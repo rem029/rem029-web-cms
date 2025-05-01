@@ -7,6 +7,220 @@
  */
 
 /**
+ * Define different themes for your website
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ThemeConfig".
+ */
+export type ThemeConfig =
+  | {
+      name: string;
+      /**
+       * Make this the default theme
+       */
+      isDefault?: boolean | null;
+      colors: {
+        primary: string;
+        secondary: string;
+        background: string;
+        text: string;
+        accent: string;
+        success: string;
+        info: string;
+        warning: string;
+      };
+      fonts: {
+        body: 'inter' | 'lora' | 'roboto' | 'arial' | 'georgia';
+        heading: 'inter' | 'lora' | 'roboto' | 'arial' | 'georgia';
+        monospace: 'inter' | 'lora' | 'roboto' | 'arial' | 'georgia';
+        headings?: {
+          h1?: {
+            mobile?: {
+              fontSize?: string | null;
+              fontWeight?: string | null;
+              lineHeight?: string | null;
+              margin?: string | null;
+              padding?: string | null;
+            };
+            desktop?: {
+              fontSize?: string | null;
+              fontWeight?: string | null;
+              lineHeight?: string | null;
+              margin?: string | null;
+              padding?: string | null;
+            };
+            /**
+             * Custom class name
+             */
+            className?: string | null;
+            /**
+             * Custom CSS styles (without selectors)
+             */
+            customCSS?: string | null;
+          };
+          h2?: {
+            fontSize?: string | null;
+            fontWeight?: string | null;
+            lineHeight?: string | null;
+            margin?: string | null;
+            padding?: string | null;
+            /**
+             * Custom class name
+             */
+            className?: string | null;
+            /**
+             * Custom CSS styles (without selectors)
+             */
+            customCSS?: string | null;
+          };
+          h3?: {
+            fontSize?: string | null;
+            fontWeight?: string | null;
+            lineHeight?: string | null;
+            margin?: string | null;
+            padding?: string | null;
+            /**
+             * Custom class name
+             */
+            className?: string | null;
+            /**
+             * Custom CSS styles (without selectors)
+             */
+            customCSS?: string | null;
+          };
+        };
+        paragraph?: {
+          fontSize?: string | null;
+          fontWeight?: string | null;
+          lineHeight?: string | null;
+          margin?: string | null;
+          padding?: string | null;
+          /**
+           * Custom class name
+           */
+          className?: string | null;
+          /**
+           * Custom CSS styles (without selectors)
+           */
+          customCSS?: string | null;
+        };
+        button?: {
+          fontSize?: string | null;
+          fontWeight?: string | null;
+          padding?: string | null;
+          borderRadius?: string | null;
+          borderWidth?: string | null;
+          borderStyle?: ('solid' | 'dashed' | 'dotted') | null;
+          /**
+           * Custom class name
+           */
+          className?: string | null;
+          /**
+           * Custom CSS styles (without selectors)
+           */
+          customCSS?: string | null;
+        };
+        input?: {
+          fontSize?: string | null;
+          padding?: string | null;
+          borderRadius?: string | null;
+          borderWidth?: string | null;
+          borderStyle?: ('solid' | 'dashed' | 'dotted') | null;
+          /**
+           * Custom class name
+           */
+          className?: string | null;
+          /**
+           * Custom CSS styles (without selectors)
+           */
+          customCSS?: string | null;
+        };
+        link?: {
+          textDecoration?: ('none' | 'underline') | null;
+          fontWeight?: string | null;
+          hoverDecoration?: ('none' | 'underline') | null;
+          /**
+           * Custom class name
+           */
+          className?: string | null;
+          /**
+           * Custom CSS styles (without selectors)
+           */
+          customCSS?: string | null;
+        };
+        card?: {
+          padding?: string | null;
+          borderRadius?: string | null;
+          borderWidth?: string | null;
+          borderStyle?: ('solid' | 'dashed' | 'dotted' | 'none') | null;
+          boxShadow?: string | null;
+          /**
+           * Custom class name
+           */
+          className?: string | null;
+          /**
+           * Custom CSS styles (without selectors)
+           */
+          customCSS?: string | null;
+        };
+        table?: {
+          cellPadding?: string | null;
+          borderWidth?: string | null;
+          borderStyle?: ('solid' | 'dashed' | 'dotted') | null;
+          /**
+           * Custom class name
+           */
+          className?: string | null;
+          /**
+           * Custom CSS styles (without selectors)
+           */
+          customCSS?: string | null;
+        };
+        list?: {
+          margin?: string | null;
+          itemSpacing?: string | null;
+          /**
+           * Custom class name
+           */
+          className?: string | null;
+          /**
+           * Custom CSS styles (without selectors)
+           */
+          customCSS?: string | null;
+        };
+        blockquote?: {
+          padding?: string | null;
+          borderLeftWidth?: string | null;
+          borderLeftStyle?: ('solid' | 'dashed' | 'dotted') | null;
+          fontStyle?: ('normal' | 'italic') | null;
+          margin?: string | null;
+          /**
+           * Custom class name
+           */
+          className?: string | null;
+          /**
+           * Custom CSS styles (without selectors)
+           */
+          customCSS?: string | null;
+        };
+        code?: {
+          fontSize?: string | null;
+          padding?: string | null;
+          borderRadius?: string | null;
+          /**
+           * Custom class name
+           */
+          className?: string | null;
+          /**
+           * Custom CSS styles (without selectors)
+           */
+          customCSS?: string | null;
+        };
+      };
+      id?: string | null;
+    }[]
+  | null;
+/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -103,10 +317,12 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    theme: Theme;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    theme: ThemeSelect<false> | ThemeSelect<true>;
   };
   locale: null;
   user: User & {
@@ -1590,6 +1806,16 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "theme".
+ */
+export interface Theme {
+  id: number;
+  themes?: ThemeConfig;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -1633,6 +1859,185 @@ export interface FooterSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "theme_select".
+ */
+export interface ThemeSelect<T extends boolean = true> {
+  themes?: T | ThemeConfigSelect<T>;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ThemeConfig_select".
+ */
+export interface ThemeConfigSelect<T extends boolean = true> {
+  name?: T;
+  isDefault?: T;
+  colors?:
+    | T
+    | {
+        primary?: T;
+        secondary?: T;
+        background?: T;
+        text?: T;
+        accent?: T;
+        success?: T;
+        info?: T;
+        warning?: T;
+      };
+  fonts?:
+    | T
+    | {
+        body?: T;
+        heading?: T;
+        monospace?: T;
+        headings?:
+          | T
+          | {
+              h1?:
+                | T
+                | {
+                    mobile?:
+                      | T
+                      | {
+                          fontSize?: T;
+                          fontWeight?: T;
+                          lineHeight?: T;
+                          margin?: T;
+                          padding?: T;
+                        };
+                    desktop?:
+                      | T
+                      | {
+                          fontSize?: T;
+                          fontWeight?: T;
+                          lineHeight?: T;
+                          margin?: T;
+                          padding?: T;
+                        };
+                    className?: T;
+                    customCSS?: T;
+                  };
+              h2?:
+                | T
+                | {
+                    fontSize?: T;
+                    fontWeight?: T;
+                    lineHeight?: T;
+                    margin?: T;
+                    padding?: T;
+                    className?: T;
+                    customCSS?: T;
+                  };
+              h3?:
+                | T
+                | {
+                    fontSize?: T;
+                    fontWeight?: T;
+                    lineHeight?: T;
+                    margin?: T;
+                    padding?: T;
+                    className?: T;
+                    customCSS?: T;
+                  };
+            };
+        paragraph?:
+          | T
+          | {
+              fontSize?: T;
+              fontWeight?: T;
+              lineHeight?: T;
+              margin?: T;
+              padding?: T;
+              className?: T;
+              customCSS?: T;
+            };
+        button?:
+          | T
+          | {
+              fontSize?: T;
+              fontWeight?: T;
+              padding?: T;
+              borderRadius?: T;
+              borderWidth?: T;
+              borderStyle?: T;
+              className?: T;
+              customCSS?: T;
+            };
+        input?:
+          | T
+          | {
+              fontSize?: T;
+              padding?: T;
+              borderRadius?: T;
+              borderWidth?: T;
+              borderStyle?: T;
+              className?: T;
+              customCSS?: T;
+            };
+        link?:
+          | T
+          | {
+              textDecoration?: T;
+              fontWeight?: T;
+              hoverDecoration?: T;
+              className?: T;
+              customCSS?: T;
+            };
+        card?:
+          | T
+          | {
+              padding?: T;
+              borderRadius?: T;
+              borderWidth?: T;
+              borderStyle?: T;
+              boxShadow?: T;
+              className?: T;
+              customCSS?: T;
+            };
+        table?:
+          | T
+          | {
+              cellPadding?: T;
+              borderWidth?: T;
+              borderStyle?: T;
+              className?: T;
+              customCSS?: T;
+            };
+        list?:
+          | T
+          | {
+              margin?: T;
+              itemSpacing?: T;
+              className?: T;
+              customCSS?: T;
+            };
+        blockquote?:
+          | T
+          | {
+              padding?: T;
+              borderLeftWidth?: T;
+              borderLeftStyle?: T;
+              fontStyle?: T;
+              margin?: T;
+              className?: T;
+              customCSS?: T;
+            };
+        code?:
+          | T
+          | {
+              fontSize?: T;
+              padding?: T;
+              borderRadius?: T;
+              className?: T;
+              customCSS?: T;
+            };
+      };
+  id?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
