@@ -59,11 +59,20 @@ export type ThemeConfig =
             customCSS?: string | null;
           };
           h2?: {
-            fontSize?: string | null;
-            fontWeight?: string | null;
-            lineHeight?: string | null;
-            margin?: string | null;
-            padding?: string | null;
+            mobile?: {
+              fontSize?: string | null;
+              fontWeight?: string | null;
+              lineHeight?: string | null;
+              margin?: string | null;
+              padding?: string | null;
+            };
+            desktop?: {
+              fontSize?: string | null;
+              fontWeight?: string | null;
+              lineHeight?: string | null;
+              margin?: string | null;
+              padding?: string | null;
+            };
             /**
              * Custom class name
              */
@@ -74,11 +83,20 @@ export type ThemeConfig =
             customCSS?: string | null;
           };
           h3?: {
-            fontSize?: string | null;
-            fontWeight?: string | null;
-            lineHeight?: string | null;
-            margin?: string | null;
-            padding?: string | null;
+            mobile?: {
+              fontSize?: string | null;
+              fontWeight?: string | null;
+              lineHeight?: string | null;
+              margin?: string | null;
+              padding?: string | null;
+            };
+            desktop?: {
+              fontSize?: string | null;
+              fontWeight?: string | null;
+              lineHeight?: string | null;
+              margin?: string | null;
+              padding?: string | null;
+            };
             /**
              * Custom class name
              */
@@ -90,11 +108,20 @@ export type ThemeConfig =
           };
         };
         paragraph?: {
-          fontSize?: string | null;
-          fontWeight?: string | null;
-          lineHeight?: string | null;
-          margin?: string | null;
-          padding?: string | null;
+          mobile?: {
+            fontSize?: string | null;
+            fontWeight?: string | null;
+            lineHeight?: string | null;
+            margin?: string | null;
+            padding?: string | null;
+          };
+          desktop?: {
+            fontSize?: string | null;
+            fontWeight?: string | null;
+            lineHeight?: string | null;
+            margin?: string | null;
+            padding?: string | null;
+          };
           /**
            * Custom class name
            */
@@ -1925,22 +1952,48 @@ export interface ThemeConfigSelect<T extends boolean = true> {
               h2?:
                 | T
                 | {
-                    fontSize?: T;
-                    fontWeight?: T;
-                    lineHeight?: T;
-                    margin?: T;
-                    padding?: T;
+                    mobile?:
+                      | T
+                      | {
+                          fontSize?: T;
+                          fontWeight?: T;
+                          lineHeight?: T;
+                          margin?: T;
+                          padding?: T;
+                        };
+                    desktop?:
+                      | T
+                      | {
+                          fontSize?: T;
+                          fontWeight?: T;
+                          lineHeight?: T;
+                          margin?: T;
+                          padding?: T;
+                        };
                     className?: T;
                     customCSS?: T;
                   };
               h3?:
                 | T
                 | {
-                    fontSize?: T;
-                    fontWeight?: T;
-                    lineHeight?: T;
-                    margin?: T;
-                    padding?: T;
+                    mobile?:
+                      | T
+                      | {
+                          fontSize?: T;
+                          fontWeight?: T;
+                          lineHeight?: T;
+                          margin?: T;
+                          padding?: T;
+                        };
+                    desktop?:
+                      | T
+                      | {
+                          fontSize?: T;
+                          fontWeight?: T;
+                          lineHeight?: T;
+                          margin?: T;
+                          padding?: T;
+                        };
                     className?: T;
                     customCSS?: T;
                   };
@@ -1948,11 +2001,24 @@ export interface ThemeConfigSelect<T extends boolean = true> {
         paragraph?:
           | T
           | {
-              fontSize?: T;
-              fontWeight?: T;
-              lineHeight?: T;
-              margin?: T;
-              padding?: T;
+              mobile?:
+                | T
+                | {
+                    fontSize?: T;
+                    fontWeight?: T;
+                    lineHeight?: T;
+                    margin?: T;
+                    padding?: T;
+                  };
+              desktop?:
+                | T
+                | {
+                    fontSize?: T;
+                    fontWeight?: T;
+                    lineHeight?: T;
+                    margin?: T;
+                    padding?: T;
+                  };
               className?: T;
               customCSS?: T;
             };
