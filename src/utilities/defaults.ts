@@ -299,12 +299,14 @@ export const defaultThemeCSS = `
   border-radius: var(--radius);
   border: 1px solid var(--primary);
   padding: 4px;
+  font-size: 16px;
 }
 
 .cms-textarea{
   border-radius: var(--radius);
   border: 1px solid var(--primary);
   padding: 4px;
+  font-size: 16px;
 }
 .cms-input-select{}
 .cms-input-select{}
@@ -312,39 +314,42 @@ export const defaultThemeCSS = `
 
 .cms-h1{
   font-family: 'Urbanist';
-  font-size: 56px;
+  font-size: clamp(36px, 5vw, 56px);
   width: 100%;
 }
 .cms-h2{
   font-family: 'Urbanist';
-  font-size: 48px;
+  font-size: clamp(32px, 4vw, 48px);
   width: 100%;
 }
 .cms-h3{ 
   font-family: 'Urbanist';
-  font-size: 40px;
+  font-size: clamp(28px, 3.5vw, 40px);
   width: 100%;
   }
 .cms-h4{ 
   font-family: 'Urbanist';
-  font-size: 32px;
+  font-size: clamp(24px, 3vw, 32px);
   width: 100%;
   }
 .cms-h5{ 
-  font-family: 'Urbanist';
-  font-size: 24px;
+  font-family: 'Urbanist';  
+  font-size: clamp(20px, 2.5vw, 24px);
   width: 100%;
   }
 .cms-h6{ 
-  font-family: 'Urbanist';
-  font-size: 16px;
+  font-family: 'Urbanist';  
+  font-size: clamp(14px, 2vw, 16px);
   width: 100%;
   }
-.cms-p{
+
+.cms-p {
+  font-size: clamp(14px, 1.5vw, 18px);  
   width: 100%;
 }
 .cms-blockquote {
   font-style: italic;
+  font-size: clamp(14px, 2vw, 16px);
   opacity: .5;
 }
 
@@ -357,8 +362,7 @@ h1,h2,h3,h4,h5,h6 {
 p, span, blockquote {
   font-family: 'Poppins';
   font-weight: 400;
-  width: 100%;
-  font-size: 16px;  
+  width: 100%;  
 }
 
 button {
@@ -368,5 +372,6 @@ button {
 input {
   font-family: 'Poppins';
 }
+
 
 `
