@@ -2,32 +2,58 @@ import { getCachedGlobal } from '@/utilities/getGlobals'
 import Link from 'next/link'
 import React from 'react'
 
-import type { Footer } from '@/payload-types'
+import type { Footer, Media, Setting } from '@/payload-types'
 
-import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
 import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
+import { css } from '@/utilities/constants'
+import RichText from '@/components/RichText'
+import { SocialMedia } from '@/components/Social'
 
-export async function Footer() {
+interface FooterProps {
+  settings: Setting
+}
+
+export async function Footer({ settings }: FooterProps) {
   const footerData: Footer = await getCachedGlobal('footer', 1)()
-
   const navItems = footerData?.navItems || []
 
   return (
-    <footer className="mt-auto border-t border-border bg-black dark:bg-card text-white">
-      <div className="container py-8 gap-8 flex flex-col md:flex-row md:justify-between">
-        <Link className="flex items-center" href="/">
-          <Logo />
+    <footer className={css('footer')}>
+      <div className={css('footer__container')}>
+        <Link className={css('footer__logo')} href="/">
+          <Logo src={(settings?.logo as Media)?.url || ''} />
         </Link>
 
-        <div className="flex flex-col-reverse items-start md:flex-row gap-4 md:items-center">
-          <ThemeSelector />
-          <nav className="flex flex-col md:flex-row gap-4">
-            {navItems.map(({ link }, i) => {
-              return <CMSLink className="text-white" key={i} {...link} />
-            })}
-          </nav>
-        </div>
+        <nav className={css('footer__nav')}>
+          {navItems.map(({ link }, i) => {
+            return (
+              <CMSLink
+                className={css('footer__nav-item')}
+                key={i}
+                label={link?.label}
+                href={link?.url || ''}
+                newTab={link?.newTab || false}
+              />
+            )
+          })}
+        </nav>
+
+        {settings?.address?.full_address && (
+          <p className={css('footer__address')}>{settings.address.full_address}</p>
+        )}
+
+        <SocialMedia
+          classNameContainer={css('footer__social')}
+          classNameItem={css('footer__social-item')}
+          socialMedia={settings?.socialMedia}
+        />
+
+        {footerData?.copyright && (
+          <div className={css('footer_copyright')}>
+            <RichText data={footerData.copyright} enableGutter={false} />
+          </div>
+        )}
       </div>
     </footer>
   )

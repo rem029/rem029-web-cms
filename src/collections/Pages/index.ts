@@ -62,6 +62,7 @@ export const Pages: CollectionConfig<'pages'> = {
       name: 'title',
       type: 'text',
       required: true,
+      localized: true,
     },
     {
       type: 'tabs',
@@ -83,6 +84,29 @@ export const Pages: CollectionConfig<'pages'> = {
             },
           ],
           label: 'Content',
+        },
+        {
+          fields: [
+            {
+              name: 'css',
+              type: 'code',
+              label: 'Custom CSS',
+              _sanitized: true,
+              admin: {
+                language: 'css',
+              },
+            },
+            {
+              name: 'js',
+              type: 'code',
+              label: 'Custom JS',
+              _sanitized: true,
+              admin: {
+                language: 'javascript',
+              },
+            },
+          ],
+          label: 'Advanced',
         },
         {
           name: 'meta',

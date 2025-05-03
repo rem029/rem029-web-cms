@@ -23,3 +23,14 @@ export const generatePreviewPath = ({ collection, slug }: Props) => {
 
   return url
 }
+
+export const generateThemePreviewPath = () => {
+  const encodedParams = new URLSearchParams({
+    path: '/preview/theme',
+    previewSecret: process.env.PREVIEW_SECRET || '',
+  })
+
+  const url = `/next/preview?${encodedParams.toString()}`
+
+  return url
+}

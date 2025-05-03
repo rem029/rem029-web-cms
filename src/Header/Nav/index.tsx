@@ -1,25 +1,33 @@
 'use client'
 
 import React from 'react'
-
-import type { Header as HeaderType } from '@/payload-types'
-
+import type { Header as HeaderType, Setting } from '@/payload-types'
 import { CMSLink } from '@/components/Link'
-import Link from 'next/link'
-import { SearchIcon } from 'lucide-react'
+import { css } from '@/utilities/constants'
+import { DrawerNav } from '../Drawer'
 
-export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
+export const HeaderNav: React.FC<{ data: HeaderType; settings: Setting }> = ({
+  data,
+  settings,
+}) => {
   const navItems = data?.navItems || []
 
   return (
-    <nav className="flex gap-3 items-center">
-      {navItems.map(({ link }, i) => {
-        return <CMSLink key={i} {...link} appearance="link" />
-      })}
-      <Link href="/search">
-        <span className="sr-only">Search</span>
-        <SearchIcon className="w-5 text-primary" />
-      </Link>
-    </nav>
+    <React.Fragment>
+      <nav className={`${css('header__nav')} max-md:hidden`}>
+        {navItems.map(({ link }, i) => {
+          return (
+            <CMSLink
+              key={`CMSLink_${i}`}
+              className={`${css('header__nav-item')}`}
+              href={link?.url || ''}
+              label={link?.label}
+              newTab={link?.newTab || false}
+            />
+          )
+        })}
+      </nav>
+      <DrawerNav data={data} settings={settings} />
+    </React.Fragment>
   )
 }

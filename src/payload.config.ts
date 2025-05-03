@@ -16,7 +16,9 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
-import { Theme } from './providers/Theme/config'
+import { Theme } from './Theme/config'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+import { Settings } from './Settings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -58,21 +60,40 @@ export default buildConfig({
       ],
     },
   },
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'ar'],
+  },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
+    push: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
+    // logger: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
   }),
   collections: [Pages, Posts, Media, Categories, Users],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, Theme],
+  globals: [Header, Footer, Theme, Settings],
   plugins: [
     ...plugins,
     // storage-adapter-placeholder
   ],
   secret: process.env.PAYLOAD_SECRET,
+  email: nodemailerAdapter({
+    defaultFromAddress: process.env.DEFAULT_FROM_ADDRESS || '',
+    defaultFromName: process.env.DEFAULT_FROM_NAME || '',
+    transportOptions: {
+      host: process.env.MAIL_SMTP_HOST,
+      port: Number(process.env.MAIL_SSMTP_PORT),
+      secure: process.env.MAIL_SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.MAIL_SMTP_USER,
+        pass: process.env.MAIL_SMTP_PASS,
+      },
+    },
+  }),
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

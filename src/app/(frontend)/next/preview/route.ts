@@ -23,9 +23,16 @@ export async function GET(
   const collection = searchParams.get('collection') as CollectionSlug
   const slug = searchParams.get('slug')
   const previewSecret = searchParams.get('previewSecret')
+  const draft = await draftMode()
 
   if (previewSecret !== process.env.PREVIEW_SECRET) {
     return new Response('You are not allowed to preview this page', { status: 403 })
+  }
+
+  if (path === '/preview/theme') {
+    payload.logger.info('redirecting to theme preview')
+    draft.enable()
+    redirect(path + `?previewSecret=${previewSecret}`)
   }
 
   if (!path || !collection || !slug) {
@@ -47,8 +54,6 @@ export async function GET(
     payload.logger.error({ err: error }, 'Error verifying token for live preview')
     return new Response('You are not allowed to preview this page', { status: 403 })
   }
-
-  const draft = await draftMode()
 
   if (!user) {
     draft.disable()
