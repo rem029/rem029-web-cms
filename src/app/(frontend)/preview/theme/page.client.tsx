@@ -3,15 +3,19 @@
 import React from 'react'
 import { CMSLink } from '@/components/Link'
 import { css } from '@/utilities/constants'
+import { SocialMedia } from '@/components/Social'
+import { Setting } from '@/payload-types'
 
 type ThemePreviewClientProps = {
   activeThemeName: string
   isPreview: boolean
+  settings: Setting
 }
 
 export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
   activeThemeName,
   isPreview,
+  settings,
 }) => {
   return (
     <div className={css('page')}>
@@ -50,17 +54,68 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
         <section className={css('section')}>
           <h2 className={css('h2')}>Colors</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className={`${css('color-primary')} h-24 rounded flex items-end p-2`}>
-              <span className="bg-white/80 px-2 py-1 rounded">Primary</span>
+            <div
+              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+              style={{
+                backgroundColor: 'var(--primary)',
+                color: 'var(--primary-foreground)',
+              }}
+            >
+              <span className="px-2 py-1 rounded">Primary</span>
             </div>
-            <div className={`${css('color-secondary')} h-24 rounded flex items-end p-2`}>
-              <span className="bg-white/80 px-2 py-1 rounded">Secondary</span>
+            <div
+              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+              style={{
+                backgroundColor: 'var(--secondary)',
+                color: 'var(--secondary-foreground)',
+              }}
+            >
+              <span className="px-2 py-1 rounded">Secondary</span>
+            </div>{' '}
+            <div
+              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+              style={{
+                backgroundColor: 'var(--base)',
+                color: 'var(--base-foreground)',
+              }}
+            >
+              <span className="px-2 py-1 rounded">Base</span>
             </div>
-            <div className={`${css('color-accent')} h-24 rounded flex items-end p-2`}>
-              <span className="bg-white/80 px-2 py-1 rounded">Accent</span>
+            <div
+              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+              style={{
+                backgroundColor: 'var(--success)',
+                color: 'var(--success-foreground)',
+              }}
+            >
+              <span className="px-2 py-1 rounded">Success</span>
             </div>
-            <div className={`${css('color-background')} h-24 rounded flex items-end p-2 border`}>
-              <span className="bg-white/80 px-2 py-1 rounded">Background</span>
+            <div
+              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+              style={{
+                backgroundColor: 'var(--warning)',
+                color: 'var(--warning-foreground)',
+              }}
+            >
+              <span className="px-2 py-1 rounded">Warning</span>
+            </div>
+            <div
+              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+              style={{
+                backgroundColor: 'var(--info)',
+                color: 'var(--info-foreground)',
+              }}
+            >
+              <span className="px-2 py-1 rounded">Info</span>
+            </div>
+            <div
+              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+              style={{
+                backgroundColor: 'var(--error)',
+                color: 'var(--error-foreground)',
+              }}
+            >
+              <span className="px-2 py-1 rounded">Error</span>
             </div>
           </div>
         </section>
@@ -83,33 +138,35 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
 
           <h3 className={css('h3')}>Links</h3>
           <section className={css('section')}>
-            <CMSLink href="#" label="Default Link" />
+            <CMSLink href="#" label="Default Link" className={css('link')} />
             <CMSLink href="#" label="Primary Link" className={css('link-primary')} />
             <CMSLink href="#" label="Secondary Link" className={css('link-secondary')} />
-            <CMSLink href="#" label="Visited Link" className={css('link-visited')} />
           </section>
 
           <h3 className={css('h3')}>Form Elements</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className={`${css('label')} block mb-1`}>Text Input</label>
+            <div className={css('form-group')}>
+              <label className={`${css('label')}`}>Text Input</label>
               <input type="text" placeholder="Text input" className={`${css('input')}`} />
             </div>
-            <div>
-              <label className={`${css('label')} block mb-1`}>Text Area</label>
+
+            <div className={css('form-group')}>
+              <label className={`${css('label')}`}>Text Area</label>
               <textarea placeholder="Text area" className={`${css('textarea')}`}></textarea>
             </div>
-            <div>
-              <label className={`${css('label')} block mb-1`}>Select</label>
-              <select className={`${css('select')}`}>
+
+            <div className={css('form-group')}>
+              <label className={`${css('label')}`}>Select</label>
+              <select className={`${css('input-select')}`}>
                 <option>Option 1</option>
                 <option>Option 2</option>
               </select>
             </div>
-            <div>
-              <label className={`${css('label')} block mb-1`}>Checkbox</label>
+
+            <div className={css('form-group')}>
+              <label className={`${css('label')}`}>Checkbox</label>
               <div>
-                <input type="checkbox" id="cb1" className={`${css('checkbox')}`} />
+                <input type="checkbox" id="cb1" className={`${css('input-checkbox')}`} />
                 <label htmlFor="cb1" className="ml-2">
                   Checkbox option
                 </label>
@@ -119,8 +176,8 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
         </section>
 
         {/* Layout Components */}
-        <section className="mb-12 p-6 bg-white rounded-lg shadow">
-          <h2 className="text-2xl font-bold mb-4">Layout Components</h2>
+        <section className={css('section')}>
+          <h2 className={css('h2')}>Layout Components</h2>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">Cards</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -172,6 +229,25 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
             <div className={`${css('alert')} ${css('alert-warning')}`}>This is a warning alert</div>
             <div className={`${css('alert')} ${css('alert-danger')}`}>This is a danger alert</div>
           </div>
+        </section>
+
+        <section className={css('section')}>
+          <h2 className={css('h2')}>Social Media Icons Header</h2>
+          <SocialMedia
+            socialMedia={settings?.socialMedia}
+            classNameContainer={css('header__drawer-footer__social')}
+            classNameItem={css('header__drawer-footer__social-item')}
+          />
+        </section>
+
+        <section className={`${css('section')} ${css('footer')} mb-8`}>
+          <h2 className={css('h2')}>Social Media Icons Footer</h2>
+          <SocialMedia
+            fullWidth
+            socialMedia={settings?.socialMedia}
+            classNameContainer={css('footer__social')}
+            classNameItem={css('footer__social-item')}
+          />
         </section>
       </div>
     </div>

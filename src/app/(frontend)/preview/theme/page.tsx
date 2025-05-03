@@ -14,6 +14,8 @@ export default async function ThemePreview({ searchParams }: { searchParams: any
   }
   const { isEnabled: isDraftMode } = await draftMode()
   const themes = await getGlobal('theme')
+  const settings = await getGlobal('settings')
+
   if (!themes) {
     return notFound()
   }
@@ -25,7 +27,11 @@ export default async function ThemePreview({ searchParams }: { searchParams: any
   return (
     <React.Fragment>
       {isDraftMode && <LivePreviewListener />}
-      <ThemePreviewClient activeThemeName={activeTheme.name} isPreview={isDraftMode} />
+      <ThemePreviewClient
+        activeThemeName={activeTheme.name}
+        isPreview={isDraftMode}
+        settings={settings}
+      />
     </React.Fragment>
   )
 }

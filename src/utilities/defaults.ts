@@ -2,8 +2,8 @@ export const defaultThemeCSS = `
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+  --background: #FFFBEF;
+  --foreground: #5D5D5D;
 
   --card: 240 5% 96%;
   --card-foreground: 222.2 84% 4.9%;
@@ -11,16 +11,17 @@ export const defaultThemeCSS = `
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
 
-  --primary: gray;
+  --primary: #102721;
   --primary-foreground: white;
 
-  --secondary: 210 40% 96.1%;
+  --secondary: #F7CF6B;
   --secondary-foreground: 222.2 47.4% 11.2%;
 
   --accent: 210 40% 96.1%;
   --accent-foreground: 222.2 47.4% 11.2%;
 
-  --base: grey;                
+  --base: #5D5D5D;
+  --base-foreground: #FFF;              
 
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
@@ -31,11 +32,24 @@ export const defaultThemeCSS = `
 
   --radius: 0.2rem;
 
-  --success: 196 52% 74%;
-  --warning: 34 89% 85%;
-  --error: 10 100% 86%;
+  --success: #69bd59;
+  --success-foreground: #FFF;
+
+  --warning: #e1ec45;
+  --warning-foreground: #5a5a5a;
+
+  --info: #979797;
+  --info-foreground: #FFF;
+
+  --error: #d8716c;
+  --error-foreground: #FFF;
 
   --max-width: 1024px;
+
+    --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
 }
 
 * {
@@ -51,6 +65,7 @@ export const defaultThemeCSS = `
   align-items: center;
   background-color: var(--primary);
 }
+
 .cms-header__container{
   min-height: 100%;
   width: 100%;
@@ -60,13 +75,16 @@ export const defaultThemeCSS = `
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 16px;
+  padding: 8px 4px;
 }
+
 .cms-header__logo{
   width: 96px;
   height: auto;
 }
+
 .cms-header__nav{}
+
 .cms-header__nav-item{
   color: var(--primary-foreground);
   padding: 0px 4px;
@@ -74,9 +92,10 @@ export const defaultThemeCSS = `
 
 .cms-header__btn-drawer {
   background-color: var(--primary);
-  color: var(--primary-foreground);
+  color: var(--secondary);
   padding: 8px;  
 }
+
 .cms-header__btn-drawer svg {
   width: 24px;
   height: auto;
@@ -101,7 +120,7 @@ export const defaultThemeCSS = `
   bottom: 0px;
   left: 0px;
   width: 100%;
-  background-color: white;
+  background-color: var(--primary);
   z-index: 50;
 }
 
@@ -119,8 +138,9 @@ export const defaultThemeCSS = `
 }
 
 .cms-header__drawer__nav-item {
-  padding: 8px 0px;
+  padding: 4px 0px;
   display: block;
+  font-size: 16px;
 }
 
 .cms-header__drawer-footer {
@@ -134,6 +154,7 @@ export const defaultThemeCSS = `
 .cms-header__drawer-footer__address {
   font-size: 12px;
   font-weight: 200;
+  color: var(--primary-foreground);
 }
 
 .cms-header__drawer-footer__social {
@@ -141,11 +162,12 @@ export const defaultThemeCSS = `
   flex-direction: row;
   flex-wrap: wrap;
   width: 100%;
-  gap: 8px;
+  gap: 16px;
 }
-.cms-header__drawer-footer__social-item {
-  width: 24px;
+.cms-header__drawer-footer__social-item svg {
+  width: 16px;
   height: auto;
+  color: var(--secondary);
 }
 
 .cms-page{
@@ -154,21 +176,38 @@ export const defaultThemeCSS = `
   flex-direction: column;
   align-items: center;
   min-height: 100dvh;
+  background-color: var(--background);
 }
 
-.cms-page__container{
-  padding-top: 64px;
-  padding-bottom: 96px;
+.cms-page__container{ 
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+
+.cms-section{
+  width: 100%;  
+  background-color: #FFF;
+  padding: 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.cms-section__container{
   width: 100%;
   max-width: var(--max-width);
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 16px;
 }
 
 
-.cms-section{}
-.cms-section__container{}
-
-
-.cms-footer{
+.cms-footer {
   min-height: 96px;
   height: min-content;
   width: 100%;
@@ -177,7 +216,8 @@ export const defaultThemeCSS = `
   align-items: center;
   background-color: var(--primary); 
 }
-.cms-footer__container{
+
+.cms-footer__container {
   min-height: 100%;
   width: 100%;
   max-width: var(--max-width);
@@ -188,6 +228,18 @@ export const defaultThemeCSS = `
   align-items: start;
   padding: 8px 16px;
   gap: 16px;
+ 
+}
+.cms-footer__address {
+  font-weight: 200;
+  font-size: 12px;
+  color: var(--primary-foreground);
+}
+
+.cms-footer_copyright p, a{
+  font-weight: 200;
+  font-size: 12px;
+  color: var(--primary-foreground);
 }
 
 .cms-footer__social {
@@ -217,37 +269,96 @@ export const defaultThemeCSS = `
 .cms-footer__nav-item{
   color: var(--primary-foreground);
   padding: 0px 4px;
+  font-size: 16px;
 }
 
 
-.cms-link{
-  color: var(base);
+.cms-link {
+  color: var(--base);
   font-weight: '200';
 }
+
+.cms-link-primary {
+  color: var(--primary);
+  font-weight: bold;
+}
+
+.cms-link-secondary {
+  color: var(--secondary);
+  font-weight: bold;
+}
+
 .cms-button{}
-.cms-input{}
+.cms-form-group{
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 4;
+}
+.cms-input[type="text"]{
+  border-radius: var(--radius);
+  border: 1px solid var(--primary);
+  padding: 4px;
+}
+
+.cms-textarea{
+  border-radius: var(--radius);
+  border: 1px solid var(--primary);
+  padding: 4px;
+}
+.cms-input-select{}
 .cms-input-select{}
 .cms-input-label{}
 
 .cms-h1{
   font-family: 'Urbanist';
-  font-size: 24px;
+  font-size: 56px;
+  width: 100%;
 }
-.cms-h2{}
-.cms-h3{}
-.cms-h4{}
-.cms-h5{}
-.cms-h6{}
-.cms-p{}
+.cms-h2{
+  font-family: 'Urbanist';
+  font-size: 48px;
+  width: 100%;
+}
+.cms-h3{ 
+  font-family: 'Urbanist';
+  font-size: 40px;
+  width: 100%;
+  }
+.cms-h4{ 
+  font-family: 'Urbanist';
+  font-size: 32px;
+  width: 100%;
+  }
+.cms-h5{ 
+  font-family: 'Urbanist';
+  font-size: 24px;
+  width: 100%;
+  }
+.cms-h6{ 
+  font-family: 'Urbanist';
+  font-size: 16px;
+  width: 100%;
+  }
+.cms-p{
+  width: 100%;
+}
+.cms-blockquote {
+  font-style: italic;
+  opacity: .5;
+}
 
 h1,h2,h3,h4,h5,h6 {
   font-family: 'Urbanist';
-  font-weight: 400;  
+  font-weight: 'bold';    
+  color: var(--foreground);
 }
 
-p, span {
+p, span, blockquote {
   font-family: 'Poppins';
   font-weight: 400;
+  width: 100%;
+  font-size: 16px;  
 }
 
 button {
@@ -257,6 +368,5 @@ button {
 input {
   font-family: 'Poppins';
 }
-
 
 `

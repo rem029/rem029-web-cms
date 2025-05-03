@@ -15,17 +15,19 @@ export interface SocialMediaProps {
   classNameContainer: string
   classNameItem: string
   socialMedia: Setting['socialMedia']
+  fullWidth?: boolean
 }
 
 export const SocialMedia = ({
   classNameContainer,
   classNameItem,
   socialMedia,
+  fullWidth,
 }: SocialMediaProps) => {
   if (!socialMedia) return <></>
 
   return (
-    <div className={classNameContainer}>
+    <div className={`${classNameContainer} ${fullWidth ? 'w-full' : ''}`}>
       {socialMedia?.facebook && (
         <Link href={socialMedia.facebook} className={classNameItem} target="_blank">
           <FaFacebook />
