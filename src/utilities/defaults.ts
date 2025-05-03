@@ -190,6 +190,17 @@ export const defaultThemeCSS = `
   gap: 16px;
 }
 
+.cms-footer__social {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.cms-footer__social-item svg{
+  width: 24px;
+  height: 24px;
+  color: white;
+}
 
 .cms-footer__logo{
   width: 96px;
@@ -218,7 +229,10 @@ export const defaultThemeCSS = `
 .cms-input-select{}
 .cms-input-label{}
 
-.cms-h1{}
+.cms-h1{
+  font-family: 'Urbanist';
+  font-size: 24px;
+}
 .cms-h2{}
 .cms-h3{}
 .cms-h4{}
@@ -228,10 +242,12 @@ export const defaultThemeCSS = `
 
 h1,h2,h3,h4,h5,h6 {
   font-family: 'Urbanist';
+  font-weight: 400;  
 }
 
 p, span {
   font-family: 'Poppins';
+  font-weight: 400;
 }
 
 button {
@@ -241,5 +257,6 @@ button {
 input {
   font-family: 'Poppins';
 }
+
 
 `
