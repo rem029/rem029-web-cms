@@ -17,6 +17,7 @@ import { getServerSideURL } from '@/utilities/getURL'
 import { getGlobal } from '@/utilities/getGlobals'
 import Script from 'next/script'
 import { Media } from '@/payload-types'
+import { defaultThemeCSS } from '@/utilities/defaults'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
@@ -24,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await getGlobal('settings')
 
   const theme = themes?.themes?.find((theme) => theme.active === true)
-  const css = theme?.css || ''
+  const css = theme?.css || defaultThemeCSS
   const js = theme?.js || ''
 
   const favicon = (settings?.favicon as Media)?.url || ''

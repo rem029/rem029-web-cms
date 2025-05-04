@@ -11,17 +11,35 @@ export const defaultThemeCSS = `
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
 
-  --primary: #102721;
-  --primary-foreground: white;
+   /* ─── Primary (deep green) ───────────────────────── */
+  --primary: #102721;                 
+  --primary-foreground: #FFFFFF;
 
-  --secondary: #F7CF6B;
-  --secondary-foreground: 222.2 47.4% 11.2%;
+  --primary-light: color-mix(in srgb, var(--primary) 50%, #FFF);           
+  --primary-light-foreground: var(--primary-dark);
 
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  --primary-dark: color-mix(in srgb, var(--primary) 50%, #000);            
+  --primary-dark-foreground: #FFFFFF;
 
-  --base: #5D5D5D;
-  --base-foreground: #FFF;              
+  
+  --secondary: #F7CF6B;               
+  --secondary-foreground: #1F1F1F;    
+
+  --secondary-light: color-mix(in srgb, var(--secondary) 50%, #FFF);                 
+  --secondary-light-foreground: var(--secondary-dark);
+
+  --secondary-dark: color-mix(in srgb, var(--secondary) 50%, #000); 
+  --secondary-dark-foreground: white;
+
+  
+  --base: #5D5D5D;                    
+  --base-foreground: #FFFFFF;
+
+  --base-light: color-mix(in srgb, var(--base) 50%, #FFF);
+  --base-light-foreground: var(--base-dark);
+
+  --base-dark: color-mix(in srgb, var(--base) 50%, #000);               
+  --base-dark-foreground: #FFFFFF;
 
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
@@ -30,27 +48,74 @@ export const defaultThemeCSS = `
   --input: 214.3 31.8% 91.4%;
   --ring: 222.2 84% 4.9%;
 
-  --radius: 0.2rem;
+  --radius: 8px;
+  --radius-sm: var(--radius);
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
 
   --success: #69bd59;
-  --success-foreground: #FFF;
+  --success-foreground: #FFFFFF;
+
+  --success-light: color-mix(in srgb, var(--success) 50%, #FFF);
+  --success-light-foreground: var(--success-dark);
+
+  --success-dark: color-mix(in srgb, var(--success) 50%, #000);    
+  --success-dark-foreground: #FFFFFF;
 
   --warning: #e1ec45;
-  --warning-foreground: #5a5a5a;
+  --warning-foreground: #5A5A5A;
+
+  --warning-light: color-mix(in srgb, var(--warning) 50%, #FFF);
+  --warning-light-foreground: var(--warning-dark);
+
+  --warning-dark: color-mix(in srgb, var(--warning) 50%, #000);
+  --warning-dark-foreground: #FFFFFF;
 
   --info: #979797;
-  --info-foreground: #FFF;
+  --info-foreground: #FFFFFF;
+
+  --info-light: color-mix(in srgb, var(--info) 50%, #FFF); 
+  --info-light-foreground: var(--info-dark);
+
+  --info-dark: color-mix(in srgb, var(--info) 50%, #000);
+  --info-dark-foreground: #FFFFFF;
 
   --error: #d8716c;
-  --error-foreground: #FFF;
+  --error-foreground: #FFFFFF;
+
+  --error-light: color-mix(in srgb, var(--error) 50%, #FFF);    
+  --error-light-foreground: var(--error-dark);
+
+  --error-dark: color-mix(in srgb, var(--error) 50%, #000);        
+  --error-dark-foreground: #FFFFFF;
 
   --max-width: 1024px;
 
-    --breakpoint-sm: 640px;
+  --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
+
+  --size-h1: clamp(36px, 5vw, 56px);
+  --size-h2: clamp(32px, 4vw, 48px);
+  --size-h3: clamp(28px, 3.5vw, 40px);
+  --size-h4: clamp(24px, 3vw, 32px);
+  --size-h5: clamp(20px, 2.5vw, 24px);
+  --size-h6: clamp(14px, 2vw, 16px);
+  --size-p-sm: clamp(14px, 1.5vw, 18px);
+  --size-p-md: clamp(16px, 1.5vw, 18px);
+  --size-p-lg: clamp(16px, 1.5vw, 20px);
+  --size-blockquote: clamp(14px, 2vw, 16px);
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-xxl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
+
 
 * {
   font-family: 'Poppins';
@@ -194,7 +259,7 @@ export const defaultThemeCSS = `
   padding: 24px 24px;
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: center;
 }
 
 .cms-section__container{
@@ -230,6 +295,7 @@ export const defaultThemeCSS = `
   gap: 16px;
  
 }
+
 .cms-footer__address {
   font-weight: 200;
   font-size: 12px;
@@ -272,6 +338,61 @@ export const defaultThemeCSS = `
   font-size: 16px;
 }
 
+.cms-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--info-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.cms-card-header {
+  background-color: var(--primary-light);
+  padding: 4px 8px;
+  font-size: var(--size-h5);
+}
+.cms-card-body {
+  background-color: var(--success-light);
+  height: 100%;
+}
+.cms-card-title {  
+  font-size: var(--size-h6);
+}
+.cms-card-text {
+  font-size: var(--size-p);  
+}
+.cms-card-footer {
+  background-color: var(--secondary-light);
+}
+
+.cms-alert {
+  padding: 4px 16px;
+  background-color: var(--primary-light);  
+  color: var(--primary-light-foreground);
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+.cms-alert-info {
+  background-color: var(--info-light);  
+  color: var(--info-light-foreground);
+}
+
+.cms-alert-success {
+  background-color: var(--success-light);  
+  color: var(--success-light-foreground);
+}
+
+.cms-alert-warning {
+  background-color: var(--warning-light);  
+  color: var(--warning-light-foreground);
+}
+
+.cms-alert-error {
+  background-color: var(--error-light);  
+  color: var(--error-light-foreground);
+}
+
 
 .cms-link {
   color: var(--base);
@@ -288,68 +409,157 @@ export const defaultThemeCSS = `
   font-weight: bold;
 }
 
-.cms-button{}
-.cms-form-group{
+.cms-btn,
+.cms-btn-primary,
+.cms-btn-secondary,
+.cms-btn-outline
+ {
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
+  font-family: 'Urbanist';    
+  background-color: var(--info);
+  color: var(--info-foreground);
+  font-size: 16px;
+  padding: 8px 24px;
+  box-shadow: var(--shadow-md);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  height: min-content;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.cms-btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground)
+}
+
+.cms-btn-secondary {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground)
+}
+
+.cms-btn-outline {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  box-shadow: unset;
+}
+
+.cms-btn-outline:hover {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.cms-btn-sm {  
+  font-size: 14px;  
+  padding: 4px 4px;
+}
+
+.cms-btn-lg {  
+  font-size: 18px;  
+  padding: 12px 36px;
+}
+
+.cms-btn-disabled,
+.cms-btn[disabled],
+.cms-btn-primary[disabled],
+.cms-btn-secondary[disabled]  {
+  opacity: 0.5;
+  background-color: var(--info-light);
+  color: var(--info-light-foreground);
+  box-shadow: unset;
+  cursor: not-allowed;
+}
+
+.cms-form-group {
   display: flex;
   flex-direction: column;
   align-items: start;
-  gap: 4;
+  gap: 4px;
 }
-.cms-input[type="text"]{
-  border-radius: var(--radius);
-  border: 1px solid var(--primary);
-  padding: 4px;
+
+.cms-input[type="text"],
+.cms-textarea,
+.cms-input-select {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--primary-light);  
+  box-sizing: border-box;
+  padding: 4px 8px;
   font-size: 16px;
 }
 
-.cms-textarea{
-  border-radius: var(--radius);
-  border: 1px solid var(--primary);
-  padding: 4px;
-  font-size: 16px;
+.cms-label {
+  font-size: 14px;
+  color: var(--info);
 }
-.cms-input-select{}
-.cms-input-select{}
-.cms-input-label{}
 
 .cms-h1{
   font-family: 'Urbanist';
-  font-size: clamp(36px, 5vw, 56px);
+  font-size: var(--size-h1);
   width: 100%;
 }
+
 .cms-h2{
   font-family: 'Urbanist';
-  font-size: clamp(32px, 4vw, 48px);
+  font-size: var(--size-h2);
   width: 100%;
 }
+
 .cms-h3{ 
   font-family: 'Urbanist';
-  font-size: clamp(28px, 3.5vw, 40px);
+  font-size: var(--size-h3);
   width: 100%;
   }
+
 .cms-h4{ 
   font-family: 'Urbanist';
-  font-size: clamp(24px, 3vw, 32px);
+  font-size: var(--size-h4);
   width: 100%;
   }
+
 .cms-h5{ 
   font-family: 'Urbanist';  
-  font-size: clamp(20px, 2.5vw, 24px);
+  font-size: var(--size-h5);
   width: 100%;
   }
+
 .cms-h6{ 
   font-family: 'Urbanist';  
-  font-size: clamp(14px, 2vw, 16px);
+  font-size: var(--size-h6);
   width: 100%;
   }
 
 .cms-p {
-  font-size: clamp(14px, 1.5vw, 18px);  
+  font-size: var(--size-p-sm);
   width: 100%;
 }
+
+.cms-p-sm {
+  font-size: var(--size-p-sm);
+  width: 100%;
+}
+
+.cms-p-md {
+  font-size: var(--size-p-md);
+  width: 100%;
+}
+
+.cms-p-lg {
+  font-size: var(--size-p-lg);
+  width: 100%;
+}
+
 .cms-blockquote {
   font-style: italic;
-  font-size: clamp(14px, 2vw, 16px);
+  font-size: var(--size-blockquote);
+  opacity: .5;
+}
+.cms-caption {
+  font-style: italic;
+  font-size: var(--size-caption);
   opacity: .5;
 }
 
@@ -372,6 +582,4 @@ button {
 input {
   font-family: 'Poppins';
 }
-
-
 `

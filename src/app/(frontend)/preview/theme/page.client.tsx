@@ -21,18 +21,21 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
     <div className={css('page')}>
       <div className={css('page__container')}>
         <section className={css('section')}>
-          <h1 className={css('h1')}>Theme Preview: {activeThemeName}</h1>
-          <p className={css('p')}>
-            {isPreview
-              ? 'Preview Mode Active - Changes appear in real-time'
-              : 'Static View - Refresh to see changes'}
-          </p>
+          <div className={css('section__container')}>
+            <h1 className={css('h1')}>Theme Preview: {activeThemeName}</h1>
+            <p className={css('p')}>
+              {isPreview
+                ? 'Preview Mode Active - Changes appear in real-time'
+                : 'Static View - Refresh to see changes'}
+            </p>
+          </div>
         </section>
 
         {/* Typography Section */}
         <section className={css('section')}>
-          <h2 className={css('h2')}>Typography</h2>
-          <div className="grid gap-4">
+          <div className={css('section__container')}>
+            <h2 className={css('h2')}>Typography</h2>
+            <div className="grid gap-4"></div>
             <h1 className={`${css('h1')}`}>Heading 1</h1>
             <h2 className={`${css('h2')}`}>Heading 2</h2>
             <h3 className={`${css('h3')}`}>Heading 3</h3>
@@ -44,6 +47,21 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
               the current theme. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua.
             </p>
+            <p className={`${css('p-sm')}`}>
+              Small This is a paragraph of text. This is how your standard paragraph text will look
+              with the current theme. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+              do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </p>
+            <p className={`${css('p-md')}`}>
+              Medium This is a paragraph of text. This is how your standard paragraph text will look
+              with the current theme. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+              do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </p>
+            <p className={`${css('p-lg')}`}>
+              Large This is a paragraph of text. This is how your standard paragraph text will look
+              with the current theme. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+              do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </p>
             <blockquote className={`${css('blockquote')}`}>
               This is a blockquote. It's often used to highlight important quotes or passages.
             </blockquote>
@@ -52,124 +70,325 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
 
         {/* Colors Section */}
         <section className={css('section')}>
-          <h2 className={css('h2')}>Colors</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div
-              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
-              style={{
-                backgroundColor: 'var(--primary)',
-                color: 'var(--primary-foreground)',
-              }}
-            >
-              <span className="px-2 py-1 rounded">Primary</span>
-            </div>
-            <div
-              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
-              style={{
-                backgroundColor: 'var(--secondary)',
-                color: 'var(--secondary-foreground)',
-              }}
-            >
-              <span className="px-2 py-1 rounded">Secondary</span>
-            </div>{' '}
-            <div
-              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
-              style={{
-                backgroundColor: 'var(--base)',
-                color: 'var(--base-foreground)',
-              }}
-            >
-              <span className="px-2 py-1 rounded">Base</span>
-            </div>
-            <div
-              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
-              style={{
-                backgroundColor: 'var(--success)',
-                color: 'var(--success-foreground)',
-              }}
-            >
-              <span className="px-2 py-1 rounded">Success</span>
-            </div>
-            <div
-              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
-              style={{
-                backgroundColor: 'var(--warning)',
-                color: 'var(--warning-foreground)',
-              }}
-            >
-              <span className="px-2 py-1 rounded">Warning</span>
-            </div>
-            <div
-              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
-              style={{
-                backgroundColor: 'var(--info)',
-                color: 'var(--info-foreground)',
-              }}
-            >
-              <span className="px-2 py-1 rounded">Info</span>
-            </div>
-            <div
-              className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
-              style={{
-                backgroundColor: 'var(--error)',
-                color: 'var(--error-foreground)',
-              }}
-            >
-              <span className="px-2 py-1 rounded">Error</span>
+          <div className={css('section__container')}>
+            <h2 className={css('h2')}>Colors</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div
+                className={`h-24 shadow-[var(--shadow-sm)] rounded-[var(--radius-md)] overflow-hidden flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--background)',
+                  color: 'var(--foreground)',
+                  boxShadow: 'var(--shadow-sm)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Background Page</span>
+              </div>
+              <div></div>
+              <div></div>
+              <div
+                className={`h-24 rounded-[var(--radius-md)] overflow-hidden flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--primary)',
+                  color: 'var(--primary-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Primary</span>
+              </div>
+              <div
+                className={`h-24 shadow-[var(--shadow-lg)] rounded-[var(--radius-md)] overflow-hidden flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--primary-light)',
+                  color: 'var(--primary-light-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Primary Light</span>
+              </div>
+              <div
+                className={`h-24 shadow-[var(--shadow-sm)] rounded-[var(--radius-md)] overflow-hidden flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--primary-dark)',
+                  color: 'var(--primary-dark-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Primary Dark</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--secondary)',
+                  color: 'var(--secondary-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Secondary</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--secondary-light)',
+                  color: 'var(--secondary-light-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Secondary Light</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--secondary-dark)',
+                  color: 'var(--secondary-dark-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Secondary Dark</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--base)',
+                  color: 'var(--base-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Base</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--base-light)',
+                  color: 'var(--base-light-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Base Light</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--base-dark)',
+                  color: 'var(--base-dark-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Base Dark</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--success)',
+                  color: 'var(--success-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Success</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--success-light)',
+                  color: 'var(--success-light-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Success Light</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--success-dark)',
+                  color: 'var(--success-dark-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Success Dark</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--warning)',
+                  color: 'var(--warning-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Warning</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--warning-light)',
+                  color: 'var(--warning-light-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Warning Light</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--warning-dark)',
+                  color: 'var(--warning-dark-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Warning Dark</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--info)',
+                  color: 'var(--info-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Info</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--info-light)',
+                  color: 'var(--info-light-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Info Light</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--info-dark)',
+                  color: 'var(--info-dark-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Info Dark</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--error)',
+                  color: 'var(--error-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Error</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--error-light)',
+                  color: 'var(--error-light-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Error Light</span>
+              </div>
+              <div
+                className={`h-24 rounded-[var(--radius)] flex items-end p-2`}
+                style={{
+                  backgroundColor: 'var(--error-dark)',
+                  color: 'var(--error-dark-foreground)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Error Dark</span>
+              </div>
             </div>
           </div>
         </section>
 
         <section className={css('section')}>
-          <h2 className={css('h2')}>UI Elements</h2>
+          <div className={css('section__container')}>
+            <h2 className={css('h2')}>Shadows</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div
+                className={`h-24 rounded-[var(--radius-md)] overflow-hidden flex items-end p-2`}
+                style={{
+                  backgroundColor: '#FFF',
+                  color: 'var(--foreground)',
+                  boxShadow: 'var(--shadow-sm)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Shadow small</span>
+              </div>
 
-          <h3 className={css('h3')}>Buttons</h3>
-          <div className="flex flex-wrap gap-2 mb-6">
-            <button className={`${css('btn')}`}>Default Button</button>
-            <button className={`${css('btn-primary')}`}>Primary Button</button>
-            <button className={`${css('btn-secondary')}`}>Secondary Button</button>
-            <button className={`${css('btn-outline')}`}>Outline Button</button>
-            <button className={`${css('btn')} ${css('btn-lg')}`}>Large Button</button>
-            <button className={`${css('btn')} ${css('btn-sm')}`}>Small Button</button>
-            <button disabled className={`${css('btn')} ${css('btn-disabled')}`}>
-              Disabled Button
-            </button>
+              <div
+                className={`h-24 rounded-[var(--radius-md)] overflow-hidden flex items-end p-2`}
+                style={{
+                  backgroundColor: '#FFF',
+                  color: 'var(--foreground)',
+                  boxShadow: 'var(--shadow-md)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Shadow medium</span>
+              </div>
+
+              <div
+                className={`h-24 rounded-[var(--radius-md)] overflow-hidden flex items-end p-2`}
+                style={{
+                  backgroundColor: '#FFF',
+                  color: 'var(--foreground)',
+                  boxShadow: 'var(--shadow-lg)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Shadow large</span>
+              </div>
+
+              <div
+                className={`h-24 rounded-[var(--radius-md)] overflow-hidden flex items-end p-2`}
+                style={{
+                  backgroundColor: '#FFF',
+                  color: 'var(--foreground)',
+                  boxShadow: 'var(--shadow-xl)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Shadow XL</span>
+              </div>
+
+              <div
+                className={`h-24 rounded-[var(--radius-md)] overflow-hidden flex items-end p-2`}
+                style={{
+                  backgroundColor: '#FFF',
+                  color: 'var(--foreground)',
+                  boxShadow: 'var(--shadow-xxl)',
+                }}
+              >
+                <span className="px-2 py-1 rounded">Shadow XXL</span>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <h3 className={css('h3')}>Links</h3>
-          <section className={css('section')}>
+        <section className={css('section')}>
+          <div className={css('section__container')}>
+            <h2 className={css('h2')}>UI Elements</h2>
+            <h3 className={css('h3')}>Buttons</h3>
+            <div className="flex flex-wrap gap-2 mb-6">
+              <button className={`${css('btn')}`}>Default Button</button>
+              <button className={`${css('btn-primary')}`}>Primary Button</button>
+              <button className={`${css('btn-secondary')}`}>Secondary Button</button>
+              <button className={`${css('btn-outline')}`}>Outline Button</button>
+              <button className={`${css('btn')} ${css('btn-lg')}`}>Large Button</button>
+              <button className={`${css('btn')} ${css('btn-sm')}`}>Small Button</button>
+              <button disabled className={`${css('btn')} ${css('btn-disabled')}`}>
+                Disabled Button
+              </button>
+            </div>
+
+            <h3 className={css('h3')}>Links</h3>
             <CMSLink href="#" label="Default Link" className={css('link')} />
             <CMSLink href="#" label="Primary Link" className={css('link-primary')} />
             <CMSLink href="#" label="Secondary Link" className={css('link-secondary')} />
-          </section>
 
-          <h3 className={css('h3')}>Form Elements</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div className={css('form-group')}>
-              <label className={`${css('label')}`}>Text Input</label>
-              <input type="text" placeholder="Text input" className={`${css('input')}`} />
-            </div>
+            <h3 className={css('h3')}>Form Elements</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className={css('form-group')}>
+                <label className={`${css('label')}`}>Text Input</label>
+                <input type="text" placeholder="Text input" className={`${css('input')}`} />
+              </div>
 
-            <div className={css('form-group')}>
-              <label className={`${css('label')}`}>Text Area</label>
-              <textarea placeholder="Text area" className={`${css('textarea')}`}></textarea>
-            </div>
+              <div className={css('form-group')}>
+                <label className={`${css('label')}`}>Text Area</label>
+                <textarea placeholder="Text area" className={`${css('textarea')}`}></textarea>
+              </div>
 
-            <div className={css('form-group')}>
-              <label className={`${css('label')}`}>Select</label>
-              <select className={`${css('input-select')}`}>
-                <option>Option 1</option>
-                <option>Option 2</option>
-              </select>
-            </div>
+              <div className={css('form-group')}>
+                <label className={`${css('label')}`}>Select</label>
+                <select className={`${css('input-select')}`}>
+                  <option>Option 1</option>
+                  <option>Option 2</option>
+                </select>
+              </div>
 
-            <div className={css('form-group')}>
-              <label className={`${css('label')}`}>Checkbox</label>
-              <div>
-                <input type="checkbox" id="cb1" className={`${css('input-checkbox')}`} />
-                <label htmlFor="cb1" className="ml-2">
-                  Checkbox option
-                </label>
+              <div className={css('form-group')}>
+                <label className={`${css('label')}`}>Checkbox</label>
+                <div>
+                  <input type="checkbox" id="cb1" className={`${css('input-checkbox')}`} />
+                  <label htmlFor="cb1" className="ml-2">
+                    Checkbox option
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -177,77 +396,99 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
 
         {/* Layout Components */}
         <section className={css('section')}>
-          <h2 className={css('h2')}>Layout Components</h2>
+          <div className={css('section__container')}>
+            <h2 className={css('h2')}>Layout Components</h2>
 
-          <h3 className="text-xl font-semibold mt-6 mb-3">Cards</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className={`${css('card')}`}>
-              <div className={`${css('card-header')}`}>Card Header</div>
-              <div className={`${css('card-body')}`}>
-                <h5 className={`${css('card-title')}`}>Card Title</h5>
-                <p className={`${css('card-text')}`}>
-                  Some quick example text to build on the card title.
-                </p>
-                <button className={`${css('btn')}`}>Go somewhere</button>
-              </div>
-              <div className={`${css('card-footer')}`}>Card Footer</div>
+            <h3 className={css('h3')}>Radius</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className={`rounded-[var(--radius)] bg-[var(--base)] w-24 h-24`}></div>
+              <div className={`rounded-[var(--radius-sm)] bg-[var(--base)] w-24 h-24`}></div>
+              <div className={`rounded-[var(--radius-md)] bg-[var(--base)] w-24 h-24`}></div>
+              <div className={`rounded-[var(--radius-lg)] bg-[var(--base)] w-24 h-24`}></div>
+              <div className={`rounded-[var(--radius-full)] bg-[var(--base)] w-24 h-24`}></div>
             </div>
 
-            <div className={`${css('card')}`}>
-              <div
-                className={`${css('card-img-top')} h-40 bg-gray-200 flex items-center justify-center`}
-              >
-                Image
+            <h3 className={css('h3')}>Cards</h3>
+            <div className="flex flex-row flex-wrap gap-8">
+              <div className={`${css('card')}`}>
+                <div className={`${css('card-header')}`}>
+                  <h6>Card Header</h6>
+                </div>
+                <div className={`${css('card-body')}`}>
+                  <h5 className={`${css('card-title')}`}>Card Title</h5>
+                  <p className={`${css('card-text')}`}>
+                    Some quick example text to build on the card title.
+                  </p>
+                </div>
+                <div className={`${css('card-footer')}`}>
+                  <button className={`${css('btn')} ${css('btn-sm')}`}>Go somewhere</button>
+                </div>
               </div>
-              <div className={`${css('card-body')}`}>
-                <h5 className={`${css('card-title')}`}>Card with Image</h5>
-                <p className={`${css('card-text')}`}>This card has an image at the top.</p>
-              </div>
-            </div>
 
-            <div className={`${css('card')} ${css('card-horizontal')}`}>
-              <div className="flex">
+              <div className={`${css('card')}`}>
                 <div
-                  className={`${css('card-img')} w-1/3 bg-gray-200 flex items-center justify-center`}
+                  className={`${css('card-img-top')} h-40 bg-gray-200 flex items-center justify-center`}
                 >
-                  Img
+                  Image
                 </div>
-                <div className={`${css('card-body')} w-2/3`}>
-                  <h5 className={`${css('card-title')}`}>Horizontal Card</h5>
-                  <p className={`${css('card-text')}`}>This is a horizontal card layout.</p>
+                <div className={`${css('card-body')}`}>
+                  <h5 className={`${css('card-title')}`}>Card with Image</h5>
+                  <p className={`${css('card-text')}`}>This card has an image at the top.</p>
+                </div>
+              </div>
+
+              <div className={`${css('card')} ${css('card-horizontal')}`}>
+                <div className="flex">
+                  <div
+                    className={`${css('card-img')} w-1/3 bg-gray-200 flex items-center justify-center`}
+                  >
+                    Img
+                  </div>
+                  <div className={`${css('card-body')} w-2/3`}>
+                    <h5 className={`${css('card-title')}`}>Horizontal Card</h5>
+                    <p className={`${css('card-text')}`}>This is a horizontal card layout.</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <h3 className="text-xl font-semibold mt-6 mb-3">Alert Messages</h3>
-          <div className="space-y-2 mb-6">
-            <div className={`${css('alert')} ${css('alert-info')}`}>
-              This is an information alert
+            <h3 className="text-xl font-semibold mt-6 mb-3">Alert Messages</h3>
+            <div className="space-y-2 mb-6">
+              <div className={`${css('alert')} ${css('alert-info')}`}>
+                This is an information alert
+              </div>
+              <div className={`${css('alert')} ${css('alert-success')}`}>
+                This is a success alert
+              </div>
+              <div className={`${css('alert')} ${css('alert-warning')}`}>
+                This is a warning alert
+              </div>
+              <div className={`${css('alert')} ${css('alert-error')}`}>This is a error alert</div>
             </div>
-            <div className={`${css('alert')} ${css('alert-success')}`}>This is a success alert</div>
-            <div className={`${css('alert')} ${css('alert-warning')}`}>This is a warning alert</div>
-            <div className={`${css('alert')} ${css('alert-danger')}`}>This is a danger alert</div>
           </div>
         </section>
 
         <section className={css('section')}>
-          <h2 className={css('h2')}>Social Media Icons Header</h2>
-          <SocialMedia
-            socialMedia={settings?.socialMedia}
-            classNameContainer={css('header__drawer-footer__social')}
-            classNameItem={css('header__drawer-footer__social-item')}
-          />
+          <div className={css('section__container')}>
+            <h2 className={css('h2')}>Social Media Icons Header</h2>
+            <SocialMedia
+              socialMedia={settings?.socialMedia}
+              classNameContainer={css('header__drawer-footer__social')}
+              classNameItem={css('header__drawer-footer__social-item')}
+            />
+          </div>
         </section>
 
         <section className={`${css('section')} ${css('footer')} mb-8`}>
-          <h2 className={css('h2')}>Social Media Icons Footer</h2>
-          <SocialMedia
-            fullWidth
-            socialMedia={settings?.socialMedia}
-            classNameContainer={css('footer__social')}
-            classNameItem={css('footer__social-item')}
-          />
+          <div className={css('footer__container')}>
+            <h2 className={css('h2')}>Social Media Icons Footer</h2>
+            <SocialMedia
+              fullWidth
+              socialMedia={settings?.socialMedia}
+              classNameContainer={css('footer__social')}
+              classNameItem={css('footer__social-item')}
+            />
+          </div>
         </section>
       </div>
     </div>
