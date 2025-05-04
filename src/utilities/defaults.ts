@@ -343,24 +343,67 @@ export const defaultThemeCSS = `
   flex-direction: column;
   background-color: var(--info-light);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow: hidden;  
+  width: clamp(200px, 100%, 280px );  
 }
 
-.cms-card-header {
+.cms-card-row {
+  aspect-ratio: 16 / 9;  
+  width: clamp(280px, 50%,720px );
+  height: min-content;
+  flex-direction: row;
+}
+
+.cms-card-img {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  height: auto;
+}
+
+.cms-card-img-top {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  height: auto;
+}
+
+.cms-card-header,
+.cms-card-body,
+.cms-card-footer {
   background-color: var(--primary-light);
   padding: 4px 8px;
   font-size: var(--size-h5);
 }
+
 .cms-card-body {
   background-color: var(--success-light);
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  gap: 8px;
+  padding: 16px 8px;
 }
+
+.cms-card-body-end {
+  justify-content: end;
+}
+
+.cms-card-body-center {
+  justify-content: center;
+}
+
+.cms-card-body-start {
+  justify-content: start;
+}
+
 .cms-card-title {  
   font-size: var(--size-h6);
 }
 .cms-card-text {
-  font-size: var(--size-p);  
+  font-size: var(--size-p-sm);  
 }
+
 .cms-card-footer {
   background-color: var(--secondary-light);
 }

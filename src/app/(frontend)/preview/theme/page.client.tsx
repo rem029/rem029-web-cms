@@ -414,8 +414,8 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
                 <div className={`${css('card-header')}`}>
                   <h6>Card Header</h6>
                 </div>
-                <div className={`${css('card-body')}`}>
-                  <h5 className={`${css('card-title')}`}>Card Title</h5>
+                <div className={`${css('card-body')} ${css('card-body-end')}`}>
+                  <h5 className={`${css('card-title')}`}>Card Image with Content Overlay</h5>
                   <p className={`${css('card-text')}`}>
                     Some quick example text to build on the card title.
                   </p>
@@ -426,28 +426,34 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
               </div>
 
               <div className={`${css('card')}`}>
+                <div className={`${css('card-header')}`}>
+                  <h6>Card Header</h6>
+                </div>
                 <div
                   className={`${css('card-img-top')} h-40 bg-gray-200 flex items-center justify-center`}
                 >
                   Image
                 </div>
                 <div className={`${css('card-body')}`}>
-                  <h5 className={`${css('card-title')}`}>Card with Image</h5>
-                  <p className={`${css('card-text')}`}>This card has an image at the top.</p>
+                  <h5 className={`${css('card-title')}`}>Card with Image on top</h5>
+                  <p className={`${css('card-text')}`}>
+                    Some quick example text to build on the card title.
+                  </p>
+                </div>
+                <div className={`${css('card-footer')}`}>
+                  <button className={`${css('btn')} ${css('btn-sm')}`}>Go somewhere</button>
                 </div>
               </div>
 
-              <div className={`${css('card')} ${css('card-horizontal')}`}>
-                <div className="flex">
-                  <div
-                    className={`${css('card-img')} w-1/3 bg-gray-200 flex items-center justify-center`}
-                  >
-                    Img
-                  </div>
-                  <div className={`${css('card-body')} w-2/3`}>
-                    <h5 className={`${css('card-title')}`}>Horizontal Card</h5>
-                    <p className={`${css('card-text')}`}>This is a horizontal card layout.</p>
-                  </div>
+              <div className={`${css('card')} ${css('card-row')}`}>
+                <div
+                  className={`${css('card-img')} w-1/3 bg-gray-200 flex items-center justify-center`}
+                >
+                  Img
+                </div>
+                <div className={`${css('card-body')} ${css('card-body-center')}`}>
+                  <h5 className={`${css('card-title')}`}>Horizontal Card</h5>
+                  <p className={`${css('card-text')}`}>This is a horizontal card layout.</p>
                 </div>
               </div>
             </div>
