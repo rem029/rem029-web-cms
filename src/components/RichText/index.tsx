@@ -21,6 +21,7 @@ import type {
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { cn } from '@/utilities/ui'
+import { css } from '@/utilities/constants'
 
 type NodeTypes =
   | DefaultNodeTypes
@@ -66,7 +67,7 @@ export default function RichText(props: Props) {
   return (
     <ConvertRichText
       converters={jsxConverters}
-      className={cn(
+      className={`${css('richtext')} ${cn(
         'payload-richtext',
         {
           container: enableGutter,
@@ -74,7 +75,7 @@ export default function RichText(props: Props) {
           'mx-auto prose md:prose-md dark:prose-invert': enableProse,
         },
         className,
-      )}
+      )}`}
       {...rest}
     />
   )

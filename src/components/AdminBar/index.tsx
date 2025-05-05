@@ -81,6 +81,7 @@ export const AdminBar: React.FC<{
             padding: 0,
             position: 'relative',
             zIndex: 'unset',
+            fontSize: '16px',
           }}
         />
       </div>

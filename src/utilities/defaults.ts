@@ -232,8 +232,14 @@ export const defaultThemeCSS = `
   width: 100%;
   gap: 16px;
 }
-.cms-header__drawer-footer__social-item svg {
+
+.cms-header__drawer-footer__social-item {
   width: 16px;
+  height: auto;
+}
+
+.cms-header__drawer-footer__social-item svg {
+  width: 100%;
   height: auto;
   color: var(--secondary);
 }
@@ -654,43 +660,51 @@ export const defaultThemeCSS = `
   color: var(--info);
 }
 
-.cms-h1, h1 {
+.cms-h1, 
+.cms-richtext > h1 {
   font-family: 'Urbanist';
   font-size: var(--size-h1);
   width: 100%;
 }
 
-.cms-h2, h2 {
+.cms-h2, 
+.cms-richtext > h2 {
   font-family: 'Urbanist';
   font-size: var(--size-h2);
   width: 100%;
 }
 
-.cms-h3, h3 { 
+.cms-h3, 
+.cms-richtext > h3 { 
   font-family: 'Urbanist';
   font-size: var(--size-h3);
   width: 100%;
   }
 
-.cms-h4, h4 { 
+.cms-h4, 
+.cms-richtext > h4 { 
   font-family: 'Urbanist';
   font-size: var(--size-h4);
   width: 100%;
   }
 
-.cms-h5, h5 { 
+.cms-h5, 
+.cms-richtext > h5 { 
   font-family: 'Urbanist';  
   font-size: var(--size-h5);
   width: 100%;
   }
 
-.cms-h6, h6 { 
+.cms-h6, 
+.cms-richtext > h6 { 
   font-family: 'Urbanist';  
   font-size: var(--size-h6);
   width: 100%;
   }
 
-.cms-p, p, a {
+.cms-p, 
+p, 
+.cms-richtext > h6 {
   font-size: var(--size-p-sm);
   width: 100%;
 }
