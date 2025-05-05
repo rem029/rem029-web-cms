@@ -153,6 +153,7 @@ export const defaultThemeCSS = `
 .cms-header__nav-item{
   color: var(--primary-foreground);
   padding: 0px 4px;
+  font-size: 16px;
 }
 
 .cms-header__btn-drawer {
@@ -177,6 +178,7 @@ export const defaultThemeCSS = `
 .cms-header__drawer-header button {
   padding: 8px;
   border-radius: 9999px;
+  color: var(--primary-foreground);
 }
 
 .cms-header__drawer{
@@ -206,6 +208,7 @@ export const defaultThemeCSS = `
   padding: 4px 0px;
   display: block;
   font-size: 16px;
+  color: var(--primary-foreground);
 }
 
 .cms-header__drawer-footer {
@@ -338,44 +341,148 @@ export const defaultThemeCSS = `
   font-size: 16px;
 }
 
+/* ─── Cards Image with Overlay ───────────────────────── */
+
 .cms-card {
   display: flex;
-  flex-direction: column;
-  background-color: var(--info-light);
+  flex-direction: column;  
   border-radius: var(--radius-md);
-  overflow: hidden;  
-  width: clamp(200px, 100%, 280px );  
-}
-
-.cms-card-row {
-  aspect-ratio: 16 / 9;  
-  width: clamp(280px, 50%,720px );
-  height: min-content;
-  flex-direction: row;
-}
-
-.cms-card-img {
-  aspect-ratio: 1 / 1;
-  width: 100%;
+  overflow: hidden;    
   height: auto;
+  width: 100%;
+  max-width: clamp(200px, 50vw, 280px );
+  aspect-ratio: 4 / 3;
 }
 
-.cms-card-img-top {
+.cms-card-overlay,
+.cms-card-img-bg .cms-card-img  {
+  width: 100%;
+  height: 100%;
+}
+
+.cms-card-overlay {
+  background-color: var(--primary);
+  opacity: 0.5;
+  width: 100%;
+  height: 100%;
+}
+
+.cms-card .cms-card-overlay {
+  z-index: 1;
+}
+.cms-card-img-bg .cms-card-img{
+  z-index: 0;  
+ }
+
+.cms-card-img-bg {
+  aspect-ratio: 2 / 3;
+  width: 100%;  
+  height: auto;
+  position: relative;
+  
+}
+
+.cms-card-img-bg .cms-card-header {
+  color: var(--primary-foreground);
+}
+
+.cms-card-img-bg .cms-card-body {
+  color: var(--primary-foreground);
+}
+
+.cms-card-img-bg .cms-card-body .cms-card-title {
+  font-weight: bold;
+}
+
+.cms-card-img-bg .cms-card-img img {
+  object-fit: cover;
+}
+
+.cms-card-img-bg .cms-card-img,
+.cms-card-img-bg .cms-card-overlay {  
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;  
+}
+
+.cms-card-img-bg .cms-card-header,
+.cms-card-img-bg .cms-card-body,
+.cms-card-img-bg .cms-card-footer {
+  z-index: 2;
+}
+
+/* ─── Cards Image Inline ───────────────────────── */
+
+.cms-card-img-inline {
+  aspect-ratio: unset;
+  background-color: #FFF);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--info-light);
+}
+
+.cms-card-img-inline .cms-card-img {
+  position: relative;
+  display: block;
   aspect-ratio: 4 / 3;
   width: 100%;
-  height: auto;
+  height:auto;  
+}
+
+.cms-card-img-inline .cms-card-img img {
+  object-fit: cover;
+}
+
+.cms-card-img-inline .cms-card-body .cms-card-title {
+  font-weight: bold;
+}
+
+/* ─── Cards Row Direction ───────────────────────── */
+
+.cms-card-row {
+  display: flex;
+  flex-direction: row;  
+  align-items: center;
+  justify-content: center;
+
+  max-width: 480px;
+  width: 100%;
+  height: 100%;
+  min-height: 96px;  
+
+  aspect-ratio: unset;
+  background-color: #FFF);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--info-light);
+}
+
+.cms-card-row .cms-card-img {
+  position: relative;
+  display: block;
+
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  height:auto;  
+}
+
+.cms-card-row .cms-card-img img {
+  object-fit: cover;
+}
+
+.cms-card-row .cms-card-body {
+  width: 100%;
+  height: 100%;
 }
 
 .cms-card-header,
 .cms-card-body,
-.cms-card-footer {
-  background-color: var(--primary-light);
-  padding: 4px 8px;
+.cms-card-footer {  
+  padding: 8px 8px;
   font-size: var(--size-h5);
 }
 
-.cms-card-body {
-  background-color: var(--success-light);
+.cms-card-body {  
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -404,16 +511,24 @@ export const defaultThemeCSS = `
   font-size: var(--size-p-sm);  
 }
 
-.cms-card-footer {
-  background-color: var(--secondary-light);
-}
+/* ─── Alerts ───────────────────────── */
 
 .cms-alert {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+
   padding: 4px 16px;
   background-color: var(--primary-light);  
   color: var(--primary-light-foreground);
   border-radius: var(--radius);
   font-size: 14px;
+}
+
+.cms-alert svg {
+  width: 24px;
+  height: 24px;
 }
 
 .cms-alert-info {
@@ -437,7 +552,7 @@ export const defaultThemeCSS = `
 }
 
 
-.cms-link {
+.cms-link,a  {
   color: var(--base);
   font-weight: '200';
 }
@@ -608,8 +723,7 @@ export const defaultThemeCSS = `
 
 h1,h2,h3,h4,h5,h6 {
   font-family: 'Urbanist';
-  font-weight: 'bold';    
-  color: var(--foreground);
+  font-weight: 'bold';      
 }
 
 p, span, blockquote {

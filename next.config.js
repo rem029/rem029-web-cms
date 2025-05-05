@@ -18,6 +18,10 @@ const nextConfig = {
           protocol: url.protocol.replace(':', ''),
         }
       }),
+      new URL('https://images.unsplash.com/**'),
+      new URL('https://images.pexels.com/**'),
+      { hostname: 'images.unsplash.com', protocol: 'https' },
+      { hostname: 'images.pexels.com', protocol: 'https' },
     ],
   },
   reactStrictMode: true,

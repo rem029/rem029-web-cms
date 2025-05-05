@@ -25,7 +25,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await getGlobal('settings')
 
   const theme = themes?.themes?.find((theme) => theme.active === true)
-  const css = theme?.css || defaultThemeCSS
+  // const css = theme?.css || defaultThemeCSS
+  const css = defaultThemeCSS
   const js = theme?.js || ''
 
   const favicon = (settings?.favicon as Media)?.url || ''

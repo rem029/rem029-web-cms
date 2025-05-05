@@ -5,6 +5,10 @@ import { CMSLink } from '@/components/Link'
 import { css } from '@/utilities/constants'
 import { SocialMedia } from '@/components/Social'
 import { Setting } from '@/payload-types'
+import Image from 'next/image'
+import { IoIosInformationCircleOutline, IoIosCheckmarkCircleOutline } from 'react-icons/io'
+import { MdErrorOutline } from 'react-icons/md'
+import { IoWarningOutline } from 'react-icons/io5'
 
 type ThemePreviewClientProps = {
   activeThemeName: string
@@ -401,16 +405,28 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
 
             <h3 className={css('h3')}>Radius</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className={`rounded-[var(--radius)] bg-[var(--base)] w-24 h-24`}></div>
-              <div className={`rounded-[var(--radius-sm)] bg-[var(--base)] w-24 h-24`}></div>
-              <div className={`rounded-[var(--radius-md)] bg-[var(--base)] w-24 h-24`}></div>
-              <div className={`rounded-[var(--radius-lg)] bg-[var(--base)] w-24 h-24`}></div>
-              <div className={`rounded-[var(--radius-full)] bg-[var(--base)] w-24 h-24`}></div>
+              <div className={`rounded-[var(--radius)] bg-[var(--info-light)] w-24 h-24`}></div>
+              <div className={`rounded-[var(--radius-sm)] bg-[var(--info-light)] w-24 h-24`}></div>
+              <div className={`rounded-[var(--radius-md)] bg-[var(--info-light)] w-24 h-24`}></div>
+              <div className={`rounded-[var(--radius-lg)] bg-[var(--info-light)] w-24 h-24`}></div>
+              <div
+                className={`rounded-[var(--radius-full)] bg-[var(--info-light)] w-24 h-24`}
+              ></div>
             </div>
 
             <h3 className={css('h3')}>Cards</h3>
             <div className="flex flex-row flex-wrap gap-8">
-              <div className={`${css('card')}`}>
+              <div className={`${css('card')} ${css('card-img-bg')}`}>
+                <div className={css('card-img')}>
+                  <Image
+                    alt="sample image"
+                    src={
+                      'https://images.pexels.com/photos/31887348/pexels-photo-31887348/free-photo-of-elegant-spring-white-flowers-in-bloom.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+                    }
+                    fill
+                  />
+                </div>
+                <div className={css('card-overlay')} />
                 <div className={`${css('card-header')}`}>
                   <h6>Card Header</h6>
                 </div>
@@ -421,18 +437,24 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
                   </p>
                 </div>
                 <div className={`${css('card-footer')}`}>
-                  <button className={`${css('btn')} ${css('btn-sm')}`}>Go somewhere</button>
+                  <CMSLink className={`${css('btn-secondary')} ${css('btn-sm')} max-w-52`} href="#">
+                    Go somewhere
+                  </CMSLink>
                 </div>
               </div>
 
-              <div className={`${css('card')}`}>
+              <div className={`${css('card')} ${css('card-img-inline')}`}>
                 <div className={`${css('card-header')}`}>
                   <h6>Card Header</h6>
                 </div>
-                <div
-                  className={`${css('card-img-top')} h-40 bg-gray-200 flex items-center justify-center`}
-                >
-                  Image
+                <div className={css('card-img')}>
+                  <Image
+                    alt="sample image"
+                    src={
+                      'https://images.pexels.com/photos/31887348/pexels-photo-31887348/free-photo-of-elegant-spring-white-flowers-in-bloom.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+                    }
+                    fill
+                  />
                 </div>
                 <div className={`${css('card-body')}`}>
                   <h5 className={`${css('card-title')}`}>Card with Image on top</h5>
@@ -441,15 +463,21 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
                   </p>
                 </div>
                 <div className={`${css('card-footer')}`}>
-                  <button className={`${css('btn')} ${css('btn-sm')}`}>Go somewhere</button>
+                  <CMSLink className={`${css('btn-primary')} ${css('btn-sm')} max-w-52`} href="#">
+                    Go somewhere
+                  </CMSLink>
                 </div>
               </div>
 
               <div className={`${css('card')} ${css('card-row')}`}>
-                <div
-                  className={`${css('card-img')} w-1/3 bg-gray-200 flex items-center justify-center`}
-                >
-                  Img
+                <div className={css('card-img')}>
+                  <Image
+                    alt="sample image"
+                    src={
+                      'https://images.pexels.com/photos/31887348/pexels-photo-31887348/free-photo-of-elegant-spring-white-flowers-in-bloom.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+                    }
+                    fill
+                  />
                 </div>
                 <div className={`${css('card-body')} ${css('card-body-center')}`}>
                   <h5 className={`${css('card-title')}`}>Horizontal Card</h5>
@@ -461,15 +489,21 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
             <h3 className="text-xl font-semibold mt-6 mb-3">Alert Messages</h3>
             <div className="space-y-2 mb-6">
               <div className={`${css('alert')} ${css('alert-info')}`}>
-                This is an information alert
+                <IoIosInformationCircleOutline />
+                <p>This is an information alert</p>
               </div>
               <div className={`${css('alert')} ${css('alert-success')}`}>
-                This is a success alert
+                <IoIosCheckmarkCircleOutline />
+                <p>This is a success alert</p>
               </div>
               <div className={`${css('alert')} ${css('alert-warning')}`}>
-                This is a warning alert
+                <IoWarningOutline />
+                <p>This is a warning alert</p>
               </div>
-              <div className={`${css('alert')} ${css('alert-error')}`}>This is a error alert</div>
+              <div className={`${css('alert')} ${css('alert-error')}`}>
+                <MdErrorOutline />
+                <p>This is a error alert</p>
+              </div>
             </div>
           </div>
         </section>
