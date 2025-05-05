@@ -9,6 +9,8 @@ import Image from 'next/image'
 import { IoIosInformationCircleOutline, IoIosCheckmarkCircleOutline } from 'react-icons/io'
 import { MdErrorOutline } from 'react-icons/md'
 import { IoWarningOutline } from 'react-icons/io5'
+import RichText from '@/components/RichText'
+import richTextSample from './rich-text.json'
 
 type ThemePreviewClientProps = {
   activeThemeName: string
@@ -69,6 +71,12 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
             <blockquote className={`${css('blockquote')}`}>
               This is a blockquote. Its often used to highlight important quotes or passages.
             </blockquote>
+          </div>
+        </section>
+
+        <section className={css('section')}>
+          <div className={css('section__container')}>
+            <RichText enableGutter={false} enableProse={false} data={{ ...richTextSample }} />
           </div>
         </section>
 
