@@ -67,7 +67,7 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
               do eiusmod tempor incididunt ut labore et dolore magna aliqua.
             </p>
             <blockquote className={`${css('blockquote')}`}>
-              This is a blockquote. It's often used to highlight important quotes or passages.
+              This is a blockquote. Its often used to highlight important quotes or passages.
             </blockquote>
           </div>
         </section>

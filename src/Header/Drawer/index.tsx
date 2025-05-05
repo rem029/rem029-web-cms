@@ -9,16 +9,6 @@ import React, { useState } from 'react'
 import { GiHamburgerMenu } from 'react-icons/gi'
 import { IoMdClose } from 'react-icons/io'
 
-import {
-  FaFacebook,
-  FaInstagram,
-  FaLinkedin,
-  FaLinkedinIn,
-  FaPinterest,
-  FaTiktok,
-  FaTwitter,
-  FaYoutube,
-} from 'react-icons/fa'
 import { SocialMedia } from '@/components/Social'
 
 export const DrawerNav: React.FC<{ data: HeaderType; settings: Setting }> = ({

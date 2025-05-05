@@ -4,6 +4,7 @@ import type { CallToActionBlock as CTABlockProps } from '@/payload-types'
 
 import RichText from '@/components/RichText'
 import { CMSLink } from '@/components/Link'
+import { css } from '@/utilities/constants'
 
 export const CallToActionBlock: React.FC<CTABlockProps> = ({ links, richText }) => {
   return (
@@ -14,7 +15,15 @@ export const CallToActionBlock: React.FC<CTABlockProps> = ({ links, richText }) 
         </div>
         <div className="flex flex-col gap-8">
           {(links || []).map(({ link }, i) => {
-            return <CMSLink key={i} size="lg" {...link} />
+            return (
+              <CMSLink
+                className={css('link')}
+                key={i}
+                href={link?.url || ''}
+                label={link?.label}
+                newTab={link?.newTab || false}
+              />
+            )
           })}
         </div>
       </div>

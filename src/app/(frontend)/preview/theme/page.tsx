@@ -6,7 +6,12 @@ import { ThemePreviewClient } from './page.client'
 import { getGlobal } from '@/utilities/getGlobals'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 
-export default async function ThemePreview({ searchParams }: { searchParams: any }) {
+export default async function ThemePreview({
+  searchParams,
+}: {
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
+  searchParams: any
+}) {
   const { previewSecret } = await searchParams
 
   if (previewSecret !== process.env.PREVIEW_SECRET) {
@@ -51,8 +56,4 @@ export const generateMetadata = (): Metadata => {
       },
     },
   }
-}
-
-export const generateSitemaps = () => {
-  return []
 }

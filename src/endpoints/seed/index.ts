@@ -47,7 +47,7 @@ export const seed = async ({
         slug: global,
         data: {
           navItems: [],
-        },
+        } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
         depth: 0,
         context: {
           disableRevalidate: true,

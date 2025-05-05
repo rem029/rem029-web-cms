@@ -19,6 +19,8 @@ import { getServerSideURL } from './utilities/getURL'
 import { Theme } from './Theme/config'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { Settings } from './Settings'
+import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -66,18 +68,34 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  db: postgresAdapter({
-    pool: {
-      connectionString: process.env.DATABASE_URI || '',
-    },
-    push: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
-    // logger: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
-  }),
+  db:
+    process.env.NODE_ENV === 'production'
+      ? postgresAdapter({
+          pool: {
+            connectionString: process.env.DATABASE_URI || '',
+          },
+
+          // logger: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
+        })
+      : vercelPostgresAdapter({
+          pool: {
+            connectionString:
+              'postgres://postgres.kxsgqmbduwtvxinjscuo:p3D1EoIdY52Plsqq@aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&supa=base-pooler.x',
+          },
+          push: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
+          // logger: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
+        }),
   collections: [Pages, Posts, Media, Categories, Users],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, Theme, Settings],
   plugins: [
     ...plugins,
+    vercelBlobStorage({
+      collections: {
+        [Media.slug]: true,
+      },
+      token: process.env.BLOB_READ_WRITE_TOKEN || '',
+    }),
     // storage-adapter-placeholder
   ],
   secret: process.env.PAYLOAD_SECRET,

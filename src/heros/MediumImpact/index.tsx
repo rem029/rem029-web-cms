@@ -5,6 +5,7 @@ import type { Page } from '@/payload-types'
 import { CMSLink } from '@/components/Link'
 import { Media } from '@/components/Media'
 import RichText from '@/components/RichText'
+import { css } from '@/utilities/constants'
 
 export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richText }) => {
   return (
@@ -17,7 +18,13 @@ export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richTex
             {links.map(({ link }, i) => {
               return (
                 <li key={i}>
-                  <CMSLink {...link} />
+                  <CMSLink
+                    className={css('link')}
+                    key={i}
+                    href={link?.url || ''}
+                    label={link?.label}
+                    newTab={link?.newTab || false}
+                  />
                 </li>
               )
             })}
