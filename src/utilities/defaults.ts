@@ -552,7 +552,7 @@ export const defaultThemeCSS = `
 }
 
 
-.cms-link,a  {
+.cms-link, a  {
   color: var(--base);
   font-weight: '200';
 }
@@ -654,43 +654,43 @@ export const defaultThemeCSS = `
   color: var(--info);
 }
 
-.cms-h1{
+.cms-h1, h1 {
   font-family: 'Urbanist';
   font-size: var(--size-h1);
   width: 100%;
 }
 
-.cms-h2{
+.cms-h2, h2 {
   font-family: 'Urbanist';
   font-size: var(--size-h2);
   width: 100%;
 }
 
-.cms-h3{ 
+.cms-h3, h3 { 
   font-family: 'Urbanist';
   font-size: var(--size-h3);
   width: 100%;
   }
 
-.cms-h4{ 
+.cms-h4, h4 { 
   font-family: 'Urbanist';
   font-size: var(--size-h4);
   width: 100%;
   }
 
-.cms-h5{ 
+.cms-h5, h5 { 
   font-family: 'Urbanist';  
   font-size: var(--size-h5);
   width: 100%;
   }
 
-.cms-h6{ 
+.cms-h6, h6 { 
   font-family: 'Urbanist';  
   font-size: var(--size-h6);
   width: 100%;
   }
 
-.cms-p {
+.cms-p, p, a {
   font-size: var(--size-p-sm);
   width: 100%;
 }
@@ -710,7 +710,7 @@ export const defaultThemeCSS = `
   width: 100%;
 }
 
-.cms-blockquote {
+.cms-blockquote, blockquote {
   font-style: italic;
   font-size: var(--size-blockquote);
   opacity: .5;

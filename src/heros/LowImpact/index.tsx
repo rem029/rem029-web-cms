@@ -3,6 +3,7 @@ import React from 'react'
 import type { Page } from '@/payload-types'
 
 import RichText from '@/components/RichText'
+import { css } from '@/utilities/constants'
 
 type LowImpactHeroType =
   | {
@@ -16,9 +17,10 @@ type LowImpactHeroType =
 
 export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText }) => {
   return (
-    <div className="container mt-16">
-      <div className="max-w-[48rem]">
-        {children || (richText && <RichText data={richText} enableGutter={false} />)}
+    <div className={css('section')}>
+      <div className={css('section__container')}>
+        {children ||
+          (richText && <RichText data={richText} enableGutter={false} enableProse={false} />)}
       </div>
     </div>
   )

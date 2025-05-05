@@ -76,28 +76,30 @@ export default buildConfig({
             connectionString:
               'postgres://postgres.kxsgqmbduwtvxinjscuo:p3D1EoIdY52Plsqq@aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&supa=base-pooler.x',
           },
-          logger: false,
+          logger: process.env.DB_LOGGER === 'true',
         })
       : postgresAdapter({
           pool: {
             connectionString: process.env.DATABASE_URI || '',
           },
           push: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
-          logger: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
+          logger: process.env.DB_LOGGER === 'true',
         }),
   collections: [Pages, Posts, Media, Categories, Users],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, Theme, Settings],
-  plugins: [
-    ...plugins,
-    vercelBlobStorage({
-      collections: {
-        [Media.slug]: true,
-      },
-      token: process.env.BLOB_READ_WRITE_TOKEN || '',
-    }),
-    // storage-adapter-placeholder
-  ],
+  plugins:
+    process.env.NODE_ENV === 'production'
+      ? [
+          ...plugins,
+          vercelBlobStorage({
+            collections: {
+              [Media.slug]: true,
+            },
+            token: process.env.BLOB_READ_WRITE_TOKEN || '',
+          }),
+        ]
+      : [...plugins],
   secret: process.env.PAYLOAD_SECRET,
   email: nodemailerAdapter({
     defaultFromAddress: process.env.DEFAULT_FROM_ADDRESS || '',
