@@ -1982,12 +1982,12 @@
     to-snake-case "1.0.0"
     uuid "10.0.0"
 
-"@payloadcms/db-vercel-postgres@^3.36.1":
-  version "3.36.1"
-  resolved "https://registry.yarnpkg.com/@payloadcms/db-vercel-postgres/-/db-vercel-postgres-3.36.1.tgz#675ae54e6ee6c5e1f571ad4e7f7ff23860e08687"
-  integrity sha512-XE/mbtl6BQIvoAYeEBDiEENlk5Vda06a/yV9UZby50eZ01juY200bFZBgD+BATQj0OSRO1/LdZJNI/MNKxNnBQ==
+"@payloadcms/db-vercel-postgres@3.33.0":
+  version "3.33.0"
+  resolved "https://registry.yarnpkg.com/@payloadcms/db-vercel-postgres/-/db-vercel-postgres-3.33.0.tgz#fa290e7771d45727402ae37d8cf3658058e8f7ef"
+  integrity sha512-9MOcfDemHE2S/3W2Nd9DqzpOMgFk80hQVM+YhVKdIDJCPJWc4ambgC7HGXQFfitHl0pA6UFNqseQi5r0HJTLdw==
   dependencies:
-    "@payloadcms/drizzle" "3.36.1"
+    "@payloadcms/drizzle" "3.33.0"
     "@vercel/postgres" "^0.9.0"
     console-table-printer "2.12.1"
     drizzle-kit "0.28.0"
@@ -2001,17 +2001,6 @@
   version "3.33.0"
   resolved "https://registry.yarnpkg.com/@payloadcms/drizzle/-/drizzle-3.33.0.tgz#4fb776aff30cd0bf23ebba5698447986bf993824"
   integrity sha512-M+twNVoAzh6cC833gjwkvlVJdFAaasLGCR4uX4ijJ4DV9qkEXuMZcqSj3CD6LIGLKQpnPOccJ4QmeYSQ8V6uKQ==
-  dependencies:
-    console-table-printer "2.12.1"
-    drizzle-orm "0.36.1"
-    prompts "2.4.2"
-    to-snake-case "1.0.0"
-    uuid "9.0.0"
-
-"@payloadcms/drizzle@3.36.1":
-  version "3.36.1"
-  resolved "https://registry.yarnpkg.com/@payloadcms/drizzle/-/drizzle-3.36.1.tgz#afbb83d35fb762e3b46e499b69ed20aeba67ec72"
-  integrity sha512-YRuUwsvBlhijWnTtg49SPELpMRMDn6W5E8ytRJ/DA7I2ws9IYmIc5FCGZFgI3GH5Vat+OEJrNIH8HNItWYnLvw==
   dependencies:
     console-table-printer "2.12.1"
     drizzle-orm "0.36.1"
@@ -2082,12 +2071,12 @@
     amazon-cognito-identity-js "^6.1.2"
     nodemailer "6.9.16"
 
-"@payloadcms/plugin-cloud-storage@3.36.1":
-  version "3.36.1"
-  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-cloud-storage/-/plugin-cloud-storage-3.36.1.tgz#3ef48e4925b4c152889625376ab8985ed9e46e79"
-  integrity sha512-9diDn7r6G6ihlzIUGwsMR/LI8iN+n6M1RIViYzcvn8J9qHzxlWCXoWiN6Sy1jf/FTk2VvRdeAWB+o4AEC/rjGQ==
+"@payloadcms/plugin-cloud-storage@3.33.0":
+  version "3.33.0"
+  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-cloud-storage/-/plugin-cloud-storage-3.33.0.tgz#4d72656077da34ddb92881f3a32b3cf03347ecfa"
+  integrity sha512-uJ+ivTYvhLSHoPVv2/3l6A9EHBvNIHU3os87hg78eibteb0QXFB1X9k8j+z6oA8g5a01gWwct0f9uTRU0Pmxrw==
   dependencies:
-    "@payloadcms/ui" "3.36.1"
+    "@payloadcms/ui" "3.33.0"
     find-node-modules "^2.1.3"
     range-parser "^1.2.1"
 
@@ -2157,25 +2146,18 @@
     ts-essentials "10.0.3"
     uuid "10.0.0"
 
-"@payloadcms/storage-vercel-blob@^3.36.1":
-  version "3.36.1"
-  resolved "https://registry.yarnpkg.com/@payloadcms/storage-vercel-blob/-/storage-vercel-blob-3.36.1.tgz#ecec2453916675a83924555e944a96f99f912135"
-  integrity sha512-YyM0kIp1tkSW0cIHbrQDj5jiA54nbqoU3bjRTR+w1aBFNQ22n1AuSTcNz6HOEUCWrPoEKKOo8Ba8Nw7YWCBxfw==
+"@payloadcms/storage-vercel-blob@3.33.0":
+  version "3.33.0"
+  resolved "https://registry.yarnpkg.com/@payloadcms/storage-vercel-blob/-/storage-vercel-blob-3.33.0.tgz#999275b3766b773fd61a6ead8fe1cb65787afdfb"
+  integrity sha512-XgEvLx9ZX36wxtwjkyjwr3cWm/ueFHe9ZNdU2VtsKh2fBTow0p3lrb8oFKASxFPvrmAW1m/CdPtmwG1UTvGQrA==
   dependencies:
-    "@payloadcms/plugin-cloud-storage" "3.36.1"
+    "@payloadcms/plugin-cloud-storage" "3.33.0"
     "@vercel/blob" "^0.22.3"
 
 "@payloadcms/translations@3.33.0":
   version "3.33.0"
   resolved "https://registry.yarnpkg.com/@payloadcms/translations/-/translations-3.33.0.tgz#8ce4f7eba5ebbbda944106a601a4639308988e8b"
   integrity sha512-QU8EFoporBLdyeGWoWogb6gZMEMopvFHmF43yQDa2TrzWxGtEaSY5pNCvJovQN1aPnLPYaK4we/nX/3ifa4G5Q==
-  dependencies:
-    date-fns "4.1.0"
-
-"@payloadcms/translations@3.36.1":
-  version "3.36.1"
-  resolved "https://registry.yarnpkg.com/@payloadcms/translations/-/translations-3.36.1.tgz#f2f7978af88182b5e90245f04b11e87d9881ef6b"
-  integrity sha512-pn2RfdKXAwIum/Pir5eF3Qa+ZYVa0G046bQAXw+cxfTaMtQ8XhzN2jbwH95ttwv3r2Qhoc7WUSYtnYZs4tHV7g==
   dependencies:
     date-fns "4.1.0"
 
@@ -2192,34 +2174,6 @@
     "@faceless-ui/window-info" "3.0.1"
     "@monaco-editor/react" "4.7.0"
     "@payloadcms/translations" "3.33.0"
-    bson-objectid "2.0.4"
-    date-fns "4.1.0"
-    dequal "2.0.3"
-    md5 "2.3.0"
-    object-to-formdata "4.5.1"
-    qs-esm "7.0.2"
-    react-datepicker "7.6.0"
-    react-image-crop "10.1.8"
-    react-select "5.9.0"
-    scheduler "0.25.0"
-    sonner "^1.7.2"
-    ts-essentials "10.0.3"
-    use-context-selector "2.0.0"
-    uuid "10.0.0"
-
-"@payloadcms/ui@3.36.1":
-  version "3.36.1"
-  resolved "https://registry.yarnpkg.com/@payloadcms/ui/-/ui-3.36.1.tgz#121a2de0171159277e47c75fd8d692e75994e815"
-  integrity sha512-SYJXZ4ma9QF58ZsG3nQxncVtWUKZwdhcVAnN17yhkYu8RQR16dmKMaN+OHgz9LZMz+/lVPZuCJu0SrHRbxeC4g==
-  dependencies:
-    "@date-fns/tz" "1.2.0"
-    "@dnd-kit/core" "6.0.8"
-    "@dnd-kit/sortable" "7.0.2"
-    "@faceless-ui/modal" "3.0.0-beta.2"
-    "@faceless-ui/scroll-info" "2.0.0"
-    "@faceless-ui/window-info" "3.0.1"
-    "@monaco-editor/react" "4.7.0"
-    "@payloadcms/translations" "3.36.1"
     bson-objectid "2.0.4"
     date-fns "4.1.0"
     dequal "2.0.3"

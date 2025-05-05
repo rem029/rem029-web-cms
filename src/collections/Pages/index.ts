@@ -2,11 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
-import { Archive } from '../../blocks/ArchiveBlock/config'
-import { CallToAction } from '../../blocks/CallToAction/config'
-import { Content } from '../../blocks/Content/config'
-import { FormBlock } from '../../blocks/Form/config'
-import { MediaBlock } from '../../blocks/MediaBlock/config'
+
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -20,6 +16,11 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
+import { CallToAction } from '@/blocks/old/CallToAction/config'
+import { FormBlock } from '@/blocks/old/Form/config'
+import { MediaBlock } from '@/blocks/old/MediaBlock/config'
+import { Content } from '@/blocks/old/Content/config'
+import { Archive } from '@/blocks/old/ArchiveBlock/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
