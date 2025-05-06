@@ -324,63 +324,7 @@ If you have any issues or questions, reach out to us on [Discord](https://discor
 
 ## Pending Issues and Roadmap
 
-### Security
-
-| Issue                   | Description                                                                                                       | Status      |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------- |
-| CSS Sanitization        | Current implementation filters Google Font imports but needs better handling of other CSS injection vectors       | In Progress |
-| JavaScript Sanitization | Theme JS needs a more robust approach than DOMPurify which is designed for HTML                                   | Pending     |
-| Embed Block Security    | Only trusted domains (YouTube, Google Maps, etc.) are allowed in embeds, but further security improvements needed | Implemented |
-
-### Font System
-
-| Issue                      | Description                                                                                                            | Status      |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------- |
-| Font Weight Implementation | Support for selecting specific font weights exists in the admin UI but needs better integration with the layout system | In Progress |
-| Font Loading Optimization  | Need to optimize font loading to prevent layout shifts and improve performance metrics                                 | Pending     |
-| Variable Fonts             | Consider adding support for variable font technology for better performance                                            | Planned     |
-
-### Component Architecture
-
-| Issue             | Description                                                                                                | Status      |
-| ----------------- | ---------------------------------------------------------------------------------------------------------- | ----------- |
-| MultiMedia Block  | Recently replaced Media block with more flexible MultiMedia component, but needs additional format support | Implemented |
-| Container Nesting | Deep nesting of container blocks requires performance optimization                                         | Pending     |
-| Component Mapping | Block type to component mapping needs refinement and better error handling                                 | In Progress |
-
-### Responsive Design
-
-| Issue                 | Description                                               | Status      |
-| --------------------- | --------------------------------------------------------- | ----------- |
-| Mobile Layout         | Some components need better mobile view optimizations     | Pending     |
-| Responsive Typography | Font sizing across different devices needs improvement    | In Progress |
-| Container Flexibility | Container blocks need better responsive behavior controls | Planned     |
-
-### User Access Control
-
-| Issue                           | Description                                                      | Status  |
-| ------------------------------- | ---------------------------------------------------------------- | ------- |
-| Dynamic Permissions             | Planning to implement granular, role-based access control system | Planned |
-| Collection-specific Permissions | Need to allow setting permissions per collection/global          | Planned |
-| Admin Role Management           | Interface for managing user roles and permissions                | Pending |
-
-### Developer Experience
-
-| Issue                   | Description                                                                   | Status      |
-| ----------------------- | ----------------------------------------------------------------------------- | ----------- |
-| Creator/Editor Tracking | Recently added tracking of content creators and editors                       | Implemented |
-| Documentation           | Component documentation needs updating with recent changes                    | In Progress |
-| Type Safety             | Ensuring type safety across the application, particularly with dynamic blocks | Ongoing     |
-
-### Planned Improvements
-
-| Feature               | Description                                         | Priority |
-| --------------------- | --------------------------------------------------- | -------- |
-| Access Control System | Complete the implementation of granular permissions | High     |
-| Theme System          | Enhance with better font controls                   | Medium   |
-| Validation            | Improve block validation and error handling         | Medium   |
-| Testing               | Add more unit and integration tests                 | Medium   |
-| Performance           | Optimize bundle size and loading performance        | High     |
-| Documentation         | Update with recent component changes                | Low      |
-
-If you encounter any other issues, please report them on GitHub Issues or contribute a fix via pull request.
+- Localized all content under container
+- Have font selection on themes
+- Show label on each roles permission
+- Consider deploying Docker

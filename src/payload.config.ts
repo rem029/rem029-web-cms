@@ -19,8 +19,8 @@ import { getServerSideURL } from './utilities/getURL'
 import { Theme } from './Theme/config'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { Settings } from './Settings'
-import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
+import { Roles } from './collections/Roles'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -77,7 +77,7 @@ export default buildConfig({
     // push: false,
     logger: process.env.DB_LOGGER === 'true',
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
+  collections: [Pages, Posts, Media, Categories, Users, Roles],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, Theme, Settings],
   plugins:
