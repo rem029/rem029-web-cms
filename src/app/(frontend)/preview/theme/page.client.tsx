@@ -76,6 +76,7 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
 
         <section className={css('section')}>
           <div className={css('section__container')}>
+            <h6 className={css('h3')}>Rich Text</h6>
             <RichText
               enableGutter={false}
               enableProse={false}

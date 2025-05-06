@@ -21,6 +21,8 @@ import { FormBlock } from '@/blocks/old/Form/config'
 import { MediaBlock } from '@/blocks/old/MediaBlock/config'
 import { Content } from '@/blocks/old/Content/config'
 import { Archive } from '@/blocks/old/ArchiveBlock/config'
+import { SectionBlock } from '@/blocks/Section/config'
+import { CSSNameWithCustomFiled } from '@/fields/css'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -71,13 +73,14 @@ export const Pages: CollectionConfig<'pages'> = {
         {
           fields: [hero],
           label: 'Hero',
+          hidden: true,
         },
         {
           fields: [
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, SectionBlock],
               required: true,
               admin: {
                 initCollapsed: true,
@@ -87,26 +90,7 @@ export const Pages: CollectionConfig<'pages'> = {
           label: 'Content',
         },
         {
-          fields: [
-            {
-              name: 'css',
-              type: 'code',
-              label: 'Custom CSS',
-              _sanitized: true,
-              admin: {
-                language: 'css',
-              },
-            },
-            {
-              name: 'js',
-              type: 'code',
-              label: 'Custom JS',
-              _sanitized: true,
-              admin: {
-                language: 'javascript',
-              },
-            },
-          ],
+          fields: [...CSSNameWithCustomFiled],
           label: 'Advanced',
         },
         {

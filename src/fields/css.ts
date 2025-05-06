@@ -1,7 +1,7 @@
 import { Field } from 'payload'
 
 export const CustomCSSField: Field = {
-  name: 'css',
+  name: 'css_style',
   type: 'code',
   label: 'Custom CSS',
   _sanitized: true,
@@ -11,7 +11,7 @@ export const CustomCSSField: Field = {
 }
 
 export const CssNameField: Field = {
-  name: 'css',
+  name: 'css_name',
   type: 'text',
   label: 'CSS names',
   _sanitized: true,

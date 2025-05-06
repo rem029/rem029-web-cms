@@ -210,9 +210,12 @@ export interface Page {
       | null;
     media?: (number | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
-  css?: string | null;
-  js?: string | null;
+  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock | SectionBlock)[];
+  /**
+   * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+   */
+  css_name?: string | null;
+  css_style?: string | null;
   meta?: {
     title?: string | null;
     /**
@@ -750,6 +753,137 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SectionBlock".
+ */
+export interface SectionBlock {
+  components: {
+    components: ContainerBlock[];
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'section';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContainerBlock".
+ */
+export interface ContainerBlock {
+  components?: {
+    components?: (HeaderBlock | TextBlock | LinkBlock | MediaBlock | EmbedBlock)[] | null;
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'container';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeaderBlock".
+ */
+export interface HeaderBlock {
+  main?: {
+    text?: string | null;
+    variant?: ('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') | null;
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'header';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock".
+ */
+export interface TextBlock {
+  main?: {
+    text?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'text';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LinkBlock".
+ */
+export interface LinkBlock {
+  main?: {
+    text?: string | null;
+    href?: string | null;
+    variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'link';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "EmbedBlock".
+ */
+export interface EmbedBlock {
+  main?: {
+    html?: string | null;
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'embed';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1038,9 +1172,10 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        section?: T | SectionBlockSelect<T>;
       };
-  css?: T;
-  js?: T;
+  css_name?: T;
+  css_style?: T;
   meta?:
     | T
     | {
@@ -1110,7 +1245,17 @@ export interface ContentBlockSelect<T extends boolean = true> {
  * via the `definition` "MediaBlock_select".
  */
 export interface MediaBlockSelect<T extends boolean = true> {
-  media?: T;
+  main?:
+    | T
+    | {
+        image?: T;
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1136,6 +1281,135 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SectionBlock_select".
+ */
+export interface SectionBlockSelect<T extends boolean = true> {
+  components?:
+    | T
+    | {
+        components?:
+          | T
+          | {
+              container?: T | ContainerBlockSelect<T>;
+            };
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContainerBlock_select".
+ */
+export interface ContainerBlockSelect<T extends boolean = true> {
+  components?:
+    | T
+    | {
+        components?:
+          | T
+          | {
+              header?: T | HeaderBlockSelect<T>;
+              text?: T | TextBlockSelect<T>;
+              link?: T | LinkBlockSelect<T>;
+              media?: T | MediaBlockSelect<T>;
+              embed?: T | EmbedBlockSelect<T>;
+            };
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeaderBlock_select".
+ */
+export interface HeaderBlockSelect<T extends boolean = true> {
+  main?:
+    | T
+    | {
+        text?: T;
+        variant?: T;
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock_select".
+ */
+export interface TextBlockSelect<T extends boolean = true> {
+  main?:
+    | T
+    | {
+        text?: T;
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LinkBlock_select".
+ */
+export interface LinkBlockSelect<T extends boolean = true> {
+  main?:
+    | T
+    | {
+        text?: T;
+        href?: T;
+        variant?: T;
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "EmbedBlock_select".
+ */
+export interface EmbedBlockSelect<T extends boolean = true> {
+  main?:
+    | T
+    | {
+        html?: T;
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
   id?: T;
   blockName?: T;
 }

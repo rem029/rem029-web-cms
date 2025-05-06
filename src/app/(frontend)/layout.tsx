@@ -18,6 +18,7 @@ import { getGlobal } from '@/utilities/getGlobals'
 import Script from 'next/script'
 import { Media } from '@/payload-types'
 import { defaultThemeCSS } from '@/utilities/defaults'
+import DOMPurify from 'isomorphic-dompurify'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
@@ -25,9 +26,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await getGlobal('settings')
 
   const theme = themes?.themes?.find((theme) => theme.active === true)
-  // const css = theme?.css || defaultThemeCSS
-  const css = defaultThemeCSS
+  const css = theme?.css || defaultThemeCSS
   const js = theme?.js || ''
+
+  const cleanJs = DOMPurify.sanitize(js)
 
   const favicon = (settings?.favicon as Media)?.url || ''
 
@@ -64,7 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Script
             id="theme-custom-js"
             dangerouslySetInnerHTML={{
-              __html: js,
+              __html: cleanJs,
             }}
           />
         )}

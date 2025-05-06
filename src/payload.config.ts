@@ -69,22 +69,14 @@ export default buildConfig({
 
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  db:
-    process.env.NODE_ENV === 'production'
-      ? vercelPostgresAdapter({
-          pool: {
-            connectionString:
-              'postgres://postgres.kxsgqmbduwtvxinjscuo:p3D1EoIdY52Plsqq@aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require&supa=base-pooler.x',
-          },
-          logger: process.env.DB_LOGGER === 'true',
-        })
-      : postgresAdapter({
-          pool: {
-            connectionString: process.env.DATABASE_URI || '',
-          },
-          push: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
-          logger: process.env.DB_LOGGER === 'true',
-        }),
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URI || '',
+    },
+    push: !process.env.NODE_ENV || process.env.NODE_ENV === 'development',
+    // push: false,
+    logger: process.env.DB_LOGGER === 'true',
+  }),
   collections: [Pages, Posts, Media, Categories, Users],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, Theme, Settings],

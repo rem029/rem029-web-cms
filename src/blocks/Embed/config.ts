@@ -1,0 +1,30 @@
+import { CSSNameWithCustomFiled } from '@/fields/css'
+import { Block } from 'payload'
+
+export const EmbedBlock: Block = {
+  slug: 'embed',
+  interfaceName: 'EmbedBlock',
+  fields: [
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'main',
+          label: 'Main',
+          fields: [
+            {
+              name: 'html',
+              type: 'code',
+              admin: { language: 'html' },
+            },
+          ],
+        },
+        {
+          name: 'styles',
+          label: 'Styles',
+          fields: [...CSSNameWithCustomFiled],
+        },
+      ],
+    },
+  ],
+}

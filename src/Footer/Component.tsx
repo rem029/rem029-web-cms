@@ -9,6 +9,7 @@ import { Logo } from '@/components/Logo/Logo'
 import { css } from '@/utilities/constants'
 import RichText from '@/components/RichText'
 import { SocialMedia } from '@/components/Social'
+import { defaultFooterCopyRight } from '@/utilities/defaults'
 
 interface FooterProps {
   settings: Setting
@@ -51,7 +52,7 @@ export async function Footer({ settings }: FooterProps) {
 
         {footerData?.copyright && (
           <div className={css('footer_copyright')}>
-            <RichText data={footerData.copyright} enableGutter={false} />
+            <RichText data={footerData.copyright || defaultFooterCopyRight} enableGutter={false} />
           </div>
         )}
       </div>
