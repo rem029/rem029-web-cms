@@ -7,6 +7,7 @@ export const TextBlock: Block = {
   fields: [
     {
       type: 'tabs',
+      required: true,
       tabs: [
         {
           name: 'main',

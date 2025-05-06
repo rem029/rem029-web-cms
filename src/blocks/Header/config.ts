@@ -7,6 +7,7 @@ export const HeaderBlock: Block = {
   fields: [
     {
       type: 'tabs',
+      required: true,
       tabs: [
         {
           name: 'main',
@@ -15,10 +16,13 @@ export const HeaderBlock: Block = {
             {
               name: 'text',
               type: 'text',
+              required: true,
             },
             {
               name: 'variant',
               type: 'select',
+              required: true,
+              defaultValue: 'h6',
               options: [
                 { label: 'H1', value: 'h1' },
                 { label: 'H2', value: 'h2' },

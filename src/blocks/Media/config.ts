@@ -7,6 +7,7 @@ export const MediaBlock: Block = {
   fields: [
     {
       type: 'tabs',
+      required: true,
       tabs: [
         {
           name: 'main',
@@ -16,6 +17,7 @@ export const MediaBlock: Block = {
               name: 'image',
               type: 'upload',
               relationTo: 'media',
+              required: true,
             },
           ],
         },

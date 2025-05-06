@@ -1,5 +1,6 @@
 import { defaultThemeCSS } from '@/utilities/defaults'
 import { generateThemePreviewPath } from '@/utilities/generatePreviewPath'
+import { SUPPORTED_FONTS } from '@/utilities/getFont'
 import type { GlobalConfig } from 'payload'
 
 export const Theme: GlobalConfig = {

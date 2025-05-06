@@ -1,26 +1,29 @@
-import { EmbedBlock as BlockType } from '@/payload-types'
+import { EmbedBlock as EmbedBlockType } from '@/payload-types'
+import { sanitizeHTML } from '@/utilities/sanitize'
 import React from 'react'
 
-export interface EmbedBlockProps {
-  block: BlockType
-}
+export interface EmbedBlockProps extends EmbedBlockType {}
 
-export const EmbedBlock = ({ block }: EmbedBlockProps) => {
-  const { styles, main } = block
-
-  if (!main) return null
+export const EmbedBlock = ({ main, styles }: EmbedBlockProps) => {
   const { html } = main
+
+  if (!html) return null
+
+  const cleanHtml = sanitizeHTML(html)
+  const cssStyle = styles?.css_style || ''
+  const cssName = styles?.css_name || ''
 
   return (
     <React.Fragment>
-      {styles?.css_style && (
+      {cssStyle && (
         <style
           dangerouslySetInnerHTML={{
-            __html: styles?.css_style,
+            __html: cssStyle || '',
           }}
         />
       )}
-      {html && <div dangerouslySetInnerHTML={{ __html: html }} />}
+
+      {html && <div className={`${cssName}`} dangerouslySetInnerHTML={{ __html: cleanHtml }} />}
     </React.Fragment>
   )
 }

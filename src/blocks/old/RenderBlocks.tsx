@@ -9,6 +9,7 @@ import { ContentBlock } from './Content/Component'
 import { FormBlock } from './Form/config'
 import { MediaBlock } from './MediaBlock/config'
 import { SectionBlock } from '../Section/config'
+import { SectionBlock as SectionBlockComponent } from '../Section/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -34,6 +35,10 @@ export const RenderBlocks: React.FC<{
 
           if (blockType && blockType in blockComponents) {
             const Block = blockComponents[blockType]
+
+            if (blockType === 'section') {
+              return <SectionBlockComponent {...block} />
+            }
 
             if (Block) {
               return (

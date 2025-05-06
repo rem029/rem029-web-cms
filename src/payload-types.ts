@@ -794,9 +794,9 @@ export interface ContainerBlock {
  * via the `definition` "HeaderBlock".
  */
 export interface HeaderBlock {
-  main?: {
-    text?: string | null;
-    variant?: ('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') | null;
+  main: {
+    text: string;
+    variant: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   };
   styles?: {
     /**
@@ -847,10 +847,10 @@ export interface TextBlock {
  * via the `definition` "LinkBlock".
  */
 export interface LinkBlock {
-  main?: {
-    text?: string | null;
-    href?: string | null;
-    variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
+  main: {
+    text: string;
+    href: string;
+    variant: 'link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn';
   };
   styles?: {
     /**
@@ -868,8 +868,8 @@ export interface LinkBlock {
  * via the `definition` "EmbedBlock".
  */
 export interface EmbedBlock {
-  main?: {
-    html?: string | null;
+  main: {
+    html: string;
   };
   styles?: {
     /**

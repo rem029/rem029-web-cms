@@ -19,6 +19,7 @@ import Script from 'next/script'
 import { Media } from '@/payload-types'
 import { defaultThemeCSS } from '@/utilities/defaults'
 import DOMPurify from 'isomorphic-dompurify'
+import { sanitizeCSS } from '@/utilities/sanitize'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
@@ -30,7 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const js = theme?.js || ''
 
   const cleanJs = DOMPurify.sanitize(js)
-
+  const cleanCss = sanitizeCSS(css)
   const favicon = (settings?.favicon as Media)?.url || ''
 
   return (
@@ -43,10 +44,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         {favicon && <link href={favicon} rel="icon" sizes="32x32" />}
 
-        {css && (
+        {cleanCss && (
           <style
             dangerouslySetInnerHTML={{
-              __html: css,
+              __html: cleanCss,
             }}
           />
         )}

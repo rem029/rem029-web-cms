@@ -7,6 +7,7 @@ export const EmbedBlock: Block = {
   fields: [
     {
       type: 'tabs',
+
       tabs: [
         {
           name: 'main',
@@ -16,6 +17,7 @@ export const EmbedBlock: Block = {
               name: 'html',
               type: 'code',
               admin: { language: 'html' },
+              required: true,
             },
           ],
         },

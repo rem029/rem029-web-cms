@@ -15,14 +15,18 @@ export const LinkBlock: Block = {
             {
               name: 'text',
               type: 'text',
+              required: true,
             },
             {
               name: 'href',
               type: 'text',
+              required: true,
             },
             {
               name: 'variant',
               type: 'select',
+              required: true,
+              defaultValue: 'link',
               options: [
                 { label: 'Link', value: 'link' },
                 { label: 'Button Primary', value: 'btn-primary' },
