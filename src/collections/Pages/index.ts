@@ -23,6 +23,8 @@ import { Content } from '@/blocks/old/Content/config'
 import { Archive } from '@/blocks/old/ArchiveBlock/config'
 import { SectionBlock } from '@/blocks/Section/config'
 import { CSSNameWithCustomFiled } from '@/fields/css'
+import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
+import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -130,10 +132,11 @@ export const Pages: CollectionConfig<'pages'> = {
       },
     },
     ...slugField(),
+    ...createdUpdatedByFields,
   ],
   hooks: {
     afterChange: [revalidatePage],
-    beforeChange: [populatePublishedAt],
+    beforeChange: [populatePublishedAt, setCreatedUpdatedByCollection],
     afterDelete: [revalidateDelete],
   },
   versions: {

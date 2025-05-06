@@ -1,3 +1,8 @@
+import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
+import {
+  setCreatedUpdatedByCollection,
+  setCreatedUpdatedByGlobal,
+} from '@/hooks/setCreatedUpdatedBy'
 import type { GlobalConfig } from 'payload'
 
 export const Settings: GlobalConfig = {
@@ -96,5 +101,7 @@ export const Settings: GlobalConfig = {
         },
       ],
     },
+    ...createdUpdatedByFields,
   ],
+  hooks: { beforeChange: [setCreatedUpdatedByGlobal] },
 }

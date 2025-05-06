@@ -319,3 +319,56 @@ You can also deploy your app manually, check out the [deployment documentation](
 ## Questions
 
 If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+
+# Rem029
+
+## Pending Issues and Roadmap
+
+This section tracks known issues, limitations, and upcoming features in the current implementation:
+
+### Security
+
+- **CSS Sanitization**: Current implementation filters Google Font imports but needs better handling of other CSS injection vectors
+- **JavaScript Sanitization**: Theme JS needs a more robust approach than DOMPurify which is designed for HTML
+- **Embed Block Security**: Only trusted domains (YouTube, Google Maps, etc.) are allowed in embeds, but further security improvements needed
+
+### Font System
+
+- **Font Weight Implementation**: Support for selecting specific font weights exists in the admin UI but needs better integration with the layout system
+- **Font Loading Optimization**: Need to optimize font loading to prevent layout shifts and improve performance metrics
+- **Variable Fonts**: Consider adding support for variable font technology for better performance
+
+### Component Architecture
+
+- **MultiMedia Block**: Recently replaced Media block with more flexible MultiMedia component, but needs additional format support
+- **Container Nesting**: Deep nesting of container blocks requires performance optimization
+- **Component Mapping**: Block type to component mapping needs refinement and better error handling
+
+### Responsive Design
+
+- **Mobile Layout**: Some components need better mobile view optimizations
+- **Responsive Typography**: Font sizing across different devices needs improvement
+- **Container Flexibility**: Container blocks need better responsive behavior controls
+
+### User Access Control
+
+- **Dynamic Permissions**: Planning to implement granular, role-based access control system
+- **Collection-specific Permissions**: Need to allow setting permissions per collection/global
+- **Admin Role Management**: Interface for managing user roles and permissions
+
+### Developer Experience
+
+- **Creator/Editor Tracking**: Recently added tracking of content creators and editors
+- **Documentation**: Component documentation needs updating with recent changes
+- **Type Safety**: Ensuring type safety across the application, particularly with dynamic blocks
+
+### Planned Improvements
+
+- Complete the access control system implementation
+- Enhance theme system with better font controls
+- Improve block validation and error handling
+- Add more unit and integration tests
+- Optimize bundle size and loading performance
+- Update documentation with recent component changes
+
+If you encounter any other issues, please report them on GitHub Issues or contribute a fix via pull request.

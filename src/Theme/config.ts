@@ -1,6 +1,8 @@
+import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
+import { setCreatedUpdatedByGlobal } from '@/hooks/setCreatedUpdatedBy'
 import { defaultThemeCSS } from '@/utilities/defaults'
 import { generateThemePreviewPath } from '@/utilities/generatePreviewPath'
-import { SUPPORTED_FONTS } from '@/utilities/getFont'
+
 import type { GlobalConfig } from 'payload'
 
 export const Theme: GlobalConfig = {
@@ -61,5 +63,7 @@ export const Theme: GlobalConfig = {
         },
       ],
     },
+    ...createdUpdatedByFields,
   ],
+  hooks: { beforeChange: [setCreatedUpdatedByGlobal] },
 }
