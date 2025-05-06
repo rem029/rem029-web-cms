@@ -18,6 +18,8 @@ export const DrawerNav: React.FC<{ data: HeaderType; settings: Setting }> = ({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const navItems = data?.navItems || []
 
+  if (!navItems || navItems.length === 0) return null
+
   return (
     <React.Fragment>
       <button
