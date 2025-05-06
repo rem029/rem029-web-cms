@@ -311,7 +311,9 @@ export const defaultThemeCSS = `
   color: var(--primary-foreground);
 }
 
-.cms-footer_copyright p, a{
+.cms-footer_copyright p,
+.cms-footer_copyright a,
+.cms-footer_copyright a:visited {
   font-weight: 200;
   font-size: 12px;
   color: var(--primary-foreground);
@@ -558,7 +560,9 @@ export const defaultThemeCSS = `
 }
 
 
-.cms-link, a  {
+.cms-link, 
+.cms-richtext > a
+,a  {
   color: var(--base);
   font-weight: '200';
 }
@@ -595,14 +599,29 @@ export const defaultThemeCSS = `
   justify-content: center;
 }
 
+.cms-btn:hover {
+  background-color: var(--info-foreground);
+  color: var(--info);
+}
+
 .cms-btn-primary {
   background-color: var(--primary);
-  color: var(--primary-foreground)
+  color: var(--primary-foreground);
+}
+
+.cms-btn-primary:hover {
+  background-color: var(--primary-foreground);
+  color: var(--primary);
 }
 
 .cms-btn-secondary {
   background-color: var(--secondary);
-  color: var(--secondary-foreground)
+  color: var(--secondary-foreground);
+}
+
+.cms-btn-secondary:hover {
+  background-color: var(--secondary-foreground);
+  color: var(--secondary);
 }
 
 .cms-btn-outline {
@@ -754,3 +773,193 @@ input {
   font-family: 'Poppins';
 }
 `
+
+export const defaultFooterCopyRight = {
+  root: {
+    type: 'root',
+    format: '',
+    indent: 0,
+    version: 1,
+    children: [
+      {
+        type: 'paragraph',
+        format: '',
+        indent: 0,
+        version: 1,
+        children: [
+          {
+            mode: 'normal',
+            text: 'Normal',
+            type: 'text',
+            style: '',
+            detail: 0,
+            format: 0,
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        textStyle: '',
+        textFormat: 0,
+      },
+      {
+        tag: 'h2',
+        type: 'heading',
+        format: '',
+        indent: 0,
+        version: 1,
+        children: [
+          {
+            mode: 'normal',
+            text: 'Heading 2',
+            type: 'text',
+            style: '',
+            detail: 0,
+            format: 0,
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+      },
+      {
+        tag: 'h3',
+        type: 'heading',
+        format: '',
+        indent: 0,
+        version: 1,
+        children: [
+          {
+            mode: 'normal',
+            text: 'Heading 3',
+            type: 'text',
+            style: '',
+            detail: 0,
+            format: 0,
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+      },
+      {
+        tag: 'h4',
+        type: 'heading',
+        format: '',
+        indent: 0,
+        version: 1,
+        children: [
+          {
+            mode: 'normal',
+            text: 'Heading 4',
+            type: 'text',
+            style: '',
+            detail: 0,
+            format: 0,
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+      },
+      {
+        type: 'paragraph',
+        format: '',
+        indent: 0,
+        version: 1,
+        children: [
+          {
+            mode: 'normal',
+            text: 'Bold',
+            type: 'text',
+            style: '',
+            detail: 0,
+            format: 1,
+            version: 1,
+          },
+          {
+            type: 'linebreak',
+            version: 1,
+          },
+          {
+            mode: 'normal',
+            text: 'Italic',
+            type: 'text',
+            style: '',
+            detail: 0,
+            format: 2,
+            version: 1,
+          },
+          {
+            type: 'linebreak',
+            version: 1,
+          },
+          {
+            mode: 'normal',
+            text: 'Underline',
+            type: 'text',
+            style: '',
+            detail: 0,
+            format: 10,
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        textStyle: '',
+        textFormat: 1,
+      },
+      {
+        type: 'paragraph',
+        format: '',
+        indent: 0,
+        version: 1,
+        children: [
+          {
+            id: '6818bd2253241f5677dc0a7a',
+            type: 'link',
+            fields: {
+              url: 'https://kien-fm.qa',
+              newTab: false,
+              linkType: 'custom',
+            },
+            format: '',
+            indent: 0,
+            version: 3,
+            children: [
+              {
+                mode: 'normal',
+                text: 'Link here',
+                type: 'text',
+                style: '',
+                detail: 0,
+                format: 0,
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+          },
+        ],
+        direction: 'ltr',
+        textStyle: '',
+        textFormat: 0,
+      },
+      {
+        type: 'paragraph',
+        format: '',
+        indent: 0,
+        version: 1,
+        children: [],
+        direction: 'ltr',
+        textStyle: '',
+        textFormat: 0,
+      },
+      {
+        type: 'paragraph',
+        format: '',
+        indent: 0,
+        version: 1,
+        children: [],
+        direction: 'ltr',
+        textStyle: '',
+        textFormat: 0,
+      },
+    ],
+    direction: 'ltr',
+  },
+}

@@ -17,7 +17,7 @@ export const Settings: GlobalConfig = {
       label: 'Homepage',
       hasMany: false,
       relationTo: 'pages',
-      required: true,
+      required: false,
       admin: { description: 'Select the homepage for your website' },
     },
     {

@@ -10,7 +10,7 @@ import { IoIosInformationCircleOutline, IoIosCheckmarkCircleOutline } from 'reac
 import { MdErrorOutline } from 'react-icons/md'
 import { IoWarningOutline } from 'react-icons/io5'
 import RichText from '@/components/RichText'
-import richTextSample from './rich-text.json'
+import { richText } from './sample-rich-text'
 
 type ThemePreviewClientProps = {
   activeThemeName: string
@@ -76,7 +76,199 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
 
         <section className={css('section')}>
           <div className={css('section__container')}>
-            <RichText enableGutter={false} enableProse={false} data={{ ...richTextSample }} />
+            <RichText
+              enableGutter={false}
+              enableProse={false}
+              data={{
+                root: {
+                  type: 'root',
+                  format: '',
+                  indent: 0,
+                  version: 1,
+                  children: [
+                    {
+                      type: 'paragraph',
+                      format: '',
+                      indent: 0,
+                      version: 1,
+                      children: [
+                        {
+                          mode: 'normal',
+                          text: 'Normal',
+                          type: 'text',
+                          style: '',
+                          detail: 0,
+                          format: 0,
+                          version: 1,
+                        },
+                      ],
+                      direction: 'ltr',
+                      textStyle: '',
+                      textFormat: 0,
+                    },
+                    {
+                      tag: 'h2',
+                      type: 'heading',
+                      format: '',
+                      indent: 0,
+                      version: 1,
+                      children: [
+                        {
+                          mode: 'normal',
+                          text: 'Heading 2',
+                          type: 'text',
+                          style: '',
+                          detail: 0,
+                          format: 0,
+                          version: 1,
+                        },
+                      ],
+                      direction: 'ltr',
+                    },
+                    {
+                      tag: 'h3',
+                      type: 'heading',
+                      format: '',
+                      indent: 0,
+                      version: 1,
+                      children: [
+                        {
+                          mode: 'normal',
+                          text: 'Heading 3',
+                          type: 'text',
+                          style: '',
+                          detail: 0,
+                          format: 0,
+                          version: 1,
+                        },
+                      ],
+                      direction: 'ltr',
+                    },
+                    {
+                      tag: 'h4',
+                      type: 'heading',
+                      format: '',
+                      indent: 0,
+                      version: 1,
+                      children: [
+                        {
+                          mode: 'normal',
+                          text: 'Heading 4',
+                          type: 'text',
+                          style: '',
+                          detail: 0,
+                          format: 0,
+                          version: 1,
+                        },
+                      ],
+                      direction: 'ltr',
+                    },
+                    {
+                      type: 'paragraph',
+                      format: '',
+                      indent: 0,
+                      version: 1,
+                      children: [
+                        {
+                          mode: 'normal',
+                          text: 'Bold',
+                          type: 'text',
+                          style: '',
+                          detail: 0,
+                          format: 1,
+                          version: 1,
+                        },
+                        {
+                          type: 'linebreak',
+                          version: 1,
+                        },
+                        {
+                          mode: 'normal',
+                          text: 'Italic',
+                          type: 'text',
+                          style: '',
+                          detail: 0,
+                          format: 2,
+                          version: 1,
+                        },
+                        {
+                          type: 'linebreak',
+                          version: 1,
+                        },
+                        {
+                          mode: 'normal',
+                          text: 'Underline',
+                          type: 'text',
+                          style: '',
+                          detail: 0,
+                          format: 10,
+                          version: 1,
+                        },
+                      ],
+                      direction: 'ltr',
+                      textStyle: '',
+                      textFormat: 1,
+                    },
+                    {
+                      type: 'paragraph',
+                      format: '',
+                      indent: 0,
+                      version: 1,
+                      children: [
+                        {
+                          id: '6818bd2253241f5677dc0a7a',
+                          type: 'link',
+                          fields: {
+                            url: 'https://kien-fm.qa',
+                            newTab: false,
+                            linkType: 'custom',
+                          },
+                          format: '',
+                          indent: 0,
+                          version: 3,
+                          children: [
+                            {
+                              mode: 'normal',
+                              text: 'Link here',
+                              type: 'text',
+                              style: '',
+                              detail: 0,
+                              format: 0,
+                              version: 1,
+                            },
+                          ],
+                          direction: 'ltr',
+                        },
+                      ],
+                      direction: 'ltr',
+                      textStyle: '',
+                      textFormat: 0,
+                    },
+                    {
+                      type: 'paragraph',
+                      format: '',
+                      indent: 0,
+                      version: 1,
+                      children: [],
+                      direction: 'ltr',
+                      textStyle: '',
+                      textFormat: 0,
+                    },
+                    {
+                      type: 'paragraph',
+                      format: '',
+                      indent: 0,
+                      version: 1,
+                      children: [],
+                      direction: 'ltr',
+                      textStyle: '',
+                      textFormat: 0,
+                    },
+                  ],
+                  direction: 'ltr',
+                },
+              }}
+            />
           </div>
         </section>
 

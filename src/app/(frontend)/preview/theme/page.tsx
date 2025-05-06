@@ -21,19 +21,13 @@ export default async function ThemePreview({
   const themes = await getGlobal('theme')
   const settings = await getGlobal('settings')
 
-  if (!themes) {
-    return notFound()
-  }
   const activeTheme = themes.themes?.find((theme) => theme.active)
-  if (!activeTheme) {
-    return notFound()
-  }
 
   return (
     <React.Fragment>
       {isDraftMode && <LivePreviewListener />}
       <ThemePreviewClient
-        activeThemeName={activeTheme.name}
+        activeThemeName={activeTheme?.name || 'Default CSS'}
         isPreview={isDraftMode}
         settings={settings}
       />

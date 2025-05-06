@@ -8,6 +8,7 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
+import { defaultFooterCopyRight } from '@/utilities/defaults'
 
 export const Footer: GlobalConfig = {
   slug: 'footer',
@@ -46,6 +47,7 @@ export const Footer: GlobalConfig = {
           ]
         },
       }),
+      defaultValue: defaultFooterCopyRight,
       admin: {
         description: 'Copyright text to be dispalyed at the bottom of the footer',
       },

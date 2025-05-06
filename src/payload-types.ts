@@ -1650,7 +1650,7 @@ export interface Setting {
   /**
    * Select the homepage for your website
    */
-  homepage: number | Page;
+  homepage?: (number | null) | Page;
   contact?: {
     email?: string | null;
     phone?: string | null;
