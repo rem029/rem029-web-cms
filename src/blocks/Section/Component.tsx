@@ -3,6 +3,7 @@ import { css } from '@/utilities/constants'
 
 import React from 'react'
 import { ContainerBlock } from '../Container/Component'
+import { getStyles } from '@/fields/css'
 
 export interface SectionBlockTypeProps extends SectionBlockType {}
 
@@ -10,8 +11,7 @@ export const SectionBlock = ({ components, styles }: SectionBlockTypeProps) => {
   const { components: componentsList } = components
   if (!componentsList) return null
 
-  const cssStyle = styles?.css_style || ''
-  const cssName = styles?.css_name || ''
+  const { cssName, cssStyle } = getStyles({ ...styles })
 
   return (
     <React.Fragment>
@@ -22,10 +22,10 @@ export const SectionBlock = ({ components, styles }: SectionBlockTypeProps) => {
           }}
         />
       )}
-      <p>Section here</p>
+
       <div className={`${css('section')} ${cssName}}`}>
         {componentsList.map((component, idx) => {
-          return <ContainerBlock {...component} />
+          return <ContainerBlock key={'section_' + idx} {...component} />
         })}
       </div>
     </React.Fragment>

@@ -261,6 +261,20 @@ export const defaultThemeCSS = `
   gap: 16px;
 }
 
+.cms-multimedia {
+  position: relative;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--info);
+}
+
+.cms-multimedia img {
+  object-fit: contain;f
+}
+
 
 .cms-section{
   width: 100%;  
@@ -387,7 +401,6 @@ export const defaultThemeCSS = `
   width: 100%;  
   height: auto;
   position: relative;
-  
 }
 
 .cms-card-img-bg .cms-card-header {

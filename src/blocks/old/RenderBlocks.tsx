@@ -37,7 +37,7 @@ export const RenderBlocks: React.FC<{
             const Block = blockComponents[blockType]
 
             if (blockType === 'section') {
-              return <SectionBlockComponent {...block} />
+              return <SectionBlockComponent key={index} {...block} />
             }
 
             if (Block) {

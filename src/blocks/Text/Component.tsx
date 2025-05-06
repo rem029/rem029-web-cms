@@ -1,29 +1,33 @@
 import RichText from '@/components/RichText'
-import { TextBlock as BlockType } from '@/payload-types'
+import { getStyles } from '@/fields/css'
+import { TextBlock as TextBlockType } from '@/payload-types'
 import { css } from '@/utilities/constants'
 import React from 'react'
 
-export interface TextBlockProps {
-  block: BlockType
-}
+export interface TextBlockProps extends TextBlockType {}
 
-export const TextBlock = ({ block }: TextBlockProps) => {
-  const { styles, main } = block
-
+export const TextBlock = ({ main, styles }: TextBlockProps) => {
   if (!main) return null
+  const { cssName, cssStyle } = getStyles({ ...styles })
   const { text } = main
-  const cssName = styles?.css_name || ''
 
   return (
     <React.Fragment>
-      {styles?.css_style && (
+      {cssStyle && (
         <style
           dangerouslySetInnerHTML={{
-            __html: styles?.css_style,
+            __html: cssStyle,
           }}
         />
       )}
-      {text && <RichText data={text} className={`${css('rich-text')} ${cssName}`} />}
+      {text && (
+        <RichText
+          data={text}
+          className={`${css('rich-text')} ${cssName}`}
+          enableGutter={false}
+          enableProse={false}
+        />
+      )}
     </React.Fragment>
   )
 }

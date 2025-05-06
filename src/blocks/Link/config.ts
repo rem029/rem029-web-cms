@@ -23,6 +23,11 @@ export const LinkBlock: Block = {
               required: true,
             },
             {
+              name: 'new_tab',
+              label: 'Open in new tab',
+              type: 'checkbox',
+            },
+            {
               name: 'variant',
               type: 'select',
               required: true,

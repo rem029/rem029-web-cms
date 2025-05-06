@@ -776,7 +776,7 @@ export interface SectionBlock {
  */
 export interface ContainerBlock {
   components?: {
-    components?: (HeaderBlock | TextBlock | LinkBlock | MediaBlock | EmbedBlock)[] | null;
+    components?: (HeaderBlock | TextBlock | LinkBlock | MultiMediaBlock | EmbedBlock)[] | null;
   };
   styles?: {
     /**
@@ -850,6 +850,7 @@ export interface LinkBlock {
   main: {
     text: string;
     href: string;
+    new_tab?: boolean | null;
     variant: 'link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn';
   };
   styles?: {
@@ -862,6 +863,25 @@ export interface LinkBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'link';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MultiMediaBlock".
+ */
+export interface MultiMediaBlock {
+  main: {
+    image: number | Media;
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'multimedia';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1245,17 +1265,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
  * via the `definition` "MediaBlock_select".
  */
 export interface MediaBlockSelect<T extends boolean = true> {
-  main?:
-    | T
-    | {
-        image?: T;
-      };
-  styles?:
-    | T
-    | {
-        css_name?: T;
-        css_style?: T;
-      };
+  media?: T;
   id?: T;
   blockName?: T;
 }
@@ -1321,7 +1331,7 @@ export interface ContainerBlockSelect<T extends boolean = true> {
               header?: T | HeaderBlockSelect<T>;
               text?: T | TextBlockSelect<T>;
               link?: T | LinkBlockSelect<T>;
-              media?: T | MediaBlockSelect<T>;
+              multimedia?: T | MultiMediaBlockSelect<T>;
               embed?: T | EmbedBlockSelect<T>;
             };
       };
@@ -1383,7 +1393,27 @@ export interface LinkBlockSelect<T extends boolean = true> {
     | {
         text?: T;
         href?: T;
+        new_tab?: T;
         variant?: T;
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MultiMediaBlock_select".
+ */
+export interface MultiMediaBlockSelect<T extends boolean = true> {
+  main?:
+    | T
+    | {
+        image?: T;
       };
   styles?:
     | T

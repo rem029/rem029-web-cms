@@ -1,17 +1,16 @@
+import { getStyles } from '@/fields/css'
 import { EmbedBlock as EmbedBlockType } from '@/payload-types'
-import { sanitizeHTML } from '@/utilities/sanitize'
+import dOMPurify from 'isomorphic-dompurify'
 import React from 'react'
 
 export interface EmbedBlockProps extends EmbedBlockType {}
 
 export const EmbedBlock = ({ main, styles }: EmbedBlockProps) => {
   const { html } = main
-
   if (!html) return null
 
-  const cleanHtml = sanitizeHTML(html)
-  const cssStyle = styles?.css_style || ''
-  const cssName = styles?.css_name || ''
+  const cleanHtml = dOMPurify.sanitize(html)
+  const { cssName, cssStyle } = getStyles({ ...styles })
 
   return (
     <React.Fragment>

@@ -1,19 +1,16 @@
-import { HeaderBlock as BlockType } from '@/payload-types'
+import { getStyles } from '@/fields/css'
+import { HeaderBlock as HeaderBlockType } from '@/payload-types'
 import { css } from '@/utilities/constants'
 import React from 'react'
 
-export interface HeaderBlockProps {
-  block: BlockType
-}
+export interface HeaderBlockProps extends HeaderBlockType {}
 
-type HeaderVariants = NonNullable<BlockType['main']>['variant']
+type HeaderVariants = NonNullable<HeaderBlockType['main']>['variant']
 
-export const HeaderBlock = ({ block }: HeaderBlockProps) => {
-  const { styles, main } = block
-
+export const HeaderBlock = ({ main, styles }: HeaderBlockProps) => {
   if (!main) return null
   const { text, variant } = main
-  const cssName = styles?.css_name || ''
+  const { cssName, cssStyle } = getStyles({ ...styles })
 
   const getVariant = (variant: HeaderVariants) => {
     switch (variant) {
@@ -36,10 +33,10 @@ export const HeaderBlock = ({ block }: HeaderBlockProps) => {
 
   return (
     <React.Fragment>
-      {styles?.css_style && (
+      {cssStyle && (
         <style
           dangerouslySetInnerHTML={{
-            __html: styles?.css_style,
+            __html: cssStyle,
           }}
         />
       )}

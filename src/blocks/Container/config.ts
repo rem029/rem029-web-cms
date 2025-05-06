@@ -3,10 +3,16 @@ import { Block } from 'payload'
 import { EmbedBlock } from '../Embed/config'
 import { HeaderBlock } from '../Header/config'
 import { LinkBlock } from '../Link/config'
-import { MediaBlock } from '../Media/config'
 import { TextBlock } from '../Text/config'
+import { MultiMediaBlock } from '../MultiMedia/config'
 
-export const sectionBlocks: Block[] = [HeaderBlock, TextBlock, LinkBlock, MediaBlock, EmbedBlock]
+export const sectionBlocks: Block[] = [
+  HeaderBlock,
+  TextBlock,
+  LinkBlock,
+  MultiMediaBlock,
+  EmbedBlock,
+]
 
 export const ContainerBlock: Block = {
   slug: 'container',

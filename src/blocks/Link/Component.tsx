@@ -1,20 +1,18 @@
-import { CMSLink } from '@/components/Link'
-import { LinkBlock as BlockType } from '@/payload-types'
+'use client'
+
+import { getStyles } from '@/fields/css'
+import { LinkBlock as LinkBlockType } from '@/payload-types'
 import { css } from '@/utilities/constants'
+import Link from 'next/link'
 import React from 'react'
 
-export interface LinkBlockProps {
-  block: BlockType
-}
+export interface LinkBlockProps extends LinkBlockType {}
 
-type HeaderVariants = NonNullable<BlockType['main']>['variant']
+type HeaderVariants = NonNullable<LinkBlockType['main']>['variant']
 
-export const LinkBlock = ({ block }: LinkBlockProps) => {
-  const { styles, main } = block
-
-  if (!main) return null
-  const { text, variant, href } = main
-  const cssName = styles?.css_name || ''
+export const LinkBlock = ({ main, styles }: LinkBlockProps) => {
+  const { text, variant, href, new_tab } = main
+  const { cssName, cssStyle } = getStyles({ ...styles })
 
   const getVariant = (variant: HeaderVariants) => {
     switch (variant) {
@@ -33,21 +31,27 @@ export const LinkBlock = ({ block }: LinkBlockProps) => {
     }
   }
 
+  const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    //handle analytics here
+  }
+
   return (
     <React.Fragment>
-      {styles?.css_style && (
+      {cssStyle && (
         <style
           dangerouslySetInnerHTML={{
-            __html: styles?.css_style,
+            __html: cssStyle,
           }}
         />
       )}
-      <CMSLink
+      <Link
+        onClick={onLinkClick}
         className={`${getVariant(variant)} ${cssName}`}
-        label={text}
         href={href || ''}
-        newTab={false}
-      />
+        target={(new_tab && '_blank') || undefined}
+      >
+        {text}
+      </Link>
     </React.Fragment>
   )
 }

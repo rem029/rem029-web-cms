@@ -1,9 +1,9 @@
 import { CSSNameWithCustomFiled } from '@/fields/css'
 import { Block } from 'payload'
 
-export const MediaBlock: Block = {
-  slug: 'media',
-  interfaceName: 'MediaBlock',
+export const MultiMediaBlock: Block = {
+  slug: 'multimedia',
+  interfaceName: 'MultiMediaBlock',
   fields: [
     {
       type: 'tabs',
