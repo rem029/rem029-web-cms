@@ -35,7 +35,7 @@ export const ContainerBlock = ({ components, styles }: ContainerBlockTypeProps) 
         />
       )}
 
-      <div className={`${css('section__container')} ${cssName}}`}>
+      <div className={`${css('section__container')} ${cssName}`}>
         {components.components?.map((item, idx) => {
           const Block = componentsMap[item['blockType']] || null
           if (!Block) return null

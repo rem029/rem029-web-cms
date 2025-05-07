@@ -16,6 +16,8 @@ export const TextBlock: Block = {
             {
               name: 'text',
               type: 'richText',
+              localized: true,
+              required: true,
             },
           ],
         },

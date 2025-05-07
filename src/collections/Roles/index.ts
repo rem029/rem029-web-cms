@@ -1,5 +1,7 @@
 import { CollectionConfig } from 'payload'
 import { validateAdmin } from './hooks/validateAdmin'
+import { anyone } from '@/access/anyone'
+import { authenticated } from '@/access/authenticated'
 
 export const Roles: CollectionConfig = {
   slug: 'roles',
@@ -9,17 +11,10 @@ export const Roles: CollectionConfig = {
     description: 'Manage user roles and permissions',
   },
   access: {
-    read: () => true,
-    // update: ({ req: { user } }) => {
-    //   // Only admins can update roles
-    //   return user?.roles?.includes('admin') || false
-    // },
-    // create: ({ req: { user } }) => {
-    //   return user?.roles?.includes('admin') || false
-    // },
-    // delete: ({ req: { user } }) => {
-    //   return user?.roles?.includes('admin') || false
-    // },
+    read: anyone,
+    update: authenticated,
+    create: authenticated,
+    delete: authenticated,
   },
   fields: [
     {
@@ -48,102 +43,116 @@ export const Roles: CollectionConfig = {
       },
     },
     {
-      name: 'permissions',
-      type: 'group',
-      admin: {
-        description: 'Configure permissions for this role',
-      },
-      fields: [
+      type: 'tabs',
+      label: 'Permissions',
+      tabs: [
         {
           name: 'collections',
-          type: 'array',
-          label: 'Collection Permissions',
-          interfaceName: 'RoleCollectionPermissions',
-          admin: {
-            description: 'Set permissions for each collection',
-          },
+          label: 'Collection',
           fields: [
             {
-              name: 'collection',
-              type: 'text',
-              required: true,
-              unique: true,
+              name: 'permissions',
+              type: 'array',
+              label: 'Permissions',
+              interfaceName: 'RoleCollectionPermissions',
               admin: {
-                description: 'Collection slug (e.g., "pages", "posts")',
+                description: 'Set permissions for each collection',
+                components: {
+                  RowLabel:
+                    '@/collections/Roles/components/CollectionsRowLabel#CollectionsRowLabel',
+                },
               },
-            },
-            {
-              name: 'canCreate',
-              type: 'checkbox',
-              defaultValue: false,
-              label: 'Can Create',
-              admin: {
-                description: 'Allow creating new items in this collection',
-              },
-            },
-            {
-              name: 'canRead',
-              type: 'checkbox',
-              defaultValue: true,
-              label: 'Can Read',
-              admin: {
-                description: 'Allow viewing items in this collection',
-              },
-            },
-            {
-              name: 'canUpdate',
-              type: 'checkbox',
-              defaultValue: false,
-              label: 'Can Update',
-              admin: {
-                description: 'Allow editing items in this collection',
-              },
-            },
-            {
-              name: 'canDelete',
-              type: 'checkbox',
-              defaultValue: false,
-              label: 'Can Delete',
-              admin: {
-                description: 'Allow deleting items in this collection',
-              },
+              fields: [
+                {
+                  name: 'collection',
+                  type: 'text',
+                  required: true,
+                  admin: {
+                    description: 'Collection slug (e.g., "pages", "posts")',
+                  },
+                },
+                {
+                  name: 'canCreate',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: 'Can Create',
+                  admin: {
+                    description: 'Allow creating new items in this collection',
+                  },
+                },
+                {
+                  name: 'canRead',
+                  type: 'checkbox',
+                  defaultValue: true,
+                  label: 'Can Read',
+                  admin: {
+                    description: 'Allow viewing items in this collection',
+                  },
+                },
+                {
+                  name: 'canUpdate',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: 'Can Update',
+                  admin: {
+                    description: 'Allow editing items in this collection',
+                  },
+                },
+                {
+                  name: 'canDelete',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: 'Can Delete',
+                  admin: {
+                    description: 'Allow deleting items in this collection',
+                  },
+                },
+              ],
             },
           ],
         },
         {
           name: 'globals',
-          type: 'array',
-          label: 'Global Permissions',
-          interfaceName: 'RoleGlobalPermissions',
-          admin: {
-            description: 'Set permissions for each global',
-          },
+          label: 'Globals',
           fields: [
             {
-              name: 'global',
-              type: 'text',
-              unique: true,
+              name: 'permissions',
+              type: 'array',
+              label: 'Permissions',
+              interfaceName: 'RoleGlobalPermissions',
               admin: {
-                description: 'Global slug (e.g., "settings", "theme")',
+                description: 'Set permissions for each global',
+                components: {
+                  RowLabel: '@/collections/Roles/components/GlobalsRowLabel#GlobalsRowLabel',
+                },
               },
-            },
-            {
-              name: 'canRead',
-              type: 'checkbox',
-              defaultValue: true,
-              label: 'Can Read',
-              admin: {
-                description: 'Allow viewing this global',
-              },
-            },
-            {
-              name: 'canUpdate',
-              type: 'checkbox',
-              defaultValue: false,
-              label: 'Can Update',
-              admin: {
-                description: 'Allow editing this global',
-              },
+              fields: [
+                {
+                  name: 'global',
+                  type: 'text',
+                  admin: {
+                    description: 'Global slug (e.g., "settings", "theme")',
+                  },
+                },
+                {
+                  name: 'canRead',
+                  type: 'checkbox',
+                  defaultValue: true,
+                  label: 'Can Read',
+                  admin: {
+                    description: 'Allow viewing this global',
+                  },
+                },
+                {
+                  name: 'canUpdate',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: 'Can Update',
+                  admin: {
+                    description: 'Allow editing this global',
+                  },
+                },
+              ],
             },
           ],
         },

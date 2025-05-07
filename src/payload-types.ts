@@ -469,12 +469,11 @@ export interface Role {
    * Brief description of what this role is for
    */
   description?: string | null;
-  /**
-   * Configure permissions for this role
-   */
-  permissions?: {
-    collections?: RoleCollectionPermissions;
-    globals?: RoleGlobalPermissions;
+  collections?: {
+    permissions?: RoleCollectionPermissions;
+  };
+  globals?: {
+    permissions?: RoleGlobalPermissions;
   };
   /**
    * Admin roles bypass all permission checks (use carefully)
@@ -871,7 +870,7 @@ export interface SectionBlock {
  */
 export interface ContainerBlock {
   components?: {
-    components?: (HeaderBlock | TextBlock | LinkBlock | MultiMediaBlock | EmbedBlock)[] | null;
+    components?: (HeaderBlock | TextBlock | LinkBlock | MultiMediaBlock | EmbedBlock | CardBlock)[] | null;
   };
   styles?: {
     /**
@@ -909,8 +908,8 @@ export interface HeaderBlock {
  * via the `definition` "TextBlock".
  */
 export interface TextBlock {
-  main?: {
-    text?: {
+  main: {
+    text: {
       root: {
         type: string;
         children: {
@@ -924,7 +923,7 @@ export interface TextBlock {
         version: number;
       };
       [k: string]: unknown;
-    } | null;
+    };
   };
   styles?: {
     /**
@@ -996,6 +995,40 @@ export interface EmbedBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'embed';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CardBlock".
+ */
+export interface CardBlock {
+  variant: 'image-background' | 'inline-image' | 'row-style';
+  image?: (number | null) | Media;
+  headerTitle?: string | null;
+  bodyTitle?: string | null;
+  bodyText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  button?: {
+    buttonVariant?: ('primary' | 'secondary' | 'outline' | 'link') | null;
+    buttonText?: string | null;
+    buttonHref?: string | null;
+    buttonNewTab?: boolean | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'card';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1434,6 +1467,7 @@ export interface ContainerBlockSelect<T extends boolean = true> {
               link?: T | LinkBlockSelect<T>;
               multimedia?: T | MultiMediaBlockSelect<T>;
               embed?: T | EmbedBlockSelect<T>;
+              card?: T | CardBlockSelect<T>;
             };
       };
   styles?:
@@ -1540,6 +1574,27 @@ export interface EmbedBlockSelect<T extends boolean = true> {
     | {
         css_name?: T;
         css_style?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CardBlock_select".
+ */
+export interface CardBlockSelect<T extends boolean = true> {
+  variant?: T;
+  image?: T;
+  headerTitle?: T;
+  bodyTitle?: T;
+  bodyText?: T;
+  button?:
+    | T
+    | {
+        buttonVariant?: T;
+        buttonText?: T;
+        buttonHref?: T;
+        buttonNewTab?: T;
       };
   id?: T;
   blockName?: T;
@@ -1715,11 +1770,15 @@ export interface RolesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   description?: T;
-  permissions?:
+  collections?:
     | T
     | {
-        collections?: T | RoleCollectionPermissionsSelect<T>;
-        globals?: T | RoleGlobalPermissionsSelect<T>;
+        permissions?: T | RoleCollectionPermissionsSelect<T>;
+      };
+  globals?:
+    | T
+    | {
+        permissions?: T | RoleGlobalPermissionsSelect<T>;
       };
   isAdmin?: T;
   updatedAt?: T;

@@ -95,6 +95,39 @@ export const seed = async ({
     ),
   ])
 
+  const role = await payload.create({
+    collection: 'roles',
+    data: {
+      name: 'Demo Author',
+      slug: 'demo-author',
+      collections: {
+        permissions: [
+          { collection: 'pages', canCreate: true, canDelete: true, canRead: true, canUpdate: true },
+          { collection: 'media', canCreate: true, canDelete: true, canRead: true, canUpdate: true },
+        ],
+      },
+      globals: {
+        permissions: [
+          {
+            global: 'header',
+            canRead: true,
+            canUpdate: true,
+          },
+          {
+            global: 'footer',
+            canRead: true,
+            canUpdate: true,
+          },
+          {
+            global: 'themes',
+            canRead: true,
+            canUpdate: true,
+          },
+        ],
+      },
+    },
+  })
+
   const [demoAuthor, image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
     payload.create({
       collection: 'users',
@@ -102,6 +135,7 @@ export const seed = async ({
         name: 'Demo Author',
         email: 'demo-author@example.com',
         password: 'password',
+        role: role.id,
       },
     }),
     payload.create({

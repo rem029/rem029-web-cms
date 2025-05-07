@@ -23,7 +23,7 @@ export const SectionBlock = ({ components, styles }: SectionBlockTypeProps) => {
         />
       )}
 
-      <div className={`${css('section')} ${cssName}}`}>
+      <div className={`${css('section')} ${cssName}`}>
         {componentsList.map((component, idx) => {
           return <ContainerBlock key={'section_' + idx} {...component} />
         })}

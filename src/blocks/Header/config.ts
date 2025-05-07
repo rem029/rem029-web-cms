@@ -16,12 +16,14 @@ export const HeaderBlock: Block = {
             {
               name: 'text',
               type: 'text',
+              localized: true,
               required: true,
             },
             {
               name: 'variant',
               type: 'select',
               required: true,
+              localized: true,
               defaultValue: 'h6',
               options: [
                 { label: 'H1', value: 'h1' },

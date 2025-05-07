@@ -16,6 +16,7 @@ export const MultiMediaBlock: Block = {
             {
               name: 'image',
               type: 'upload',
+              localized: true,
               relationTo: 'media',
               required: true,
             },

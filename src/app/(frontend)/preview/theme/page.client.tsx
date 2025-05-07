@@ -11,6 +11,7 @@ import { MdErrorOutline } from 'react-icons/md'
 import { IoWarningOutline } from 'react-icons/io5'
 import RichText from '@/components/RichText'
 import { richText } from './sample-rich-text'
+import { CardBlock } from '@/blocks/Card/Component'
 
 type ThemePreviewClientProps = {
   activeThemeName: string
@@ -617,74 +618,7 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
 
             <h3 className={css('h3')}>Cards</h3>
             <div className="flex flex-row flex-wrap gap-8">
-              <div className={`${css('card')} ${css('card-img-bg')}`}>
-                <div className={css('card-img')}>
-                  <Image
-                    alt="sample image"
-                    src={
-                      'https://images.pexels.com/photos/31887348/pexels-photo-31887348/free-photo-of-elegant-spring-white-flowers-in-bloom.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
-                    }
-                    fill
-                  />
-                </div>
-                <div className={css('card-overlay')} />
-                <div className={`${css('card-header')}`}>
-                  <h6>Card Header</h6>
-                </div>
-                <div className={`${css('card-body')} ${css('card-body-end')}`}>
-                  <h5 className={`${css('card-title')}`}>Card Image with Content Overlay</h5>
-                  <p className={`${css('card-text')}`}>
-                    Some quick example text to build on the card title.
-                  </p>
-                </div>
-                <div className={`${css('card-footer')}`}>
-                  <CMSLink className={`${css('btn-secondary')} ${css('btn-sm')} max-w-52`} href="#">
-                    Go somewhere
-                  </CMSLink>
-                </div>
-              </div>
-
-              <div className={`${css('card')} ${css('card-img-inline')}`}>
-                <div className={`${css('card-header')}`}>
-                  <h6>Card Header</h6>
-                </div>
-                <div className={css('card-img')}>
-                  <Image
-                    alt="sample image"
-                    src={
-                      'https://images.pexels.com/photos/31887348/pexels-photo-31887348/free-photo-of-elegant-spring-white-flowers-in-bloom.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
-                    }
-                    fill
-                  />
-                </div>
-                <div className={`${css('card-body')}`}>
-                  <h5 className={`${css('card-title')}`}>Card with Image on top</h5>
-                  <p className={`${css('card-text')}`}>
-                    Some quick example text to build on the card title.
-                  </p>
-                </div>
-                <div className={`${css('card-footer')}`}>
-                  <CMSLink className={`${css('btn-primary')} ${css('btn-sm')} max-w-52`} href="#">
-                    Go somewhere
-                  </CMSLink>
-                </div>
-              </div>
-
-              <div className={`${css('card')} ${css('card-row')}`}>
-                <div className={css('card-img')}>
-                  <Image
-                    alt="sample image"
-                    src={
-                      'https://images.pexels.com/photos/31887348/pexels-photo-31887348/free-photo-of-elegant-spring-white-flowers-in-bloom.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
-                    }
-                    fill
-                  />
-                </div>
-                <div className={`${css('card-body')} ${css('card-body-center')}`}>
-                  <h5 className={`${css('card-title')}`}>Horizontal Card</h5>
-                  <p className={`${css('card-text')}`}>This is a horizontal card layout.</p>
-                </div>
-              </div>
+              <CardBlock />
             </div>
 
             <h3 className="text-xl font-semibold mt-6 mb-3">Alert Messages</h3>

@@ -13,6 +13,7 @@ import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { css } from '@/utilities/constants'
+import { getStyles } from '@/fields/css'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -64,21 +65,31 @@ export default async function Page({ params: paramsPromise }: Args) {
     return <PayloadRedirects url={url} />
   }
 
-  const { hero, layout } = page
+  const { hero, layout, css_name, css_style } = page
+  const { cssName, cssStyle } = getStyles({ css_name, css_style })
 
   return (
-    <div className={css('page')}>
-      <div className={css('page__container')}>
-        <PageClient />
-        {/* Allows redirects for valid pages too */}
-        <PayloadRedirects disableNotFound url={url} />
+    <React.Fragment>
+      {cssStyle && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: cssStyle || '',
+          }}
+        />
+      )}
+      <div className={`${css('page')} ${cssName}`}>
+        <div className={css('page__container')}>
+          <PageClient />
+          {/* Allows redirects for valid pages too */}
+          <PayloadRedirects disableNotFound url={url} />
 
-        {draft && <LivePreviewListener />}
+          {draft && <LivePreviewListener />}
 
-        <RenderHero {...hero} />
-        <RenderBlocks blocks={layout} />
+          <RenderHero {...hero} />
+          <RenderBlocks blocks={layout} />
+        </div>
       </div>
-    </div>
+    </React.Fragment>
   )
 }
 

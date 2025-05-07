@@ -15,12 +15,14 @@ export const LinkBlock: Block = {
             {
               name: 'text',
               type: 'text',
+              localized: true,
               required: true,
             },
             {
               name: 'href',
               type: 'text',
               required: true,
+              localized: true,
             },
             {
               name: 'new_tab',
@@ -30,6 +32,7 @@ export const LinkBlock: Block = {
             {
               name: 'variant',
               type: 'select',
+              localized: true,
               required: true,
               defaultValue: 'link',
               options: [

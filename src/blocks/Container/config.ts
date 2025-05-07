@@ -5,6 +5,7 @@ import { HeaderBlock } from '../Header/config'
 import { LinkBlock } from '../Link/config'
 import { TextBlock } from '../Text/config'
 import { MultiMediaBlock } from '../MultiMedia/config'
+import { CardBlock } from '../Card/config'
 
 export const sectionBlocks: Block[] = [
   HeaderBlock,
@@ -12,6 +13,7 @@ export const sectionBlocks: Block[] = [
   LinkBlock,
   MultiMediaBlock,
   EmbedBlock,
+  CardBlock,
 ]
 
 export const ContainerBlock: Block = {

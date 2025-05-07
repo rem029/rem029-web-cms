@@ -1,5 +1,5 @@
 {
-  "id": "9ff9a0ef-eb5b-4fc5-ab12-e1b828f3569f",
+  "id": "63629ecb-8692-40d6-99d6-3a017595ef3b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1080,20 +1080,6 @@
           "primaryKey": true,
           "notNull": true
         },
-        "main_text": {
-          "name": "main_text",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "main_variant": {
-          "name": "main_variant",
-          "type": "enum_pages_blocks_header_main_variant",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'h6'"
-        },
         "styles_css_name": {
           "name": "styles_css_name",
           "type": "varchar",
@@ -1181,6 +1167,88 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.pages_blocks_header_locales": {
+      "name": "pages_blocks_header_locales",
+      "schema": "",
+      "columns": {
+        "main_text": {
+          "name": "main_text",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_variant": {
+          "name": "main_variant",
+          "type": "enum_pages_blocks_header_main_variant",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'h6'"
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "pages_blocks_header_locales_locale_parent_id_unique": {
+          "name": "pages_blocks_header_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pages_blocks_header_locales_parent_id_fk": {
+          "name": "pages_blocks_header_locales_parent_id_fk",
+          "tableFrom": "pages_blocks_header_locales",
+          "tableTo": "pages_blocks_header",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.pages_blocks_text": {
       "name": "pages_blocks_text",
       "schema": "",
@@ -1208,12 +1276,6 @@
           "type": "varchar",
           "primaryKey": true,
           "notNull": true
-        },
-        "main_text": {
-          "name": "main_text",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
         },
         "styles_css_name": {
           "name": "styles_css_name",
@@ -1302,6 +1364,80 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.pages_blocks_text_locales": {
+      "name": "pages_blocks_text_locales",
+      "schema": "",
+      "columns": {
+        "main_text": {
+          "name": "main_text",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "pages_blocks_text_locales_locale_parent_id_unique": {
+          "name": "pages_blocks_text_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pages_blocks_text_locales_parent_id_fk": {
+          "name": "pages_blocks_text_locales_parent_id_fk",
+          "tableFrom": "pages_blocks_text_locales",
+          "tableTo": "pages_blocks_text",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.pages_blocks_link": {
       "name": "pages_blocks_link",
       "schema": "",
@@ -1330,31 +1466,11 @@
           "primaryKey": true,
           "notNull": true
         },
-        "main_text": {
-          "name": "main_text",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "main_href": {
-          "name": "main_href",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "main_new_tab": {
           "name": "main_new_tab",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
-        },
-        "main_variant": {
-          "name": "main_variant",
-          "type": "enum_pages_blocks_link_main_variant",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'link'"
         },
         "styles_css_name": {
           "name": "styles_css_name",
@@ -1443,6 +1559,94 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.pages_blocks_link_locales": {
+      "name": "pages_blocks_link_locales",
+      "schema": "",
+      "columns": {
+        "main_text": {
+          "name": "main_text",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_href": {
+          "name": "main_href",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_variant": {
+          "name": "main_variant",
+          "type": "enum_pages_blocks_link_main_variant",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'link'"
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "pages_blocks_link_locales_locale_parent_id_unique": {
+          "name": "pages_blocks_link_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pages_blocks_link_locales_parent_id_fk": {
+          "name": "pages_blocks_link_locales_parent_id_fk",
+          "tableFrom": "pages_blocks_link_locales",
+          "tableTo": "pages_blocks_link",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.pages_blocks_multimedia": {
       "name": "pages_blocks_multimedia",
       "schema": "",
@@ -1470,12 +1674,6 @@
           "type": "varchar",
           "primaryKey": true,
           "notNull": true
-        },
-        "main_image_id": {
-          "name": "main_image_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         },
         "styles_css_name": {
           "name": "styles_css_name",
@@ -1541,12 +1739,71 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pages_blocks_multimedia_parent_id_fk": {
+          "name": "pages_blocks_multimedia_parent_id_fk",
+          "tableFrom": "pages_blocks_multimedia",
+          "tableTo": "pages",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pages_blocks_multimedia_locales": {
+      "name": "pages_blocks_multimedia_locales",
+      "schema": "",
+      "columns": {
+        "main_image_id": {
+          "name": "main_image_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
         "pages_blocks_multimedia_main_main_image_idx": {
           "name": "pages_blocks_multimedia_main_main_image_idx",
           "columns": [
             {
               "expression": "main_image_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_locale",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1556,12 +1813,33 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "pages_blocks_multimedia_locales_locale_parent_id_unique": {
+          "name": "pages_blocks_multimedia_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
-        "pages_blocks_multimedia_main_image_id_media_id_fk": {
-          "name": "pages_blocks_multimedia_main_image_id_media_id_fk",
-          "tableFrom": "pages_blocks_multimedia",
+        "pages_blocks_multimedia_locales_main_image_id_media_id_fk": {
+          "name": "pages_blocks_multimedia_locales_main_image_id_media_id_fk",
+          "tableFrom": "pages_blocks_multimedia_locales",
           "tableTo": "media",
           "columnsFrom": [
             "main_image_id"
@@ -1572,10 +1850,10 @@
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "pages_blocks_multimedia_parent_id_fk": {
-          "name": "pages_blocks_multimedia_parent_id_fk",
-          "tableFrom": "pages_blocks_multimedia",
-          "tableTo": "pages",
+        "pages_blocks_multimedia_locales_parent_id_fk": {
+          "name": "pages_blocks_multimedia_locales_parent_id_fk",
+          "tableFrom": "pages_blocks_multimedia_locales",
+          "tableTo": "pages_blocks_multimedia",
           "columnsFrom": [
             "_parent_id"
           ],
@@ -1619,12 +1897,6 @@
           "type": "varchar",
           "primaryKey": true,
           "notNull": true
-        },
-        "main_html": {
-          "name": "main_html",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
         },
         "styles_css_name": {
           "name": "styles_css_name",
@@ -1697,6 +1969,80 @@
           "name": "pages_blocks_embed_parent_id_fk",
           "tableFrom": "pages_blocks_embed",
           "tableTo": "pages",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pages_blocks_embed_locales": {
+      "name": "pages_blocks_embed_locales",
+      "schema": "",
+      "columns": {
+        "main_html": {
+          "name": "main_html",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "pages_blocks_embed_locales_locale_parent_id_unique": {
+          "name": "pages_blocks_embed_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pages_blocks_embed_locales_parent_id_fk": {
+          "name": "pages_blocks_embed_locales_parent_id_fk",
+          "tableFrom": "pages_blocks_embed_locales",
+          "tableTo": "pages_blocks_embed",
           "columnsFrom": [
             "_parent_id"
           ],
@@ -3642,20 +3988,6 @@
           "primaryKey": true,
           "notNull": true
         },
-        "main_text": {
-          "name": "main_text",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "main_variant": {
-          "name": "main_variant",
-          "type": "enum__pages_v_blocks_header_main_variant",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'h6'"
-        },
         "styles_css_name": {
           "name": "styles_css_name",
           "type": "varchar",
@@ -3749,6 +4081,88 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public._pages_v_blocks_header_locales": {
+      "name": "_pages_v_blocks_header_locales",
+      "schema": "",
+      "columns": {
+        "main_text": {
+          "name": "main_text",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_variant": {
+          "name": "main_variant",
+          "type": "enum__pages_v_blocks_header_main_variant",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'h6'"
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "_pages_v_blocks_header_locales_locale_parent_id_unique": {
+          "name": "_pages_v_blocks_header_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_pages_v_blocks_header_locales_parent_id_fk": {
+          "name": "_pages_v_blocks_header_locales_parent_id_fk",
+          "tableFrom": "_pages_v_blocks_header_locales",
+          "tableTo": "_pages_v_blocks_header",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public._pages_v_blocks_text": {
       "name": "_pages_v_blocks_text",
       "schema": "",
@@ -3776,12 +4190,6 @@
           "type": "serial",
           "primaryKey": true,
           "notNull": true
-        },
-        "main_text": {
-          "name": "main_text",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
         },
         "styles_css_name": {
           "name": "styles_css_name",
@@ -3876,6 +4284,80 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public._pages_v_blocks_text_locales": {
+      "name": "_pages_v_blocks_text_locales",
+      "schema": "",
+      "columns": {
+        "main_text": {
+          "name": "main_text",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "_pages_v_blocks_text_locales_locale_parent_id_unique": {
+          "name": "_pages_v_blocks_text_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_pages_v_blocks_text_locales_parent_id_fk": {
+          "name": "_pages_v_blocks_text_locales_parent_id_fk",
+          "tableFrom": "_pages_v_blocks_text_locales",
+          "tableTo": "_pages_v_blocks_text",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public._pages_v_blocks_link": {
       "name": "_pages_v_blocks_link",
       "schema": "",
@@ -3904,31 +4386,11 @@
           "primaryKey": true,
           "notNull": true
         },
-        "main_text": {
-          "name": "main_text",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "main_href": {
-          "name": "main_href",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
         "main_new_tab": {
           "name": "main_new_tab",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
-        },
-        "main_variant": {
-          "name": "main_variant",
-          "type": "enum__pages_v_blocks_link_main_variant",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'link'"
         },
         "styles_css_name": {
           "name": "styles_css_name",
@@ -4023,6 +4485,94 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public._pages_v_blocks_link_locales": {
+      "name": "_pages_v_blocks_link_locales",
+      "schema": "",
+      "columns": {
+        "main_text": {
+          "name": "main_text",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_href": {
+          "name": "main_href",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_variant": {
+          "name": "main_variant",
+          "type": "enum__pages_v_blocks_link_main_variant",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'link'"
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "_pages_v_blocks_link_locales_locale_parent_id_unique": {
+          "name": "_pages_v_blocks_link_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_pages_v_blocks_link_locales_parent_id_fk": {
+          "name": "_pages_v_blocks_link_locales_parent_id_fk",
+          "tableFrom": "_pages_v_blocks_link_locales",
+          "tableTo": "_pages_v_blocks_link",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public._pages_v_blocks_multimedia": {
       "name": "_pages_v_blocks_multimedia",
       "schema": "",
@@ -4050,12 +4600,6 @@
           "type": "serial",
           "primaryKey": true,
           "notNull": true
-        },
-        "main_image_id": {
-          "name": "main_image_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         },
         "styles_css_name": {
           "name": "styles_css_name",
@@ -4127,12 +4671,71 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_pages_v_blocks_multimedia_parent_id_fk": {
+          "name": "_pages_v_blocks_multimedia_parent_id_fk",
+          "tableFrom": "_pages_v_blocks_multimedia",
+          "tableTo": "_pages_v",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._pages_v_blocks_multimedia_locales": {
+      "name": "_pages_v_blocks_multimedia_locales",
+      "schema": "",
+      "columns": {
+        "main_image_id": {
+          "name": "main_image_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
         "_pages_v_blocks_multimedia_main_main_image_idx": {
           "name": "_pages_v_blocks_multimedia_main_main_image_idx",
           "columns": [
             {
               "expression": "main_image_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_locale",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -4142,12 +4745,33 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "_pages_v_blocks_multimedia_locales_locale_parent_id_unique": {
+          "name": "_pages_v_blocks_multimedia_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
-        "_pages_v_blocks_multimedia_main_image_id_media_id_fk": {
-          "name": "_pages_v_blocks_multimedia_main_image_id_media_id_fk",
-          "tableFrom": "_pages_v_blocks_multimedia",
+        "_pages_v_blocks_multimedia_locales_main_image_id_media_id_fk": {
+          "name": "_pages_v_blocks_multimedia_locales_main_image_id_media_id_fk",
+          "tableFrom": "_pages_v_blocks_multimedia_locales",
           "tableTo": "media",
           "columnsFrom": [
             "main_image_id"
@@ -4158,10 +4782,10 @@
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "_pages_v_blocks_multimedia_parent_id_fk": {
-          "name": "_pages_v_blocks_multimedia_parent_id_fk",
-          "tableFrom": "_pages_v_blocks_multimedia",
-          "tableTo": "_pages_v",
+        "_pages_v_blocks_multimedia_locales_parent_id_fk": {
+          "name": "_pages_v_blocks_multimedia_locales_parent_id_fk",
+          "tableFrom": "_pages_v_blocks_multimedia_locales",
+          "tableTo": "_pages_v_blocks_multimedia",
           "columnsFrom": [
             "_parent_id"
           ],
@@ -4205,12 +4829,6 @@
           "type": "serial",
           "primaryKey": true,
           "notNull": true
-        },
-        "main_html": {
-          "name": "main_html",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
         },
         "styles_css_name": {
           "name": "styles_css_name",
@@ -4289,6 +4907,80 @@
           "name": "_pages_v_blocks_embed_parent_id_fk",
           "tableFrom": "_pages_v_blocks_embed",
           "tableTo": "_pages_v",
+          "columnsFrom": [
+            "_parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public._pages_v_blocks_embed_locales": {
+      "name": "_pages_v_blocks_embed_locales",
+      "schema": "",
+      "columns": {
+        "main_html": {
+          "name": "main_html",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "_locale": {
+          "name": "_locale",
+          "type": "_locales",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "_parent_id": {
+          "name": "_parent_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "_pages_v_blocks_embed_locales_locale_parent_id_unique": {
+          "name": "_pages_v_blocks_embed_locales_locale_parent_id_unique",
+          "columns": [
+            {
+              "expression": "_locale",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "_parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "_pages_v_blocks_embed_locales_parent_id_fk": {
+          "name": "_pages_v_blocks_embed_locales_parent_id_fk",
+          "tableFrom": "_pages_v_blocks_embed_locales",
+          "tableTo": "_pages_v_blocks_embed",
           "columnsFrom": [
             "_parent_id"
           ],
@@ -7456,7 +8148,7 @@
           "name": "role_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
@@ -7599,8 +8291,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.roles_permissions_collections": {
-      "name": "roles_permissions_collections",
+    "public.roles_collections_permissions": {
+      "name": "roles_collections_permissions",
       "schema": "",
       "columns": {
         "_order": {
@@ -7657,8 +8349,8 @@
         }
       },
       "indexes": {
-        "roles_permissions_collections_order_idx": {
-          "name": "roles_permissions_collections_order_idx",
+        "roles_collections_permissions_order_idx": {
+          "name": "roles_collections_permissions_order_idx",
           "columns": [
             {
               "expression": "_order",
@@ -7672,8 +8364,8 @@
           "method": "btree",
           "with": {}
         },
-        "roles_permissions_collections_parent_id_idx": {
-          "name": "roles_permissions_collections_parent_id_idx",
+        "roles_collections_permissions_parent_id_idx": {
+          "name": "roles_collections_permissions_parent_id_idx",
           "columns": [
             {
               "expression": "_parent_id",
@@ -7686,12 +8378,27 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "roles_collections_permissions_collection_idx": {
+          "name": "roles_collections_permissions_collection_idx",
+          "columns": [
+            {
+              "expression": "collection",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
-        "roles_permissions_collections_parent_id_fk": {
-          "name": "roles_permissions_collections_parent_id_fk",
-          "tableFrom": "roles_permissions_collections",
+        "roles_collections_permissions_parent_id_fk": {
+          "name": "roles_collections_permissions_parent_id_fk",
+          "tableFrom": "roles_collections_permissions",
           "tableTo": "roles",
           "columnsFrom": [
             "_parent_id"
@@ -7709,8 +8416,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.roles_permissions_globals": {
-      "name": "roles_permissions_globals",
+    "public.roles_globals_permissions": {
+      "name": "roles_globals_permissions",
       "schema": "",
       "columns": {
         "_order": {
@@ -7753,8 +8460,8 @@
         }
       },
       "indexes": {
-        "roles_permissions_globals_order_idx": {
-          "name": "roles_permissions_globals_order_idx",
+        "roles_globals_permissions_order_idx": {
+          "name": "roles_globals_permissions_order_idx",
           "columns": [
             {
               "expression": "_order",
@@ -7768,8 +8475,8 @@
           "method": "btree",
           "with": {}
         },
-        "roles_permissions_globals_parent_id_idx": {
-          "name": "roles_permissions_globals_parent_id_idx",
+        "roles_globals_permissions_parent_id_idx": {
+          "name": "roles_globals_permissions_parent_id_idx",
           "columns": [
             {
               "expression": "_parent_id",
@@ -7782,12 +8489,27 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "roles_globals_permissions_global_idx": {
+          "name": "roles_globals_permissions_global_idx",
+          "columns": [
+            {
+              "expression": "global",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
-        "roles_permissions_globals_parent_id_fk": {
-          "name": "roles_permissions_globals_parent_id_fk",
-          "tableFrom": "roles_permissions_globals",
+        "roles_globals_permissions_parent_id_fk": {
+          "name": "roles_globals_permissions_parent_id_fk",
+          "tableFrom": "roles_globals_permissions",
           "tableTo": "roles",
           "columnsFrom": [
             "_parent_id"

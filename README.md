@@ -328,3 +328,4 @@ If you have any issues or questions, reach out to us on [Discord](https://discor
 - Have font selection on themes
 - Show label on each roles permission
 - Consider deploying Docker
+- Use Roles control user access

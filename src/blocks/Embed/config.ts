@@ -15,6 +15,7 @@ export const EmbedBlock: Block = {
           fields: [
             {
               name: 'html',
+              localized: true,
               type: 'code',
               admin: { language: 'html' },
               required: true,
