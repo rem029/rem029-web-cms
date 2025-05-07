@@ -9,14 +9,16 @@ services:
       - .:/app
       - node_modules:/app/node_modules
     working_dir: /app
-    command: sh -c "export NODE_ENV=production && yarn install && yarn payload migrate && yarn build && yarn start"
+    command: >
+      sh -c "export NODE_ENV=production &&
+       yarn install --frozen-lockfile --production=false &&
+       yarn payload migrate &&
+       yarn build &&
+       yarn start"
     env_file:
       - .env
     environment:
       NODE_ENV: production
-      DATABASE_URI: 'postgres://postgres:123@host.docker.internal:5432/rem029-web-cms-prod'
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
 
 volumes:
   node_modules:
