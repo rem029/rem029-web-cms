@@ -5,13 +5,13 @@ import { CMSLink } from '@/components/Link'
 import { css } from '@/utilities/constants'
 import { SocialMedia } from '@/components/Social'
 import { Setting } from '@/payload-types'
-import Image from 'next/image'
 import { IoIosInformationCircleOutline, IoIosCheckmarkCircleOutline } from 'react-icons/io'
 import { MdErrorOutline } from 'react-icons/md'
 import { IoWarningOutline } from 'react-icons/io5'
 import RichText from '@/components/RichText'
-import { richText } from './sample-rich-text'
-import { CardBlock } from '@/blocks/CardWithBackground/Component'
+import { CardInlineImageBlock } from '@/blocks/CardInlineImage/Component'
+import { CardWithBackgroundBlock } from '@/blocks/CardWithBackground/Component'
+import { CardRowBlock } from '@/blocks/CardRow/Component'
 
 type ThemePreviewClientProps = {
   activeThemeName: string
@@ -618,7 +618,67 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
 
             <h3 className={css('h3')}>Cards</h3>
             <div className="flex flex-row flex-wrap gap-8">
-              <CardBlock />
+              <div className={`${css('card')} ${css('card-sm')}`}>
+                <CardInlineImageBlock
+                  blockType="card-inline-image"
+                  main={{
+                    image: {
+                      id: -1,
+                      createdAt: new Date().toISOString(),
+                      updatedAt: new Date().toISOString(),
+                      url: 'https://images.pexels.com/photos/31936770/pexels-photo-31936770/free-photo-of-striking-black-and-white-view-of-london-eye.jpeg?auto=compress&cs=tinysrgb&w=400&lazy=load',
+                      alt: 'Placeholder',
+                    },
+                    button: {
+                      href: '#',
+                      text: 'Click here',
+                      variant: 'btn-secondary',
+                    },
+                    headerTitle: 'Header Title',
+                    bodyTitle: 'Body Title',
+                  }}
+                />
+
+                <CardWithBackgroundBlock
+                  blockType="card-with-background"
+                  main={{
+                    image: {
+                      id: -1,
+                      createdAt: new Date().toISOString(),
+                      updatedAt: new Date().toISOString(),
+                      url: 'https://images.pexels.com/photos/31936770/pexels-photo-31936770/free-photo-of-striking-black-and-white-view-of-london-eye.jpeg?auto=compress&cs=tinysrgb&w=400&lazy=load',
+                      alt: 'Placeholder',
+                    },
+                    button: {
+                      href: '#',
+                      text: 'Click here',
+                      variant: 'btn-secondary',
+                    },
+                    headerTitle: 'Header Title',
+                    bodyTitle: 'Body Title',
+                  }}
+                />
+
+                <CardRowBlock
+                  blockType="card-row"
+                  main={{
+                    image: {
+                      id: -1,
+                      createdAt: new Date().toISOString(),
+                      updatedAt: new Date().toISOString(),
+                      url: 'https://images.pexels.com/photos/31936770/pexels-photo-31936770/free-photo-of-striking-black-and-white-view-of-london-eye.jpeg?auto=compress&cs=tinysrgb&w=400&lazy=load',
+                      alt: 'Placeholder',
+                    },
+                    button: {
+                      href: '#',
+                      text: 'Click here',
+                      variant: 'btn-secondary',
+                    },
+                    headerTitle: 'Header Title',
+                    bodyTitle: 'Body Title',
+                  }}
+                />
+              </div>
             </div>
 
             <h3 className="text-xl font-semibold mt-6 mb-3">Alert Messages</h3>

@@ -2,13 +2,13 @@ import { css } from '@/utilities/constants'
 import React from 'react'
 import { LinkBlock } from '../Link/Component'
 import Image from 'next/image'
-import { CardInlineImageBlock as CardInlineImageBlockType, Media } from '@/payload-types'
+import { CardRowBlock as CardRowBlockType, Media } from '@/payload-types'
 import RichText from '@/components/RichText'
 import { getStyles } from '@/fields/css'
 
-export interface CardInlineImageBlockProps extends CardInlineImageBlockType {}
+export interface CardRowBlockProps extends CardRowBlockType {}
 
-export const CardRowBlock = ({ main, styles }: CardInlineImageBlockProps) => {
+export const CardRowBlock = ({ main, styles }: CardRowBlockProps) => {
   const { cssName, cssStyle } = getStyles({ ...styles })
 
   const img = main?.image ? (main?.image as Media) : undefined
