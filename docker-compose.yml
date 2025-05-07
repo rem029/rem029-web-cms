@@ -1,5 +1,3 @@
-version: '4.2'
-
 services:
   payload:
     build:
