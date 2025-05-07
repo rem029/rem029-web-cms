@@ -22,7 +22,6 @@ import { cn } from '@/utilities/ui'
 import { css } from '@/utilities/constants'
 import { CallToActionBlock } from '@/blocks/old/CallToAction/Component'
 import { CodeBlockProps, CodeBlock } from '@/blocks/old/Code/Component'
-import { json } from 'stream/consumers'
 
 type NodeTypes =
   | DefaultNodeTypes

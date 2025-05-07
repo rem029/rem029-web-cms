@@ -1,9 +1,9 @@
 import { RoleCollectionPermissions, RoleGlobalPermissions } from '@/payload-types'
-import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
+import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres'
 
 const ROLE_SLUG = 'admin'
 
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ payload }: MigrateUpArgs): Promise<void> {
   const { collections, globals } = payload.config
   const _collections = collections.map((c) => c.slug)
   const _globals = globals.map((g) => g.slug)
@@ -30,7 +30,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   })
 }
 
-export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ payload }: MigrateDownArgs): Promise<void> {
   // Migration code
   await payload
     .find({
