@@ -9,23 +9,32 @@ services:
       - .:/home/node/app
       - node_modules:/home/node/app/node_modules
     working_dir: /home/node/app/
-    command: sh -c "yarn install && yarn dev"
+    command: sh -c "yarn install && yarn payload migrate && yarn payload build && yarn payload start"
     depends_on:
-      - mongo
+      - postgres
     env_file:
       - .env
+    environment:
+      # Override the DATABASE_URI to point to the postgres container
+      DATABASE_URI: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-123}@postgres:5432/${POSTGRES_DB:-rem029-web-cms}
 
-  mongo:
-    image: mongo:latest
-    ports:
-      - '27017:27017'
-    command:
-      - --storageEngine=wiredTiger
-    volumes:
-      - data:/data/db
-    logging:
-      driver: none
+postgres:
+  image: postgres:15-alpine
+  ports:
+    - '5432:5432'
+  environment:
+    POSTGRES_USER: ${POSTGRES_USER:-postgres}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123}
+    POSTGRES_DB: ${POSTGRES_DB:-rem029-web-cms}
+    PGDATA: /var/lib/postgresql/data/pgdata
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+  healthcheck:
+    test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres}']
+    interval: 5s
+    timeout: 5s
+    retries: 5
 
 volumes:
-  data:
+  postgres_data:
   node_modules:
