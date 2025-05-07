@@ -1,4 +1,4 @@
-version: '4'
+version: '4.1'
 
 services:
   payload:
@@ -6,8 +6,7 @@ services:
     ports:
       - '3000:3000'
     volumes:
-      - .:/app
-      - node_modules:/app/node_modules
+      - ./:/app
     working_dir: /app
     command: >
       sh -c "export NODE_ENV=production &&
@@ -19,6 +18,3 @@ services:
       - .env
     environment:
       NODE_ENV: production
-
-volumes:
-  node_modules:
