@@ -329,3 +329,5 @@ If you have any issues or questions, reach out to us on [Discord](https://discor
 - Show label on each roles permission
 - Consider deploying Docker
 - Use Roles control user access
+- Add carousel
+- Add styling on forms

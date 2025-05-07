@@ -11,7 +11,7 @@ import { MdErrorOutline } from 'react-icons/md'
 import { IoWarningOutline } from 'react-icons/io5'
 import RichText from '@/components/RichText'
 import { richText } from './sample-rich-text'
-import { CardBlock } from '@/blocks/Card/Component'
+import { CardBlock } from '@/blocks/CardWithBackground/Component'
 
 type ThemePreviewClientProps = {
   activeThemeName: string

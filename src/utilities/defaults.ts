@@ -438,7 +438,7 @@ export const defaultThemeCSS = `
 
 .cms-card-img-inline {
   aspect-ratio: unset;
-  background-color: #FFF);
+  background-color: #FFF;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--info-light);
 }
@@ -473,7 +473,7 @@ export const defaultThemeCSS = `
   min-height: 96px;  
 
   aspect-ratio: unset;
-  background-color: #FFF);
+  background-color: #FFF;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--info-light);
 }

@@ -24,6 +24,8 @@ export const FormBlock: React.FC<
     id?: string
   } & FormBlockType
 > = (props) => {
+  if (!props.form) return null
+
   const {
     enableIntro,
     form: formFromProps,

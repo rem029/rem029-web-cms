@@ -870,7 +870,19 @@ export interface SectionBlock {
  */
 export interface ContainerBlock {
   components?: {
-    components?: (HeaderBlock | TextBlock | LinkBlock | MultiMediaBlock | EmbedBlock | CardBlock)[] | null;
+    components?:
+      | (
+          | HeaderBlock
+          | TextBlock
+          | LinkBlock
+          | MultiMediaBlock
+          | EmbedBlock
+          | CardWithBackgroundBlock
+          | CardInlineImageBlock
+          | CardRowBlock
+          | FormBlock
+        )[]
+      | null;
   };
   styles?: {
     /**
@@ -998,37 +1010,129 @@ export interface EmbedBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CardBlock".
+ * via the `definition` "CardWithBackgroundBlock".
  */
-export interface CardBlock {
-  variant: 'image-background' | 'inline-image' | 'row-style';
-  image?: (number | null) | Media;
-  headerTitle?: string | null;
-  bodyTitle?: string | null;
-  bodyText?: {
-    root: {
-      type: string;
-      children: {
+export interface CardWithBackgroundBlock {
+  main: {
+    image?: (number | null) | Media;
+    headerTitle?: string | null;
+    bodyTitle?: string | null;
+    bodyText?: {
+      root: {
         type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
         version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    button: {
+      text: string;
+      href: string;
+      new_tab?: boolean | null;
+      variant: 'link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn';
     };
-    [k: string]: unknown;
-  } | null;
-  button?: {
-    buttonVariant?: ('primary' | 'secondary' | 'outline' | 'link') | null;
-    buttonText?: string | null;
-    buttonHref?: string | null;
-    buttonNewTab?: boolean | null;
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
   };
   id?: string | null;
   blockName?: string | null;
-  blockType: 'card';
+  blockType: 'card-with-background';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CardInlineImageBlock".
+ */
+export interface CardInlineImageBlock {
+  main: {
+    image?: (number | null) | Media;
+    headerTitle?: string | null;
+    bodyTitle?: string | null;
+    bodyText?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    button: {
+      text: string;
+      href: string;
+      new_tab?: boolean | null;
+      variant: 'link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn';
+    };
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'card-inline-image';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CardRowBlock".
+ */
+export interface CardRowBlock {
+  main: {
+    image?: (number | null) | Media;
+    headerTitle?: string | null;
+    bodyTitle?: string | null;
+    bodyText?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    button: {
+      text: string;
+      href: string;
+      new_tab?: boolean | null;
+      variant: 'link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn';
+    };
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'card-row';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1467,7 +1571,10 @@ export interface ContainerBlockSelect<T extends boolean = true> {
               link?: T | LinkBlockSelect<T>;
               multimedia?: T | MultiMediaBlockSelect<T>;
               embed?: T | EmbedBlockSelect<T>;
-              card?: T | CardBlockSelect<T>;
+              'card-with-background'?: T | CardWithBackgroundBlockSelect<T>;
+              'card-inline-image'?: T | CardInlineImageBlockSelect<T>;
+              'card-row'?: T | CardRowBlockSelect<T>;
+              formBlock?: T | FormBlockSelect<T>;
             };
       };
   styles?:
@@ -1580,21 +1687,90 @@ export interface EmbedBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CardBlock_select".
+ * via the `definition` "CardWithBackgroundBlock_select".
  */
-export interface CardBlockSelect<T extends boolean = true> {
-  variant?: T;
-  image?: T;
-  headerTitle?: T;
-  bodyTitle?: T;
-  bodyText?: T;
-  button?:
+export interface CardWithBackgroundBlockSelect<T extends boolean = true> {
+  main?:
     | T
     | {
-        buttonVariant?: T;
-        buttonText?: T;
-        buttonHref?: T;
-        buttonNewTab?: T;
+        image?: T;
+        headerTitle?: T;
+        bodyTitle?: T;
+        bodyText?: T;
+        button?:
+          | T
+          | {
+              text?: T;
+              href?: T;
+              new_tab?: T;
+              variant?: T;
+            };
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CardInlineImageBlock_select".
+ */
+export interface CardInlineImageBlockSelect<T extends boolean = true> {
+  main?:
+    | T
+    | {
+        image?: T;
+        headerTitle?: T;
+        bodyTitle?: T;
+        bodyText?: T;
+        button?:
+          | T
+          | {
+              text?: T;
+              href?: T;
+              new_tab?: T;
+              variant?: T;
+            };
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CardRowBlock_select".
+ */
+export interface CardRowBlockSelect<T extends boolean = true> {
+  main?:
+    | T
+    | {
+        image?: T;
+        headerTitle?: T;
+        bodyTitle?: T;
+        bodyText?: T;
+        button?:
+          | T
+          | {
+              text?: T;
+              href?: T;
+              new_tab?: T;
+              variant?: T;
+            };
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
       };
   id?: T;
   blockName?: T;

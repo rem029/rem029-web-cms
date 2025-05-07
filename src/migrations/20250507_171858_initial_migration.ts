@@ -13,7 +13,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TYPE "public"."enum_pages_blocks_archive_populate_by" AS ENUM('collection', 'selection');
   CREATE TYPE "public"."enum_pages_blocks_archive_relation_to" AS ENUM('posts');
   CREATE TYPE "public"."enum_pages_blocks_header_main_variant" AS ENUM('h1', 'h2', 'h3', 'h4', 'h5', 'h6');
-  CREATE TYPE "public"."enum_pages_blocks_link_main_variant" AS ENUM('link', 'btn-primary', 'btn-secondary', 'btn-outline', 'btn');
+  CREATE TYPE "public"."var" AS ENUM('link', 'btn-primary', 'btn-secondary', 'btn-outline', 'btn');
   CREATE TYPE "public"."enum_pages_hero_type" AS ENUM('none', 'highImpact', 'mediumImpact', 'lowImpact');
   CREATE TYPE "public"."enum_pages_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__pages_v_version_hero_links_link_type" AS ENUM('reference', 'custom');
@@ -26,7 +26,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TYPE "public"."enum__pages_v_blocks_archive_populate_by" AS ENUM('collection', 'selection');
   CREATE TYPE "public"."enum__pages_v_blocks_archive_relation_to" AS ENUM('posts');
   CREATE TYPE "public"."enum__pages_v_blocks_header_main_variant" AS ENUM('h1', 'h2', 'h3', 'h4', 'h5', 'h6');
-  CREATE TYPE "public"."enum__pages_v_blocks_link_main_variant" AS ENUM('link', 'btn-primary', 'btn-secondary', 'btn-outline', 'btn');
   CREATE TYPE "public"."enum__pages_v_version_hero_type" AS ENUM('none', 'highImpact', 'mediumImpact', 'lowImpact');
   CREATE TYPE "public"."enum__pages_v_version_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__pages_v_published_locale" AS ENUM('en', 'ar');
@@ -180,7 +179,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TABLE IF NOT EXISTS "pages_blocks_link_locales" (
   	"main_text" varchar,
   	"main_href" varchar,
-  	"main_variant" "enum_pages_blocks_link_main_variant" DEFAULT 'link',
+  	"main_variant" "var" DEFAULT 'link',
   	"id" serial PRIMARY KEY NOT NULL,
   	"_locale" "_locales" NOT NULL,
   	"_parent_id" varchar NOT NULL
@@ -215,6 +214,78 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   
   CREATE TABLE IF NOT EXISTS "pages_blocks_embed_locales" (
   	"main_html" varchar,
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"_locale" "_locales" NOT NULL,
+  	"_parent_id" varchar NOT NULL
+  );
+  
+  CREATE TABLE IF NOT EXISTS "card_bg" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"_path" text NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"main_image_id" integer,
+  	"main_header_title" varchar,
+  	"main_body_title" varchar,
+  	"main_body_text" jsonb,
+  	"main_button_new_tab" boolean,
+  	"styles_css_name" varchar,
+  	"styles_css_style" varchar,
+  	"block_name" varchar
+  );
+  
+  CREATE TABLE IF NOT EXISTS "card_bg_locales" (
+  	"main_button_text" varchar,
+  	"main_button_href" varchar,
+  	"main_button_variant" "var" DEFAULT 'link',
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"_locale" "_locales" NOT NULL,
+  	"_parent_id" varchar NOT NULL
+  );
+  
+  CREATE TABLE IF NOT EXISTS "card_in" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"_path" text NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"main_image_id" integer,
+  	"main_header_title" varchar,
+  	"main_body_title" varchar,
+  	"main_body_text" jsonb,
+  	"main_button_new_tab" boolean,
+  	"styles_css_name" varchar,
+  	"styles_css_style" varchar,
+  	"block_name" varchar
+  );
+  
+  CREATE TABLE IF NOT EXISTS "card_in_locales" (
+  	"main_button_text" varchar,
+  	"main_button_href" varchar,
+  	"main_button_variant" "var" DEFAULT 'link',
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"_locale" "_locales" NOT NULL,
+  	"_parent_id" varchar NOT NULL
+  );
+  
+  CREATE TABLE IF NOT EXISTS "card_r" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"_path" text NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"main_image_id" integer,
+  	"main_header_title" varchar,
+  	"main_body_title" varchar,
+  	"main_body_text" jsonb,
+  	"main_button_new_tab" boolean,
+  	"styles_css_name" varchar,
+  	"styles_css_style" varchar,
+  	"block_name" varchar
+  );
+  
+  CREATE TABLE IF NOT EXISTS "card_r_locales" (
+  	"main_button_text" varchar,
+  	"main_button_href" varchar,
+  	"main_button_variant" "var" DEFAULT 'link',
   	"id" serial PRIMARY KEY NOT NULL,
   	"_locale" "_locales" NOT NULL,
   	"_parent_id" varchar NOT NULL
@@ -428,7 +499,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TABLE IF NOT EXISTS "_pages_v_blocks_link_locales" (
   	"main_text" varchar,
   	"main_href" varchar,
-  	"main_variant" "enum__pages_v_blocks_link_main_variant" DEFAULT 'link',
+  	"main_variant" "var" DEFAULT 'link',
   	"id" serial PRIMARY KEY NOT NULL,
   	"_locale" "_locales" NOT NULL,
   	"_parent_id" integer NOT NULL
@@ -465,6 +536,81 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   
   CREATE TABLE IF NOT EXISTS "_pages_v_blocks_embed_locales" (
   	"main_html" varchar,
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"_locale" "_locales" NOT NULL,
+  	"_parent_id" integer NOT NULL
+  );
+  
+  CREATE TABLE IF NOT EXISTS "_card_bg_v" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"_path" text NOT NULL,
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"main_image_id" integer,
+  	"main_header_title" varchar,
+  	"main_body_title" varchar,
+  	"main_body_text" jsonb,
+  	"main_button_new_tab" boolean,
+  	"styles_css_name" varchar,
+  	"styles_css_style" varchar,
+  	"_uuid" varchar,
+  	"block_name" varchar
+  );
+  
+  CREATE TABLE IF NOT EXISTS "_card_bg_v_locales" (
+  	"main_button_text" varchar,
+  	"main_button_href" varchar,
+  	"main_button_variant" "var" DEFAULT 'link',
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"_locale" "_locales" NOT NULL,
+  	"_parent_id" integer NOT NULL
+  );
+  
+  CREATE TABLE IF NOT EXISTS "_card_in_v" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"_path" text NOT NULL,
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"main_image_id" integer,
+  	"main_header_title" varchar,
+  	"main_body_title" varchar,
+  	"main_body_text" jsonb,
+  	"main_button_new_tab" boolean,
+  	"styles_css_name" varchar,
+  	"styles_css_style" varchar,
+  	"_uuid" varchar,
+  	"block_name" varchar
+  );
+  
+  CREATE TABLE IF NOT EXISTS "_card_in_v_locales" (
+  	"main_button_text" varchar,
+  	"main_button_href" varchar,
+  	"main_button_variant" "var" DEFAULT 'link',
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"_locale" "_locales" NOT NULL,
+  	"_parent_id" integer NOT NULL
+  );
+  
+  CREATE TABLE IF NOT EXISTS "_card_r_v" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"_path" text NOT NULL,
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"main_image_id" integer,
+  	"main_header_title" varchar,
+  	"main_body_title" varchar,
+  	"main_body_text" jsonb,
+  	"main_button_new_tab" boolean,
+  	"styles_css_name" varchar,
+  	"styles_css_style" varchar,
+  	"_uuid" varchar,
+  	"block_name" varchar
+  );
+  
+  CREATE TABLE IF NOT EXISTS "_card_r_v_locales" (
+  	"main_button_text" varchar,
+  	"main_button_href" varchar,
+  	"main_button_variant" "var" DEFAULT 'link',
   	"id" serial PRIMARY KEY NOT NULL,
   	"_locale" "_locales" NOT NULL,
   	"_parent_id" integer NOT NULL
@@ -2125,6 +2271,60 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   END $$;
   
   DO $$ BEGIN
+   ALTER TABLE "card_bg" ADD CONSTRAINT "card_bg_main_image_id_media_id_fk" FOREIGN KEY ("main_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "card_bg" ADD CONSTRAINT "card_bg_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."pages"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "card_bg_locales" ADD CONSTRAINT "card_bg_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."card_bg"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "card_in" ADD CONSTRAINT "card_in_main_image_id_media_id_fk" FOREIGN KEY ("main_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "card_in" ADD CONSTRAINT "card_in_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."pages"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "card_in_locales" ADD CONSTRAINT "card_in_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."card_in"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "card_r" ADD CONSTRAINT "card_r_main_image_id_media_id_fk" FOREIGN KEY ("main_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "card_r" ADD CONSTRAINT "card_r_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."pages"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "card_r_locales" ADD CONSTRAINT "card_r_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."card_r"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
    ALTER TABLE "pages_blocks_container" ADD CONSTRAINT "pages_blocks_container_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."pages"("id") ON DELETE cascade ON UPDATE no action;
   EXCEPTION
    WHEN duplicate_object THEN null;
@@ -2318,6 +2518,60 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   
   DO $$ BEGIN
    ALTER TABLE "_pages_v_blocks_embed_locales" ADD CONSTRAINT "_pages_v_blocks_embed_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v_blocks_embed"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "_card_bg_v" ADD CONSTRAINT "_card_bg_v_main_image_id_media_id_fk" FOREIGN KEY ("main_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "_card_bg_v" ADD CONSTRAINT "_card_bg_v_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "_card_bg_v_locales" ADD CONSTRAINT "_card_bg_v_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_card_bg_v"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "_card_in_v" ADD CONSTRAINT "_card_in_v_main_image_id_media_id_fk" FOREIGN KEY ("main_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "_card_in_v" ADD CONSTRAINT "_card_in_v_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "_card_in_v_locales" ADD CONSTRAINT "_card_in_v_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_card_in_v"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "_card_r_v" ADD CONSTRAINT "_card_r_v_main_image_id_media_id_fk" FOREIGN KEY ("main_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "_card_r_v" ADD CONSTRAINT "_card_r_v_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v"("id") ON DELETE cascade ON UPDATE no action;
+  EXCEPTION
+   WHEN duplicate_object THEN null;
+  END $$;
+  
+  DO $$ BEGIN
+   ALTER TABLE "_card_r_v_locales" ADD CONSTRAINT "_card_r_v_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_card_r_v"("id") ON DELETE cascade ON UPDATE no action;
   EXCEPTION
    WHEN duplicate_object THEN null;
   END $$;
@@ -2979,6 +3233,21 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX IF NOT EXISTS "pages_blocks_embed_parent_id_idx" ON "pages_blocks_embed" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "pages_blocks_embed_path_idx" ON "pages_blocks_embed" USING btree ("_path");
   CREATE UNIQUE INDEX IF NOT EXISTS "pages_blocks_embed_locales_locale_parent_id_unique" ON "pages_blocks_embed_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX IF NOT EXISTS "card_bg_order_idx" ON "card_bg" USING btree ("_order");
+  CREATE INDEX IF NOT EXISTS "card_bg_parent_id_idx" ON "card_bg" USING btree ("_parent_id");
+  CREATE INDEX IF NOT EXISTS "card_bg_path_idx" ON "card_bg" USING btree ("_path");
+  CREATE INDEX IF NOT EXISTS "card_bg_main_main_image_idx" ON "card_bg" USING btree ("main_image_id");
+  CREATE UNIQUE INDEX IF NOT EXISTS "card_bg_locales_locale_parent_id_unique" ON "card_bg_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX IF NOT EXISTS "card_in_order_idx" ON "card_in" USING btree ("_order");
+  CREATE INDEX IF NOT EXISTS "card_in_parent_id_idx" ON "card_in" USING btree ("_parent_id");
+  CREATE INDEX IF NOT EXISTS "card_in_path_idx" ON "card_in" USING btree ("_path");
+  CREATE INDEX IF NOT EXISTS "card_in_main_main_image_idx" ON "card_in" USING btree ("main_image_id");
+  CREATE UNIQUE INDEX IF NOT EXISTS "card_in_locales_locale_parent_id_unique" ON "card_in_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX IF NOT EXISTS "card_r_order_idx" ON "card_r" USING btree ("_order");
+  CREATE INDEX IF NOT EXISTS "card_r_parent_id_idx" ON "card_r" USING btree ("_parent_id");
+  CREATE INDEX IF NOT EXISTS "card_r_path_idx" ON "card_r" USING btree ("_path");
+  CREATE INDEX IF NOT EXISTS "card_r_main_main_image_idx" ON "card_r" USING btree ("main_image_id");
+  CREATE UNIQUE INDEX IF NOT EXISTS "card_r_locales_locale_parent_id_unique" ON "card_r_locales" USING btree ("_locale","_parent_id");
   CREATE INDEX IF NOT EXISTS "pages_blocks_container_order_idx" ON "pages_blocks_container" USING btree ("_order");
   CREATE INDEX IF NOT EXISTS "pages_blocks_container_parent_id_idx" ON "pages_blocks_container" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "pages_blocks_container_path_idx" ON "pages_blocks_container" USING btree ("_path");
@@ -3045,6 +3314,21 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX IF NOT EXISTS "_pages_v_blocks_embed_parent_id_idx" ON "_pages_v_blocks_embed" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "_pages_v_blocks_embed_path_idx" ON "_pages_v_blocks_embed" USING btree ("_path");
   CREATE UNIQUE INDEX IF NOT EXISTS "_pages_v_blocks_embed_locales_locale_parent_id_unique" ON "_pages_v_blocks_embed_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX IF NOT EXISTS "_card_bg_v_order_idx" ON "_card_bg_v" USING btree ("_order");
+  CREATE INDEX IF NOT EXISTS "_card_bg_v_parent_id_idx" ON "_card_bg_v" USING btree ("_parent_id");
+  CREATE INDEX IF NOT EXISTS "_card_bg_v_path_idx" ON "_card_bg_v" USING btree ("_path");
+  CREATE INDEX IF NOT EXISTS "_card_bg_v_main_main_image_idx" ON "_card_bg_v" USING btree ("main_image_id");
+  CREATE UNIQUE INDEX IF NOT EXISTS "_card_bg_v_locales_locale_parent_id_unique" ON "_card_bg_v_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX IF NOT EXISTS "_card_in_v_order_idx" ON "_card_in_v" USING btree ("_order");
+  CREATE INDEX IF NOT EXISTS "_card_in_v_parent_id_idx" ON "_card_in_v" USING btree ("_parent_id");
+  CREATE INDEX IF NOT EXISTS "_card_in_v_path_idx" ON "_card_in_v" USING btree ("_path");
+  CREATE INDEX IF NOT EXISTS "_card_in_v_main_main_image_idx" ON "_card_in_v" USING btree ("main_image_id");
+  CREATE UNIQUE INDEX IF NOT EXISTS "_card_in_v_locales_locale_parent_id_unique" ON "_card_in_v_locales" USING btree ("_locale","_parent_id");
+  CREATE INDEX IF NOT EXISTS "_card_r_v_order_idx" ON "_card_r_v" USING btree ("_order");
+  CREATE INDEX IF NOT EXISTS "_card_r_v_parent_id_idx" ON "_card_r_v" USING btree ("_parent_id");
+  CREATE INDEX IF NOT EXISTS "_card_r_v_path_idx" ON "_card_r_v" USING btree ("_path");
+  CREATE INDEX IF NOT EXISTS "_card_r_v_main_main_image_idx" ON "_card_r_v" USING btree ("main_image_id");
+  CREATE UNIQUE INDEX IF NOT EXISTS "_card_r_v_locales_locale_parent_id_unique" ON "_card_r_v_locales" USING btree ("_locale","_parent_id");
   CREATE INDEX IF NOT EXISTS "_pages_v_blocks_container_order_idx" ON "_pages_v_blocks_container" USING btree ("_order");
   CREATE INDEX IF NOT EXISTS "_pages_v_blocks_container_parent_id_idx" ON "_pages_v_blocks_container" USING btree ("_parent_id");
   CREATE INDEX IF NOT EXISTS "_pages_v_blocks_container_path_idx" ON "_pages_v_blocks_container" USING btree ("_path");
@@ -3136,10 +3420,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE UNIQUE INDEX IF NOT EXISTS "users_email_idx" ON "users" USING btree ("email");
   CREATE INDEX IF NOT EXISTS "roles_collections_permissions_order_idx" ON "roles_collections_permissions" USING btree ("_order");
   CREATE INDEX IF NOT EXISTS "roles_collections_permissions_parent_id_idx" ON "roles_collections_permissions" USING btree ("_parent_id");
-  CREATE UNIQUE INDEX IF NOT EXISTS "roles_collections_permissions_collection_idx" ON "roles_collections_permissions" USING btree ("collection");
   CREATE INDEX IF NOT EXISTS "roles_globals_permissions_order_idx" ON "roles_globals_permissions" USING btree ("_order");
   CREATE INDEX IF NOT EXISTS "roles_globals_permissions_parent_id_idx" ON "roles_globals_permissions" USING btree ("_parent_id");
-  CREATE UNIQUE INDEX IF NOT EXISTS "roles_globals_permissions_global_idx" ON "roles_globals_permissions" USING btree ("global");
   CREATE UNIQUE INDEX IF NOT EXISTS "roles_name_idx" ON "roles" USING btree ("name");
   CREATE UNIQUE INDEX IF NOT EXISTS "roles_slug_idx" ON "roles" USING btree ("slug");
   CREATE INDEX IF NOT EXISTS "roles_updated_at_idx" ON "roles" USING btree ("updated_at");
@@ -3299,6 +3581,12 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "pages_blocks_multimedia_locales" CASCADE;
   DROP TABLE "pages_blocks_embed" CASCADE;
   DROP TABLE "pages_blocks_embed_locales" CASCADE;
+  DROP TABLE "card_bg" CASCADE;
+  DROP TABLE "card_bg_locales" CASCADE;
+  DROP TABLE "card_in" CASCADE;
+  DROP TABLE "card_in_locales" CASCADE;
+  DROP TABLE "card_r" CASCADE;
+  DROP TABLE "card_r_locales" CASCADE;
   DROP TABLE "pages_blocks_container" CASCADE;
   DROP TABLE "pages_blocks_section" CASCADE;
   DROP TABLE "pages" CASCADE;
@@ -3323,6 +3611,12 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "_pages_v_blocks_multimedia_locales" CASCADE;
   DROP TABLE "_pages_v_blocks_embed" CASCADE;
   DROP TABLE "_pages_v_blocks_embed_locales" CASCADE;
+  DROP TABLE "_card_bg_v" CASCADE;
+  DROP TABLE "_card_bg_v_locales" CASCADE;
+  DROP TABLE "_card_in_v" CASCADE;
+  DROP TABLE "_card_in_v_locales" CASCADE;
+  DROP TABLE "_card_r_v" CASCADE;
+  DROP TABLE "_card_r_v_locales" CASCADE;
   DROP TABLE "_pages_v_blocks_container" CASCADE;
   DROP TABLE "_pages_v_blocks_section" CASCADE;
   DROP TABLE "_pages_v" CASCADE;
@@ -3403,7 +3697,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum_pages_blocks_archive_populate_by";
   DROP TYPE "public"."enum_pages_blocks_archive_relation_to";
   DROP TYPE "public"."enum_pages_blocks_header_main_variant";
-  DROP TYPE "public"."enum_pages_blocks_link_main_variant";
+  DROP TYPE "public"."var";
   DROP TYPE "public"."enum_pages_hero_type";
   DROP TYPE "public"."enum_pages_status";
   DROP TYPE "public"."enum__pages_v_version_hero_links_link_type";
@@ -3416,7 +3710,6 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum__pages_v_blocks_archive_populate_by";
   DROP TYPE "public"."enum__pages_v_blocks_archive_relation_to";
   DROP TYPE "public"."enum__pages_v_blocks_header_main_variant";
-  DROP TYPE "public"."enum__pages_v_blocks_link_main_variant";
   DROP TYPE "public"."enum__pages_v_version_hero_type";
   DROP TYPE "public"."enum__pages_v_version_status";
   DROP TYPE "public"."enum__pages_v_published_locale";
