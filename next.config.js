@@ -26,6 +26,7 @@ const nextConfig = {
   },
   reactStrictMode: true,
   redirects,
+  output: process.env.NODE_ENV && 'standalone',
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
