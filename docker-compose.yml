@@ -10,3 +10,12 @@ services:
       - .env
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: "--max-old-space-size=1024" 
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 2g
+        reservations:
+          cpus: '0.5'
+          memory: 1g
