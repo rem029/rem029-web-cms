@@ -7,6 +7,7 @@ import React from 'react'
 
 import { Error } from '../Error'
 import { Width } from '../Width'
+import { css } from '@/utilities/constants'
 export const Number: React.FC<
   TextField & {
     errors: Partial<FieldErrorsImpl>
@@ -25,6 +26,7 @@ export const Number: React.FC<
         )}
       </Label>
       <Input
+        className={css('form__input-number')}
         defaultValue={defaultValue}
         id={name}
         type="number"

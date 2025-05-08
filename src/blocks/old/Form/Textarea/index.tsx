@@ -7,6 +7,7 @@ import React from 'react'
 
 import { Error } from '../Error'
 import { Width } from '../Width'
+import { css } from '@/utilities/constants'
 
 export const Textarea: React.FC<
   TextField & {
@@ -28,6 +29,7 @@ export const Textarea: React.FC<
       </Label>
 
       <TextAreaComponent
+        className={css('form__input-textarea')}
         defaultValue={defaultValue}
         id={name}
         rows={rows}

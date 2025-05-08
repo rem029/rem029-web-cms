@@ -593,7 +593,8 @@ export const defaultThemeCSS = `
 .cms-btn,
 .cms-btn-primary,
 .cms-btn-secondary,
-.cms-btn-outline
+.cms-btn-outline,
+.cms-btn-form
  {
   box-sizing: border-box;
   border-radius: var(--radius-full);
@@ -617,12 +618,14 @@ export const defaultThemeCSS = `
   color: var(--info);
 }
 
-.cms-btn-primary {
+.cms-btn-primary,
+.cms-btn-form {
   background-color: var(--primary);
   color: var(--primary-foreground);
 }
 
-.cms-btn-primary:hover {
+.cms-btn-primary:hover,
+.cms-btn-form:hover {
   background-color: var(--primary-foreground);
   color: var(--primary);
 }
@@ -677,15 +680,7 @@ export const defaultThemeCSS = `
   gap: 4px;
 }
 
-.cms-input[type="text"],
-.cms-textarea,
-.cms-input-select {
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--primary-light);  
-  box-sizing: border-box;
-  padding: 4px 8px;
-  font-size: 16px;
-}
+
 
 .cms-label {
   font-size: 14px;
@@ -761,11 +756,34 @@ p,
   font-size: var(--size-blockquote);
   opacity: .5;
 }
+
 .cms-caption {
   font-style: italic;
   font-size: var(--size-caption);
   opacity: .5;
 }
+
+.cms-form {
+  margin: 0 auto;
+  width: 100%;
+  border: 0 !important;
+}
+
+.cms-form__input-text,
+.cms-form__input-number,
+.cms-form__input-textarea,
+.cms-form__input-select,
+.cms-input[type="text"],
+.cms-textarea,
+.cms-input-select  {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--primary-light);  
+  box-sizing: border-box;
+  padding: 4px 8px;
+  font-size: 16px;
+}
+
+
 
 h1,h2,h3,h4,h5,h6 {
   font-family: 'Urbanist';
