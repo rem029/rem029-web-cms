@@ -19,3 +19,9 @@ services:
         reservations:
           cpus: '0.5'
           memory: 1g
+    volumes:
+      - media_storage:/app/public/media
+
+volumes:
+  media_storage:
+  external: true
