@@ -80,18 +80,7 @@ export default buildConfig({
   collections: [Pages, Posts, Media, Categories, Users, Roles],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, Theme, Settings],
-  plugins:
-    process.env.NODE_ENV === 'production'
-      ? [
-          ...plugins,
-          vercelBlobStorage({
-            collections: {
-              [Media.slug]: true,
-            },
-            token: process.env.BLOB_READ_WRITE_TOKEN || '',
-          }),
-        ]
-      : [...plugins],
+  plugins: [...plugins],
   secret: process.env.PAYLOAD_SECRET,
   email: nodemailerAdapter({
     defaultFromAddress: process.env.DEFAULT_FROM_ADDRESS || '',

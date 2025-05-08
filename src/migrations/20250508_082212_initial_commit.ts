@@ -1,6 +1,6 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
-export async function up({ db }: MigrateUpArgs): Promise<void> {
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    CREATE TYPE "public"."_locales" AS ENUM('en', 'ar');
   CREATE TYPE "public"."enum_pages_hero_links_link_type" AS ENUM('reference', 'custom');
@@ -1757,7 +1757,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   
   .cms-card-img-inline {
     aspect-ratio: unset;
-    background-color: #FFF);
+    background-color: #FFF;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--info-light);
   }
@@ -1792,7 +1792,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     min-height: 96px;  
   
     aspect-ratio: unset;
-    background-color: #FFF);
+    background-color: #FFF;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--info-light);
   }
@@ -3560,7 +3560,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   CREATE INDEX IF NOT EXISTS "settings_updated_by_idx" ON "settings" USING btree ("updated_by_id");`)
 }
 
-export async function down({ db }: MigrateDownArgs): Promise<void> {
+export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
    DROP TABLE "pages_hero_links" CASCADE;
   DROP TABLE "pages_blocks_cta_links" CASCADE;
