@@ -25,6 +25,14 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Add importmap before building
+RUN \
+  if [ -f yarn.lock ]; then yarn payload generate:importmap; \
+  elif [ -f package-lock.json ]; then npm run payload generate:importmap; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run payload generate:importmap; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
+
 # Add migration step before building
 RUN \
   if [ -f yarn.lock ]; then yarn payload migrate; \
