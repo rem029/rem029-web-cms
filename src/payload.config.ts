@@ -19,7 +19,6 @@ import { getServerSideURL } from './utilities/getURL'
 import { Theme } from './Theme/config'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { Settings } from './Settings'
-import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { Roles } from './collections/Roles'
 
 const filename = fileURLToPath(import.meta.url)
@@ -85,14 +84,23 @@ export default buildConfig({
   email: nodemailerAdapter({
     defaultFromAddress: process.env.DEFAULT_FROM_ADDRESS || '',
     defaultFromName: process.env.DEFAULT_FROM_NAME || '',
+
     transportOptions: {
       host: process.env.MAIL_SMTP_HOST,
-      port: Number(process.env.MAIL_SSMTP_PORT),
-      secure: process.env.MAIL_SMTP_SECURE === 'true',
+      port: Number(process.env.MAIL_SMTP_PORT),
       auth: {
         user: process.env.MAIL_SMTP_USER,
         pass: process.env.MAIL_SMTP_PASS,
       },
+      debug: true,
+      ...(process.env.MAIL_SMTP_SECURE === 'true' && {
+        secure: true,
+        // requireTLS: true,
+        // tls: {
+        //   rejectUnauthorized: true,
+        //   minVersion: 'TLSv1.2',
+        // },
+      }),
     },
   }),
   sharp,
