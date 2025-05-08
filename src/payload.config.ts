@@ -92,14 +92,16 @@ export default buildConfig({
         user: process.env.MAIL_SMTP_USER,
         pass: process.env.MAIL_SMTP_PASS,
       },
-      debug: true,
+      ...(process.env.MAIL_SMTP_DEBUG === 'true' && {
+        debug: true,
+        logger: true,
+      }),
       ...(process.env.MAIL_SMTP_SECURE === 'true' && {
         secure: true,
-        // requireTLS: true,
-        // tls: {
-        //   rejectUnauthorized: true,
-        //   minVersion: 'TLSv1.2',
-        // },
+        tls: {
+          ciphers: 'SSLv3',
+          rejectUnauthorized: false,
+        },
       }),
     },
   }),
