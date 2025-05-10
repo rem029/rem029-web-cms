@@ -148,6 +148,11 @@ export const defaultThemeCSS = `
 .cms-header__logo{
   width: 96px;
   height: auto;
+ 
+}
+
+.cms-header__logo img {
+  object-fit: contain;
 }
 
 .cms-header__nav{}
@@ -453,10 +458,13 @@ export const defaultThemeCSS = `
   color: white;
 }
 
-.cms-footer__logo{
+.cms-footer__logo {
   width: 96px;
   height: auto;
 }
+
+.cms-footer__logo img {
+  object-fit: contain;}
 
 .cms-footer__nav{
   display: flex;

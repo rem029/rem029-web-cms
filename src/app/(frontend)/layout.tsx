@@ -24,7 +24,7 @@ import { sanitizeCSS } from '@/utilities/sanitize'
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
   const themes = await getGlobal('theme')
-  const settings = await getGlobal('settings')
+  const settings = await getGlobal('settings', 1)
 
   const theme = themes?.themes?.find((theme) => theme.active === true)
   const css = theme?.css || defaultThemeCSS
@@ -33,6 +33,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const cleanJs = DOMPurify.sanitize(js)
   const cleanCss = sanitizeCSS(css)
   const favicon = (settings?.favicon as Media)?.url || ''
+
+  console.log('favicon', favicon)
 
   return (
     <html

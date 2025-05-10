@@ -36,7 +36,12 @@ export const DrawerNav: React.FC<{ data: HeaderType; settings: Setting }> = ({
       >
         <div className={css('header__drawer-header')}>
           <Link href="/" className={css('header__logo')}>
-            <Logo loading="eager" priority="high" src={(settings?.logo as Media)?.url || ''} />
+            <Logo
+              loading="eager"
+              priority="high"
+              src={(settings?.logo as Media)?.url || ''}
+              className={css('footer__logo')}
+            />
           </Link>
           <button onClick={() => setIsDrawerOpen(false)}>
             <IoMdClose />
