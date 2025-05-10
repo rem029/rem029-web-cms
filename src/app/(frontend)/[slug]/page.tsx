@@ -5,7 +5,6 @@ import configPromise from '@payload-config'
 import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
-import { homeStatic } from '@/endpoints/seed/home-static'
 
 import { RenderBlocks } from '@/blocks/old/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
@@ -14,6 +13,7 @@ import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { css } from '@/utilities/constants'
 import { getStyles } from '@/fields/css'
+import { homeStatic } from '@/endpoints/seed/home-static'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })

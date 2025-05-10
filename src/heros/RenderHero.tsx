@@ -1,19 +1,20 @@
 import React from 'react'
 
 import type { Page } from '@/payload-types'
-
-import { HighImpactHero } from '@/heros/HighImpact'
-import { LowImpactHero } from '@/heros/LowImpact'
-import { MediumImpactHero } from '@/heros/MediumImpact'
+import { CarouselHero } from './Carousel'
+import { css } from '@/utilities/constants'
+import { getStyles } from '@/fields/css'
 
 const heroes = {
-  highImpact: HighImpactHero,
-  lowImpact: LowImpactHero,
-  mediumImpact: MediumImpactHero,
+  carousel: CarouselHero,
 }
 
 export const RenderHero: React.FC<Page['hero']> = (props) => {
-  const { type } = props || {}
+  const {
+    main: { type, settings },
+    styles,
+  } = props || {}
+  const { cssName, cssStyle } = getStyles({ ...styles })
 
   if (!type || type === 'none') return null
 
@@ -21,5 +22,16 @@ export const RenderHero: React.FC<Page['hero']> = (props) => {
 
   if (!HeroToRender) return null
 
-  return <HeroToRender {...props} />
+  return (
+    <div className={`${css('hero')} ${cssName}`}>
+      {cssStyle && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: cssStyle || '',
+          }}
+        />
+      )}
+      <HeroToRender {...settings} />
+    </div>
+  )
 }

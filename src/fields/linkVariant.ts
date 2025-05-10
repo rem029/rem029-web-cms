@@ -5,12 +5,12 @@ export const LinkVariant: Field[] = [
     name: 'text',
     type: 'text',
     localized: true,
-    required: true,
+    required: false,
   },
   {
     name: 'href',
     type: 'text',
-    required: true,
+    required: false,
     localized: true,
   },
   {
@@ -23,7 +23,7 @@ export const LinkVariant: Field[] = [
     dbName: 'var',
     type: 'select',
     localized: true,
-    required: true,
+    required: false,
     defaultValue: 'link',
     options: [
       { label: 'Link', value: 'link' },

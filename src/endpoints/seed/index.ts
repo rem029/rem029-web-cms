@@ -1,8 +1,8 @@
 import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
 
 import { contactForm as contactFormData } from './contact-form'
-import { contact as contactPageData } from './contact-page'
-import { home } from './home'
+
+// import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
@@ -301,18 +301,18 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding pages...`)
 
-  const [_, contactPage] = await Promise.all([
-    payload.create({
-      collection: 'pages',
-      depth: 0,
-      data: home({ heroImage: imageHomeDoc, metaImage: image2Doc }),
-    }),
-    payload.create({
-      collection: 'pages',
-      depth: 0,
-      data: contactPageData({ contactForm: contactForm }),
-    }),
-  ])
+  // const [_,contact] = await Promise.all([
+  //   payload.create({
+  //     collection: 'pages',
+  //     depth: 0,
+  //     data: home({ heroImage: imageHomeDoc, metaImage: image2Doc }),
+  //   }),
+  //   payload.create({
+  //     collection: 'pages',
+  //     depth: 0,
+  //     data: contactPageData({ contactForm: contactForm }),
+  //   }),
+  // ])
 
   payload.logger.info(`— Seeding globals...`)
 
@@ -328,16 +328,16 @@ export const seed = async ({
               url: '/posts',
             },
           },
-          {
-            link: {
-              type: 'reference',
-              label: 'Contact',
-              reference: {
-                relationTo: 'pages',
-                value: contactPage.id,
-              },
-            },
-          },
+          // {
+          //   link: {
+          //     type: 'reference',
+          //     label: 'Contact',
+          //     reference: {
+          //       relationTo: 'pages',
+          //       value: contactPage.id,
+          //     },
+          //   },
+          // },
         ],
       },
     }),

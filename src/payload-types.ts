@@ -7,6 +7,45 @@
  */
 
 /**
+ * Add and configure individual slides for the carousel.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroSlide".
+ */
+export type HeroSlide =
+  | {
+      image?: (number | null) | Media;
+      /**
+       * How the image should be resized to fit the container.
+       */
+      imageFit?: ('contain' | 'cover' | 'fill') | null;
+      headerTitle?: string | null;
+      bodyTitle?: string | null;
+      bodyText?: {
+        root: {
+          type: string;
+          children: {
+            type: string;
+            version: number;
+            [k: string]: unknown;
+          }[];
+          direction: ('ltr' | 'rtl') | null;
+          format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+          indent: number;
+          version: number;
+        };
+        [k: string]: unknown;
+      } | null;
+      button?: {
+        text?: string | null;
+        href?: string | null;
+        new_tab?: boolean | null;
+        variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
+      };
+      id?: string | null;
+    }[]
+  | null;
+/**
  * Set permissions for each collection
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -223,49 +262,7 @@ export interface UserAuthOperations {
 export interface Page {
   id: number;
   title: string;
-  hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: string;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    links?:
-      | {
-          link: {
-            type?: ('reference' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?:
-              | ({
-                  relationTo: 'pages';
-                  value: number | Page;
-                } | null)
-              | ({
-                  relationTo: 'posts';
-                  value: number | Post;
-                } | null);
-            url?: string | null;
-            label: string;
-            /**
-             * Choose how the link should be rendered.
-             */
-            appearance?: ('default' | 'outline') | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    media?: (number | null) | Media;
-  };
+  hero: Hero;
   layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock | SectionBlock)[];
   /**
    * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
@@ -290,51 +287,63 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Configure the hero section for this page, including carousel options.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "Hero".
  */
-export interface Post {
-  id: number;
-  title: string;
-  heroImage?: (number | null) | Media;
-  content: {
-    root: {
-      type: string;
-      children: {
+export interface Hero {
+  main: {
+    type: 'none' | 'carousel';
+    settings?: CarouselSettings;
+    richText?: {
+      root: {
         type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
         version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
+      };
+      [k: string]: unknown;
+    } | null;
+    media?: (number | null) | Media;
   };
-  relatedPosts?: (number | Post)[] | null;
-  categories?: (number | Category)[] | null;
-  meta?: {
-    title?: string | null;
+  styles?: {
     /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
-    image?: (number | null) | Media;
-    description?: string | null;
+    css_name?: string | null;
+    css_style?: string | null;
   };
-  publishedAt?: string | null;
-  authors?: (number | User)[] | null;
-  populatedAuthors?:
-    | {
-        id?: string | null;
-        name?: string | null;
-      }[]
-    | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Choose slide should be displayed.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarouselSettings".
+ */
+export interface CarouselSettings {
+  /**
+   * Customize the behavior of the carousel.
+   */
+  carouselSettings?: {
+    autoplay?: boolean | null;
+    loop?: boolean | null;
+    /**
+     * Add a custom class name to the carousel.
+     */
+    className?: string | null;
+  };
+  /**
+   * Choose slide should be displayed.
+   */
+  layout?: 'feature' | null;
+  slides?: HeroSlide;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -484,27 +493,6 @@ export interface Role {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  parent?: (number | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (number | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
@@ -550,6 +538,74 @@ export interface CallToActionBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  heroImage?: (number | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  relatedPosts?: (number | Post)[] | null;
+  categories?: (number | Category)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  publishedAt?: string | null;
+  authors?: (number | User)[] | null;
+  populatedAuthors?:
+    | {
+        id?: string | null;
+        name?: string | null;
+      }[]
+    | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  parent?: (number | null) | Category;
+  breadcrumbs?:
+    | {
+        doc?: (number | null) | Category;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -880,6 +936,7 @@ export interface ContainerBlock {
           | CardWithBackgroundBlock
           | CardInlineImageBlock
           | CardRowBlock
+          | CarouselBlock
           | FormBlock
         )[]
       | null;
@@ -953,11 +1010,11 @@ export interface TextBlock {
  * via the `definition` "LinkBlock".
  */
 export interface LinkBlock {
-  main: {
-    text: string;
-    href: string;
+  main?: {
+    text?: string | null;
+    href?: string | null;
     new_tab?: boolean | null;
-    variant: 'link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn';
+    variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
   };
   styles?: {
     /**
@@ -1013,8 +1070,12 @@ export interface EmbedBlock {
  * via the `definition` "CardWithBackgroundBlock".
  */
 export interface CardWithBackgroundBlock {
-  main: {
+  main?: {
     image?: (number | null) | Media;
+    /**
+     * How the image should be resized to fit the container.
+     */
+    imageFit?: ('contain' | 'cover' | 'fill') | null;
     headerTitle?: string | null;
     bodyTitle?: string | null;
     bodyText?: {
@@ -1032,12 +1093,13 @@ export interface CardWithBackgroundBlock {
       };
       [k: string]: unknown;
     } | null;
-    button: {
-      text: string;
-      href: string;
+    button?: {
+      text?: string | null;
+      href?: string | null;
       new_tab?: boolean | null;
-      variant: 'link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn';
+      variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
     };
+    id?: string | null;
   };
   styles?: {
     /**
@@ -1055,8 +1117,12 @@ export interface CardWithBackgroundBlock {
  * via the `definition` "CardInlineImageBlock".
  */
 export interface CardInlineImageBlock {
-  main: {
+  main?: {
     image?: (number | null) | Media;
+    /**
+     * How the image should be resized to fit the container.
+     */
+    imageFit?: ('contain' | 'cover' | 'fill') | null;
     headerTitle?: string | null;
     bodyTitle?: string | null;
     bodyText?: {
@@ -1074,12 +1140,13 @@ export interface CardInlineImageBlock {
       };
       [k: string]: unknown;
     } | null;
-    button: {
-      text: string;
-      href: string;
+    button?: {
+      text?: string | null;
+      href?: string | null;
       new_tab?: boolean | null;
-      variant: 'link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn';
+      variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
     };
+    id?: string | null;
   };
   styles?: {
     /**
@@ -1097,8 +1164,12 @@ export interface CardInlineImageBlock {
  * via the `definition` "CardRowBlock".
  */
 export interface CardRowBlock {
-  main: {
+  main?: {
     image?: (number | null) | Media;
+    /**
+     * How the image should be resized to fit the container.
+     */
+    imageFit?: ('contain' | 'cover' | 'fill') | null;
     headerTitle?: string | null;
     bodyTitle?: string | null;
     bodyText?: {
@@ -1116,12 +1187,13 @@ export interface CardRowBlock {
       };
       [k: string]: unknown;
     } | null;
-    button: {
-      text: string;
-      href: string;
+    button?: {
+      text?: string | null;
+      href?: string | null;
       new_tab?: boolean | null;
-      variant: 'link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn';
+      variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
     };
+    id?: string | null;
   };
   styles?: {
     /**
@@ -1133,6 +1205,44 @@ export interface CardRowBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'card-row';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarouselBlock".
+ */
+export interface CarouselBlock {
+  main?: {
+    /**
+     * Customize the behavior of the carousel.
+     */
+    carouselSettings?: {
+      slidesPerView?: number | null;
+      centeredSlides?: boolean | null;
+      autoplay?: boolean | null;
+      loop?: boolean | null;
+      showArrows?: boolean | null;
+      showDots?: boolean | null;
+      /**
+       * Add a custom class name to the carousel.
+       */
+      className?: string | null;
+    };
+    /**
+     * Choose slide should be displayed.
+     */
+    layout?: ('card-row' | 'card-inline-image' | 'card-with-background') | null;
+    slides?: HeroSlide;
+  };
+  styles?: {
+    /**
+     * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
+     */
+    css_name?: string | null;
+    css_style?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'carousel-block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1398,28 +1508,7 @@ export interface PayloadMigration {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
-  hero?:
-    | T
-    | {
-        type?: T;
-        richText?: T;
-        links?:
-          | T
-          | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    url?: T;
-                    label?: T;
-                    appearance?: T;
-                  };
-              id?: T;
-            };
-        media?: T;
-      };
+  hero?: T | HeroSelect<T>;
   layout?:
     | T
     | {
@@ -1447,6 +1536,61 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Hero_select".
+ */
+export interface HeroSelect<T extends boolean = true> {
+  main?:
+    | T
+    | {
+        type?: T;
+        settings?: T | CarouselSettingsSelect<T>;
+        richText?: T;
+        media?: T;
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarouselSettings_select".
+ */
+export interface CarouselSettingsSelect<T extends boolean = true> {
+  carouselSettings?:
+    | T
+    | {
+        autoplay?: T;
+        loop?: T;
+        className?: T;
+      };
+  layout?: T;
+  slides?: T | HeroSlideSelect<T>;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroSlide_select".
+ */
+export interface HeroSlideSelect<T extends boolean = true> {
+  image?: T;
+  imageFit?: T;
+  headerTitle?: T;
+  bodyTitle?: T;
+  bodyText?: T;
+  button?:
+    | T
+    | {
+        text?: T;
+        href?: T;
+        new_tab?: T;
+        variant?: T;
+      };
+  id?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1574,6 +1718,7 @@ export interface ContainerBlockSelect<T extends boolean = true> {
               'card-with-background'?: T | CardWithBackgroundBlockSelect<T>;
               'card-inline-image'?: T | CardInlineImageBlockSelect<T>;
               'card-row'?: T | CardRowBlockSelect<T>;
+              'carousel-block'?: T | CarouselBlockSelect<T>;
               formBlock?: T | FormBlockSelect<T>;
             };
       };
@@ -1694,6 +1839,7 @@ export interface CardWithBackgroundBlockSelect<T extends boolean = true> {
     | T
     | {
         image?: T;
+        imageFit?: T;
         headerTitle?: T;
         bodyTitle?: T;
         bodyText?: T;
@@ -1705,6 +1851,7 @@ export interface CardWithBackgroundBlockSelect<T extends boolean = true> {
               new_tab?: T;
               variant?: T;
             };
+        id?: T;
       };
   styles?:
     | T
@@ -1724,6 +1871,7 @@ export interface CardInlineImageBlockSelect<T extends boolean = true> {
     | T
     | {
         image?: T;
+        imageFit?: T;
         headerTitle?: T;
         bodyTitle?: T;
         bodyText?: T;
@@ -1735,6 +1883,7 @@ export interface CardInlineImageBlockSelect<T extends boolean = true> {
               new_tab?: T;
               variant?: T;
             };
+        id?: T;
       };
   styles?:
     | T
@@ -1754,6 +1903,7 @@ export interface CardRowBlockSelect<T extends boolean = true> {
     | T
     | {
         image?: T;
+        imageFit?: T;
         headerTitle?: T;
         bodyTitle?: T;
         bodyText?: T;
@@ -1765,6 +1915,38 @@ export interface CardRowBlockSelect<T extends boolean = true> {
               new_tab?: T;
               variant?: T;
             };
+        id?: T;
+      };
+  styles?:
+    | T
+    | {
+        css_name?: T;
+        css_style?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarouselBlock_select".
+ */
+export interface CarouselBlockSelect<T extends boolean = true> {
+  main?:
+    | T
+    | {
+        carouselSettings?:
+          | T
+          | {
+              slidesPerView?: T;
+              centeredSlides?: T;
+              autoplay?: T;
+              loop?: T;
+              showArrows?: T;
+              showDots?: T;
+              className?: T;
+            };
+        layout?: T;
+        slides?: T | HeroSlideSelect<T>;
       };
   styles?:
     | T

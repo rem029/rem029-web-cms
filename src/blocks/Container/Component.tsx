@@ -12,6 +12,7 @@ import { CardWithBackgroundBlock } from '../CardWithBackground/Component'
 import { CardInlineImageBlock } from '../CardInlineImage/Component'
 import { CardRowBlock } from '../CardRow/Component'
 import { FormBlock } from '../old/Form/Component'
+import { CarouselBlock } from '../Carousel/Component'
 
 export interface ContainerBlockTypeProps extends ContainerBlockType {}
 
@@ -25,6 +26,7 @@ const componentsMap: Record<string, React.ComponentType<any>> = {
   'card-inline-image': CardInlineImageBlock,
   'card-row': CardRowBlock,
   formBlock: FormBlock,
+  'carousel-block': CarouselBlock,
 }
 
 export const ContainerBlock = ({ components, styles }: ContainerBlockTypeProps) => {

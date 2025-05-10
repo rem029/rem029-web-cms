@@ -117,6 +117,8 @@ export const defaultThemeCSS = `
 }
 
 
+
+
 * {
   font-family: 'Poppins';
 }
@@ -242,6 +244,112 @@ export const defaultThemeCSS = `
   width: 100%;
   height: auto;
   color: var(--secondary);
+}
+
+.cms-hero {
+  width: 100%;
+  height: max-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cms-hero__carousel-navigation {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 16px;
+}
+
+.cms-hero__carousel-pagination-bullet {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin: 0 4px;
+    border-radius: 50%;
+    cursor: pointer;
+    background-color: var(--base);
+    opacity: 0.5;
+}
+
+.cms-hero__carousel-pagination-bullet-active {
+    opacity: 1;
+    background-color: var(--secondary);
+}
+
+.cms-hero__carousel {
+  width: 100%;  
+  height: 100%;  
+  position: relative;
+}
+
+.cms-hero__carousel-slide {
+  width: max-content;
+  box-sizing: border-box;
+  padding: 0px 0px;
+}
+
+.cms-hero__feature {
+  position: relative;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 1;
+}
+
+.cms-hero__feature-content,
+.cms-hero__feature-overlay {
+  position: absolute;  
+}
+
+.cms-hero__feature-overlay {
+  background: rgba(0, 0, 0, 0.01);
+  background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+
+  opacity: 0.5;
+  width: 100%;
+  height: 100%;
+}
+
+.cms-hero__feature-content {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  justify-content: end;
+  align-items: start;
+  box-sizing: border-box;  
+  max-width: var(--max-width); 
+  padding: 4px;
+}
+
+.cms-hero__feature-header {
+  font-size: var(--size-h3);
+  color: var(--secondary);
+}
+.cms-hero__feature-body {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  gap: 8px;
+  color: white;
+}
+.cms-hero__feature-body-title {
+  font-size: var(--size-h6);
+}
+.cms-hero__feature-body-text {
+  font-size: var(--size-p-md);
+}
+.cms-hero__feature-footer {
+  padding: 8px 0px;
+}
+
+.cms-hero__feature img {
+  object-fit: cover;
 }
 
 .cms-page{
@@ -434,6 +542,11 @@ export const defaultThemeCSS = `
   z-index: 2;
 }
 
+.cms-card-img-bg .cms-card-footer {
+  font-size: var(--size-p);
+  color: var(--secondary);
+}
+
 /* ─── Cards Image Inline ───────────────────────── */
 
 .cms-card-img-inline {
@@ -500,7 +613,11 @@ export const defaultThemeCSS = `
 .cms-card-body,
 .cms-card-footer {  
   padding: 8px 8px;
-  font-size: var(--size-h5);
+  font-size: var(--size-p);
+}
+
+.cms-card-header h6 {
+  width: max-content;
 }
 
 .cms-card-body {  
@@ -601,7 +718,7 @@ export const defaultThemeCSS = `
   font-family: 'Urbanist';    
   background-color: var(--info);
   color: var(--info-foreground);
-  font-size: 16px;
+  font-size: var(--size-p);
   padding: 8px 24px;
   box-shadow: var(--shadow-md);
   transition: all 0.2s ease;
@@ -802,6 +919,29 @@ button {
 
 input {
   font-family: 'Poppins';
+}
+
+
+/* ─── Responsive ───────────────────────── */
+
+@media only screen and (max-width: 768px) {
+ .cms-hero__feature {
+    aspect-ratio: 4 / 3;
+ }
+
+ .cms-hero__feature-content {
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .cms-btn,
+  .cms-btn-primary,
+  .cms-btn-secondary,
+  .cms-btn-outline,
+  .cms-btn-form {
+    padding: 4px 16px;
+    font-size: 16px;
+  }
 }
 `
 

@@ -16,7 +16,7 @@ export const CardWithBackgroundBlock = ({ main, styles }: CardWithBackgroundBloc
   const bodyTitle = main?.bodyTitle || ''
   const bodyText = main?.bodyText || ''
 
-  const buttonVariant = main?.button?.variant || ''
+  const buttonVariant = main?.button?.variant || undefined
   const buttonHref = main?.button?.href || ''
   const buttonText = main?.button?.text || ''
   const buttonNewTab = main?.button?.new_tab || false
@@ -33,7 +33,12 @@ export const CardWithBackgroundBlock = ({ main, styles }: CardWithBackgroundBloc
       <div className={`${css('card')} ${css('card-img-bg')} ${cssName}`}>
         {img && (
           <div className={css('card-img')}>
-            <Image alt={img?.alt || ''} src={img?.url || ''} fill />
+            <Image
+              alt={img?.alt || ''}
+              src={img?.url || ''}
+              fill
+              objectFit={main?.imageFit || 'contain'}
+            />
           </div>
         )}
         <div className={css('card-overlay')} />

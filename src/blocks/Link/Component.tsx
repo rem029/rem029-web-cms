@@ -11,6 +11,7 @@ export interface LinkBlockProps extends LinkBlockType {}
 type HeaderVariants = NonNullable<LinkBlockType['main']>['variant']
 
 export const LinkBlock = ({ main, styles }: LinkBlockProps) => {
+  if (!main) return null
   const { text, variant, href, new_tab } = main
   const { cssName, cssStyle } = getStyles({ ...styles })
 

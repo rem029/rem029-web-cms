@@ -16,7 +16,7 @@ export const CardInlineImageBlock = ({ main, styles }: CardInlineImageBlockProps
   const bodyTitle = main?.bodyTitle || ''
   const bodyText = main?.bodyText || ''
 
-  const buttonVariant = main?.button?.variant || ''
+  const buttonVariant = main?.button?.variant
   const buttonHref = main?.button?.href || ''
   const buttonText = main?.button?.text || ''
   const buttonNewTab = main?.button?.new_tab || false
@@ -40,7 +40,12 @@ export const CardInlineImageBlock = ({ main, styles }: CardInlineImageBlockProps
 
         {img && (
           <div className={css('card-img')}>
-            <Image alt={img?.alt || ''} src={img?.url || ''} fill />
+            <Image
+              alt={img?.alt || ''}
+              src={img?.url || ''}
+              fill
+              objectFit={main?.imageFit || 'contain'}
+            />
           </div>
         )}
 
@@ -56,8 +61,8 @@ export const CardInlineImageBlock = ({ main, styles }: CardInlineImageBlockProps
             />
           )}
         </div>
-        <div className={`${css('card-footer')}`}>
-          {buttonText && (
+        {buttonText && (
+          <div className={`${css('card-footer')}`}>
             <LinkBlock
               blockType="link"
               main={{
@@ -67,8 +72,8 @@ export const CardInlineImageBlock = ({ main, styles }: CardInlineImageBlockProps
                 new_tab: buttonNewTab,
               }}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </React.Fragment>
   )

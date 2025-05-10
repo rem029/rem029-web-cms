@@ -75,7 +75,6 @@ export const Pages: CollectionConfig<'pages'> = {
         {
           fields: [hero],
           label: 'Hero',
-          hidden: true,
         },
         {
           fields: [

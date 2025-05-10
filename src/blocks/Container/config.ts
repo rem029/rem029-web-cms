@@ -9,6 +9,7 @@ import { CardWithBackgroundBlock } from '../CardWithBackground/config'
 import { CardInlineImageBlock } from '../CardInlineImage/config'
 import { CardRowBlock } from '../CardRow/config'
 import { FormBlock } from '../old/Form/config'
+import { CarouselBlock } from '../Carousel/config'
 
 export const sectionBlocks: Block[] = [
   HeaderBlock,
@@ -19,6 +20,7 @@ export const sectionBlocks: Block[] = [
   CardWithBackgroundBlock,
   CardInlineImageBlock,
   CardRowBlock,
+  CarouselBlock,
   FormBlock,
 ]
 
