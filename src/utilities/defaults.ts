@@ -124,8 +124,8 @@ export const defaultThemeCSS = `
 }
 
 .cms-header{
-  min-height: 96px;
-  height: 96px;
+  min-height: 72px;
+  height: 72px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -301,6 +301,10 @@ export const defaultThemeCSS = `
   aspect-ratio: 4 / 1;
 }
 
+.cms-hero__feature .cms-link {
+  color: var(--secondary); 
+}
+
 .cms-hero__feature-content,
 .cms-hero__feature-overlay {
   position: absolute;  
@@ -333,7 +337,7 @@ export const defaultThemeCSS = `
 
 .cms-hero__feature-header {
   font-size: var(--size-h3);
-  color: var(--secondary);
+  color: white;
 }
 .cms-hero__feature-body {
   display: flex;
@@ -496,6 +500,10 @@ export const defaultThemeCSS = `
 .cms-card-img-bg .cms-card-img  {
   width: 100%;
   height: 100%;
+}
+
+.cms-card-img-bg .cms-link {
+  color: var(--secondary);
 }
 
 .cms-card-overlay {
