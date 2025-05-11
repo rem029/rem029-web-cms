@@ -37,10 +37,11 @@ export type HeroSlide =
         [k: string]: unknown;
       } | null;
       button?: {
+        elemId?: string | null;
         text?: string | null;
         href?: string | null;
         new_tab?: boolean | null;
-        variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
+        variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
       };
       id?: string | null;
     }[]
@@ -264,6 +265,7 @@ export interface Page {
   title: string;
   hero: Hero;
   layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock | SectionBlock)[];
+  elemId?: string | null;
   /**
    * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
    */
@@ -314,6 +316,7 @@ export interface Hero {
     media?: (number | null) | Media;
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -910,6 +913,7 @@ export interface SectionBlock {
     components: ContainerBlock[];
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -942,6 +946,7 @@ export interface ContainerBlock {
       | null;
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -962,6 +967,7 @@ export interface HeaderBlock {
     variant: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -995,6 +1001,7 @@ export interface TextBlock {
     };
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -1011,12 +1018,14 @@ export interface TextBlock {
  */
 export interface LinkBlock {
   main?: {
+    elemId?: string | null;
     text?: string | null;
     href?: string | null;
     new_tab?: boolean | null;
-    variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
+    variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -1036,6 +1045,7 @@ export interface MultiMediaBlock {
     image: number | Media;
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -1055,6 +1065,7 @@ export interface EmbedBlock {
     html: string;
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -1094,14 +1105,16 @@ export interface CardWithBackgroundBlock {
       [k: string]: unknown;
     } | null;
     button?: {
+      elemId?: string | null;
       text?: string | null;
       href?: string | null;
       new_tab?: boolean | null;
-      variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
+      variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
     };
     id?: string | null;
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -1141,14 +1154,16 @@ export interface CardInlineImageBlock {
       [k: string]: unknown;
     } | null;
     button?: {
+      elemId?: string | null;
       text?: string | null;
       href?: string | null;
       new_tab?: boolean | null;
-      variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
+      variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
     };
     id?: string | null;
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -1188,14 +1203,16 @@ export interface CardRowBlock {
       [k: string]: unknown;
     } | null;
     button?: {
+      elemId?: string | null;
       text?: string | null;
       href?: string | null;
       new_tab?: boolean | null;
-      variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn') | null;
+      variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
     };
     id?: string | null;
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -1234,6 +1251,7 @@ export interface CarouselBlock {
     slides?: HeroSlide;
   };
   styles?: {
+    elemId?: string | null;
     /**
      * Add CSS class names to the element. These will be added to the element as a class attribute. You can use this to add custom styles to the element.
      */
@@ -1519,6 +1537,7 @@ export interface PagesSelect<T extends boolean = true> {
         formBlock?: T | FormBlockSelect<T>;
         section?: T | SectionBlockSelect<T>;
       };
+  elemId?: T;
   css_name?: T;
   css_style?: T;
   meta?:
@@ -1553,6 +1572,7 @@ export interface HeroSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1585,6 +1605,7 @@ export interface HeroSlideSelect<T extends boolean = true> {
   button?:
     | T
     | {
+        elemId?: T;
         text?: T;
         href?: T;
         new_tab?: T;
@@ -1693,6 +1714,7 @@ export interface SectionBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1725,6 +1747,7 @@ export interface ContainerBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1745,6 +1768,7 @@ export interface HeaderBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1764,6 +1788,7 @@ export interface TextBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1778,6 +1803,7 @@ export interface LinkBlockSelect<T extends boolean = true> {
   main?:
     | T
     | {
+        elemId?: T;
         text?: T;
         href?: T;
         new_tab?: T;
@@ -1786,6 +1812,7 @@ export interface LinkBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1805,6 +1832,7 @@ export interface MultiMediaBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1824,6 +1852,7 @@ export interface EmbedBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1846,6 +1875,7 @@ export interface CardWithBackgroundBlockSelect<T extends boolean = true> {
         button?:
           | T
           | {
+              elemId?: T;
               text?: T;
               href?: T;
               new_tab?: T;
@@ -1856,6 +1886,7 @@ export interface CardWithBackgroundBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1878,6 +1909,7 @@ export interface CardInlineImageBlockSelect<T extends boolean = true> {
         button?:
           | T
           | {
+              elemId?: T;
               text?: T;
               href?: T;
               new_tab?: T;
@@ -1888,6 +1920,7 @@ export interface CardInlineImageBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1910,6 +1943,7 @@ export interface CardRowBlockSelect<T extends boolean = true> {
         button?:
           | T
           | {
+              elemId?: T;
               text?: T;
               href?: T;
               new_tab?: T;
@@ -1920,6 +1954,7 @@ export interface CardRowBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };
@@ -1951,6 +1986,7 @@ export interface CarouselBlockSelect<T extends boolean = true> {
   styles?:
     | T
     | {
+        elemId?: T;
         css_name?: T;
         css_style?: T;
       };

@@ -12,6 +12,8 @@ import RichText from '@/components/RichText'
 import { CardInlineImageBlock } from '@/blocks/CardInlineImage/Component'
 import { CardWithBackgroundBlock } from '@/blocks/CardWithBackground/Component'
 import { CardRowBlock } from '@/blocks/CardRow/Component'
+import { CarouselBlock } from '@/blocks/Carousel/Component'
+import { sampleCarouselCards } from './sample-carousal-card'
 
 type ThemePreviewClientProps = {
   activeThemeName: string
@@ -628,6 +630,7 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
                     url: 'https://images.pexels.com/photos/31936770/pexels-photo-31936770/free-photo-of-striking-black-and-white-view-of-london-eye.jpeg?auto=compress&cs=tinysrgb&w=400&lazy=load',
                     alt: 'Placeholder',
                   },
+                  imageFit: 'cover',
                   button: {
                     href: '#',
                     text: 'Click here',
@@ -648,6 +651,7 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
                     url: 'https://images.pexels.com/photos/31936770/pexels-photo-31936770/free-photo-of-striking-black-and-white-view-of-london-eye.jpeg?auto=compress&cs=tinysrgb&w=400&lazy=load',
                     alt: 'Placeholder',
                   },
+                  imageFit: 'cover',
                   button: {
                     href: '#',
                     text: 'Click here',
@@ -668,6 +672,7 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
                     url: 'https://images.pexels.com/photos/31936770/pexels-photo-31936770/free-photo-of-striking-black-and-white-view-of-london-eye.jpeg?auto=compress&cs=tinysrgb&w=400&lazy=load',
                     alt: 'Placeholder',
                   },
+                  imageFit: 'cover',
                   button: {
                     href: '#',
                     text: 'Click here',
@@ -698,6 +703,64 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
                 <p>This is a error alert</p>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className={css('section')}>
+          <div className={css('section__container')}>
+            <h2 className={css('h2')}>Carousels With BG</h2>
+            <CarouselBlock
+              blockType="carousel-block"
+              main={{
+                carouselSettings: {
+                  slidesPerView: 3,
+                  centeredSlides: false,
+                  autoplay: false,
+                  loop: true,
+                  showArrows: true,
+                  showDots: true,
+                  className: null,
+                },
+                layout: 'card-with-background',
+                slides: sampleCarouselCards,
+              }}
+            />
+
+            <h2 className={css('h2')}>Carousels Inline Image</h2>
+            <CarouselBlock
+              blockType="carousel-block"
+              main={{
+                carouselSettings: {
+                  slidesPerView: 3,
+                  centeredSlides: false,
+                  autoplay: false,
+                  loop: true,
+                  showArrows: true,
+                  showDots: true,
+                  className: null,
+                },
+                layout: 'card-inline-image',
+                slides: sampleCarouselCards,
+              }}
+            />
+
+            <h2 className={css('h2')}>Carousels Card Row</h2>
+            <CarouselBlock
+              blockType="carousel-block"
+              main={{
+                carouselSettings: {
+                  slidesPerView: 3,
+                  centeredSlides: false,
+                  autoplay: false,
+                  loop: true,
+                  showArrows: true,
+                  showDots: true,
+                  className: null,
+                },
+                layout: 'card-row',
+                slides: sampleCarouselCards,
+              }}
+            />
           </div>
         </section>
 

@@ -2,6 +2,12 @@ import { Field } from 'payload'
 
 export const LinkVariant: Field[] = [
   {
+    name: 'elemId',
+    type: 'text',
+    localized: false,
+    required: false,
+  },
+  {
     name: 'text',
     type: 'text',
     localized: true,
@@ -30,6 +36,7 @@ export const LinkVariant: Field[] = [
       { label: 'Button Primary', value: 'btn-primary' },
       { label: 'Button Secondary', value: 'btn-secondary' },
       { label: 'Button Outline', value: 'btn-outline' },
+      { label: 'Button Outline Primary', value: 'btn-outline-primary' },
       { label: 'Button', value: 'btn' },
     ],
   },

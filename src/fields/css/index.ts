@@ -21,10 +21,21 @@ export const CssNameField: Field = {
   },
 }
 
-export const CSSNameWithCustomFiled: Field[] = [CssNameField, CustomCSSField]
+export const ElemId: Field = {
+  name: 'elemId',
+  type: 'text',
+  label: 'Element ID',
+}
+
+export const CSSNameWithCustomFiled: Field[] = [ElemId, CssNameField, CustomCSSField]
 export const getStyles = (styles: {
   css_style?: string | null | undefined
   css_name?: string | null | undefined
+  elemId?: string | null | undefined
 }) => {
-  return { cssStyle: styles?.css_style || '', cssName: styles?.css_name || '' }
+  return {
+    cssStyle: styles?.css_style || '',
+    cssName: styles?.css_name || '',
+    elemId: styles?.elemId || '',
+  }
 }

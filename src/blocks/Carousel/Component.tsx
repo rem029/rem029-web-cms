@@ -21,12 +21,11 @@ import { CardWithBackgroundBlock } from '../CardWithBackground/Component'
 export interface CarouselBlockProps extends CarouselBlockType {}
 
 export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
-  if (!main) return null
-
   const [showNavigation, setShowNavigation] = useState<boolean>(false)
   const swiperRef = useRef<SwiperRef>(null)
+
+  const { carouselSettings, layout, slides } = main!
   const { cssName, cssStyle } = getStyles({ ...styles })
-  const { carouselSettings, layout, slides } = main
 
   const onClickNext = () => swiperRef.current && swiperRef.current?.swiper.slideNext()
   const onClickPrev = () => swiperRef.current && swiperRef.current?.swiper.slidePrev()
@@ -42,19 +41,19 @@ export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
     return {
       0: {
         slidesPerView: 1.2,
-        spaceBetween: 8,
+        spaceBetween: 4,
       },
       425: {
         slidesPerView: 1.5,
-        spaceBetween: 8,
+        spaceBetween: 1,
       },
       640: {
         slidesPerView: Math.min(2, maxSlides),
-        spaceBetween: 12,
+        spaceBetween: 4,
       },
       768: {
         slidesPerView: Math.min(3, maxSlides),
-        spaceBetween: 16,
+        spaceBetween: 8,
       },
       // Large screens (lg) - use the full requested number
       1024: {
@@ -112,7 +111,7 @@ export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
         >
           <FaChevronRight className="text-lg text-secondary" />
         </button>
-
+        <div className={css('hero__carousel-navigation')}></div>
         <Swiper
           style={{ width: '100%', height: '100%' }}
           ref={swiperRef}
@@ -123,9 +122,6 @@ export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
           loop={carouselSettings?.loop === true || false}
           pagination={{
             clickable: true,
-            el: css('hero__carousel-navigation'),
-            bulletClass: css('hero__carousel-pagination-bullet'),
-            bulletActiveClass: css('hero__carousel-pagination-bullet-active'),
           }}
           breakpoints={swiperBreakpoints}
           modules={[Pagination, Navigation, Autoplay]}
@@ -157,7 +153,6 @@ export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
           })}
         </Swiper>
       </div>
-      <div className={css('hero__carousel-navigation')}></div>
     </React.Fragment>
   )
 }

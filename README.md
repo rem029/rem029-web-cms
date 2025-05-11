@@ -324,10 +324,10 @@ If you have any issues or questions, reach out to us on [Discord](https://discor
 
 ## Pending Issues and Roadmap
 
-- Localized all content under container
-- Have font selection on themes
-- Show label on each roles permission
-- Consider deploying Docker
-- Use Roles control user access
-- Add carousel use (https://www.embla-carousel.com/guides/slide-sizes/)
-- Add styling on forms
+- Localized all content under container                                 DONE
+- Have font selection on themes                                         WIP
+- Show label on each roles permission                                   DONE
+- Consider deploying Docker                                             DONE
+- Use Roles control user access                                         DONE
+- Add carousel use (https://www.embla-carousel.com/guides/slide-sizes/) DONE used swiperJS
+- Add styling on forms                                                  WIP

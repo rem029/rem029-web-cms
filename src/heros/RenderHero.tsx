@@ -23,7 +23,7 @@ export const RenderHero: React.FC<Page['hero']> = (props) => {
   if (!HeroToRender) return null
 
   return (
-    <div className={`${css('hero')} ${cssName}`}>
+    <div id="hero" className={`${css('hero')} ${cssName}`}>
       {cssStyle && (
         <style
           dangerouslySetInnerHTML={{

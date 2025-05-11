@@ -266,7 +266,11 @@ export const defaultThemeCSS = `
     margin-top: 16px;
 }
 
-.cms-hero__carousel-pagination-bullet {
+.swiper-pagination{
+  position: unset;
+}
+
+.swiper-pagination-bullet {
     display: inline-block;
     width: 8px;
     height: 8px;
@@ -277,7 +281,7 @@ export const defaultThemeCSS = `
     opacity: 0.5;
 }
 
-.cms-hero__carousel-pagination-bullet-active {
+.swiper-pagination-bullet-active {
     opacity: 1;
     background-color: var(--secondary);
 }

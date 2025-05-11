@@ -11,7 +11,7 @@ export const SectionBlock = ({ components, styles }: SectionBlockTypeProps) => {
   const { components: componentsList } = components
   if (!componentsList) return null
 
-  const { cssName, cssStyle } = getStyles({ ...styles })
+  const { cssName, cssStyle, elemId } = getStyles({ ...styles })
 
   return (
     <React.Fragment>
@@ -23,7 +23,7 @@ export const SectionBlock = ({ components, styles }: SectionBlockTypeProps) => {
         />
       )}
 
-      <div className={`${css('section')} ${cssName}`}>
+      <div id={elemId || undefined} className={`${css('section')} ${cssName}`}>
         {componentsList.map((component, idx) => {
           return <ContainerBlock key={'section_' + idx} {...component} />
         })}

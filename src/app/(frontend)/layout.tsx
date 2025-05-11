@@ -34,8 +34,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const cleanCss = sanitizeCSS(css)
   const favicon = (settings?.favicon as Media)?.url || ''
 
-  console.log('favicon', favicon)
-
   return (
     <html
       className={cn(GeistSans.variable, GeistMono.variable)}
