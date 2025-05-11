@@ -1,39 +1,52 @@
 import type { TextField } from '@payloadcms/plugin-form-builder/types'
 import type { FieldErrorsImpl, FieldValues, UseFormRegister } from 'react-hook-form'
 
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import React from 'react'
 
 import { Error } from '../Error'
-import { Width } from '../Width'
 import { css } from '@/utilities/constants'
+
+import { iconMap } from '../Component'
 
 export const Text: React.FC<
   TextField & {
     errors: Partial<FieldErrorsImpl>
     register: UseFormRegister<FieldValues>
+    icon?: string
   }
-> = ({ name, defaultValue, errors, label, register, required, width }) => {
-  return (
-    <Width width={width}>
-      <Label htmlFor={name}>
-        {label}
+> = ({ name, defaultValue, errors, label, register, required, width, icon }) => {
+  const IconComponent = icon ? iconMap[icon as keyof typeof iconMap] : undefined
 
-        {required && (
-          <span className="required">
-            * <span className="sr-only">(required)</span>
-          </span>
-        )}
-      </Label>
-      <Input
-        className={css('form__input-text')}
-        defaultValue={defaultValue}
-        id={name}
-        type="text"
-        {...register(name, { required })}
-      />
+  return (
+    <div className={css('form__input-control')} style={{ width: width && `${width}%` }}>
+      <label htmlFor={name}>{label}</label>
+
+      <div className={`${css('form__input')} ${css('form__input-rounded')}`}>
+        {IconComponent && <IconComponent />}
+        <input
+          defaultValue={defaultValue}
+          id={name}
+          type="text"
+          {...register(name, { required })}
+        />
+      </div>
       {errors[name] && <Error name={name} />}
-    </Width>
+    </div>
   )
+
+  // return (
+  //   <Width width={width} className={css('form__input-text')}>
+  //     <Label htmlFor={name}>
+  //       {label}
+
+  //       {required && (
+  //         <span className="required">
+  //           * <span className="sr-only">(required)</span>
+  //         </span>
+  //       )}
+  //     </Label>
+  //     <Input defaultValue={defaultValue} id={name} type="text" {...register(name, { required })} />
+  //     {errors[name] && <Error name={name} />}
+  //   </Width>
+  // )
 }

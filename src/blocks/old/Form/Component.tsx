@@ -7,10 +7,23 @@ import { useForm, FormProvider } from 'react-hook-form'
 import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import { IoIosSend } from 'react-icons/io'
 
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
 import { css } from '@/utilities/constants'
+
+import {
+  Icon,
+  UserIcon,
+  MailIcon,
+  PhoneIcon,
+  MessageSquareIcon,
+  HashIcon,
+  CheckSquareIcon,
+  MapPinIcon,
+} from 'lucide-react' // Example icon import
+import { formatErrors } from 'payload'
 
 export type FormBlockType = {
   blockName?: string
@@ -18,6 +31,18 @@ export type FormBlockType = {
   enableIntro: boolean
   form: FormType
   introContent?: SerializedEditorState
+}
+
+// Define a mapping from your icon string values to actual icon components
+export const iconMap = {
+  person: UserIcon,
+  email: MailIcon,
+  phone: PhoneIcon,
+  message: MessageSquareIcon,
+  number: HashIcon,
+  select: CheckSquareIcon,
+  checkbox: CheckSquareIcon,
+  location: MapPinIcon,
 }
 
 export const FormBlock: React.FC<
@@ -121,46 +146,42 @@ export const FormBlock: React.FC<
       {enableIntro && introContent && !hasSubmitted && (
         <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
       )}
-      <div className="p-4 lg:p-6">
-        <FormProvider {...formMethods}>
-          {!isLoading && hasSubmitted && confirmationType === 'message' && (
-            <RichText data={confirmationMessage} />
-          )}
-          {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
-          {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
-          {!hasSubmitted && (
-            <form id={formID} onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-4 last:mb-0">
-                {formFromProps &&
-                  formFromProps.fields &&
-                  formFromProps.fields?.map((field, index) => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
-                    if (Field) {
-                      return (
-                        <div className="mb-6 last:mb-0" key={index}>
-                          <Field
-                            form={formFromProps}
-                            {...field}
-                            {...formMethods}
-                            control={control}
-                            errors={errors}
-                            register={register}
-                          />
-                        </div>
-                      )
-                    }
-                    return null
-                  })}
-              </div>
+      <FormProvider {...formMethods}>
+        {!isLoading && hasSubmitted && confirmationType === 'message' && (
+          <RichText data={confirmationMessage} />
+        )}
+        {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
+        {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
+        {!hasSubmitted && (
+          <form id={formID} onSubmit={handleSubmit(onSubmit)}>
+            {formFromProps &&
+              formFromProps.fields &&
+              formFromProps.fields?.map((field, index) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
 
-              <Button className={css('btn-form')} form={formID} type="submit" variant="default">
-                {submitButtonLabel}
-              </Button>
-            </form>
-          )}
-        </FormProvider>
-      </div>
+                if (Field) {
+                  return (
+                    <Field
+                      key={index}
+                      form={formFromProps}
+                      {...field}
+                      {...formMethods}
+                      control={control}
+                      errors={errors}
+                      register={register}
+                    />
+                  )
+                }
+                return null
+              })}
+
+            <Button className={css('btn-form')} form={formID} type="submit" variant="default">
+              {submitButtonLabel} <IoIosSend />
+            </Button>
+          </form>
+        )}
+      </FormProvider>
     </div>
   )
 }

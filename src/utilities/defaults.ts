@@ -399,7 +399,7 @@ export const defaultThemeCSS = `
 
 .cms-section{
   width: 100%;  
-  background-color: #FFF;
+  background-color: transparent;
   padding: 24px 24px;
   display: flex;
   flex-direction: column;
@@ -759,6 +759,11 @@ export const defaultThemeCSS = `
 .cms-btn-form {
   background-color: var(--primary);
   color: var(--primary-foreground);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .cms-btn-primary:hover,
@@ -810,12 +815,6 @@ export const defaultThemeCSS = `
   cursor: not-allowed;
 }
 
-.cms-form-group {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 4px;
-}
 
 
 
@@ -903,24 +902,91 @@ p,
 .cms-form {
   margin: 0 auto;
   width: 100%;
+  max-width: 480px;
   border: 0 !important;
+  margin-bottom: 24px;
 }
 
-.cms-form__input-text,
-.cms-form__input-number,
-.cms-form__input-textarea,
-.cms-form__input-select,
-.cms-input[type="text"],
-.cms-textarea,
-.cms-input-select  {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--primary-light);  
-  box-sizing: border-box;
+.cms-form form {
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+  width: 100%;
+}
+
+.cms-form .cms-btn-form {
+  width: 100%;
+}
+
+.cms-form input,
+.cms-form textarea,
+.cms-form select {
+  background-color: transparent;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  outline: none;
+}
+
+.cms-form > input:active,
+.cms-form > textarea:active {
+  outline: none;
+}
+
+.cms-form__input-control {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  gap: 4px;
+}
+
+.cms-form__input-control label {  
+  font-size: 12px;
+  color: var(--info);
+}
+
+.cms-form__input {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  height: max-content;
+
   padding: 4px 8px;
+  box-sizing: border-box;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--secondary); 
+  background-color: white;
+}
+
+.cms-form__input-rounded {
+  border-radius: var(--radius-full);
+}
+
+.cms-form__input-control svg {
+  color: var(--primary-light);
   font-size: 16px;
 }
 
+.cms-form__input-control input[type=text] {
+  width: 100%;
+  height: 24px;
+  font-size: 16px;  
+}
 
+.cms-form__input-control textarea {
+  text-align: left;
+  width: 100%;
+  font-size: 16px; 
+}
 
 h1,h2,h3,h4,h5,h6 {
   font-family: 'Urbanist';
@@ -937,9 +1003,7 @@ button {
   font-family: 'Urbanist';
 }
 
-input {
-  font-family: 'Poppins';
-}
+
 
 
 /* ─── Responsive ───────────────────────── */

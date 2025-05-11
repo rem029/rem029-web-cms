@@ -15,7 +15,7 @@ export const Number: React.FC<
   }
 > = ({ name, defaultValue, errors, label, register, required, width }) => {
   return (
-    <Width width={width}>
+    <Width width={width} className={css('form__input-number')}>
       <Label htmlFor={name}>
         {label}
 
@@ -26,7 +26,6 @@ export const Number: React.FC<
         )}
       </Label>
       <Input
-        className={css('form__input-number')}
         defaultValue={defaultValue}
         id={name}
         type="number"
