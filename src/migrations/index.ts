@@ -3,6 +3,7 @@ import * as migration_20250508_082216_add_admin_role from './20250508_082216_add
 import * as migration_20250510_172522_removed_hero from './20250510_172522_removed_hero';
 import * as migration_20250510_201923_added_new_hero_and_carousel_blocks from './20250510_201923_added_new_hero_and_carousel_blocks';
 import * as migration_20250511_101426_update_default_themes__update_link_variant from './20250511_101426_update_default_themes__update_link_variant';
+import * as migration_20250511_141238_update_fields_with_icons_and_some_fixes from './20250511_141238_update_fields_with_icons_and_some_fixes';
 
 export const migrations = [
   {
@@ -28,6 +29,11 @@ export const migrations = [
   {
     up: migration_20250511_101426_update_default_themes__update_link_variant.up,
     down: migration_20250511_101426_update_default_themes__update_link_variant.down,
-    name: '20250511_101426_update_default_themes__update_link_variant'
+    name: '20250511_101426_update_default_themes__update_link_variant',
+  },
+  {
+    up: migration_20250511_141238_update_fields_with_icons_and_some_fixes.up,
+    down: migration_20250511_141238_update_fields_with_icons_and_some_fixes.down,
+    name: '20250511_141238_update_fields_with_icons_and_some_fixes'
   },
 ];
