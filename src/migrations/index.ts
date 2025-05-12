@@ -4,6 +4,7 @@ import * as migration_20250510_172522_removed_hero from './20250510_172522_remov
 import * as migration_20250510_201923_added_new_hero_and_carousel_blocks from './20250510_201923_added_new_hero_and_carousel_blocks';
 import * as migration_20250511_101426_update_default_themes__update_link_variant from './20250511_101426_update_default_themes__update_link_variant';
 import * as migration_20250511_141238_update_fields_with_icons_and_some_fixes from './20250511_141238_update_fields_with_icons_and_some_fixes';
+import * as migration_20250512_123010_add_site_name_on_settings from './20250512_123010_add_site_name_on_settings';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20250511_141238_update_fields_with_icons_and_some_fixes.up,
     down: migration_20250511_141238_update_fields_with_icons_and_some_fixes.down,
-    name: '20250511_141238_update_fields_with_icons_and_some_fixes'
+    name: '20250511_141238_update_fields_with_icons_and_some_fixes',
+  },
+  {
+    up: migration_20250512_123010_add_site_name_on_settings.up,
+    down: migration_20250512_123010_add_site_name_on_settings.down,
+    name: '20250512_123010_add_site_name_on_settings'
   },
 ];
