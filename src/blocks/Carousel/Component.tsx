@@ -117,7 +117,7 @@ export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
           ref={swiperRef}
           autoplay={swiperAutoPlay}
           slidesPerView={baseSlidesPerView}
-          spaceBetween={16}
+          spaceBetween={4}
           centeredSlides={carouselSettings?.centeredSlides === true || false}
           loop={carouselSettings?.loop === true || false}
           pagination={{
