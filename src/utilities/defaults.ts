@@ -397,7 +397,7 @@ export const defaultThemeCSS = `
 }
 
 
-.cms-section{
+.cms-section {
   width: 100%;  
   background-color: transparent;
   padding: 24px 24px;
@@ -406,7 +406,7 @@ export const defaultThemeCSS = `
   align-items: center;
 }
 
-.cms-section__container{
+.cms-section__container {
   width: 100%;
   max-width: var(--max-width);
   display: flex;
@@ -1013,7 +1013,11 @@ button {
 
  .cms-hero__feature-content {
     gap: 4px;
-    padding: 8px;
+    padding: 24px;
+  }
+  
+  .cms-section__container {    
+    gap: 8px;
   }
 
   .cms-btn,
