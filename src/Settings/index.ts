@@ -13,6 +13,7 @@ export const Settings: GlobalConfig = {
   fields: [
     { type: 'upload', relationTo: 'media', name: 'favicon', label: 'Favicon' },
     { type: 'upload', relationTo: 'media', name: 'logo', label: 'Logo' },
+    { type: 'text', name: 'siteName', label: 'SiteName', defaultValue: 'CMS Website' },
     {
       type: 'relationship',
       name: 'homepage',

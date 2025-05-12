@@ -2592,6 +2592,7 @@ export interface Setting {
   id: number;
   favicon?: (number | null) | Media;
   logo?: (number | null) | Media;
+  siteName?: string | null;
   /**
    * Select the homepage for your website
    */
@@ -2695,6 +2696,7 @@ export interface ThemeConfigSelect<T extends boolean = true> {
 export interface SettingsSelect<T extends boolean = true> {
   favicon?: T;
   logo?: T;
+  siteName?: T;
   homepage?: T;
   contact?:
     | T

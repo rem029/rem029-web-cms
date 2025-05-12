@@ -15,10 +15,9 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { iconField } from '@/fields/icon'
-import { FieldConfig } from '@payloadcms/plugin-form-builder/types'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
+  return doc?.title ? `${doc.title} | CMS Website` : 'CMS Website'
 }
 
 const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
