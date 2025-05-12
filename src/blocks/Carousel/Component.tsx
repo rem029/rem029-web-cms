@@ -35,12 +35,30 @@ export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
   }, [layout, carouselSettings?.slidesPerView])
 
   const swiperBreakpoints: SwiperOptions['breakpoints'] = useMemo(() => {
-    // Calculate responsive breakpoints based on baseSlidesPerView
     const maxSlides = Math.max(1, baseSlidesPerView)
+    const defaultBreakSettings = {
+      slidesPerView: 1,
+      spaceBetween: 4,
+    }
+
+    if (layout === 'card-row') {
+      return {
+        0: defaultBreakSettings,
+        425: defaultBreakSettings,
+        '640': defaultBreakSettings,
+        768: {
+          slidesPerView: 1.5,
+        },
+        1024: {
+          slidesPerView: maxSlides,
+          spaceBetween: 8,
+        },
+      }
+    }
 
     return {
       0: {
-        slidesPerView: 1.2,
+        slidesPerView: 1.5,
         spaceBetween: 4,
       },
       425: {
@@ -55,10 +73,9 @@ export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
         slidesPerView: Math.min(3, maxSlides),
         spaceBetween: 8,
       },
-      // Large screens (lg) - use the full requested number
       1024: {
         slidesPerView: maxSlides,
-        spaceBetween: 20,
+        spaceBetween: 8,
       },
     }
   }, [layout, carouselSettings, baseSlidesPerView])

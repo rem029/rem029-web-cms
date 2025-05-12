@@ -495,15 +495,15 @@ export const defaultThemeCSS = `
   border-radius: var(--radius-md);
   overflow: hidden;    
   height: auto;
-  width: 100%;
-  max-width: clamp(200px, 50vw, 280px );
   aspect-ratio: 4 / 3;
 }
 
-.cms-card-overlay,
-.cms-card-img-bg .cms-card-img  {
-  width: 100%;
-  height: 100%;
+.cms-card-img-bg {
+  aspect-ratio: 2 / 3;
+  width: 100%;  
+  max-width: clamp(200px, 50vw, 280px );
+  height: auto;
+  position: relative;
 }
 
 .cms-card-img-bg .cms-link {
@@ -524,12 +524,7 @@ export const defaultThemeCSS = `
   z-index: 0;  
  }
 
-.cms-card-img-bg {
-  aspect-ratio: 2 / 3;
-  width: 100%;  
-  height: auto;
-  position: relative;
-}
+
 
 .cms-card-img-bg .cms-card-header {
   color: var(--primary-foreground);
@@ -574,6 +569,9 @@ export const defaultThemeCSS = `
   background-color: #FFF;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--info-light);
+
+  width: 100%;
+  max-width: clamp(200px, 50vw, 280px );
 }
 
 .cms-card-img-inline .cms-card-img {
