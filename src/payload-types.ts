@@ -282,6 +282,11 @@ export interface Page {
   publishedAt?: string | null;
   slug?: string | null;
   slugLock?: boolean | null;
+  /**
+   * This is the full slug of the page, including the category slug. It is used for SEO purposes and should not be changed.
+   */
+  fullSlug?: string | null;
+  category?: (number | null) | Category;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -1585,6 +1590,8 @@ export interface PagesSelect<T extends boolean = true> {
   publishedAt?: T;
   slug?: T;
   slugLock?: T;
+  fullSlug?: T;
+  category?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

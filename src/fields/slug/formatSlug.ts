@@ -8,16 +8,33 @@ export const formatSlug = (val: string): string =>
 
 export const formatSlugHook =
   (fallback: string): FieldHook =>
-  ({ data, operation, value }) => {
+  async ({ data, operation, value, req }) => {
+    let categorySlug = ''
+
+    if (data?.category) {
+      const category = await req.payload.findByID({
+        collection: 'categories',
+        id: data?.category,
+        depth: 0,
+      })
+      categorySlug = category?.slug || ''
+    }
+
     if (typeof value === 'string') {
-      return formatSlug(value)
+      const returnValue = categorySlug ? `${categorySlug}/${formatSlug(value)}` : formatSlug(value)
+
+      return returnValue
     }
 
     if (operation === 'create' || !data?.slug) {
       const fallbackData = data?.[fallback] || data?.[fallback]
 
       if (fallbackData && typeof fallbackData === 'string') {
-        return formatSlug(fallbackData)
+        const returnValue = categorySlug
+          ? `${categorySlug}/${formatSlug(fallbackData)}`
+          : formatSlug(fallbackData)
+
+        return returnValue
       }
     }
 
