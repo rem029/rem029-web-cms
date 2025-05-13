@@ -1054,7 +1054,6 @@ export interface TextBlock {
  */
 export interface LinkBlock {
   main?: {
-    elemId?: string | null;
     text?: string | null;
     href?: string | null;
     new_tab?: boolean | null;
@@ -1839,7 +1838,6 @@ export interface LinkBlockSelect<T extends boolean = true> {
   main?:
     | T
     | {
-        elemId?: T;
         text?: T;
         href?: T;
         new_tab?: T;

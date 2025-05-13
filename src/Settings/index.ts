@@ -11,9 +11,15 @@ export const Settings: GlobalConfig = {
     group: 'Admin',
   },
   fields: [
-    { type: 'upload', relationTo: 'media', name: 'favicon', label: 'Favicon' },
-    { type: 'upload', relationTo: 'media', name: 'logo', label: 'Logo' },
-    { type: 'text', name: 'siteName', label: 'SiteName', defaultValue: 'CMS Website' },
+    { type: 'upload', relationTo: 'media', name: 'favicon', label: 'Favicon', localized: true },
+    { type: 'upload', relationTo: 'media', name: 'logo', label: 'Logo', localized: true },
+    {
+      type: 'text',
+      name: 'siteName',
+      label: 'SiteName',
+      defaultValue: 'CMS Website',
+      localized: true,
+    },
     {
       type: 'relationship',
       name: 'homepage',

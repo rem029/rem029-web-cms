@@ -20,11 +20,16 @@ import { Media } from '@/payload-types'
 import { defaultThemeCSS } from '@/utilities/defaults'
 import DOMPurify from 'isomorphic-dompurify'
 import { sanitizeCSS } from '@/utilities/sanitize'
+import { TypedLocale } from 'payload'
+import { cookies } from 'next/headers'
+import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from '@/utilities/constant'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
-  const themes = await getGlobal('theme')
-  const settings = await getGlobal('settings', 1)
+  const cookieStore = await cookies()
+  const locale = cookieStore.get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE
+  const themes = await getGlobal('theme', 1, locale as TypedLocale)
+  const settings = await getGlobal('settings', 1, locale as TypedLocale)
 
   const theme = themes?.themes?.find((theme) => theme.active === true)
   const css = theme?.css || defaultThemeCSS
@@ -40,6 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang="en"
       suppressHydrationWarning
       data-theme="light"
+      dir={locale === 'ar' ? 'rtl' : 'ltr'}
     >
       <head>
         {favicon && <link href={favicon} rel="icon" sizes="32x32" />}

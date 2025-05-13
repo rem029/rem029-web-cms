@@ -46,6 +46,6 @@ export const cardsFields: Field[] = [
     type: 'group',
     name: 'button',
     label: 'Button',
-    fields: [...LinkVariant],
+    fields: [{ type: 'text', name: 'elemId', label: 'Element ID' }, ...LinkVariant],
   },
 ]

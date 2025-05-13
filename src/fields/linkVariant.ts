@@ -2,12 +2,6 @@ import { Field } from 'payload'
 
 export const LinkVariant: Field[] = [
   {
-    name: 'elemId',
-    type: 'text',
-    localized: false,
-    required: false,
-  },
-  {
     name: 'text',
     type: 'text',
     localized: true,

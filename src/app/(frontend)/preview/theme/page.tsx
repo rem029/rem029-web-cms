@@ -9,8 +9,7 @@ import { LivePreviewListener } from '@/components/LivePreviewListener'
 export default async function ThemePreview({
   searchParams,
 }: {
-  /* eslint-disable  @typescript-eslint/no-explicit-any */
-  searchParams: any
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const { previewSecret } = await searchParams
 

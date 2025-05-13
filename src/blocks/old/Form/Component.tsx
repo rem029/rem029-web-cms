@@ -14,7 +14,6 @@ import { getClientSideURL } from '@/utilities/getURL'
 import { css } from '@/utilities/constants'
 
 import {
-  Icon,
   UserIcon,
   MailIcon,
   PhoneIcon,
@@ -22,8 +21,8 @@ import {
   HashIcon,
   CheckSquareIcon,
   MapPinIcon,
+  BadgeCheckIcon,
 } from 'lucide-react' // Example icon import
-import { formatErrors } from 'payload'
 
 export type FormBlockType = {
   blockName?: string
@@ -148,7 +147,10 @@ export const FormBlock: React.FC<
       )}
       <FormProvider {...formMethods}>
         {!isLoading && hasSubmitted && confirmationType === 'message' && (
-          <RichText data={confirmationMessage} />
+          <div className={css('form-success-message')}>
+            <RichText data={confirmationMessage} enableGutter={false} enableProse={false} />
+            <BadgeCheckIcon />
+          </div>
         )}
         {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
         {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}

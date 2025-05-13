@@ -5,6 +5,8 @@ import * as migration_20250510_201923_added_new_hero_and_carousel_blocks from '.
 import * as migration_20250511_101426_update_default_themes__update_link_variant from './20250511_101426_update_default_themes__update_link_variant';
 import * as migration_20250511_141238_update_fields_with_icons_and_some_fixes from './20250511_141238_update_fields_with_icons_and_some_fixes';
 import * as migration_20250512_123010_add_site_name_on_settings from './20250512_123010_add_site_name_on_settings';
+import * as migration_20250513_085451_added_more_support_on_locales from './20250513_085451_added_more_support_on_locales';
+import * as migration_20250513_101646_add_element_ID_on_cards_button from './20250513_101646_add_element_ID_on_cards_button';
 
 export const migrations = [
   {
@@ -40,6 +42,16 @@ export const migrations = [
   {
     up: migration_20250512_123010_add_site_name_on_settings.up,
     down: migration_20250512_123010_add_site_name_on_settings.down,
-    name: '20250512_123010_add_site_name_on_settings'
+    name: '20250512_123010_add_site_name_on_settings',
+  },
+  {
+    up: migration_20250513_085451_added_more_support_on_locales.up,
+    down: migration_20250513_085451_added_more_support_on_locales.down,
+    name: '20250513_085451_added_more_support_on_locales',
+  },
+  {
+    up: migration_20250513_101646_add_element_ID_on_cards_button.up,
+    down: migration_20250513_101646_add_element_ID_on_cards_button.down,
+    name: '20250513_101646_add_element_ID_on_cards_button'
   },
 ];
