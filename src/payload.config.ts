@@ -20,6 +20,7 @@ import { Theme } from './Theme/config'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { Settings } from './Settings'
 import { Roles } from './collections/Roles'
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -62,8 +63,8 @@ export default buildConfig({
     },
   },
   localization: {
-    defaultLocale: 'en',
-    locales: ['en', 'ar'],
+    defaultLocale: DEFAULT_LOCALE,
+    locales: SUPPORTED_LOCALES,
     fallback: true,
   },
 
