@@ -37,6 +37,7 @@ export type HeroSlide =
         [k: string]: unknown;
       } | null;
       button?: {
+        elemId?: string | null;
         text?: string | null;
         href?: string | null;
         new_tab?: boolean | null;
@@ -1139,6 +1140,7 @@ export interface CardWithBackgroundBlock {
       [k: string]: unknown;
     } | null;
     button?: {
+      elemId?: string | null;
       text?: string | null;
       href?: string | null;
       new_tab?: boolean | null;
@@ -1187,6 +1189,7 @@ export interface CardInlineImageBlock {
       [k: string]: unknown;
     } | null;
     button?: {
+      elemId?: string | null;
       text?: string | null;
       href?: string | null;
       new_tab?: boolean | null;
@@ -1235,6 +1238,7 @@ export interface CardRowBlock {
       [k: string]: unknown;
     } | null;
     button?: {
+      elemId?: string | null;
       text?: string | null;
       href?: string | null;
       new_tab?: boolean | null;
@@ -1636,6 +1640,7 @@ export interface HeroSlideSelect<T extends boolean = true> {
   button?:
     | T
     | {
+        elemId?: T;
         text?: T;
         href?: T;
         new_tab?: T;
@@ -1904,6 +1909,7 @@ export interface CardWithBackgroundBlockSelect<T extends boolean = true> {
         button?:
           | T
           | {
+              elemId?: T;
               text?: T;
               href?: T;
               new_tab?: T;
@@ -1937,6 +1943,7 @@ export interface CardInlineImageBlockSelect<T extends boolean = true> {
         button?:
           | T
           | {
+              elemId?: T;
               text?: T;
               href?: T;
               new_tab?: T;
@@ -1970,6 +1977,7 @@ export interface CardRowBlockSelect<T extends boolean = true> {
         button?:
           | T
           | {
+              elemId?: T;
               text?: T;
               href?: T;
               new_tab?: T;

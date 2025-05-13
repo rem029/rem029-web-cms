@@ -13,7 +13,6 @@ export const sampleCarouselCards: HeroSlide = [
     bodyTitle: 'Body title 1',
     bodyText: null,
     button: {
-      elemId: 'btn-1',
       text: 'Click here',
       href: '#',
       new_tab: true,
@@ -32,7 +31,6 @@ export const sampleCarouselCards: HeroSlide = [
     bodyTitle: 'Body title 1',
     bodyText: null,
     button: {
-      elemId: 'btn-1',
       text: 'Click here',
       href: '#',
       new_tab: true,
@@ -51,7 +49,6 @@ export const sampleCarouselCards: HeroSlide = [
     bodyTitle: 'Body title 1',
     bodyText: null,
     button: {
-      elemId: 'btn-1',
       text: 'Click here',
       href: '#',
       new_tab: true,
@@ -70,7 +67,6 @@ export const sampleCarouselCards: HeroSlide = [
     bodyTitle: 'Body title 1',
     bodyText: null,
     button: {
-      elemId: 'btn-1',
       text: 'Click here',
       href: '#',
       new_tab: true,
