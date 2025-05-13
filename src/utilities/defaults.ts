@@ -905,6 +905,29 @@ p,
   margin-bottom: 24px;
 }
 
+.cms-form-success-message {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.cms-form-success-message h1,
+.cms-form-success-message h2,
+.cms-form-success-message h3,
+.cms-form-success-message h4,
+.cms-form-success-message h5,
+.cms-form-success-message h6 {
+  color: var(--primary);
+}
+
+.cms-form-success-message svg {
+   color: var(--primary);
+   width: 96px;
+}
+
 .cms-form form {
   display: flex;
   align-items: start;
@@ -952,7 +975,7 @@ p,
 .cms-form__input {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
   gap: 4px;
   width: 100%;
@@ -961,7 +984,7 @@ p,
   padding: 4px 8px;
   box-sizing: border-box;
   border-radius: var(--radius-md);
-  border: 2px solid var(--secondary); 
+  border: 1px solid var(--primary); 
   background-color: white;
 }
 
@@ -971,10 +994,14 @@ p,
 
 .cms-form__input-control svg {
   color: var(--primary-light);
+  width: 16px;
   font-size: 16px;
 }
 
-.cms-form__input-control input[type=text] {
+.cms-form__input-control input[type=text],
+.cms-form__input-control input[type=number],
+.cms-form__input-control input[type=email]
+ {
   width: 100%;
   height: 24px;
   font-size: 16px;  

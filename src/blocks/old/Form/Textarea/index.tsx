@@ -21,7 +21,14 @@ export const Textarea: React.FC<
   const IconComponent = icon ? iconMap[icon as keyof typeof iconMap] : undefined
   return (
     <div className={css('form__input-control')} style={{ width: width && `${width}%` }}>
-      <label htmlFor={name}>{label}</label>
+      <label htmlFor={name}>
+        {label}
+        {required && (
+          <span className="required">
+            * <span className="sr-only">(required)</span>
+          </span>
+        )}
+      </label>
 
       <div className={css('form__input')}>
         {IconComponent && <IconComponent />}

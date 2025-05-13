@@ -19,7 +19,14 @@ export const Text: React.FC<
 
   return (
     <div className={css('form__input-control')} style={{ width: width && `${width}%` }}>
-      <label htmlFor={name}>{label}</label>
+      <label htmlFor={name}>
+        {label}
+        {required && (
+          <span className="required">
+            * <span className="sr-only">(required)</span>
+          </span>
+        )}
+      </label>
 
       <div className={`${css('form__input')} ${css('form__input-rounded')}`}>
         {IconComponent && <IconComponent />}
