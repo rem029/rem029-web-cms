@@ -47,6 +47,7 @@ export const Theme: GlobalConfig = {
           type: 'code',
           label: 'Custom CSS',
           _sanitized: true,
+          localized: true,
           admin: {
             language: 'css',
           },
@@ -57,6 +58,7 @@ export const Theme: GlobalConfig = {
           type: 'code',
           label: 'Custom JS',
           _sanitized: true,
+          localized: true,
           admin: {
             language: 'javascript',
           },

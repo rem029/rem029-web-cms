@@ -13,7 +13,9 @@ type HeaderVariants = NonNullable<LinkBlockType['main']>['variant']
 export const LinkBlock = ({ main, styles }: LinkBlockProps) => {
   if (!main) return null
   const { text, variant, href, new_tab } = main
-  const { cssName, cssStyle } = getStyles({ ...styles })
+  const { cssName, cssStyle, elemId } = getStyles({ ...styles })
+
+  const normalizedHref = href ? (href.startsWith('/') ? href : `/${href}`) : '/'
 
   const getVariant = (variant: HeaderVariants) => {
     switch (variant) {
@@ -33,7 +35,11 @@ export const LinkBlock = ({ main, styles }: LinkBlockProps) => {
   }
 
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    //handle analytics here
+    console.log('Link clicked:', {
+      href: normalizedHref,
+      target: new_tab ? '_blank' : undefined,
+      text,
+    })
   }
 
   return (
@@ -46,12 +52,15 @@ export const LinkBlock = ({ main, styles }: LinkBlockProps) => {
         />
       )}
       <Link
+        id={elemId}
         onClick={onLinkClick}
         className={`${getVariant(variant)} ${cssName}`}
-        href={href || ''}
+        href={normalizedHref}
         target={(new_tab && '_blank') || undefined}
+        prefetch
+        role="link"
       >
-        {text}
+        {text || 'Link'}
       </Link>
     </React.Fragment>
   )
