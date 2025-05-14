@@ -10,6 +10,7 @@ import { css } from '@/utilities/constants'
 import RichText from '@/components/RichText'
 import { SocialMedia } from '@/components/Social'
 import { defaultFooterCopyRight } from '@/utilities/defaults'
+import { LocaleSwitch } from '@/components/Locale'
 
 interface FooterProps {
   settings: Setting
@@ -23,9 +24,12 @@ export async function Footer({ settings }: FooterProps) {
   return (
     <footer className={css('footer')}>
       <div className={css('footer__container')}>
-        <Link className={css('footer__logo')} href="/">
-          <Logo src={(settings?.logo as Media)?.url || ''} />
-        </Link>
+        <div className={css('footer__section')}>
+          <Link className={css('footer__logo')} href="/">
+            <Logo src={(settings?.logo as Media)?.url || ''} />
+          </Link>
+          {settings?.localeSwitch?.enableLocaleFooter && <LocaleSwitch location="footer" />}
+        </div>
 
         <nav className={css('footer__nav')}>
           {navItems.map(({ link }, i) => {

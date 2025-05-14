@@ -2597,6 +2597,10 @@ export interface Setting {
   id: number;
   favicon?: (number | null) | Media;
   logo?: (number | null) | Media;
+  localeSwitch?: {
+    enableLocaleHeader?: boolean | null;
+    enableLocaleFooter?: boolean | null;
+  };
   siteName?: string | null;
   /**
    * Select the homepage for your website
@@ -2701,6 +2705,12 @@ export interface ThemeConfigSelect<T extends boolean = true> {
 export interface SettingsSelect<T extends boolean = true> {
   favicon?: T;
   logo?: T;
+  localeSwitch?:
+    | T
+    | {
+        enableLocaleHeader?: T;
+        enableLocaleFooter?: T;
+      };
   siteName?: T;
   homepage?: T;
   contact?:
