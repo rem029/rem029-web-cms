@@ -9,6 +9,7 @@ import * as migration_20250513_085451_added_more_support_on_locales from './2025
 import * as migration_20250513_101646_add_element_ID_on_cards_button from './20250513_101646_add_element_ID_on_cards_button';
 import * as migration_20250513_230042_add_category_for_pages from './20250513_230042_add_category_for_pages';
 import * as migration_20250514_072424_add_locales_for_link_labels from './20250514_072424_add_locales_for_link_labels';
+import * as migration_20250514_082219_checkbox_for_locale_switchers from './20250514_082219_checkbox_for_locale_switchers';
 
 export const migrations = [
   {
@@ -64,6 +65,11 @@ export const migrations = [
   {
     up: migration_20250514_072424_add_locales_for_link_labels.up,
     down: migration_20250514_072424_add_locales_for_link_labels.down,
-    name: '20250514_072424_add_locales_for_link_labels'
+    name: '20250514_072424_add_locales_for_link_labels',
+  },
+  {
+    up: migration_20250514_082219_checkbox_for_locale_switchers.up,
+    down: migration_20250514_082219_checkbox_for_locale_switchers.down,
+    name: '20250514_082219_checkbox_for_locale_switchers'
   },
 ];
