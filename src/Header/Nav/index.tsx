@@ -16,15 +16,7 @@ export const HeaderNav: React.FC<{ data: HeaderType; settings: Setting }> = ({
     <React.Fragment>
       <nav className={`${css('header__nav')} max-md:hidden`}>
         {navItems.map(({ link }, i) => {
-          return (
-            <CMSLink
-              key={`CMSLink_${i}`}
-              className={`${css('header__nav-item')}`}
-              href={link?.url || ''}
-              label={link?.label}
-              newTab={link?.newTab || false}
-            />
-          )
+          return <CMSLink key={`CMSLink_${i}`} className={`${css('header__nav-item')}`} {...link} />
         })}
       </nav>
       <DrawerNav data={data} settings={settings} />

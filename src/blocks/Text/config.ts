@@ -1,4 +1,5 @@
 import { CSSNameWithCustomFiled } from '@/fields/css'
+import { FixedToolbarFeature, lexicalEditor, HeadingFeature } from '@payloadcms/richtext-lexical'
 import { Block } from 'payload'
 
 export const TextBlock: Block = {
@@ -18,6 +19,15 @@ export const TextBlock: Block = {
               type: 'richText',
               localized: true,
               required: true,
+              editor: lexicalEditor({
+                features: ({ rootFeatures }) => {
+                  return [
+                    ...rootFeatures,
+                    FixedToolbarFeature(),
+                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                  ]
+                },
+              }),
             },
           ],
         },

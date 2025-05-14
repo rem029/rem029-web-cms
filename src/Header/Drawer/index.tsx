@@ -53,10 +53,8 @@ export const DrawerNav: React.FC<{ data: HeaderType; settings: Setting }> = ({
             <CMSLink
               key={`DrawerLink_${i}`}
               className={css('header__drawer__nav-item')}
-              href={link?.url || ''}
-              label={link?.label}
-              newTab={link?.newTab || false}
               onClick={() => setIsDrawerOpen(false)}
+              {...link}
             />
           ))}
         </div>

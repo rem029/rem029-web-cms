@@ -330,4 +330,8 @@ If you have any issues or questions, reach out to us on [Discord](https://discor
 - Consider deploying Docker                                             DONE
 - Use Roles control user access                                         DONE
 - Add carousel use (https://www.embla-carousel.com/guides/slide-sizes/) DONE used swiperJS
-- Add styling on forms                                                  WIP
+- Add styling on forms                                                  DONE
+- Navigation add dropdowns
+- Navigation add groupings under category
+- Seed with default data
+- Add Analytics

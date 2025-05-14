@@ -17,6 +17,7 @@ interface FooterProps {
 
 export async function Footer({ settings }: FooterProps) {
   const footerData: Footer = await getCachedGlobal('footer', 1)()
+
   const navItems = footerData?.navItems || []
 
   return (
@@ -28,15 +29,7 @@ export async function Footer({ settings }: FooterProps) {
 
         <nav className={css('footer__nav')}>
           {navItems.map(({ link }, i) => {
-            return (
-              <CMSLink
-                className={css('footer__nav-item')}
-                key={i}
-                label={link?.label}
-                href={link?.url || ''}
-                newTab={link?.newTab || false}
-              />
-            )
+            return <CMSLink key={i} className={css('footer__nav-item')} {...link} />
           })}
         </nav>
 
