@@ -10,6 +10,7 @@ import * as migration_20250513_101646_add_element_ID_on_cards_button from './202
 import * as migration_20250513_230042_add_category_for_pages from './20250513_230042_add_category_for_pages';
 import * as migration_20250514_072424_add_locales_for_link_labels from './20250514_072424_add_locales_for_link_labels';
 import * as migration_20250514_082219_checkbox_for_locale_switchers from './20250514_082219_checkbox_for_locale_switchers';
+import * as migration_20250514_212002_add_analytics from './20250514_212002_add_analytics';
 
 export const migrations = [
   {
@@ -70,6 +71,11 @@ export const migrations = [
   {
     up: migration_20250514_082219_checkbox_for_locale_switchers.up,
     down: migration_20250514_082219_checkbox_for_locale_switchers.down,
-    name: '20250514_082219_checkbox_for_locale_switchers'
+    name: '20250514_082219_checkbox_for_locale_switchers',
+  },
+  {
+    up: migration_20250514_212002_add_analytics.up,
+    down: migration_20250514_212002_add_analytics.down,
+    name: '20250514_212002_add_analytics'
   },
 ];
