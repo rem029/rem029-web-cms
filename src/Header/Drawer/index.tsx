@@ -10,6 +10,7 @@ import { GiHamburgerMenu } from 'react-icons/gi'
 import { IoMdClose } from 'react-icons/io'
 
 import { SocialMedia } from '@/components/Social'
+import { LocaleSwitch } from '@/components/Locale'
 
 export const DrawerNav: React.FC<{ data: HeaderType; settings: Setting }> = ({
   data,
@@ -49,14 +50,13 @@ export const DrawerNav: React.FC<{ data: HeaderType; settings: Setting }> = ({
         </div>
 
         <div className={css('header__drawer__nav')}>
+          <LocaleSwitch location="header-drawer" />
           {navItems.map(({ link }, i) => (
             <CMSLink
               key={`DrawerLink_${i}`}
               className={css('header__drawer__nav-item')}
-              href={link?.url || ''}
-              label={link?.label}
-              newTab={link?.newTab || false}
               onClick={() => setIsDrawerOpen(false)}
+              {...link}
             />
           ))}
         </div>

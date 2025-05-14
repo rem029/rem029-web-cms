@@ -2,20 +2,24 @@
 
 import { getStyles } from '@/fields/css'
 import { LinkBlock as LinkBlockType } from '@/payload-types'
+import { addAnalytics } from '@/utilities/analytics'
 import { css } from '@/utilities/constants'
 import Link from 'next/link'
+import { useRouter, usePathname } from 'next/navigation'
 import React from 'react'
 
-export interface LinkBlockProps extends LinkBlockType {}
+export type LinkBlockProps = LinkBlockType
 
 type HeaderVariants = NonNullable<LinkBlockType['main']>['variant']
 
 export const LinkBlock = ({ main, styles }: LinkBlockProps) => {
-  if (!main) return null
-  const { text, variant, href, new_tab } = main
+  const router = useRouter()
+  const pathName = usePathname()
+
+  const { text, variant, href, new_tab } = main!
   const { cssName, cssStyle, elemId } = getStyles({ ...styles })
 
-  const normalizedHref = href ? (href.startsWith('/') ? href : `/${href}`) : '/'
+  const normalizedHref = href || '/'
 
   const getVariant = (variant: HeaderVariants) => {
     switch (variant) {
@@ -34,12 +38,16 @@ export const LinkBlock = ({ main, styles }: LinkBlockProps) => {
     }
   }
 
-  const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    console.log('Link clicked:', {
-      href: normalizedHref,
-      target: new_tab ? '_blank' : undefined,
-      text,
+  const onLinkClick = (_: React.MouseEvent<HTMLAnchorElement>) => {
+    addAnalytics({
+      eventType: 'click',
+      clickedUrl: normalizedHref,
+      pagePath: pathName,
+      payload: { elementId: styles?.elemId },
     })
+
+    router.push(normalizedHref)
+    router.refresh()
   }
 
   return (

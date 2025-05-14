@@ -34,14 +34,7 @@ export const ContentBlock: React.FC<ContentBlockProps> = (props) => {
               >
                 {richText && <RichText data={richText} enableGutter={false} enableProse={false} />}
 
-                {enableLink && (
-                  <CMSLink
-                    className={css('link')}
-                    href={link?.url || ''}
-                    newTab={link?.newTab || false}
-                    label={link?.label || ''}
-                  />
-                )}
+                {enableLink && <CMSLink className={css('link')} {...link} />}
               </div>
             )
           })}

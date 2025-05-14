@@ -3,7 +3,7 @@ import { HeaderBlock as HeaderBlockType } from '@/payload-types'
 import { css } from '@/utilities/constants'
 import React from 'react'
 
-export interface HeaderBlockProps extends HeaderBlockType {}
+export type HeaderBlockProps = HeaderBlockType
 
 type HeaderVariants = NonNullable<HeaderBlockType['main']>['variant']
 

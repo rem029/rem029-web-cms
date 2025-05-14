@@ -12,6 +12,7 @@ import { IoIosSend } from 'react-icons/io'
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
 import { css } from '@/utilities/constants'
+import { addAnalytics } from '@/utilities/analytics'
 
 import {
   UserIcon,
@@ -23,6 +24,7 @@ import {
   MapPinIcon,
   BadgeCheckIcon,
 } from 'lucide-react' // Example icon import
+import { FormSubmission } from '@/payload-types'
 
 export type FormBlockType = {
   blockName?: string
@@ -49,8 +51,6 @@ export const FormBlock: React.FC<
     id?: string
   } & FormBlockType
 > = (props) => {
-  if (!props.form) return null
-
   const {
     enableIntro,
     form: formFromProps,
@@ -89,8 +89,11 @@ export const FormBlock: React.FC<
           setIsLoading(true)
         }, 1000)
 
+        let email = ''
+        let phone = ''
+
         try {
-          const req = await fetch(`${getClientSideURL()}/api/form-submissions`, {
+          const response = await fetch(`${getClientSideURL()}/api/form-submissions`, {
             body: JSON.stringify({
               form: formID,
               submissionData: dataToSend,
@@ -101,16 +104,36 @@ export const FormBlock: React.FC<
             method: 'POST',
           })
 
-          const res = await req.json()
+          const result = await response.json()
+
+          const formResponse: FormSubmission = result.doc
+
+          email = formResponse?.submissionData?.find((item) => item.field === 'email')?.value || ''
+          phone = formResponse?.submissionData?.find((item) => item.field === 'phone')?.value || ''
 
           clearTimeout(loadingTimerID)
 
-          if (req.status >= 400) {
+          if (response.status >= 400 || !response.ok) {
             setIsLoading(false)
 
             setError({
-              message: res.errors?.[0]?.message || 'Internal Server Error',
-              status: res.status,
+              message: result.errors?.[0]?.message || 'Internal Server Error',
+              status: result.status,
+            })
+
+            // Track form submission error
+            addAnalytics({
+              eventType: 'error',
+              pagePath: typeof window !== 'undefined' ? window.location.pathname : '',
+              email,
+              phone,
+              payload: {
+                formID,
+                formName: formFromProps?.title || 'Unknown Form',
+                errorType: 'api_error',
+                errorMessage: result.errors?.[0]?.message || 'Internal Server Error',
+                errorStatus: result.status,
+              },
             })
 
             return
@@ -119,6 +142,19 @@ export const FormBlock: React.FC<
           setIsLoading(false)
           setHasSubmitted(true)
 
+          // Track successful form submission
+          addAnalytics({
+            eventType: 'form_submission',
+            pagePath: typeof window !== 'undefined' ? window.location.pathname : '',
+            email,
+            phone,
+            payload: {
+              formID,
+              formName: formFromProps?.title || 'Unknown Form',
+              success: true,
+            },
+          })
+
           if (confirmationType === 'redirect' && redirect) {
             const { url } = redirect
 
@@ -126,18 +162,33 @@ export const FormBlock: React.FC<
 
             if (redirectUrl) router.push(redirectUrl)
           }
+
+          // Analytics tracking is already done above
         } catch (err) {
           console.warn(err)
           setIsLoading(false)
           setError({
             message: 'Something went wrong.',
           })
+
+          // Track form submission error
+          addAnalytics({
+            eventType: 'error',
+            email,
+            phone,
+            payload: {
+              formID,
+              formName: formFromProps?.title || 'Unknown Form',
+              errorType: 'client_error',
+              errorMessage: 'Something went wrong.',
+            },
+          })
         }
       }
 
       void submitForm()
     },
-    [router, formID, redirect, confirmationType],
+    [router, formID, redirect, confirmationType, formFromProps?.title],
   )
 
   return (

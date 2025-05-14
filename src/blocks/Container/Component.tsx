@@ -14,8 +14,9 @@ import { CardRowBlock } from '../CardRow/Component'
 import { FormBlock } from '../old/Form/Component'
 import { CarouselBlock } from '../Carousel/Component'
 
-export interface ContainerBlockTypeProps extends ContainerBlockType {}
+export type ContainerBlockTypeProps = ContainerBlockType
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const componentsMap: Record<string, React.ComponentType<any>> = {
   header: HeaderBlock,
   text: TextBlock,

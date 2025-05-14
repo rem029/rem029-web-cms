@@ -393,7 +393,7 @@ export const defaultThemeCSS = `
 }
 
 .cms-multimedia img {
-  object-fit: contain;f
+  object-fit: contain;
 }
 
 
@@ -437,7 +437,15 @@ export const defaultThemeCSS = `
   align-items: start;
   padding: 8px 16px;
   gap: 16px;
- 
+}
+
+.cms-footer__section {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
 }
 
 .cms-footer__address {
@@ -485,6 +493,45 @@ export const defaultThemeCSS = `
   color: var(--primary-foreground);
   padding: 0px 4px;
   font-size: 16px;
+}
+
+/* ─── Locale Switch Styles ───────────────────────── */
+
+.cms-header__locale__select,
+.cms-footer__locale__select,
+.cms-header-drawer__locale__select {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;  
+}
+
+.cms-header-drawer__locale__select {
+  justify-content: start;
+}
+
+.cms-header__locale__select span,
+.cms-footer__locale__select span, 
+.cms-header-drawer__locale__select span {
+  font-size: 12px;  
+}
+
+.cms-header__locale__select-item,
+.cms-footer__locale__select-item,
+.cms-header-drawer__locale__select-item {
+  color: #FFF;
+}
+
+.cms-header-drawer__locale__select-item {
+  font-size: 12px;
+}
+
+.cms-header__locale__select span,
+.cms-footer__locale__select span, 
+.cms-header-drawer__locale__select span {
+  color: var(--info-light);
+  width: max-content;
 }
 
 /* ─── Cards Image with Overlay ───────────────────────── */
@@ -1034,28 +1081,32 @@ button {
 /* ─── Responsive ───────────────────────── */
 
 @media only screen and (max-width: 768px) {
- .cms-hero__feature {
-    aspect-ratio: 4 / 3;
- }
+    .cms-header__locale__select {
+      display: none;
+    }
 
- .cms-hero__feature-content {
-    gap: 4px;
-    padding: 24px;
-  }
-  
-  .cms-section__container {    
-    gap: 8px;
-  }
+    .cms-hero__feature {
+      aspect-ratio: 4 / 3;
+    }
 
-  .cms-btn,
-  .cms-btn-primary,
-  .cms-btn-secondary,
-  .cms-btn-outline,
-  .cms-btn-form {
-    padding: 4px 16px;
-    font-size: 16px;
+    .cms-hero__feature-content {
+      gap: 4px;
+      padding: 24px;
+    }
+
+    .cms-section__container {    
+      gap: 8px;
+    }
+
+    .cms-btn,
+    .cms-btn-primary,
+    .cms-btn-secondary,
+    .cms-btn-outline,
+    .cms-btn-form {
+      padding: 4px 16px;
+      font-size: 16px;
+    }
   }
-}
 `
 
 export const defaultFooterCopyRight = {

@@ -21,6 +21,7 @@ import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { Settings } from './Settings'
 import { Roles } from './collections/Roles'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
+import { Analytics } from './collections/Analytics'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -78,7 +79,7 @@ export default buildConfig({
     // push: false,
     logger: process.env.DB_LOGGER === 'true',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Roles],
+  collections: [Pages, Posts, Media, Categories, Users, Roles, Analytics],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, Theme, Settings],
   plugins: [...plugins],

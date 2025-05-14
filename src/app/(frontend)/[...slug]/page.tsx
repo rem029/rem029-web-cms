@@ -34,7 +34,7 @@ export async function generateStaticParams() {
       return doc.slug !== 'home'
     })
     .map(({ slug }) => {
-      return { slug }
+      return { slug: slug?.split('/') }
     })
 
   return params
@@ -42,16 +42,17 @@ export async function generateStaticParams() {
 
 type Args = {
   params: Promise<{
-    slug?: string
+    slug?: string[]
   }>
   searchParams: Promise<{ lang?: TypedLocale }>
 }
 
 export default async function Page({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
-  const { slug = 'home' } = await paramsPromise
+  const { slug = ['home'] } = await paramsPromise
+  const slugPath = Array.isArray(slug) ? slug.join('/') : slug
 
-  const url = '/' + slug
+  const url = '/' + slugPath
 
   const cookieStore = await cookies()
   const locale = (cookieStore.get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE) as TypedLocale
@@ -59,12 +60,12 @@ export default async function Page({ params: paramsPromise }: Args) {
   let page: RequiredDataFromCollectionSlug<'pages'> | null
 
   page = await queryPageBySlug({
-    slug,
+    slug: slugPath,
     locale,
   })
 
   // Remove this code once your website is seeded
-  if (!page && slug === 'home') {
+  if (!page && slugPath === 'home') {
     page = homeStatic
   }
 
@@ -102,13 +103,16 @@ export default async function Page({ params: paramsPromise }: Args) {
 }
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { slug = 'home' } = await paramsPromise
+  const { slug = ['home'] } = await paramsPromise
 
   const cookieStore = await cookies()
   const locale = (cookieStore.get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE) as TypedLocale
 
+  // Convert slug array to string path
+  const slugPath = Array.isArray(slug) ? slug.join('/') : slug
+
   const page = await queryPageBySlug({
-    slug,
+    slug: slugPath,
     locale,
   })
 

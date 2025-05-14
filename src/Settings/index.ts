@@ -14,6 +14,15 @@ export const Settings: GlobalConfig = {
     { type: 'upload', relationTo: 'media', name: 'favicon', label: 'Favicon', localized: true },
     { type: 'upload', relationTo: 'media', name: 'logo', label: 'Logo', localized: true },
     {
+      type: 'group',
+      name: 'localeSwitch',
+      label: 'Locale Switch',
+      fields: [
+        { type: 'checkbox', name: 'enableLocaleHeader', label: 'Show on Header' },
+        { type: 'checkbox', name: 'enableLocaleFooter', label: 'Show on Footer' },
+      ],
+    },
+    {
       type: 'text',
       name: 'siteName',
       label: 'SiteName',

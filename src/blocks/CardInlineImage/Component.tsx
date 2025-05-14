@@ -6,7 +6,7 @@ import { CardInlineImageBlock as CardInlineImageBlockType, Media } from '@/paylo
 import { getStyles } from '@/fields/css'
 import RichText from '@/components/RichText'
 
-export interface CardInlineImageBlockProps extends CardInlineImageBlockType {}
+export type CardInlineImageBlockProps = CardInlineImageBlockType
 
 export const CardInlineImageBlock = ({ main, styles }: CardInlineImageBlockProps) => {
   const { cssName, cssStyle } = getStyles({ ...styles })

@@ -25,6 +25,7 @@ import { SectionBlock } from '@/blocks/Section/config'
 import { CSSNameWithCustomFiled } from '@/fields/css'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
+import { populateFullSlug } from './hooks/populateFullSlug'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -40,6 +41,7 @@ export const Pages: CollectionConfig<'pages'> = {
   defaultPopulate: {
     title: true,
     slug: true,
+    category: true,
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
@@ -131,11 +133,35 @@ export const Pages: CollectionConfig<'pages'> = {
       },
     },
     ...slugField(),
+    {
+      name: 'fullSlug',
+      type: 'text',
+      label: 'Full Slug',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        condition: (_, siblingData) => {
+          return !!siblingData?.category
+        },
+        description:
+          'This is the full slug of the page, including the category slug. It is used for SEO purposes and should not be changed.',
+      },
+    },
+    {
+      name: 'category',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
+      hasMany: false,
+      relationTo: 'categories',
+    },
+
     ...createdUpdatedByFields,
   ],
   hooks: {
     afterChange: [revalidatePage],
-    beforeChange: [populatePublishedAt, setCreatedUpdatedByCollection],
+    beforeChange: [populatePublishedAt, setCreatedUpdatedByCollection, populateFullSlug],
     afterDelete: [revalidateDelete],
   },
   versions: {

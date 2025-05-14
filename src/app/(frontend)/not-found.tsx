@@ -6,7 +6,7 @@ import { css } from '@/utilities/constants'
 
 export default function NotFound() {
   return (
-    <div className={`${css('section')}`}>
+    <div className={`${css('section')}`} style={{ minHeight: '100dvh' }}>
       <div className={`${css('section__container')} py-28`}>
         <div className="prose max-w-none">
           <h1 style={{ marginBottom: 0 }}>404</h1>

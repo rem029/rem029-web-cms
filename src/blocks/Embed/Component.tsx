@@ -3,7 +3,7 @@ import { EmbedBlock as EmbedBlockType } from '@/payload-types'
 import dOMPurify from 'isomorphic-dompurify'
 import React from 'react'
 
-export interface EmbedBlockProps extends EmbedBlockType {}
+export type EmbedBlockProps = EmbedBlockType
 
 export const EmbedBlock = ({ main, styles }: EmbedBlockProps) => {
   const { html } = main
