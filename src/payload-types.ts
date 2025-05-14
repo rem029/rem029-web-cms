@@ -39,6 +39,9 @@ export type HeroSlide =
       button?: {
         elemId?: string | null;
         text?: string | null;
+        /**
+         * Use "/" prefix for internal links (e.g., "/about"). Use full URLs for external links (e.g., "https://example.com").
+         */
         href?: string | null;
         new_tab?: boolean | null;
         variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
@@ -1062,6 +1065,9 @@ export interface TextBlock {
 export interface LinkBlock {
   main?: {
     text?: string | null;
+    /**
+     * Use "/" prefix for internal links (e.g., "/about"). Use full URLs for external links (e.g., "https://example.com").
+     */
     href?: string | null;
     new_tab?: boolean | null;
     variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
@@ -1149,6 +1155,9 @@ export interface CardWithBackgroundBlock {
     button?: {
       elemId?: string | null;
       text?: string | null;
+      /**
+       * Use "/" prefix for internal links (e.g., "/about"). Use full URLs for external links (e.g., "https://example.com").
+       */
       href?: string | null;
       new_tab?: boolean | null;
       variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
@@ -1198,6 +1207,9 @@ export interface CardInlineImageBlock {
     button?: {
       elemId?: string | null;
       text?: string | null;
+      /**
+       * Use "/" prefix for internal links (e.g., "/about"). Use full URLs for external links (e.g., "https://example.com").
+       */
       href?: string | null;
       new_tab?: boolean | null;
       variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
@@ -1247,6 +1259,9 @@ export interface CardRowBlock {
     button?: {
       elemId?: string | null;
       text?: string | null;
+      /**
+       * Use "/" prefix for internal links (e.g., "/about"). Use full URLs for external links (e.g., "https://example.com").
+       */
       href?: string | null;
       new_tab?: boolean | null;
       variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;

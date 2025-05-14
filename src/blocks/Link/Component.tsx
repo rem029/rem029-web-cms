@@ -19,7 +19,7 @@ export const LinkBlock = ({ main, styles }: LinkBlockProps) => {
   const { text, variant, href, new_tab } = main!
   const { cssName, cssStyle, elemId } = getStyles({ ...styles })
 
-  const normalizedHref = href ? (href.startsWith('/') ? href : `/${href}`) : '/'
+  const normalizedHref = href || '/'
 
   const getVariant = (variant: HeaderVariants) => {
     switch (variant) {
