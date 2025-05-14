@@ -4,7 +4,7 @@ import { getStyles } from '@/fields/css'
 import { LinkBlock as LinkBlockType } from '@/payload-types'
 import { css } from '@/utilities/constants'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 
 export interface LinkBlockProps extends LinkBlockType {}

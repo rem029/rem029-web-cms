@@ -14,6 +14,7 @@ import { CardWithBackgroundBlock } from '@/blocks/CardWithBackground/Component'
 import { CardRowBlock } from '@/blocks/CardRow/Component'
 import { CarouselBlock } from '@/blocks/Carousel/Component'
 import { sampleCarouselCards } from './sample-carousal-card'
+import { LinkBlock } from '@/blocks/Link/Component'
 
 type ThemePreviewClientProps = {
   activeThemeName: string
@@ -565,9 +566,21 @@ export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({
             </div>
 
             <h3 className={css('h3')}>Links</h3>
-            <CMSLink href="#" label="Default Link" className={css('link')} />
-            <CMSLink href="#" label="Primary Link" className={css('link-primary')} />
-            <CMSLink href="#" label="Secondary Link" className={css('link-secondary')} />
+            <LinkBlock
+              blockType="link"
+              main={{ href: '#', text: 'Default Link' }}
+              styles={{ css_name: css('link'), elemId: 'theme-link' }}
+            />
+            <LinkBlock
+              blockType="link"
+              main={{ href: '#', text: 'Primary Link' }}
+              styles={{ css_name: css('link-primary'), elemId: 'theme-link' }}
+            />
+            <LinkBlock
+              blockType="link"
+              main={{ href: '#', text: 'Secondary Link' }}
+              styles={{ css_name: css('link-secondary'), elemId: 'theme-link' }}
+            />
 
             <h3 className={css('h3')}>Form Elements</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
