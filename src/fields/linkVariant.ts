@@ -12,6 +12,10 @@ export const LinkVariant: Field[] = [
     type: 'text',
     required: false,
     localized: true,
+    admin: {
+      description:
+        'Use "/" prefix for internal links (e.g., "/about"). Use full URLs for external links (e.g., "https://example.com").',
+    },
   },
   {
     name: 'new_tab',

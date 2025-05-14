@@ -393,7 +393,7 @@ export const defaultThemeCSS = `
 }
 
 .cms-multimedia img {
-  object-fit: contain;f
+  object-fit: contain;
 }
 
 
@@ -1061,28 +1061,32 @@ button {
 /* ─── Responsive ───────────────────────── */
 
 @media only screen and (max-width: 768px) {
- .cms-hero__feature {
-    aspect-ratio: 4 / 3;
- }
+    .cms-header__locale__select {
+      display: none;
+    }
 
- .cms-hero__feature-content {
-    gap: 4px;
-    padding: 24px;
-  }
-  
-  .cms-section__container {    
-    gap: 8px;
-  }
+    .cms-hero__feature {
+      aspect-ratio: 4 / 3;
+    }
 
-  .cms-btn,
-  .cms-btn-primary,
-  .cms-btn-secondary,
-  .cms-btn-outline,
-  .cms-btn-form {
-    padding: 4px 16px;
-    font-size: 16px;
+    .cms-hero__feature-content {
+      gap: 4px;
+      padding: 24px;
+    }
+
+    .cms-section__container {    
+      gap: 8px;
+    }
+
+    .cms-btn,
+    .cms-btn-primary,
+    .cms-btn-secondary,
+    .cms-btn-outline,
+    .cms-btn-form {
+      padding: 4px 16px;
+      font-size: 16px;
+    }
   }
-}
 `
 
 export const defaultFooterCopyRight = {
