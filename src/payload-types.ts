@@ -182,6 +182,7 @@ export interface Config {
     categories: Category;
     users: User;
     roles: Role;
+    analytics: Analytics;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -199,6 +200,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     roles: RolesSelect<false> | RolesSelect<true>;
+    analytics: AnalyticsSelect<false> | AnalyticsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -1304,6 +1306,33 @@ export interface CarouselBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics".
+ */
+export interface Analytics {
+  id: number;
+  ip?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  deviceType: 'desktop' | 'mobile' | 'tablet';
+  pagePath: string;
+  referrer?: string | null;
+  clickedUrl?: string | null;
+  eventType: 'page_view' | 'click' | 'form_submission' | 'error' | 'unknown';
+  timestamp: string;
+  payload?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1497,6 +1526,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'roles';
         value: number | Role;
+      } | null)
+    | ({
+        relationTo: 'analytics';
+        value: number | Analytics;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -2240,6 +2273,24 @@ export interface RoleGlobalPermissionsSelect<T extends boolean = true> {
   canRead?: T;
   canUpdate?: T;
   id?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "analytics_select".
+ */
+export interface AnalyticsSelect<T extends boolean = true> {
+  ip?: T;
+  email?: T;
+  phone?: T;
+  deviceType?: T;
+  pagePath?: T;
+  referrer?: T;
+  clickedUrl?: T;
+  eventType?: T;
+  timestamp?: T;
+  payload?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -6,7 +6,7 @@ import { CardRowBlock as CardRowBlockType, Media } from '@/payload-types'
 import RichText from '@/components/RichText'
 import { getStyles } from '@/fields/css'
 
-export interface CardRowBlockProps extends CardRowBlockType {}
+export type CardRowBlockProps = CardRowBlockType
 
 export const CardRowBlock = ({ main, styles }: CardRowBlockProps) => {
   const { cssName, cssStyle } = getStyles({ ...styles })

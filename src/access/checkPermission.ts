@@ -1,5 +1,5 @@
 import type { User, Role } from '@/payload-types' // Adjust if your payload-types path is different
-import { Access, CollectionSlug, GlobalSlug } from 'payload'
+import { CollectionSlug, GlobalSlug } from 'payload'
 
 type CollectionAction = 'create' | 'read' | 'update' | 'delete'
 type GlobalAction = 'read' | 'update'

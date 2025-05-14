@@ -5,7 +5,7 @@ import { css } from '@/utilities/constants'
 import Image from 'next/image'
 
 export type SingleHeroSlideObject = NonNullable<HeroSlide>[number]
-export interface FeatureProps extends SingleHeroSlideObject {}
+export type FeatureProps = SingleHeroSlideObject
 
 export const Feature = ({
   imageFit,

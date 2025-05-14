@@ -6,7 +6,7 @@ import { CardWithBackgroundBlock as CardWithBackgroundBlockType, Media } from '@
 import { getStyles } from '@/fields/css'
 import RichText from '@/components/RichText'
 
-export interface CardWithBackgroundBlockProps extends CardWithBackgroundBlockType {}
+export type CardWithBackgroundBlockProps = CardWithBackgroundBlockType
 
 export const CardWithBackgroundBlock = ({ main, styles }: CardWithBackgroundBlockProps) => {
   const { cssName, cssStyle } = getStyles({ ...styles })

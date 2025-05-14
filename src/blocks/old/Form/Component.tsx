@@ -12,6 +12,7 @@ import { IoIosSend } from 'react-icons/io'
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
 import { css } from '@/utilities/constants'
+import { addAnalytics } from '@/utilities/analytics'
 
 import {
   UserIcon,
@@ -49,8 +50,6 @@ export const FormBlock: React.FC<
     id?: string
   } & FormBlockType
 > = (props) => {
-  if (!props.form) return null
-
   const {
     enableIntro,
     form: formFromProps,
@@ -113,11 +112,39 @@ export const FormBlock: React.FC<
               status: res.status,
             })
 
+            // Track form submission error
+            addAnalytics({
+              eventType: 'error',
+              pagePath: typeof window !== 'undefined' ? window.location.pathname : '',
+
+              payload: {
+                formID,
+                formName: formFromProps?.title || 'Unknown Form',
+                errorType: 'api_error',
+                errorMessage: res.errors?.[0]?.message || 'Internal Server Error',
+                errorStatus: res.status,
+              },
+            })
+
             return
           }
 
+          const response = await req.json()
+          console.log('@FormComponent', response)
+
           setIsLoading(false)
           setHasSubmitted(true)
+
+          // Track successful form submission
+          addAnalytics({
+            eventType: 'form_submission',
+            pagePath: typeof window !== 'undefined' ? window.location.pathname : '',
+            payload: {
+              formID,
+              formName: formFromProps?.title || 'Unknown Form',
+              success: true,
+            },
+          })
 
           if (confirmationType === 'redirect' && redirect) {
             const { url } = redirect
@@ -126,18 +153,31 @@ export const FormBlock: React.FC<
 
             if (redirectUrl) router.push(redirectUrl)
           }
+
+          // Analytics tracking is already done above
         } catch (err) {
           console.warn(err)
           setIsLoading(false)
           setError({
             message: 'Something went wrong.',
           })
+
+          // Track form submission error
+          addAnalytics({
+            eventType: 'error',
+            payload: {
+              formID,
+              formName: formFromProps?.title || 'Unknown Form',
+              errorType: 'client_error',
+              errorMessage: 'Something went wrong.',
+            },
+          })
         }
       }
 
       void submitForm()
     },
-    [router, formID, redirect, confirmationType],
+    [router, formID, redirect, confirmationType, formFromProps?.title],
   )
 
   return (

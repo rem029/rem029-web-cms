@@ -4,7 +4,7 @@ import { TextBlock as TextBlockType } from '@/payload-types'
 import { css } from '@/utilities/constants'
 import React from 'react'
 
-export interface TextBlockProps extends TextBlockType {}
+export type TextBlockProps = TextBlockType
 
 export const TextBlock = ({ main, styles }: TextBlockProps) => {
   if (!main) return null

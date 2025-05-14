@@ -5,7 +5,7 @@ import React from 'react'
 import { ContainerBlock } from '../Container/Component'
 import { getStyles } from '@/fields/css'
 
-export interface SectionBlockTypeProps extends SectionBlockType {}
+export type SectionBlockTypeProps = SectionBlockType
 
 export const SectionBlock = ({ components, styles }: SectionBlockTypeProps) => {
   const { components: componentsList } = components

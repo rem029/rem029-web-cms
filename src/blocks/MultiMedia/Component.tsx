@@ -4,7 +4,7 @@ import { css } from '@/utilities/constants'
 import Image from 'next/image'
 import React from 'react'
 
-export interface MultiMediaBlockProps extends MultiMediaBlockType {}
+export type MultiMediaBlockProps = MultiMediaBlockType
 
 export const MultiMediaBlock = ({ main, styles }: MultiMediaBlockProps) => {
   if (!main) return null

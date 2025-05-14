@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { CMSLink } from '@/components/Link'
 import { css } from '@/utilities/constants'
 import { SocialMedia } from '@/components/Social'
 import { Setting } from '@/payload-types'

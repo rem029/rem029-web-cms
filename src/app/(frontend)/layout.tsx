@@ -23,6 +23,7 @@ import { sanitizeCSS } from '@/utilities/sanitize'
 import { TypedLocale } from 'payload'
 import { cookies } from 'next/headers'
 import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from '@/utilities/constant'
+import { AnalyticsComponent } from '@/components/Analytics'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
@@ -66,6 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
 
         <Header settings={settings} />
+        <AnalyticsComponent draftMode={isEnabled} />
         {children}
         <Footer settings={settings} />
 

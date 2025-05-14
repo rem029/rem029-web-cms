@@ -18,7 +18,7 @@ import { CardInlineImageBlock } from '../CardInlineImage/Component'
 import { CardRowBlock } from '../CardRow/Component'
 import { CardWithBackgroundBlock } from '../CardWithBackground/Component'
 
-export interface CarouselBlockProps extends CarouselBlockType {}
+export type CarouselBlockProps = CarouselBlockType
 
 export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
   const [showNavigation, setShowNavigation] = useState<boolean>(false)
@@ -32,7 +32,7 @@ export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
 
   const baseSlidesPerView = useMemo(() => {
     return carouselSettings?.slidesPerView || 1
-  }, [layout, carouselSettings?.slidesPerView])
+  }, [carouselSettings?.slidesPerView])
 
   const swiperBreakpoints: SwiperOptions['breakpoints'] = useMemo(() => {
     const maxSlides = Math.max(1, baseSlidesPerView)
@@ -78,7 +78,7 @@ export const CarouselBlock = ({ main, styles }: CarouselBlockProps) => {
         spaceBetween: 8,
       },
     }
-  }, [layout, carouselSettings, baseSlidesPerView])
+  }, [layout, baseSlidesPerView])
 
   const swiperAutoPlay: AutoplayOptions | undefined = useMemo(() => {
     return carouselSettings?.autoplay === true
