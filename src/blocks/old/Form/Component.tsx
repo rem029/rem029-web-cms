@@ -16,7 +16,7 @@ import { addAnalytics } from '@/utilities/analytics'
 
 import {
   UserIcon,
-  MailIcon,
+  AtSignIcon,
   PhoneIcon,
   MessageSquareIcon,
   HashIcon,
@@ -37,7 +37,7 @@ export type FormBlockType = {
 // Define a mapping from your icon string values to actual icon components
 export const iconMap = {
   person: UserIcon,
-  email: MailIcon,
+  email: AtSignIcon,
   phone: PhoneIcon,
   message: MessageSquareIcon,
   number: HashIcon,
