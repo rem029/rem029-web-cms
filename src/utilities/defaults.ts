@@ -498,20 +498,40 @@ export const defaultThemeCSS = `
 /* ─── Locale Switch Styles ───────────────────────── */
 
 .cms-header__locale__select,
-.cms-footer__locale__select {
+.cms-footer__locale__select,
+.cms-header-drawer__locale__select {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 4px;  
+  gap: 8px;  
+}
+
+.cms-header-drawer__locale__select {
+  justify-content: start;
 }
 
 .cms-header__locale__select span,
 .cms-footer__locale__select span, 
+.cms-header-drawer__locale__select span {
+  font-size: 12px;  
+}
+
 .cms-header__locale__select-item,
-.cms-footer__locale__select-item {
-  font-size: 12px;
+.cms-footer__locale__select-item,
+.cms-header-drawer__locale__select-item {
   color: #FFF;
+}
+
+.cms-header-drawer__locale__select-item {
+  font-size: 12px;
+}
+
+.cms-header__locale__select span,
+.cms-footer__locale__select span, 
+.cms-header-drawer__locale__select span {
+  color: var(--info-light);
+  width: max-content;
 }
 
 /* ─── Cards Image with Overlay ───────────────────────── */

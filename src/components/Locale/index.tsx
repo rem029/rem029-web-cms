@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 
 interface LocaleSwitchProps {
-  location: 'header' | 'footer'
+  location: 'header' | 'header-drawer' | 'footer'
 }
 export const LocaleSwitch: React.FC<LocaleSwitchProps> = ({ location }) => {
   const router = useRouter()
