@@ -24,6 +24,7 @@ import {
   MapPinIcon,
   BadgeCheckIcon,
 } from 'lucide-react' // Example icon import
+import { FormSubmission } from '@/payload-types'
 
 export type FormBlockType = {
   blockName?: string
@@ -88,8 +89,11 @@ export const FormBlock: React.FC<
           setIsLoading(true)
         }, 1000)
 
+        let email = ''
+        let phone = ''
+
         try {
-          const req = await fetch(`${getClientSideURL()}/api/form-submissions`, {
+          const response = await fetch(`${getClientSideURL()}/api/form-submissions`, {
             body: JSON.stringify({
               form: formID,
               submissionData: dataToSend,
@@ -100,37 +104,40 @@ export const FormBlock: React.FC<
             method: 'POST',
           })
 
-          const res = await req.json()
+          const result = await response.json()
+
+          const formResponse: FormSubmission = result.doc
+
+          email = formResponse?.submissionData?.find((item) => item.field === 'email')?.value || ''
+          phone = formResponse?.submissionData?.find((item) => item.field === 'phone')?.value || ''
 
           clearTimeout(loadingTimerID)
 
-          if (req.status >= 400) {
+          if (response.status >= 400 || !response.ok) {
             setIsLoading(false)
 
             setError({
-              message: res.errors?.[0]?.message || 'Internal Server Error',
-              status: res.status,
+              message: result.errors?.[0]?.message || 'Internal Server Error',
+              status: result.status,
             })
 
             // Track form submission error
             addAnalytics({
               eventType: 'error',
               pagePath: typeof window !== 'undefined' ? window.location.pathname : '',
-
+              email,
+              phone,
               payload: {
                 formID,
                 formName: formFromProps?.title || 'Unknown Form',
                 errorType: 'api_error',
-                errorMessage: res.errors?.[0]?.message || 'Internal Server Error',
-                errorStatus: res.status,
+                errorMessage: result.errors?.[0]?.message || 'Internal Server Error',
+                errorStatus: result.status,
               },
             })
 
             return
           }
-
-          const response = await req.json()
-          console.log('@FormComponent', response)
 
           setIsLoading(false)
           setHasSubmitted(true)
@@ -139,6 +146,8 @@ export const FormBlock: React.FC<
           addAnalytics({
             eventType: 'form_submission',
             pagePath: typeof window !== 'undefined' ? window.location.pathname : '',
+            email,
+            phone,
             payload: {
               formID,
               formName: formFromProps?.title || 'Unknown Form',
@@ -165,6 +174,8 @@ export const FormBlock: React.FC<
           // Track form submission error
           addAnalytics({
             eventType: 'error',
+            email,
+            phone,
             payload: {
               formID,
               formName: formFromProps?.title || 'Unknown Form',

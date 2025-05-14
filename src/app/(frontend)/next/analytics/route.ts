@@ -10,7 +10,6 @@ export async function POST(req: NextRequest) {
       req.headers.get('x-real-ip') ||
       (req as any).ip ||
       ''
-    console.log('next/analytics', 'body', body)
 
     await fetch(`${getClientSideURL()}/api/analytics`, {
       body: JSON.stringify({ ...body, ip }),
