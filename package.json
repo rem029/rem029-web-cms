@@ -1,6 +1,6 @@
 {
   "name": "rem029-web-cms",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Website template for Payload",
   "license": "MIT",
   "type": "module",
@@ -17,7 +17,8 @@
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation next lint --fix",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "release": "standard-version"
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.33.0",
@@ -78,6 +79,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "postcss": "^8.4.38",
     "prettier": "^3.4.2",
+    "standard-version": "^9.5.0",
     "tailwindcss": "^3.4.3",
     "typescript": "5.7.3"
   },
