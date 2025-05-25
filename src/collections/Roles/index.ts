@@ -1,22 +1,38 @@
-import { CollectionConfig } from 'payload'
-import { validateAdmin } from './hooks/validateAdmin'
-import { anyone } from '@/access/anyone'
-import { authenticated } from '@/access/authenticated'
+import { CollectionConfig, PayloadRequest } from 'payload'
+import { validateAdmin, validateRoleShouldHaveOneAdmin } from './hooks/validateAdmin'
+import { permissionFields } from './fields'
+import { getConfigAccessCollection } from '@/utilities/configAccess'
+
+const getDefaultValue = (req: PayloadRequest, type: 'collections' | 'globals') => {
+  return Object.keys(req.payload[type]).map((key) => ({
+    slug: key,
+    read: true,
+    update: false,
+    hidden: false,
+    create: false,
+    admin: false,
+    delete: false,
+  }))
+}
 
 export const Roles: CollectionConfig = {
   slug: 'roles',
+  access: getConfigAccessCollection('roles'),
   admin: {
     useAsTitle: 'name',
     group: 'Admin',
     description: 'Manage user roles and permissions',
   },
-  access: {
-    read: anyone,
-    update: authenticated,
-    create: authenticated,
-    delete: authenticated,
-  },
   fields: [
+    {
+      name: 'isAdmin',
+      type: 'checkbox',
+      label: 'Is Admin Role',
+      defaultValue: false,
+      admin: {
+        description: 'Admin roles bypass all permission checks (use carefully)',
+      },
+    },
     {
       name: 'name',
       type: 'text',
@@ -24,15 +40,6 @@ export const Roles: CollectionConfig = {
       unique: true,
       admin: {
         description: 'Display name for this role',
-      },
-    },
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-      unique: true,
-      admin: {
-        description: 'Unique identifier for this role (e.g., "admin", "editor", "contributor")',
       },
     },
     {
@@ -62,52 +69,8 @@ export const Roles: CollectionConfig = {
                     '@/collections/Roles/components/CollectionsRowLabel#CollectionsRowLabel',
                 },
               },
-              fields: [
-                {
-                  name: 'collection',
-                  type: 'text',
-                  required: true,
-                  admin: {
-                    description: 'Collection slug (e.g., "pages", "posts")',
-                  },
-                },
-                {
-                  name: 'canCreate',
-                  type: 'checkbox',
-                  defaultValue: false,
-                  label: 'Can Create',
-                  admin: {
-                    description: 'Allow creating new items in this collection',
-                  },
-                },
-                {
-                  name: 'canRead',
-                  type: 'checkbox',
-                  defaultValue: true,
-                  label: 'Can Read',
-                  admin: {
-                    description: 'Allow viewing items in this collection',
-                  },
-                },
-                {
-                  name: 'canUpdate',
-                  type: 'checkbox',
-                  defaultValue: false,
-                  label: 'Can Update',
-                  admin: {
-                    description: 'Allow editing items in this collection',
-                  },
-                },
-                {
-                  name: 'canDelete',
-                  type: 'checkbox',
-                  defaultValue: false,
-                  label: 'Can Delete',
-                  admin: {
-                    description: 'Allow deleting items in this collection',
-                  },
-                },
-              ],
+              defaultValue: ({ req }) => getDefaultValue(req, 'collections'),
+              fields: permissionFields('collections'),
             },
           ],
         },
@@ -126,49 +89,15 @@ export const Roles: CollectionConfig = {
                   RowLabel: '@/collections/Roles/components/GlobalsRowLabel#GlobalsRowLabel',
                 },
               },
-              fields: [
-                {
-                  name: 'global',
-                  type: 'text',
-                  admin: {
-                    description: 'Global slug (e.g., "settings", "theme")',
-                  },
-                },
-                {
-                  name: 'canRead',
-                  type: 'checkbox',
-                  defaultValue: true,
-                  label: 'Can Read',
-                  admin: {
-                    description: 'Allow viewing this global',
-                  },
-                },
-                {
-                  name: 'canUpdate',
-                  type: 'checkbox',
-                  defaultValue: false,
-                  label: 'Can Update',
-                  admin: {
-                    description: 'Allow editing this global',
-                  },
-                },
-              ],
+              defaultValue: ({ req }) => getDefaultValue(req, 'globals'),
+              fields: permissionFields('globals'),
             },
           ],
         },
       ],
     },
-    {
-      name: 'isAdmin',
-      type: 'checkbox',
-      label: 'Is Admin Role',
-      defaultValue: false,
-      admin: {
-        description: 'Admin roles bypass all permission checks (use carefully)',
-      },
-    },
   ],
   hooks: {
-    beforeChange: [validateAdmin],
+    beforeChange: [validateRoleShouldHaveOneAdmin, validateAdmin],
   },
 }

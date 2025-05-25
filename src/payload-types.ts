@@ -60,23 +60,31 @@ export type RoleCollectionPermissions =
       /**
        * Collection slug (e.g., "pages", "posts")
        */
-      collection: string;
-      /**
-       * Allow creating new items in this collection
-       */
-      canCreate?: boolean | null;
+      slug: string;
       /**
        * Allow viewing items in this collection
        */
-      canRead?: boolean | null;
+      create?: boolean | null;
+      /**
+       * Allow viewing items in this collection
+       */
+      read?: boolean | null;
       /**
        * Allow editing items in this collection
        */
-      canUpdate?: boolean | null;
+      update?: boolean | null;
       /**
        * Allow deleting items in this collection
        */
-      canDelete?: boolean | null;
+      delete?: boolean | null;
+      /**
+       * Allow deleting items in this collection
+       */
+      hidden?: boolean | null;
+      /**
+       * Allow deleting items in this collection
+       */
+      admin?: boolean | null;
       id?: string | null;
     }[]
   | null;
@@ -89,17 +97,21 @@ export type RoleCollectionPermissions =
 export type RoleGlobalPermissions =
   | {
       /**
-       * Global slug (e.g., "settings", "theme")
+       * Collection slug (e.g., "pages", "posts")
        */
-      global?: string | null;
+      slug: string;
       /**
-       * Allow viewing this global
+       * Allow viewing items in this collection
        */
-      canRead?: boolean | null;
+      read?: boolean | null;
       /**
-       * Allow editing this global
+       * Allow editing items in this collection
        */
-      canUpdate?: boolean | null;
+      update?: boolean | null;
+      /**
+       * Allow editing items in this collection
+       */
+      hidden?: boolean | null;
       id?: string | null;
     }[]
   | null;
@@ -480,13 +492,13 @@ export interface User {
 export interface Role {
   id: number;
   /**
+   * Admin roles bypass all permission checks (use carefully)
+   */
+  isAdmin?: boolean | null;
+  /**
    * Display name for this role
    */
   name: string;
-  /**
-   * Unique identifier for this role (e.g., "admin", "editor", "contributor")
-   */
-  slug: string;
   /**
    * Brief description of what this role is for
    */
@@ -497,10 +509,6 @@ export interface Role {
   globals?: {
     permissions?: RoleGlobalPermissions;
   };
-  /**
-   * Admin roles bypass all permission checks (use carefully)
-   */
-  isAdmin?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2250,8 +2258,8 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "roles_select".
  */
 export interface RolesSelect<T extends boolean = true> {
+  isAdmin?: T;
   name?: T;
-  slug?: T;
   description?: T;
   collections?:
     | T
@@ -2263,7 +2271,6 @@ export interface RolesSelect<T extends boolean = true> {
     | {
         permissions?: T | RoleGlobalPermissionsSelect<T>;
       };
-  isAdmin?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2272,11 +2279,13 @@ export interface RolesSelect<T extends boolean = true> {
  * via the `definition` "RoleCollectionPermissions_select".
  */
 export interface RoleCollectionPermissionsSelect<T extends boolean = true> {
-  collection?: T;
-  canCreate?: T;
-  canRead?: T;
-  canUpdate?: T;
-  canDelete?: T;
+  slug?: T;
+  create?: T;
+  read?: T;
+  update?: T;
+  delete?: T;
+  hidden?: T;
+  admin?: T;
   id?: T;
 }
 /**
@@ -2284,9 +2293,10 @@ export interface RoleCollectionPermissionsSelect<T extends boolean = true> {
  * via the `definition` "RoleGlobalPermissions_select".
  */
 export interface RoleGlobalPermissionsSelect<T extends boolean = true> {
-  global?: T;
-  canRead?: T;
-  canUpdate?: T;
+  slug?: T;
+  read?: T;
+  update?: T;
+  hidden?: T;
   id?: T;
 }
 /**
