@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/rem029/rem029-web-cms/compare/v1.2.0...v1.2.1) (2025-05-25)
+
 ## [1.2.0](https://github.com/rem029/rem029-web-cms/compare/v1.1.1...v1.2.0) (2025-05-25)
 
 
