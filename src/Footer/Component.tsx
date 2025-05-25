@@ -11,13 +11,15 @@ import RichText from '@/components/RichText'
 import { SocialMedia } from '@/components/Social'
 import { defaultFooterCopyRight } from '@/utilities/defaults'
 import { LocaleSwitch } from '@/components/Locale'
+import { TypedLocale } from 'payload'
 
 interface FooterProps {
   settings: Setting
+  locale?: TypedLocale
 }
 
-export async function Footer({ settings }: FooterProps) {
-  const footerData: Footer = await getCachedGlobal('footer', 1)()
+export async function Footer({ settings, locale }: FooterProps) {
+  const footerData: Footer = await getCachedGlobal('footer', 1, locale)()
 
   const navItems = footerData?.navItems || []
 
