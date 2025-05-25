@@ -1,4 +1,4 @@
-import { getCachedGlobal } from '@/utilities/getGlobals'
+import { getGlobal } from '@/utilities/getGlobals'
 import Link from 'next/link'
 import React from 'react'
 
@@ -19,7 +19,7 @@ interface FooterProps {
 }
 
 export async function Footer({ settings, locale }: FooterProps) {
-  const footerData: Footer = await getCachedGlobal('footer', 1, locale)()
+  const footerData: Footer = await getGlobal('footer', 1, locale)
 
   const navItems = footerData?.navItems || []
 

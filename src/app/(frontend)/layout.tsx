@@ -28,7 +28,7 @@ import { AnalyticsComponent } from '@/components/Analytics'
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
   const cookieStore = await cookies()
-  const locale = cookieStore.get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE
+  const locale = (cookieStore.get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE) as TypedLocale
   const themes = await getGlobal('theme', 1, locale as TypedLocale)
   const settings = await getGlobal('settings', 1, locale as TypedLocale)
 
@@ -66,10 +66,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           }}
         />
 
-        <Header settings={settings} />
+        <Header settings={settings} locale={locale} />
         <AnalyticsComponent draftMode={isEnabled} />
         {children}
-        <Footer settings={settings} />
+        <Footer settings={settings} locale={locale} />
 
         {js && (
           <Script
