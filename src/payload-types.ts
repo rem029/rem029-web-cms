@@ -539,6 +539,13 @@ export interface CallToActionBlock {
                 value: number | Post;
               } | null);
           url?: string | null;
+          items?:
+            | {
+                URL?: string | null;
+                label?: string | null;
+                id?: string | null;
+              }[]
+            | null;
           label: string;
           /**
            * Choose how the link should be rendered.
@@ -657,6 +664,13 @@ export interface ContentBlock {
                 value: number | Post;
               } | null);
           url?: string | null;
+          items?:
+            | {
+                URL?: string | null;
+                label?: string | null;
+                id?: string | null;
+              }[]
+            | null;
           label: string;
           /**
            * Choose how the link should be rendered.
@@ -1719,6 +1733,13 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
               newTab?: T;
               reference?: T;
               url?: T;
+              items?:
+                | T
+                | {
+                    URL?: T;
+                    label?: T;
+                    id?: T;
+                  };
               label?: T;
               appearance?: T;
             };
@@ -1745,6 +1766,13 @@ export interface ContentBlockSelect<T extends boolean = true> {
               newTab?: T;
               reference?: T;
               url?: T;
+              items?:
+                | T
+                | {
+                    URL?: T;
+                    label?: T;
+                    id?: T;
+                  };
               label?: T;
               appearance?: T;
             };
@@ -2576,7 +2604,7 @@ export interface Header {
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'custom') | null;
+          type?: ('reference' | 'custom' | 'group') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -2588,6 +2616,13 @@ export interface Header {
                 value: number | Post;
               } | null);
           url?: string | null;
+          items?:
+            | {
+                URL?: string | null;
+                label?: string | null;
+                id?: string | null;
+              }[]
+            | null;
           label: string;
         };
         id?: string | null;
@@ -2605,7 +2640,7 @@ export interface Footer {
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'custom') | null;
+          type?: ('reference' | 'custom' | 'group') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -2617,6 +2652,13 @@ export interface Footer {
                 value: number | Post;
               } | null);
           url?: string | null;
+          items?:
+            | {
+                URL?: string | null;
+                label?: string | null;
+                id?: string | null;
+              }[]
+            | null;
           label: string;
         };
         id?: string | null;
@@ -2688,6 +2730,7 @@ export interface Setting {
     youtube?: string | null;
     pinterest?: string | null;
     tiktok?: string | null;
+    whatsapp?: string | null;
   };
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
@@ -2709,6 +2752,13 @@ export interface HeaderSelect<T extends boolean = true> {
               newTab?: T;
               reference?: T;
               url?: T;
+              items?:
+                | T
+                | {
+                    URL?: T;
+                    label?: T;
+                    id?: T;
+                  };
               label?: T;
             };
         id?: T;
@@ -2732,6 +2782,13 @@ export interface FooterSelect<T extends boolean = true> {
               newTab?: T;
               reference?: T;
               url?: T;
+              items?:
+                | T
+                | {
+                    URL?: T;
+                    label?: T;
+                    id?: T;
+                  };
               label?: T;
             };
         id?: T;
@@ -2801,6 +2858,7 @@ export interface SettingsSelect<T extends boolean = true> {
         youtube?: T;
         pinterest?: T;
         tiktok?: T;
+        whatsapp?: T;
       };
   createdBy?: T;
   updatedBy?: T;

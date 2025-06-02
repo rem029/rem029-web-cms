@@ -1,6 +1,7 @@
 import type { Field, GroupField } from 'payload'
 
 import deepMerge from '@/utilities/deepMerge'
+import { off } from 'process'
 
 export type LinkAppearances = 'default' | 'outline'
 
@@ -18,10 +19,16 @@ export const appearanceOptions: Record<LinkAppearances, { label: string; value: 
 type LinkType = (options?: {
   appearances?: LinkAppearances[] | false
   disableLabel?: boolean
+  enableGrouping?: boolean
   overrides?: Partial<GroupField>
 }) => Field
 
-export const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = {}) => {
+export const link: LinkType = ({
+  appearances,
+  disableLabel = false,
+  enableGrouping = false,
+  overrides = {},
+} = {}) => {
   const linkResult: GroupField = {
     name: 'link',
     type: 'group',
@@ -49,6 +56,14 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
                 label: 'Custom URL',
                 value: 'custom',
               },
+              ...(enableGrouping
+                ? [
+                    {
+                      label: 'Group',
+                      value: 'group',
+                    },
+                  ]
+                : []),
             ],
           },
           {
@@ -73,6 +88,7 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
       type: 'relationship',
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'reference',
+        width: '50%',
       },
       label: 'Document to link to',
       relationTo: ['pages', 'posts'],
@@ -83,9 +99,23 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
       type: 'text',
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'custom',
+        width: '50%',
       },
       label: 'Custom URL',
       required: true,
+    },
+    {
+      name: 'items',
+      type: 'array',
+      required: true,
+      admin: {
+        condition: (_, siblingData) => siblingData?.type === 'group',
+        width: '50%',
+      },
+      fields: [
+        { type: 'text', name: 'URL', label: 'URL' },
+        { type: 'text', name: 'label', label: 'Label', localized: true },
+      ],
     },
   ]
 
@@ -105,10 +135,8 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
         {
           name: 'label',
           type: 'text',
-          admin: {
-            width: '50%',
-          },
           label: 'Label',
+          admin: { width: '50%' },
           required: true,
           localized: true,
         },

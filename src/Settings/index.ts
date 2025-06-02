@@ -112,6 +112,11 @@ export const Settings: GlobalConfig = {
           name: 'tiktok',
           label: 'TikTok URL',
         },
+        {
+          type: 'text',
+          name: 'whatsapp',
+          label: 'Whatsapp URL',
+        },
       ],
     },
     ...createdUpdatedByFields,

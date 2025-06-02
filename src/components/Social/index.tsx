@@ -7,6 +7,7 @@ import {
   FaPinterest,
   FaTiktok,
   FaTwitter,
+  FaWhatsapp,
   FaYoutube,
 } from 'react-icons/fa'
 
@@ -60,6 +61,11 @@ export const SocialMedia = ({
       {socialMedia?.tiktok && (
         <Link href={socialMedia.tiktok} className={classNameItem} target="_blank">
           <FaTiktok />
+        </Link>
+      )}
+      {socialMedia?.whatsapp && (
+        <Link href={socialMedia.whatsapp} className={classNameItem} target="_blank">
+          <FaWhatsapp />
         </Link>
       )}
     </div>
