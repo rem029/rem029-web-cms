@@ -12,6 +12,7 @@ import * as migration_20250514_072424_add_locales_for_link_labels from './202505
 import * as migration_20250514_082219_checkbox_for_locale_switchers from './20250514_082219_checkbox_for_locale_switchers';
 import * as migration_20250514_212002_add_analytics from './20250514_212002_add_analytics';
 import * as migration_20250602_110944_grouped_links_added from './20250602_110944_grouped_links_added';
+import * as migration_20251210_163848_payload_upgrade_to_3_44 from './20251210_163848_payload_upgrade_to_3_44';
 
 export const migrations = [
   {
@@ -82,6 +83,11 @@ export const migrations = [
   {
     up: migration_20250602_110944_grouped_links_added.up,
     down: migration_20250602_110944_grouped_links_added.down,
-    name: '20250602_110944_grouped_links_added'
+    name: '20250602_110944_grouped_links_added',
+  },
+  {
+    up: migration_20251210_163848_payload_upgrade_to_3_44.up,
+    down: migration_20251210_163848_payload_upgrade_to_3_44.down,
+    name: '20251210_163848_payload_upgrade_to_3_44'
   },
 ];
