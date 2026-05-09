@@ -13,6 +13,7 @@ import * as migration_20250514_082219_checkbox_for_locale_switchers from './2025
 import * as migration_20250514_212002_add_analytics from './20250514_212002_add_analytics';
 import * as migration_20250602_110944_grouped_links_added from './20250602_110944_grouped_links_added';
 import * as migration_20251210_163848_payload_upgrade_to_3_44 from './20251210_163848_payload_upgrade_to_3_44';
+import * as migration_20260509_182521_user_roles_update_add_super_user from './20260509_182521_user_roles_update_add_super_user';
 
 export const migrations = [
   {
@@ -88,6 +89,11 @@ export const migrations = [
   {
     up: migration_20251210_163848_payload_upgrade_to_3_44.up,
     down: migration_20251210_163848_payload_upgrade_to_3_44.down,
-    name: '20251210_163848_payload_upgrade_to_3_44'
+    name: '20251210_163848_payload_upgrade_to_3_44',
+  },
+  {
+    up: migration_20260509_182521_user_roles_update_add_super_user.up,
+    down: migration_20260509_182521_user_roles_update_add_super_user.down,
+    name: '20260509_182521_user_roles_update_add_super_user'
   },
 ];

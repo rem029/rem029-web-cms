@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { accessCheckResolver } from '@/utilities/access'
+import { ensureFirstUserIsSuperUser } from './hooks/ensureFirstUserIsSuperUser'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -56,5 +57,8 @@ export const Users: CollectionConfig = {
       },
     },
   ],
+  hooks: {
+    beforeChange: [ensureFirstUserIsSuperUser],
+  },
   timestamps: true,
 }
