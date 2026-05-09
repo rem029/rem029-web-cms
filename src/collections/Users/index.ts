@@ -9,13 +9,13 @@ export const Users: CollectionConfig = {
     admin: authenticated,
     create: accessCheckResolver('users', 'canCreate'),
     delete: accessCheckResolver('users', 'canDelete'),
-    read: accessCheckResolver('users', 'canRead', { 
+    read: accessCheckResolver('users', 'canRead', {
       fallbackAccess: false,
       refineAccess: async (hasAccess, _, req) => {
         if (hasAccess) return true
         if (req.user) return { id: { equals: req.user.id } }
         return false
-      }
+      },
     }),
     update: accessCheckResolver('users', 'canUpdate', {
       fallbackAccess: false,
@@ -23,7 +23,7 @@ export const Users: CollectionConfig = {
         if (hasAccess) return true
         if (req.user) return { id: { equals: req.user.id } }
         return false
-      }
+      },
     }),
   },
   admin: {

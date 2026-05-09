@@ -2,15 +2,13 @@ import { Config, User, Role } from '@/payload-types'
 import { Access, CollectionConfig, PayloadRequest, Where } from 'payload'
 
 // Simplified types based on the current project structure
-// In the user's sample, they had a 'users-access' collection. 
+// In the user's sample, they had a 'users-access' collection.
 // In this project, we have a 'roles' collection.
 type UserWithRole = User & {
   role?: Role | string | null
 }
 
-export type Slugs =
-  | keyof Config['collections']
-  | keyof Config['globals']
+export type Slugs = keyof Config['collections'] | keyof Config['globals']
 
 export type AccessArgs = {
   fallbackAccess?: boolean
@@ -21,10 +19,14 @@ export type AccessArgs = {
 
 type AccessArgsInternal = AccessArgs & { reqOverride: PayloadRequest }
 
-export const accessCheck = async (slug: Slugs, type: 'canRead' | 'canCreate' | 'canUpdate' | 'canDelete' | 'admin' | 'super_user', args: AccessArgsInternal) => {
+export const accessCheck = async (
+  slug: Slugs,
+  type: 'canRead' | 'canCreate' | 'canUpdate' | 'canDelete' | 'admin' | 'super_user',
+  args: AccessArgsInternal,
+) => {
   const { fallbackAccess, reqOverride: req, where, refineAccess } = args
   const { payload: p, user } = req
-  
+
   const typedUser = user as UserWithRole | null
   let defaultAccessReturn = fallbackAccess ?? false
 
@@ -35,12 +37,12 @@ export const accessCheck = async (slug: Slugs, type: 'canRead' | 'canCreate' | '
   // If the user has a role, check permissions within that role
   if (typedUser?.role && typeof typedUser.role !== 'string') {
     const role = typedUser.role as Role
-    
+
     // Check if it's an admin role
     if (role.isAdmin) return true
 
     // Check specific collection permissions
-    const collectionPermission = role.collections?.permissions?.find(p => p.collection === slug)
+    const collectionPermission = role.collections?.permissions?.find((p) => p.collection === slug)
     if (collectionPermission) {
       if (type === 'canRead' && collectionPermission.canRead) defaultAccessReturn = true
       if (type === 'canCreate' && collectionPermission.canCreate) defaultAccessReturn = true
@@ -49,7 +51,7 @@ export const accessCheck = async (slug: Slugs, type: 'canRead' | 'canCreate' | '
     }
 
     // Check specific global permissions
-    const globalPermission = role.globals?.permissions?.find(p => p.global === slug)
+    const globalPermission = role.globals?.permissions?.find((p) => p.global === slug)
     if (globalPermission) {
       if (type === 'canRead' && globalPermission.canRead) defaultAccessReturn = true
       if (type === 'canUpdate' && globalPermission.canUpdate) defaultAccessReturn = true
