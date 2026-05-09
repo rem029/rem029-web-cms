@@ -38,9 +38,6 @@ export const accessCheck = async (
   if (typedUser?.role && typeof typedUser.role !== 'string') {
     const role = typedUser.role as Role
 
-    // Check if it's an admin role
-    if (role.isAdmin) return true
-
     // Check specific collection permissions
     const collectionPermission = role.collections?.permissions?.find((p) => p.collection === slug)
     if (collectionPermission) {
@@ -56,7 +53,7 @@ export const accessCheck = async (
       if (type === 'canRead' && globalPermission.canRead) defaultAccessReturn = true
       if (type === 'canUpdate' && globalPermission.canUpdate) defaultAccessReturn = true
     }
-  }
+  } else return false
 
   if (refineAccess) {
     return await refineAccess(defaultAccessReturn, slug, req)
