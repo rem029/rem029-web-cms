@@ -10,19 +10,19 @@ import { fileURLToPath } from 'url'
 
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
+import { accessCheckResolver } from '@/utilities/access'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: accessCheckResolver('media', 'canCreate'),
+    delete: accessCheckResolver('media', 'canDelete'),
     read: anyone,
-    update: authenticated,
+    update: accessCheckResolver('media', 'canUpdate'),
   },
   fields: [
     {

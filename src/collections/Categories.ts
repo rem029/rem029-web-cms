@@ -2,15 +2,16 @@ import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
+import { accessCheckResolver } from '@/utilities/access'
 import { slugField } from '@/fields/slug'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: accessCheckResolver('categories', 'canCreate'),
+    delete: accessCheckResolver('categories', 'canDelete'),
     read: anyone,
-    update: authenticated,
+    update: accessCheckResolver('categories', 'canUpdate'),
   },
   admin: {
     useAsTitle: 'title',

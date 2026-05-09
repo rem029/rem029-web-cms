@@ -2,6 +2,7 @@ import { CollectionConfig } from 'payload'
 import { validateAdmin } from './hooks/validateAdmin'
 import { anyone } from '@/access/anyone'
 import { authenticated } from '@/access/authenticated'
+import { accessCheckResolver } from '@/utilities/access'
 
 export const Roles: CollectionConfig = {
   slug: 'roles',
@@ -11,10 +12,10 @@ export const Roles: CollectionConfig = {
     description: 'Manage user roles and permissions',
   },
   access: {
-    read: anyone,
-    update: authenticated,
-    create: authenticated,
-    delete: authenticated,
+    read: accessCheckResolver('roles', 'canRead', { fallbackAccess: true }),
+    update: accessCheckResolver('roles', 'canUpdate'),
+    create: accessCheckResolver('roles', 'canCreate'),
+    delete: accessCheckResolver('roles', 'canDelete'),
   },
   fields: [
     {

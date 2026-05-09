@@ -11,6 +11,7 @@ import {
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import { accessCheckResolver } from '@/utilities/access'
 import { Banner } from '../../blocks/old/Banner/config'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
@@ -30,10 +31,10 @@ import { MediaBlock } from '@/blocks/old/MediaBlock/config'
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: accessCheckResolver('posts', 'canCreate'),
+    delete: accessCheckResolver('posts', 'canDelete'),
     read: authenticatedOrPublished,
-    update: authenticated,
+    update: accessCheckResolver('posts', 'canUpdate'),
   },
   // This config controls what's populated by default when a post is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property

@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import { accessCheckResolver } from '@/utilities/access'
 
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
@@ -30,10 +31,10 @@ import { populateFullSlug } from './hooks/populateFullSlug'
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: accessCheckResolver('pages', 'canCreate'),
+    delete: accessCheckResolver('pages', 'canDelete'),
     read: authenticatedOrPublished,
-    update: authenticated,
+    update: accessCheckResolver('pages', 'canUpdate'),
   },
   // This config controls what's populated by default when a page is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property

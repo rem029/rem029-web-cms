@@ -459,7 +459,11 @@ export interface Media {
 export interface User {
   id: number;
   name?: string | null;
-  role: number | Role;
+  /**
+   * A super user has full access to all collections and settings.
+   */
+  super_user?: boolean | null;
+  role?: (number | null) | Role;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -2269,6 +2273,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  super_user?: T;
   role?: T;
   updatedAt?: T;
   createdAt?: T;
