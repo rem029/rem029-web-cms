@@ -11,3 +11,8 @@ public/media/
 
 public/robots.txt
 public/sitemap*.xml
+
+# Claude Code: personal settings stay local
+.claude/settings.local.json
+# impeccable: platform-specific engine binary (launcher re-downloads it)
+.claude/skills/impeccable/scripts/bin/

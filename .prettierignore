@@ -12,3 +12,5 @@
 **/docs/**
 tsconfig.json
 
+.claude/skills
+.claude/agents
