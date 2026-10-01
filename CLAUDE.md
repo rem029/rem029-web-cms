@@ -30,7 +30,7 @@ Every feature should be designed for the end state, even before multi-tenancy sh
 | POS | Not started |
 | Multi-tenancy | Not started. Evaluate `@payloadcms/plugin-multi-tenant` first. |
 
-Track larger work in `docs/<branch>/` (see below) and keep this table current as things land.
+Track larger work in `docs/<ticket-id>-<short-name>/` (see below) and keep this table current as things land.
 
 ## Project
 
@@ -112,7 +112,7 @@ src/
 
 For **long or multi-file tasks**, Claude acts as planner/reviewer and delegates implementation to the `agy-bridge` MCP server (Antigravity/Gemini):
 
-1. **Plan** — Claude reads the code and writes the plan in `docs/<branch>/` (see below). Get an `mcp__agy-bridge__adversarial_review` of the plan for anything touching schema, access control, or migrations.
+1. **Plan** — Claude reads the code and writes the plan in `docs/<ticket-id>-<short-name>/` (see below). Get an `mcp__agy-bridge__adversarial_review` of the plan for anything touching schema, access control, or migrations.
 2. **Build** — delegate each phase with `mcp__agy-bridge__delegate` (`cwd` = repo root). The prompt must be self-contained: point it at the phase file, list files to touch, conventions above, and the definition of done (lint + tsc pass, types/migrations regenerated). Use `mcp__agy-bridge__follow_up` with the returned `session_id` for corrections instead of re-delegating.
 3. **Review** — Claude reviews the diff itself (`git diff`), runs lint/tsc/build, and fixes or sends back issues. Then write the phase `-result` file.
 4. Use `analyze_files` / `deep_search` / `web_lookup` to keep large files, git archaeology, and doc lookups out of Claude's context.
@@ -122,7 +122,7 @@ Small, single-file changes: just do them directly.
 ## Planning docs (`docs/`)
 
 ```
-docs/<branch-name>/
+docs/<ticket-id>-<short-name>/
 ├── .plan.md                                   # overview: goal, scope, approach, phase list, status
 ├── phases/
 │   ├── phase-1-<short-description>.md         # what to build, files, acceptance criteria
@@ -130,7 +130,10 @@ docs/<branch-name>/
 └── references/                                # specs, screenshots, API notes, research
 ```
 
-- `<branch-name>` = current git branch with `/` replaced by `-`.
+- Folder name = `<ticket-id>-<short-name>`, all lowercase kebab-case with no spaces (e.g. `rem0001-access-control`). The git branch uses the same name.
+- Keep all names under `docs/` lowercase (folders and files).
+- Ticket order and dependencies are recorded at the top of each `.plan.md`. Current order: rem0000 design → rem0001 → rem0003 → rem0002 → rem0004 → rem0000 implementation.
+- Reference `.ts` files under `docs/` are excluded from `tsconfig.json`, so they don't break the build.
 - Only create `phases/` when the plan is big enough to split; small plans live entirely in `.plan.md`.
 - Keep `.plan.md` status current (phase checklist) so work can resume across sessions.
 - Templates: `docs/README.md`.

@@ -1,9 +1,9 @@
 # Planning docs
 
-One folder per branch: `docs/<branch-name>/` (`/` in branch names → `-`).
+one folder per ticket: `docs/<ticket-id>-<short-name>/`, all lowercase kebab-case with no spaces (e.g. `docs/rem0001-access-control/`). the branch uses the same name.
 
 ```
-docs/<branch-name>/
+docs/<ticket-id>-<short-name>/
 ├── .plan.md
 ├── phases/
 │   ├── phase-<n>-<short-description>.md
