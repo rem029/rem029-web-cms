@@ -2,6 +2,36 @@
 
 Guidance for Claude Code in this repo. Built by hand before AI tooling — respect the existing patterns over "template defaults".
 
+## Product vision
+
+A WordPress-style CMS for non-technical users, with business modules on top. Target users are businesses (restaurants first), each running as their own tenant.
+
+1. **Website builder**: pages built in a user-friendly editor with Payload live preview. Users should be able to style things without writing code.
+2. **Restaurant menu**: tenants manage menu categories and items and build customer-facing menu pages in the live editor.
+3. **POS**: a cashier-facing point-of-sale screen that uses the menu data.
+4. **Home page**: the public landing page, driven by the CMS like any other page.
+5. **Multi-tenancy**: each tenant has its own content, and its own branding and styling across both the admin panel and the frontend components.
+
+Every feature should be designed for the end state, even before multi-tenancy ships:
+- **Tenant-scoped data.** New collections and globals must be tenant-scoped. Avoid singletons that assume one site, or document why they're fine.
+- **Branding through theme tokens.** Components take their styling from Theme/CSS variables and Tailwind tokens, never hardcoded colors or fonts, so each tenant can rebrand.
+- **Editor-friendly controls.** Expose options as clear admin fields (selects, toggles, presets) with sensible defaults rather than free-form CSS. The custom CSS fields (`src/fields/css`) are the escape hatch, not the main UX.
+- **Live preview for every editable surface.** Pages, menus, and headers/footers should all preview live.
+
+## Current state & roadmap
+
+| Area | Status |
+|---|---|
+| Page editor (Pages/Posts + blocks + live preview) | Exists but incomplete. Needs more styling options per block (spacing, background, alignment, width, typography presets, responsive visibility) and more blocks. |
+| Header / Footer globals | Basic: only `navItems` (+ `copyright` on Footer). Planned: sticky, hide-on-scroll / reveal-on-scroll-up, transparent-over-hero, shrink on scroll, layout variants, CTA button, mobile menu styles, multi-column footer, socials, newsletter. |
+| Theme / Settings globals | Exist (themes array, logo, favicon, locale switch, homepage, contact). These will become per-tenant. |
+| Roles & permissions | Exists (Roles collection, `super_user`). Must be extended for tenant-level roles (tenant admin, editor, cashier). |
+| Restaurant menu | Not started |
+| POS | Not started |
+| Multi-tenancy | Not started. Evaluate `@payloadcms/plugin-multi-tenant` first. |
+
+Track larger work in `docs/<branch>/` (see below) and keep this table current as things land.
+
 ## Project
 
 Payload CMS 3.44 + Next.js 15 (App Router) + Postgres, started from the official Payload website template and customised heavily.
