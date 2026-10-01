@@ -38,7 +38,7 @@ Payload CMS 3.44 + Next.js 15 (App Router) + Postgres, started from the official
 
 - Admin: `/admin` (`src/app/(payload)`), frontend: `src/app/(frontend)`
 - Collections: Pages, Posts, Media, Categories, Users, Roles, Analytics (`src/collections`)
-- Globals: Header, Footer, Theme, Settings (`src/Header`, `src/Footer`, `src/Theme`, `src/Settings`)
+- Globals: Header, Footer, Theme, Settings (currently `src/Header`, `src/Footer`, `src/Theme`, `src/Settings`; new globals go in `src/globals/`)
 - Styling: Tailwind 3 + shadcn-style primitives in `src/components/ui`, CSS variables in `src/app/(frontend)/globals.css`; site themes are editable in the Theme global
 - Localization: `en`, `ar` (`src/utilities/constant.ts`). Locale is stored in a cookie set by `src/middleware.ts` (`?lang=ar`). Arabic renders `dir="rtl"` — **every UI change must work in RTL** (prefer logical utilities like `ms-`/`me-`/`ps-`/`pe-`/`start-`/`end-`)
 
@@ -68,8 +68,45 @@ There is no test suite. Verify with `pnpm lint`, `npx tsc --noEmit`, and (for an
 - **Schema changes need a migration.** Dev uses `push: true`, so the DB looks fine locally even without one; production does not push. After changing any collection/global/block field: `generate:types` → `migrate:create` → commit both the `.ts` and `.json` migration files (index is updated automatically).
 - Blocks live in `src/blocks/<Name>/{config.ts,Component.tsx}`. `src/blocks/old/*` are legacy template blocks still used by Pages/Posts — don't delete without a migration plan.
 - Access control: use `accessCheckResolver(slug, 'canRead' | 'canCreate' | 'canUpdate' | 'canDelete')` from `src/utilities/access.ts`. Users with `super_user` bypass all checks; otherwise permissions come from the user's Role. `src/access/checkPermission.ts` is an older unused implementation.
-- Use `createdUpdatedByFields` + `setCreatedUpdatedBy*` hooks for audit fields on new collections/globals.
+- Use `createdUpdatedByFields` (`src/fields/createdUpdatedByFields.ts`) + `setCreatedUpdatedBy*` hooks (`src/hooks/setCreatedUpdatedBy.ts`) for audit fields on new collections/globals. Both are due to move to `src/common/` (REM0003).
 - Secrets come from `.env` (see `.env.example`); never commit `.env`.
+
+## Engineering principles
+
+- **Simple, maintainable, debuggable.** Prefer the plainest code that works: small functions, clear names, early returns, no clever abstractions or premature generalisation. Duplicate twice before abstracting.
+- **Debuggable failures.** Never swallow errors silently. Log with `req.payload.logger` and include context (slug, operation, user id). Use `debug` level for per-request noise like access checks, never `info`/`console.log` in hot paths.
+- **Security by default.**
+  - Every collection, global and field gets explicit access control, and denies by default (`fallbackAccess: false`) unless public read is intended.
+  - Validate and sanitise user input.
+  - Never log or store secrets, passwords, tokens or API keys. Redact them from audit data.
+  - Use `overrideAccess: false` (and pass `user`) in Local API calls made on a user's behalf.
+- **Typed.** Use generated types from `@/payload-types` and Payload's exported types (`import type { CollectionBeforeChangeHook } from 'payload'`), never imports from `node_modules/...` paths. Avoid `any`.
+- **External packages.** Only add a dependency if it's actively maintained (recent releases and commits), widely used, and has a strong community. Prefer official `@payloadcms/*` packages. Check it first (`web_lookup`), and justify new dependencies in the plan.
+
+## Folder structure
+
+New code follows this layout. Existing code (`src/Header`, `src/Footer`, `src/Theme`, `src/Settings`, `src/fields`, `src/hooks`, `src/utilities`) moves over gradually when it's touched for a task. Don't refactor it unprompted.
+
+```
+src/
+├── collections/<Name>/      # one folder per collection
+│   ├── index.ts             # CollectionConfig
+│   ├── hooks/               # used only by this collection
+│   ├── components/          # admin/UI components used only by this collection
+│   ├── endpoints/           # custom endpoints used only by this collection
+│   └── utils/               # helpers used only by this collection
+├── globals/<Name>/          # same layout as collections, with config.ts
+├── common/                  # anything used by 2+ collections/globals
+│   ├── hooks/
+│   ├── components/
+│   ├── endpoints/
+│   ├── fields/
+│   └── utils/
+└── seeds/                   # seed data for testing features
+```
+
+- **Colocate first, then promote.** Hooks, components, endpoints and helpers start next to the one collection/global that uses them. When a second one needs them, move them to `src/common/<kind>/` in the same change. Don't leave copies behind.
+- **Seeds:** every new feature that needs test data gets a seed in `src/seeds/`. Seeds must be idempotent (safe to re-run) and must never run in production. The existing template seed is in `src/endpoints/seed`.
 
 ## Workflow: Claude plans & reviews, agy-bridge builds
 
