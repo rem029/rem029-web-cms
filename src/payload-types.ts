@@ -187,6 +187,10 @@ export interface Config {
     roles: Role;
     analytics: Analytics;
     tenants: Tenant;
+    header: Header;
+    footer: Footer;
+    theme: Theme;
+    settings: Setting;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -206,6 +210,10 @@ export interface Config {
     roles: RolesSelect<false> | RolesSelect<true>;
     analytics: AnalyticsSelect<false> | AnalyticsSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
+    header: HeaderSelect<false> | HeaderSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+    theme: ThemeSelect<false> | ThemeSelect<true>;
+    settings: SettingsSelect<false> | SettingsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -218,18 +226,8 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  globals: {
-    header: Header;
-    footer: Footer;
-    theme: Theme;
-    settings: Setting;
-  };
-  globalsSelect: {
-    header: HeaderSelect<false> | HeaderSelect<true>;
-    footer: FooterSelect<false> | FooterSelect<true>;
-    theme: ThemeSelect<false> | ThemeSelect<true>;
-    settings: SettingsSelect<false> | SettingsSelect<true>;
-  };
+  globals: {};
+  globalsSelect: {};
   locale: 'en' | 'ar';
   user: User & {
     collection: 'users';
@@ -1410,6 +1408,152 @@ export interface Analytics {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header".
+ */
+export interface Header {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  navItems?:
+    | {
+        link: {
+          type?: ('reference' | 'custom' | 'group') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          items?:
+            | {
+                URL?: string | null;
+                label?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  navItems?:
+    | {
+        link: {
+          type?: ('reference' | 'custom' | 'group') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          items?:
+            | {
+                URL?: string | null;
+                label?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Copyright text to be dispalyed at the bottom of the footer
+   */
+  copyright?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "theme".
+ */
+export interface Theme {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  themes?: ThemeConfig;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings".
+ */
+export interface Setting {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  favicon?: (number | null) | Media;
+  logo?: (number | null) | Media;
+  localeSwitch?: {
+    enableLocaleHeader?: boolean | null;
+    enableLocaleFooter?: boolean | null;
+  };
+  siteName?: string | null;
+  /**
+   * Select the homepage for your website
+   */
+  homepage?: (number | null) | Page;
+  contact?: {
+    email?: string | null;
+    phone?: string | null;
+    fax?: string | null;
+  };
+  address?: {
+    full_address?: string | null;
+  };
+  socialMedia?: {
+    facebook?: string | null;
+    twitter?: string | null;
+    instagram?: string | null;
+    linkedin?: string | null;
+    youtube?: string | null;
+    pinterest?: string | null;
+    tiktok?: string | null;
+    whatsapp?: string | null;
+  };
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1614,6 +1758,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tenants';
         value: number | Tenant;
+      } | null)
+    | ({
+        relationTo: 'header';
+        value: number | Header;
+      } | null)
+    | ({
+        relationTo: 'footer';
+        value: number | Footer;
+      } | null)
+    | ({
+        relationTo: 'theme';
+        value: number | Theme;
+      } | null)
+    | ({
+        relationTo: 'settings';
+        value: number | Setting;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -2430,6 +2590,135 @@ export interface TenantsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header_select".
+ */
+export interface HeaderSelect<T extends boolean = true> {
+  tenant?: T;
+  navItems?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              items?:
+                | T
+                | {
+                    URL?: T;
+                    label?: T;
+                    id?: T;
+                  };
+              label?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  tenant?: T;
+  navItems?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              items?:
+                | T
+                | {
+                    URL?: T;
+                    label?: T;
+                    id?: T;
+                  };
+              label?: T;
+            };
+        id?: T;
+      };
+  copyright?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "theme_select".
+ */
+export interface ThemeSelect<T extends boolean = true> {
+  tenant?: T;
+  themes?: T | ThemeConfigSelect<T>;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ThemeConfig_select".
+ */
+export interface ThemeConfigSelect<T extends boolean = true> {
+  active?: T;
+  name?: T;
+  css?: T;
+  js?: T;
+  id?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_select".
+ */
+export interface SettingsSelect<T extends boolean = true> {
+  tenant?: T;
+  favicon?: T;
+  logo?: T;
+  localeSwitch?:
+    | T
+    | {
+        enableLocaleHeader?: T;
+        enableLocaleFooter?: T;
+      };
+  siteName?: T;
+  homepage?: T;
+  contact?:
+    | T
+    | {
+        email?: T;
+        phone?: T;
+        fax?: T;
+      };
+  address?:
+    | T
+    | {
+        full_address?: T;
+      };
+  socialMedia?:
+    | T
+    | {
+        facebook?: T;
+        twitter?: T;
+        instagram?: T;
+        linkedin?: T;
+        youtube?: T;
+        pinterest?: T;
+        tiktok?: T;
+        whatsapp?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects_select".
  */
 export interface RedirectsSelect<T extends boolean = true> {
@@ -2691,277 +2980,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header".
- */
-export interface Header {
-  id: number;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom' | 'group') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: number | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: number | Post;
-              } | null);
-          url?: string | null;
-          items?:
-            | {
-                URL?: string | null;
-                label?: string | null;
-                id?: string | null;
-              }[]
-            | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer".
- */
-export interface Footer {
-  id: number;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom' | 'group') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: number | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: number | Post;
-              } | null);
-          url?: string | null;
-          items?:
-            | {
-                URL?: string | null;
-                label?: string | null;
-                id?: string | null;
-              }[]
-            | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Copyright text to be dispalyed at the bottom of the footer
-   */
-  copyright?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "theme".
- */
-export interface Theme {
-  id: number;
-  themes?: ThemeConfig;
-  createdBy?: (number | null) | User;
-  updatedBy?: (number | null) | User;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "settings".
- */
-export interface Setting {
-  id: number;
-  favicon?: (number | null) | Media;
-  logo?: (number | null) | Media;
-  localeSwitch?: {
-    enableLocaleHeader?: boolean | null;
-    enableLocaleFooter?: boolean | null;
-  };
-  siteName?: string | null;
-  /**
-   * Select the homepage for your website
-   */
-  homepage?: (number | null) | Page;
-  contact?: {
-    email?: string | null;
-    phone?: string | null;
-    fax?: string | null;
-  };
-  address?: {
-    full_address?: string | null;
-  };
-  socialMedia?: {
-    facebook?: string | null;
-    twitter?: string | null;
-    instagram?: string | null;
-    linkedin?: string | null;
-    youtube?: string | null;
-    pinterest?: string | null;
-    tiktok?: string | null;
-    whatsapp?: string | null;
-  };
-  createdBy?: (number | null) | User;
-  updatedBy?: (number | null) | User;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header_select".
- */
-export interface HeaderSelect<T extends boolean = true> {
-  navItems?:
-    | T
-    | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              items?:
-                | T
-                | {
-                    URL?: T;
-                    label?: T;
-                    id?: T;
-                  };
-              label?: T;
-            };
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer_select".
- */
-export interface FooterSelect<T extends boolean = true> {
-  navItems?:
-    | T
-    | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              items?:
-                | T
-                | {
-                    URL?: T;
-                    label?: T;
-                    id?: T;
-                  };
-              label?: T;
-            };
-        id?: T;
-      };
-  copyright?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "theme_select".
- */
-export interface ThemeSelect<T extends boolean = true> {
-  themes?: T | ThemeConfigSelect<T>;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ThemeConfig_select".
- */
-export interface ThemeConfigSelect<T extends boolean = true> {
-  active?: T;
-  name?: T;
-  css?: T;
-  js?: T;
-  id?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "settings_select".
- */
-export interface SettingsSelect<T extends boolean = true> {
-  favicon?: T;
-  logo?: T;
-  localeSwitch?:
-    | T
-    | {
-        enableLocaleHeader?: T;
-        enableLocaleFooter?: T;
-      };
-  siteName?: T;
-  homepage?: T;
-  contact?:
-    | T
-    | {
-        email?: T;
-        phone?: T;
-        fax?: T;
-      };
-  address?:
-    | T
-    | {
-        full_address?: T;
-      };
-  socialMedia?:
-    | T
-    | {
-        facebook?: T;
-        twitter?: T;
-        instagram?: T;
-        linkedin?: T;
-        youtube?: T;
-        pinterest?: T;
-        tiktok?: T;
-        whatsapp?: T;
-      };
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

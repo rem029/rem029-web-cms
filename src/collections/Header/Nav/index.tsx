@@ -6,7 +6,7 @@ import { CMSLink } from '@/components/Link'
 import { css } from '@/utilities/constants'
 import { DrawerNav } from '../Drawer'
 
-export const HeaderNav: React.FC<{ data: HeaderType; settings: Setting }> = ({
+export const HeaderNav: React.FC<{ data: HeaderType | null; settings: Setting | null }> = ({
   data,
   settings,
 }) => {

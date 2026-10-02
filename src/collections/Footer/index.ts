@@ -1,4 +1,4 @@
-import type { GlobalConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 import { link } from '@/fields/link'
 import { revalidateFooter } from './hooks/revalidateFooter'
@@ -9,11 +9,18 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import { defaultFooterCopyRight } from '@/utilities/defaults'
+import { accessCheckResolver, isSuperUser } from '@/utilities/access'
+import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 
-export const Footer: GlobalConfig = {
+export const Footer: CollectionConfig = {
   slug: 'footer',
+  // one doc per business, so no plural in the admin nav
+  labels: { singular: 'Footer', plural: 'Footer' },
   access: {
     read: () => true,
+    update: accessCheckResolver('footer', 'canUpdate'),
+    create: isSuperUser,
+    delete: isSuperUser,
   },
   fields: [
     {
@@ -29,7 +36,7 @@ export const Footer: GlobalConfig = {
       admin: {
         initCollapsed: true,
         components: {
-          RowLabel: '@/Footer/RowLabel#RowLabel',
+          RowLabel: '@/collections/Footer/RowLabel#RowLabel',
         },
       },
     },
@@ -55,6 +62,7 @@ export const Footer: GlobalConfig = {
     },
   ],
   hooks: {
+    beforeValidate: [validateTenantDocUniqueness('footer', 'Footer')],
     afterChange: [revalidateFooter],
   },
 }

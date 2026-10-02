@@ -12,7 +12,7 @@ import { IoMdClose } from 'react-icons/io'
 import { SocialMedia } from '@/components/Social'
 import { LocaleSwitch } from '@/components/Locale'
 
-export const DrawerNav: React.FC<{ data: HeaderType; settings: Setting }> = ({
+export const DrawerNav: React.FC<{ data: HeaderType | null; settings: Setting | null }> = ({
   data,
   settings,
 }) => {

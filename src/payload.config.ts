@@ -11,14 +11,15 @@ import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
-import { Footer } from './Footer/config'
-import { Header } from './Header/config'
+import { Footer } from './collections/Footer'
+import { Header } from './collections/Header'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
-import { Theme } from './Theme/config'
+import { Theme } from './collections/Theme'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
-import { Settings } from './Settings'
+import { Settings } from './collections/Settings'
+
 import { Roles } from './collections/Roles'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 import { Analytics } from './collections/Analytics'
@@ -91,9 +92,23 @@ export default buildConfig({
     // push: false,
     logger: process.env.DB_LOGGER === 'true',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Roles, Analytics, Tenants],
+  collections: [
+    Pages,
+    Posts,
+    Media,
+    Categories,
+    Users,
+    Roles,
+    Analytics,
+    Tenants,
+    Header,
+    Footer,
+    Theme,
+    Settings,
+  ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, Theme, Settings],
+  globals: [],
+
   plugins: [...plugins],
   secret: process.env.PAYLOAD_SECRET,
   email: nodemailerAdapter({

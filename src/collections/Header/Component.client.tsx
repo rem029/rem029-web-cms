@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 
-import type { Header, Media, Setting } from '@/payload-types'
+import type { Header as HeaderType, Media, Setting } from '@/payload-types'
 
 import { Logo } from '@/components/Logo/Logo'
 import { HeaderNav } from './Nav'
@@ -10,8 +10,8 @@ import { css } from '@/utilities/constants'
 import { LocaleSwitch } from '@/components/Locale'
 
 interface HeaderClientProps {
-  data: Header
-  settings: Setting
+  data: HeaderType | null
+  settings: Setting | null
 }
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({ data, settings }) => {

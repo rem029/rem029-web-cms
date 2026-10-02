@@ -3,6 +3,7 @@ import { accessCheckResolver } from '@/utilities/access'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { formatTenantSlugHook, validateTenantSlug } from './hooks/validateTenantSlug'
+import { createTenantDocs } from './hooks/createTenantDocs'
 
 const HOSTNAME_REGEX =
   /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/
@@ -106,5 +107,6 @@ export const Tenants: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [setCreatedUpdatedByCollection],
+    afterChange: [createTenantDocs],
   },
 }

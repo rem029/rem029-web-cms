@@ -29,10 +29,11 @@ export async function GET(
     return new Response('You are not allowed to preview this page', { status: 403 })
   }
 
-  if (path === '/preview/theme') {
+  if (path?.startsWith('/preview/theme')) {
     payload.logger.info('redirecting to theme preview')
     draft.enable()
-    redirect(path + `?previewSecret=${previewSecret}`)
+    const delimiter = path.includes('?') ? '&' : '?'
+    redirect(`${path}${delimiter}previewSecret=${previewSecret}`)
   }
 
   if (!path || !collection || !slug) {

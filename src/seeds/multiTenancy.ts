@@ -5,12 +5,11 @@
  *
  * - Idempotent: creates only what's missing and never overwrites existing docs.
  * - Refuses to run in production.
- * - Test users are created only when SEED_USER_PASSWORD is set (min 12 chars) and a first
- *   (super) user already exists. The password
- *   is never logged.
+ * - Test users (`*@example.test`) log in with their email as the password, and are created only
+ *   once a first (super) user exists. Existing test users get their password reset to it.
  */
 import config from '@payload-config'
-import type { Payload } from 'payload'
+import type { Payload, RequiredDataFromCollectionSlug } from 'payload'
 import { getPayload } from 'payload'
 
 import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
@@ -175,18 +174,70 @@ const upsertPage = async (
   payload.logger.info(`seed: created page ${tenant.slug}/${page.slug}`)
 }
 
+// header/footer/theme/settings are one doc per tenant. tenants created since phase 2 get empty ones
+// from createTenantDocs; older tenants get them here. only empty docs are filled, so edits survive
+const upsertTenantDocs = async (payload: Payload, tenant: Tenant, seed: SeedTenant) => {
+  const findOrCreate = async <T extends 'header' | 'footer' | 'theme' | 'settings'>(slug: T) => {
+    const { docs } = await payload.find({
+      collection: slug,
+      where: { tenant: { equals: tenant.id } },
+      limit: 1,
+      depth: 0,
+    })
+    if (docs[0]) return docs[0]
+    payload.logger.info(`seed: created ${slug} for ${tenant.slug}`)
+    // every field on these collections is optional, so the tenant alone is a valid doc
+    const data = { tenant: tenant.id } as RequiredDataFromCollectionSlug<T>
+    return payload.create({ collection: slug, data, context, depth: 0 })
+  }
+
+  const header = await findOrCreate('header')
+  if (!header.navItems?.length) {
+    const navItems = [
+      { link: { type: 'custom' as const, label: `${seed.name.en} home`, url: '/' } },
+      { link: { type: 'custom' as const, label: `About ${seed.name.en}`, url: '/about' } },
+    ]
+    await payload.update({ collection: 'header', id: header.id, data: { navItems }, context })
+    payload.logger.info(`seed: filled header for ${tenant.slug}`)
+  }
+
+  await findOrCreate('footer')
+  await findOrCreate('theme')
+
+  const settings = await findOrCreate('settings')
+  if (!settings.siteName || settings.siteName === 'CMS Website') {
+    for (const locale of ['en', 'ar'] as const) {
+      await payload.update({
+        collection: 'settings',
+        id: settings.id,
+        locale,
+        data: { siteName: seed.name[locale] },
+        context,
+      })
+    }
+    payload.logger.info(`seed: set site name for ${tenant.slug}`)
+  }
+}
+
 const upsertUser = async (
   payload: Payload,
   seed: SeedUser,
-  password: string,
   tenantsBySlug: Map<string, Tenant>,
   roleId: number | undefined,
 ) => {
-  const { totalDocs } = await payload.count({
+  // test-only accounts: the email doubles as the password so anyone testing can log in
+  const password = seed.email
+  const { docs } = await payload.find({
     collection: 'users',
     where: { email: { equals: seed.email } },
+    limit: 1,
+    depth: 0,
   })
-  if (totalDocs > 0) return
+  if (docs[0]) {
+    await payload.update({ collection: 'users', id: docs[0].id, data: { password } })
+    payload.logger.info(`seed: reset password of ${seed.email} to its email`)
+    return
+  }
 
   const tenants = seed.tenantSlugs.flatMap((slug) => {
     const tenant = tenantsBySlug.get(slug)
@@ -205,6 +256,7 @@ const seed = async (payload: Payload) => {
   for (const seedTenant of TENANTS) {
     const tenant = await upsertTenant(payload, seedTenant)
     tenantsBySlug.set(seedTenant.slug, tenant)
+    await upsertTenantDocs(payload, tenant, seedTenant)
 
     await upsertPage(payload, tenant, {
       slug: 'home',
@@ -225,12 +277,6 @@ const seed = async (payload: Payload) => {
     })
   }
 
-  const password = process.env.SEED_USER_PASSWORD
-  if (!password || password.length < 12) {
-    payload.logger.warn('seed: SEED_USER_PASSWORD not set (min 12 chars), skipping test users')
-    return
-  }
-
   // the first user becomes the super user (setupFirstUser), so that must be a real person
   if ((await payload.count({ collection: 'users' })).totalDocs === 0) {
     payload.logger.warn(
@@ -247,7 +293,7 @@ const seed = async (payload: Payload) => {
     depth: 0,
   })
   for (const user of USERS) {
-    await upsertUser(payload, user, password, tenantsBySlug, roles[0]?.id)
+    await upsertUser(payload, user, tenantsBySlug, roles[0]?.id)
   }
 }
 

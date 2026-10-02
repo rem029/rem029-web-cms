@@ -18,7 +18,7 @@ import { LinkBlock } from '@/blocks/Link/Component'
 type ThemePreviewClientProps = {
   activeThemeName: string
   isPreview: boolean
-  settings: Setting
+  settings: Setting | null
 }
 
 export const ThemePreviewClient: React.FC<ThemePreviewClientProps> = ({

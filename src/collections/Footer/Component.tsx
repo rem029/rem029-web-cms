@@ -1,8 +1,8 @@
-import { getGlobal } from '@/utilities/getGlobals'
+import { getDefaultTenantId, getTenantDoc } from '@/common/utils/getTenantDoc'
 import Link from 'next/link'
 import React from 'react'
 
-import type { Footer, Media, Setting } from '@/payload-types'
+import type { Footer as FooterDoc, Media, Setting } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
@@ -14,14 +14,17 @@ import { LocaleSwitch } from '@/components/Locale'
 import { TypedLocale } from 'payload'
 
 interface FooterProps {
-  settings: Setting
+  settings: Setting | null
   locale?: TypedLocale
 }
 
 export async function Footer({ settings, locale }: FooterProps) {
-  const footerData: Footer = await getGlobal('footer', 1, locale)
+  const defaultTenantId = await getDefaultTenantId()
+  const footerData = await getTenantDoc('footer', defaultTenantId, { depth: 1, locale })
 
   const navItems = footerData?.navItems || []
+  // a tenant without a footer doc gets the field default, like the old global did
+  const showCopyright = !footerData || Boolean(footerData.copyright)
 
   return (
     <footer className={css('footer')}>
@@ -49,9 +52,15 @@ export async function Footer({ settings, locale }: FooterProps) {
           socialMedia={settings?.socialMedia}
         />
 
-        {footerData?.copyright && (
+        {showCopyright && (
           <div className={css('footer_copyright')}>
-            <RichText data={footerData.copyright || defaultFooterCopyRight} enableGutter={false} />
+            <RichText
+              data={
+                footerData?.copyright ||
+                (defaultFooterCopyRight as NonNullable<FooterDoc['copyright']>)
+              }
+              enableGutter={false}
+            />
           </div>
         )}
       </div>

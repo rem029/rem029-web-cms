@@ -1,11 +1,18 @@
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
-import { setCreatedUpdatedByGlobal } from '@/hooks/setCreatedUpdatedBy'
-import type { GlobalConfig } from 'payload'
+import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
+import { accessCheckResolver, isSuperUser } from '@/utilities/access'
+import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
+import type { CollectionConfig } from 'payload'
+import { validateHomepageTenant } from './hooks/validateHomepageTenant'
 
-export const Settings: GlobalConfig = {
+export const Settings: CollectionConfig = {
   slug: 'settings',
+  labels: { singular: 'Settings', plural: 'Settings' },
   access: {
     read: () => true,
+    update: accessCheckResolver('settings', 'canUpdate'),
+    create: isSuperUser,
+    delete: isSuperUser,
   },
   admin: {
     group: 'Admin',
@@ -37,6 +44,11 @@ export const Settings: GlobalConfig = {
       relationTo: 'pages',
       required: false,
       admin: { description: 'Select the homepage for your website' },
+      filterOptions: ({ data }) => {
+        const tenantId = typeof data?.tenant === 'object' ? data?.tenant?.id : data?.tenant
+        return tenantId ? { tenant: { equals: tenantId } } : false
+      },
+      validate: validateHomepageTenant,
     },
     {
       type: 'group',
@@ -121,5 +133,8 @@ export const Settings: GlobalConfig = {
     },
     ...createdUpdatedByFields,
   ],
-  hooks: { beforeChange: [setCreatedUpdatedByGlobal] },
+  hooks: {
+    beforeValidate: [validateTenantDocUniqueness('settings', 'Settings')],
+    beforeChange: [setCreatedUpdatedByCollection],
+  },
 }

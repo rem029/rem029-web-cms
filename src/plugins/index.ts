@@ -46,13 +46,17 @@ const tenantScopedCollections: CollectionSlug[] = [
   'search',
 ]
 
+// one doc per tenant (were globals before multi-tenancy)
+const tenantGlobalCollections: CollectionSlug[] = ['header', 'footer', 'theme', 'settings']
+
 const isSuperUser: FieldAccess = ({ req }) => Boolean(req.user?.super_user)
 
 // form submissions take their tenant from the form (setFormSubmissionTenant), so anyone,
 // signed in or not, can submit any tenant's public form
-const membershipCheckedCollections: CollectionSlug[] = tenantScopedCollections.filter(
-  (slug) => slug !== 'form-submissions',
-)
+const membershipCheckedCollections: CollectionSlug[] = [
+  ...tenantScopedCollections.filter((slug) => slug !== 'form-submissions'),
+  ...tenantGlobalCollections,
+]
 
 // runs after multiTenantPlugin so plugin-created collections (redirects, forms, search) exist
 const addTenantMembershipCheck: Plugin = (config) => ({
@@ -153,7 +157,10 @@ export const plugins: Plugin[] = [
     },
   }),
   multiTenantPlugin<Config>({
-    collections: Object.fromEntries(tenantScopedCollections.map((slug) => [slug, {}])),
+    collections: {
+      ...Object.fromEntries(tenantScopedCollections.map((slug) => [slug, {}])),
+      ...Object.fromEntries(tenantGlobalCollections.map((slug) => [slug, { isGlobal: true }])),
+    },
     tenantsArrayField: {
       includeDefaultField: true,
       // only super users manage memberships for now; tenant admins come in phase 3
