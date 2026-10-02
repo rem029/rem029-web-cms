@@ -1,4 +1,4 @@
-// dev-only default super user (admin of the default tenant). `pnpm seed:admin` creates it and the
+// dev-only default super user (admin of the default tenant). `pnpm seed` creates it and the
 // optional login prefill uses the same credentials, so the two always match.
 // returns null when no usable password is configured, so callers skip quietly.
 export const getSeedAdminCredentials = (): { email: string; password: string } | null => {

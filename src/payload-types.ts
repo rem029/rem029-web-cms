@@ -184,6 +184,7 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
+    'users-access': UsersAccess;
     roles: Role;
     analytics: Analytics;
     tenants: Tenant;
@@ -207,6 +208,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'users-access': UsersAccessSelect<false> | UsersAccessSelect<true>;
     roles: RolesSelect<false> | RolesSelect<true>;
     analytics: AnalyticsSelect<false> | AnalyticsSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
@@ -334,6 +336,10 @@ export interface User {
    */
   super_user?: boolean | null;
   role?: (number | null) | Role;
+  /**
+   * What this user can see and do. Super users bypass it.
+   */
+  access?: (number | null) | UsersAccess;
   tenants?:
     | {
         tenant: number | Tenant;
@@ -388,6 +394,56 @@ export interface Role {
    * Admin roles bypass all permission checks (use carefully)
    */
   isAdmin?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users-access".
+ */
+export interface UsersAccess {
+  id: number;
+  name: string;
+  /**
+   * Identifies the profile in code, e.g. "default". Lowercase kebab-case.
+   */
+  slug: string;
+  description?: string | null;
+  access?:
+    | {
+        slug:
+          | 'pages'
+          | 'posts'
+          | 'media'
+          | 'categories'
+          | 'users'
+          | 'users-access'
+          | 'roles'
+          | 'analytics'
+          | 'tenants'
+          | 'header'
+          | 'footer'
+          | 'theme'
+          | 'settings'
+          | 'redirects'
+          | 'forms'
+          | 'form-submissions'
+          | 'search';
+        hidden?: boolean | null;
+        read?: boolean | null;
+        create?: boolean | null;
+        update?: boolean | null;
+        delete?: boolean | null;
+        /**
+         * Can open the admin panel
+         */
+        admin?: boolean | null;
+        access?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1748,6 +1804,10 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'users-access';
+        value: number | UsersAccess;
+      } | null)
+    | ({
         relationTo: 'roles';
         value: number | Role;
       } | null)
@@ -2483,6 +2543,7 @@ export interface UsersSelect<T extends boolean = true> {
   name?: T;
   super_user?: T;
   role?: T;
+  access?: T;
   tenants?:
     | T
     | {
@@ -2505,6 +2566,32 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users-access_select".
+ */
+export interface UsersAccessSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  access?:
+    | T
+    | {
+        slug?: T;
+        hidden?: T;
+        read?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+        admin?: T;
+        access?: T;
+        id?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

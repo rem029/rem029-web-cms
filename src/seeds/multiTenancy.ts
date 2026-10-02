@@ -1,16 +1,14 @@
 /**
  * Multi-tenancy test data: tenants, a home + about page per tenant, and test users.
  *
- *   pnpm seed:tenants
+ *   pnpm seed
  *
  * - Idempotent: creates only what's missing and never overwrites existing docs.
- * - Refuses to run in production.
+ * - Never runs in production (src/seeds/index.ts refuses).
  * - Test users (`*@example.test`) log in with their email as the password, and are created only
  *   once a first (super) user exists. Existing test users get their password reset to it.
  */
-import config from '@payload-config'
 import type { Payload, RequiredDataFromCollectionSlug } from 'payload'
-import { getPayload } from 'payload'
 
 import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
 import type { Page, Tenant } from '@/payload-types'
@@ -251,7 +249,7 @@ const upsertUser = async (
   payload.logger.info(`seed: created user ${seed.email} (${seed.tenantSlugs.join(', ')})`)
 }
 
-const seed = async (payload: Payload) => {
+export const seedMultiTenancy = async (payload: Payload) => {
   const tenantsBySlug = new Map<string, Tenant>()
   for (const seedTenant of TENANTS) {
     const tenant = await upsertTenant(payload, seedTenant)
@@ -295,19 +293,4 @@ const seed = async (payload: Payload) => {
   for (const user of USERS) {
     await upsertUser(payload, user, tenantsBySlug, roles[0]?.id)
   }
-}
-
-if (process.env.NODE_ENV === 'production') {
-  console.error('seed: refusing to run with NODE_ENV=production')
-  process.exit(1)
-}
-
-const payload = await getPayload({ config })
-try {
-  await seed(payload)
-  payload.logger.info('seed: multi-tenancy seed done')
-  process.exit(0)
-} catch (err) {
-  payload.logger.error({ msg: 'seed: multi-tenancy seed failed', err })
-  process.exit(1)
 }

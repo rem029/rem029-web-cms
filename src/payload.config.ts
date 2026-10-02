@@ -11,6 +11,8 @@ import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
+import { UsersAccess } from './collections/UsersAccess'
+import { withAccessSlugOptions } from './collections/UsersAccess/utils/withAccessSlugOptions'
 import { Footer } from './collections/Footer'
 import { Header } from './collections/Header'
 import { plugins } from './plugins'
@@ -98,6 +100,7 @@ export default buildConfig({
     Media,
     Categories,
     Users,
+    UsersAccess,
     Roles,
     Analytics,
     Tenants,
@@ -109,7 +112,7 @@ export default buildConfig({
   cors: [getServerSideURL()].filter(Boolean),
   globals: [],
 
-  plugins: [...plugins],
+  plugins: [...plugins, withAccessSlugOptions],
   secret: process.env.PAYLOAD_SECRET,
   email: nodemailerAdapter({
     defaultFromAddress: process.env.DEFAULT_FROM_ADDRESS || '',
