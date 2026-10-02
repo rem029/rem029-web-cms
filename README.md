@@ -192,6 +192,16 @@ Although Next.js includes a robust set of caching strategies out of the box, Pay
 
 ## Development
 
+### Docs (private)
+
+Planning docs and the Claude Code setup live in a separate private repo, `rem029/rem029-web-cms-docs`. If you have access and want them:
+
+```bash
+pnpm setup:docs
+```
+
+This clones the repo into `docs/` and links `CLAUDE.md` and `.claude` (Claude Code instructions and config) from it to the project root. All three are ignored by this repo. Setup details are in that repo's README. The app builds and runs without it.
+
 To spin up this example locally, follow the [Quick Start](#quick-start). Then [Seed](#seed) the database with a few pages, posts, and projects.
 
 ### Working with Postgres

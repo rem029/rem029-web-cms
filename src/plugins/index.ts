@@ -5,14 +5,18 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
-import { Block, Field, Plugin } from 'payload'
+import type { Block, CollectionSlug, Field, FieldAccess, Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 
-import { Page, Post } from '@/payload-types'
+import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
+import { setFormSubmissionTenant } from '@/plugins/hooks/setFormSubmissionTenant'
+import { enforceTenantMembership } from '@/common/hooks/enforceTenantMembership'
+
+import { Config, Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { iconField } from '@/fields/icon'
 
@@ -30,10 +34,51 @@ const addFormmBuilderField = (fieldName: string, newFields: Field[]) => {
   return { ...fields[fieldName], fields: [...(fields[fieldName] as Block).fields, ...newFields] }
 }
 
+const tenantScopedCollections: CollectionSlug[] = [
+  'pages',
+  'posts',
+  'media',
+  'categories',
+  'analytics',
+  'redirects',
+  'forms',
+  'form-submissions',
+  'search',
+]
+
+const isSuperUser: FieldAccess = ({ req }) => Boolean(req.user?.super_user)
+
+// form submissions take their tenant from the form (setFormSubmissionTenant), so anyone,
+// signed in or not, can submit any tenant's public form
+const membershipCheckedCollections: CollectionSlug[] = tenantScopedCollections.filter(
+  (slug) => slug !== 'form-submissions',
+)
+
+// runs after multiTenantPlugin so plugin-created collections (redirects, forms, search) exist
+const addTenantMembershipCheck: Plugin = (config) => ({
+  ...config,
+  collections: config.collections?.map((collection) => {
+    if (!membershipCheckedCollections.includes(collection.slug as CollectionSlug)) return collection
+    return {
+      ...collection,
+      hooks: {
+        ...collection.hooks,
+        beforeChange: [enforceTenantMembership, ...(collection.hooks?.beforeChange ?? [])],
+      },
+    }
+  }),
+})
+
 export const plugins: Plugin[] = [
   redirectsPlugin({
     collections: ['pages', 'posts'],
     overrides: {
+      indexes: [
+        {
+          fields: ['tenant', 'from'],
+          unique: true,
+        },
+      ],
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
@@ -92,6 +137,11 @@ export const plugins: Plugin[] = [
         })
       },
     },
+    formSubmissionOverrides: {
+      hooks: {
+        beforeValidate: [setFormSubmissionTenant],
+      },
+    },
   }),
   searchPlugin({
     collections: ['posts'],
@@ -102,6 +152,19 @@ export const plugins: Plugin[] = [
       },
     },
   }),
+  multiTenantPlugin<Config>({
+    collections: Object.fromEntries(tenantScopedCollections.map((slug) => [slug, {}])),
+    tenantsArrayField: {
+      includeDefaultField: true,
+      // only super users manage memberships for now; tenant admins come in phase 3
+      arrayFieldAccess: { create: isSuperUser, update: isSuperUser },
+    },
+    userHasAccessToAllTenants: (user) => Boolean(user?.super_user),
+    tenantSelectorLabel: { en: 'Business', ar: 'النشاط التجاري' },
+    // deleting a tenant must never hard-delete its documents; deactivate it with `isActive`
+    cleanupAfterTenantDelete: false,
+  }),
+  addTenantMembershipCheck,
   payloadCloudPlugin(),
   ...(process.env.S3_ENDPOINT
     ? [

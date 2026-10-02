@@ -22,12 +22,20 @@ import { Settings } from './Settings'
 import { Roles } from './collections/Roles'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 import { Analytics } from './collections/Analytics'
+import { Tenants } from './collections/Tenants'
+import { ar } from '@payloadcms/translations/languages/ar'
+import { en } from '@payloadcms/translations/languages/en'
+import { getSeedAdminCredentials, isLoginPrefillEnabled } from './common/utils/seedAdmin'
+
+const prefillCredentials = isLoginPrefillEnabled() ? getSeedAdminCredentials() : null
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
+    // dev only, opt-in (DEV_PREFILL_LOGIN=true): fills the login form, still needs a click
+    autoLogin: prefillCredentials ? { ...prefillCredentials, prefillOnly: true } : false,
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
@@ -63,6 +71,10 @@ export default buildConfig({
       ],
     },
   },
+  // admin ui languages (users pick theirs in their account settings); ar renders rtl
+  i18n: {
+    supportedLanguages: { en, ar },
+  },
   localization: {
     defaultLocale: DEFAULT_LOCALE,
     locales: SUPPORTED_LOCALES,
@@ -79,7 +91,7 @@ export default buildConfig({
     // push: false,
     logger: process.env.DB_LOGGER === 'true',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Roles, Analytics],
+  collections: [Pages, Posts, Media, Categories, Users, Roles, Analytics, Tenants],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, Theme, Settings],
   plugins: [...plugins],

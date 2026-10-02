@@ -12,7 +12,16 @@ public/media/
 public/robots.txt
 public/sitemap*.xml
 
-# Claude Code: personal settings stay local
-.claude/settings.local.json
-# impeccable: platform-specific engine binary (launcher re-downloads it)
-.claude/skills/impeccable/scripts/bin/
+# Claude Code files live in docs/ (private repo); `pnpm setup:docs` links them here
+/.claude
+/CLAUDE.md
+
+# planning docs live in a separate private repo cloned here (see README "Docs (private)")
+/docs/
+
+# local pnpm install files: deploys build from yarn.lock (see Dockerfile) until one lockfile is chosen
+pnpm-lock.yaml
+pnpm-workspace.yaml
+
+# typescript incremental build cache
+*.tsbuildinfo

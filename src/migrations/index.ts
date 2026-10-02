@@ -15,6 +15,7 @@ import * as migration_20250602_110944_grouped_links_added from './20250602_11094
 import * as migration_20251210_163848_payload_upgrade_to_3_44 from './20251210_163848_payload_upgrade_to_3_44';
 import * as migration_20260509_182521_user_roles_update_add_super_user from './20260509_182521_user_roles_update_add_super_user';
 import * as migration_20260509_191323_set_users_as_super_user from './20260509_191323_set_users_as_super_user';
+import * as migration_20261002_072703_multi_tenancy_tenants from './20261002_072703_multi_tenancy_tenants';
 
 export const migrations = [
   {
@@ -100,6 +101,11 @@ export const migrations = [
   {
     up: migration_20260509_191323_set_users_as_super_user.up,
     down: migration_20260509_191323_set_users_as_super_user.down,
-    name: '20260509_191323_set_users_as_super_user'
+    name: '20260509_191323_set_users_as_super_user',
+  },
+  {
+    up: migration_20261002_072703_multi_tenancy_tenants.up,
+    down: migration_20261002_072703_multi_tenancy_tenants.down,
+    name: '20261002_072703_multi_tenancy_tenants'
   },
 ];

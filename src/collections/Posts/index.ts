@@ -27,6 +27,7 @@ import {
 import { slugField } from '@/fields/slug'
 import { Code } from '@/blocks/old/Code/config'
 import { MediaBlock } from '@/blocks/old/MediaBlock/config'
+import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -221,8 +222,15 @@ export const Posts: CollectionConfig<'posts'> = {
     },
     ...slugField(),
   ],
+  indexes: [
+    {
+      fields: ['tenant', 'slug'],
+      unique: true,
+    },
+  ],
   hooks: {
     afterChange: [revalidatePost],
+    beforeValidate: [validateTenantSlugUniqueness('posts', 'post')],
     afterRead: [populateAuthors],
     afterDelete: [revalidateDelete],
   },
