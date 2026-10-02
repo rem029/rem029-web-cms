@@ -1,4 +1,6 @@
-import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
+import type { CollectionSlug, Payload, PayloadRequest, File } from 'payload'
+import type { Footer, Header } from '@/payload-types'
+import { getDefaultTenantId } from '@/common/utils/getTenantDoc'
 
 import { contactForm as contactFormData } from './contact-form'
 
@@ -19,7 +21,7 @@ const collections: CollectionSlug[] = [
   'form-submissions',
   'search',
 ]
-const globals: GlobalSlug[] = ['header', 'footer']
+const tenantDocs = ['header', 'footer'] as const
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
@@ -42,18 +44,7 @@ export const seed = async ({
 
   // clear the database
   await Promise.all(
-    globals.map((global) =>
-      payload.updateGlobal({
-        slug: global,
-        data: {
-          navItems: [],
-        } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
-        depth: 0,
-        context: {
-          disableRevalidate: true,
-        },
-      }),
-    ),
+    tenantDocs.map((slug) => updateDefaultTenantDoc(payload, req, slug, { navItems: [] })),
   )
 
   await Promise.all(
@@ -317,59 +308,53 @@ export const seed = async ({
   payload.logger.info(`— Seeding globals...`)
 
   await Promise.all([
-    payload.updateGlobal({
-      slug: 'header',
-      data: {
-        navItems: [
-          {
-            link: {
-              type: 'custom',
-              label: 'Posts',
-              url: '/posts',
-            },
+    updateDefaultTenantDoc(payload, req, 'header', {
+      navItems: [
+        {
+          link: {
+            type: 'custom',
+            label: 'Posts',
+            url: '/posts',
           },
-          // {
-          //   link: {
-          //     type: 'reference',
-          //     label: 'Contact',
-          //     reference: {
-          //       relationTo: 'pages',
-          //       value: contactPage.id,
-          //     },
-          //   },
-          // },
-        ],
-      },
+        },
+        // {
+        //   link: {
+        //     type: 'reference',
+        //     label: 'Contact',
+        //     reference: {
+        //       relationTo: 'pages',
+        //       value: contactPage.id,
+        //     },
+        //   },
+        // },
+      ],
     }),
-    payload.updateGlobal({
-      slug: 'footer',
-      data: {
-        navItems: [
-          {
-            link: {
-              type: 'custom',
-              label: 'Admin',
-              url: '/admin',
-            },
+    updateDefaultTenantDoc(payload, req, 'footer', {
+      navItems: [
+        {
+          link: {
+            type: 'custom',
+            label: 'Admin',
+            url: '/admin',
           },
-          {
-            link: {
-              type: 'custom',
-              label: 'Source Code',
-              newTab: true,
-              url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
-            },
+        },
+        {
+          link: {
+            type: 'custom',
+            label: 'Source Code',
+            newTab: true,
+            url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
           },
-          {
-            link: {
-              type: 'custom',
-              label: 'Payload',
-              newTab: true,
-              url: 'https://payloadcms.com/',
-            },
+        },
+        {
+          link: {
+            type: 'custom',
+            label: 'Payload',
+            newTab: true,
+            url: 'https://payloadcms.com/',
           },
-        ],
-      },
+        },
+      ],
     }),
   ])
 
@@ -394,4 +379,35 @@ async function fetchFileByURL(url: string): Promise<File> {
     mimetype: `image/${url.split('.').pop()}`,
     size: data.byteLength,
   }
+}
+
+// header/footer are per-tenant docs; this template seed only fills the default tenant's
+async function updateDefaultTenantDoc(
+  payload: Payload,
+  req: PayloadRequest,
+  slug: (typeof tenantDocs)[number],
+  data: Pick<Header | Footer, 'navItems'>,
+) {
+  const tenantId = await getDefaultTenantId()
+  if (!tenantId) throw new Error('Seed needs the default tenant; run the migrations first')
+
+  const context = { disableRevalidate: true }
+  const existing = await payload.find({
+    collection: slug,
+    where: { tenant: { equals: tenantId } },
+    limit: 1,
+    depth: 0,
+    req,
+  })
+  const doc = existing.docs[0]
+  if (doc) {
+    return payload.update({ collection: slug, id: doc.id, data, depth: 0, context, req })
+  }
+  return payload.create({
+    collection: slug,
+    data: { ...data, tenant: tenantId },
+    depth: 0,
+    context,
+    req,
+  })
 }

@@ -19,6 +19,15 @@ export const beforeSyncWithSearch: BeforeSync = async ({ originalDoc, searchDoc 
     categories: [],
   }
 
+  if (originalDoc?.tenant) {
+    const tenantId =
+      typeof originalDoc.tenant === 'object' && 'id' in originalDoc.tenant
+        ? originalDoc.tenant.id
+        : originalDoc.tenant
+
+    modifiedDoc.tenant = tenantId
+  }
+
   if (categories && Array.isArray(categories) && categories.length > 0) {
     // get full categories and keep a flattened copy of their most important properties
     try {

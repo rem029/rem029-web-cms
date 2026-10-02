@@ -54,6 +54,7 @@ git clone -n --depth=1 --filter=tree:0 https://github.com/payloadcms/payload my-
 ### Development
 
 1. First [clone the repo](#clone) if you have not done so already
+1. Have a **PostgreSQL 16** database running (see [Postgres version](#postgres-version)) and point `DATABASE_URI` at it
 1. `cd my-project && cp .env.example .env` to copy the example environment variables
 1. `pnpm install && pnpm dev` to install dependencies and start the dev server
 1. open `http://localhost:3000` to open the app in your browser
@@ -192,6 +193,16 @@ Although Next.js includes a robust set of caching strategies out of the box, Pay
 
 ## Development
 
+### Docs (private)
+
+Planning docs and the Claude Code setup live in a separate private repo, `rem029/rem029-web-cms-docs`. If you have access and want them:
+
+```bash
+pnpm setup:docs
+```
+
+This clones the repo into `docs/` and links `CLAUDE.md` and `.claude` (Claude Code instructions and config) from it to the project root. All three are ignored by this repo. Setup details are in that repo's README. The app builds and runs without it.
+
 To spin up this example locally, follow the [Quick Start](#quick-start). Then [Seed](#seed) the database with a few pages, posts, and projects.
 
 ### Working with Postgres
@@ -199,6 +210,13 @@ To spin up this example locally, follow the [Quick Start](#quick-start). Then [S
 Postgres and other SQL-based databases follow a strict schema for managing your data. In comparison to our MongoDB adapter, this means that there's a few extra steps to working with Postgres.
 
 Note that often times when making big schema changes you can run the risk of losing data if you're not manually migrating it.
+
+#### Postgres version
+
+Use **PostgreSQL 16** in every environment (local, staging, production), so migrations behave the same everywhere.
+
+- Don't use PostgreSQL 18 yet: Payload 3.44's development schema push (`pnpm dev`) fails on it. Revisit when Payload is upgraded.
+- Keep staging and production on the same major version; a major upgrade needs a dump and restore, so take a backup first.
 
 #### Local development
 

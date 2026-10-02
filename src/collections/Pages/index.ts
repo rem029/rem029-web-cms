@@ -27,6 +27,7 @@ import { CSSNameWithCustomFiled } from '@/fields/css'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { populateFullSlug } from './hooks/populateFullSlug'
+import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -160,9 +161,16 @@ export const Pages: CollectionConfig<'pages'> = {
 
     ...createdUpdatedByFields,
   ],
+  indexes: [
+    {
+      fields: ['tenant', 'slug'],
+      unique: true,
+    },
+  ],
   hooks: {
     afterChange: [revalidatePage],
     beforeChange: [populatePublishedAt, setCreatedUpdatedByCollection, populateFullSlug],
+    beforeValidate: [validateTenantSlugUniqueness('pages', 'page')],
     afterDelete: [revalidateDelete],
   },
   versions: {

@@ -77,3 +77,5 @@ export const accessCheckResolver = (
       reqOverride: req,
     })) as Access
 }
+
+export const isSuperUser: Access = ({ req }) => Boolean(req.user?.super_user)

@@ -7,49 +7,6 @@
  */
 
 /**
- * Add and configure individual slides for the carousel.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroSlide".
- */
-export type HeroSlide =
-  | {
-      image?: (number | null) | Media;
-      /**
-       * How the image should be resized to fit the container.
-       */
-      imageFit?: ('contain' | 'cover' | 'fill') | null;
-      headerTitle?: string | null;
-      bodyTitle?: string | null;
-      bodyText?: {
-        root: {
-          type: string;
-          children: {
-            type: string;
-            version: number;
-            [k: string]: unknown;
-          }[];
-          direction: ('ltr' | 'rtl') | null;
-          format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-          indent: number;
-          version: number;
-        };
-        [k: string]: unknown;
-      } | null;
-      button?: {
-        elemId?: string | null;
-        text?: string | null;
-        /**
-         * Use "/" prefix for internal links (e.g., "/about"). Use full URLs for external links (e.g., "https://example.com").
-         */
-        href?: string | null;
-        new_tab?: boolean | null;
-        variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
-      };
-      id?: string | null;
-    }[]
-  | null;
-/**
  * Set permissions for each collection
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -100,6 +57,49 @@ export type RoleGlobalPermissions =
        * Allow editing this global
        */
       canUpdate?: boolean | null;
+      id?: string | null;
+    }[]
+  | null;
+/**
+ * Add and configure individual slides for the carousel.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroSlide".
+ */
+export type HeroSlide =
+  | {
+      image?: (number | null) | Media;
+      /**
+       * How the image should be resized to fit the container.
+       */
+      imageFit?: ('contain' | 'cover' | 'fill') | null;
+      headerTitle?: string | null;
+      bodyTitle?: string | null;
+      bodyText?: {
+        root: {
+          type: string;
+          children: {
+            type: string;
+            version: number;
+            [k: string]: unknown;
+          }[];
+          direction: ('ltr' | 'rtl') | null;
+          format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+          indent: number;
+          version: number;
+        };
+        [k: string]: unknown;
+      } | null;
+      button?: {
+        elemId?: string | null;
+        text?: string | null;
+        /**
+         * Use "/" prefix for internal links (e.g., "/about"). Use full URLs for external links (e.g., "https://example.com").
+         */
+        href?: string | null;
+        new_tab?: boolean | null;
+        variant?: ('link' | 'btn-primary' | 'btn-secondary' | 'btn-outline' | 'btn-outline-primary' | 'btn') | null;
+      };
       id?: string | null;
     }[]
   | null;
@@ -186,6 +186,11 @@ export interface Config {
     users: User;
     roles: Role;
     analytics: Analytics;
+    tenants: Tenant;
+    header: Header;
+    footer: Footer;
+    theme: Theme;
+    settings: Setting;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -204,6 +209,11 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     roles: RolesSelect<false> | RolesSelect<true>;
     analytics: AnalyticsSelect<false> | AnalyticsSelect<true>;
+    tenants: TenantsSelect<false> | TenantsSelect<true>;
+    header: HeaderSelect<false> | HeaderSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+    theme: ThemeSelect<false> | ThemeSelect<true>;
+    settings: SettingsSelect<false> | SettingsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -216,18 +226,8 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  globals: {
-    header: Header;
-    footer: Footer;
-    theme: Theme;
-    settings: Setting;
-  };
-  globalsSelect: {
-    header: HeaderSelect<false> | HeaderSelect<true>;
-    footer: FooterSelect<false> | FooterSelect<true>;
-    theme: ThemeSelect<false> | ThemeSelect<true>;
-    settings: SettingsSelect<false> | SettingsSelect<true>;
-  };
+  globals: {};
+  globalsSelect: {};
   locale: 'en' | 'ar';
   user: User & {
     collection: 'users';
@@ -267,6 +267,7 @@ export interface UserAuthOperations {
  */
 export interface Page {
   id: number;
+  tenant?: (number | null) | Tenant;
   title: string;
   hero: Hero;
   layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock | SectionBlock)[];
@@ -297,6 +298,98 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants".
+ */
+export interface Tenant {
+  id: number;
+  name: string;
+  slug: string;
+  domains?:
+    | {
+        domain: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Controls whether the tenant is active. Inactive tenants are not accessible to public users.
+   */
+  isActive?: boolean | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  name?: string | null;
+  /**
+   * A super user has full access to all collections and settings.
+   */
+  super_user?: boolean | null;
+  role?: (number | null) | Role;
+  tenants?:
+    | {
+        tenant: number | Tenant;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * Manage user roles and permissions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "roles".
+ */
+export interface Role {
+  id: number;
+  /**
+   * Display name for this role
+   */
+  name: string;
+  /**
+   * Unique identifier for this role (e.g., "admin", "editor", "contributor")
+   */
+  slug: string;
+  /**
+   * Brief description of what this role is for
+   */
+  description?: string | null;
+  collections?: {
+    permissions?: RoleCollectionPermissions;
+  };
+  globals?: {
+    permissions?: RoleGlobalPermissions;
+  };
+  /**
+   * Admin roles bypass all permission checks (use carefully)
+   */
+  isAdmin?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Configure the hero section for this page, including carousel options.
@@ -364,6 +457,7 @@ export interface CarouselSettings {
  */
 export interface Media {
   id: number;
+  tenant?: (number | null) | Tenant;
   alt?: string | null;
   caption?: {
     root: {
@@ -454,69 +548,6 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  name?: string | null;
-  /**
-   * A super user has full access to all collections and settings.
-   */
-  super_user?: boolean | null;
-  role?: (number | null) | Role;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * Manage user roles and permissions
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "roles".
- */
-export interface Role {
-  id: number;
-  /**
-   * Display name for this role
-   */
-  name: string;
-  /**
-   * Unique identifier for this role (e.g., "admin", "editor", "contributor")
-   */
-  slug: string;
-  /**
-   * Brief description of what this role is for
-   */
-  description?: string | null;
-  collections?: {
-    permissions?: RoleCollectionPermissions;
-  };
-  globals?: {
-    permissions?: RoleGlobalPermissions;
-  };
-  /**
-   * Admin roles bypass all permission checks (use carefully)
-   */
-  isAdmin?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
@@ -576,6 +607,7 @@ export interface CallToActionBlock {
  */
 export interface Post {
   id: number;
+  tenant?: (number | null) | Tenant;
   title: string;
   heroImage?: (number | null) | Media;
   content: {
@@ -623,6 +655,7 @@ export interface Post {
  */
 export interface Category {
   id: number;
+  tenant?: (number | null) | Tenant;
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
@@ -771,6 +804,7 @@ export interface FormBlock {
  */
 export interface Form {
   id: number;
+  tenant?: (number | null) | Tenant;
   title: string;
   fields?:
     | (
@@ -1350,6 +1384,7 @@ export interface CarouselBlock {
  */
 export interface Analytics {
   id: number;
+  tenant?: (number | null) | Tenant;
   ip?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -1373,10 +1408,157 @@ export interface Analytics {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header".
+ */
+export interface Header {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  navItems?:
+    | {
+        link: {
+          type?: ('reference' | 'custom' | 'group') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          items?:
+            | {
+                URL?: string | null;
+                label?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  navItems?:
+    | {
+        link: {
+          type?: ('reference' | 'custom' | 'group') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          items?:
+            | {
+                URL?: string | null;
+                label?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Copyright text to be dispalyed at the bottom of the footer
+   */
+  copyright?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "theme".
+ */
+export interface Theme {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  themes?: ThemeConfig;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings".
+ */
+export interface Setting {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  favicon?: (number | null) | Media;
+  logo?: (number | null) | Media;
+  localeSwitch?: {
+    enableLocaleHeader?: boolean | null;
+    enableLocaleFooter?: boolean | null;
+  };
+  siteName?: string | null;
+  /**
+   * Select the homepage for your website
+   */
+  homepage?: (number | null) | Page;
+  contact?: {
+    email?: string | null;
+    phone?: string | null;
+    fax?: string | null;
+  };
+  address?: {
+    full_address?: string | null;
+  };
+  socialMedia?: {
+    facebook?: string | null;
+    twitter?: string | null;
+    instagram?: string | null;
+    linkedin?: string | null;
+    youtube?: string | null;
+    pinterest?: string | null;
+    tiktok?: string | null;
+    whatsapp?: string | null;
+  };
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
   id: number;
+  tenant?: (number | null) | Tenant;
   /**
    * You will need to rebuild the website when changing this field.
    */
@@ -1403,6 +1585,7 @@ export interface Redirect {
  */
 export interface FormSubmission {
   id: number;
+  tenant?: (number | null) | Tenant;
   form: number | Form;
   submissionData?:
     | {
@@ -1422,6 +1605,7 @@ export interface FormSubmission {
  */
 export interface Search {
   id: number;
+  tenant?: (number | null) | Tenant;
   title?: string | null;
   priority?: number | null;
   doc: {
@@ -1572,6 +1756,26 @@ export interface PayloadLockedDocument {
         value: number | Analytics;
       } | null)
     | ({
+        relationTo: 'tenants';
+        value: number | Tenant;
+      } | null)
+    | ({
+        relationTo: 'header';
+        value: number | Header;
+      } | null)
+    | ({
+        relationTo: 'footer';
+        value: number | Footer;
+      } | null)
+    | ({
+        relationTo: 'theme';
+        value: number | Theme;
+      } | null)
+    | ({
+        relationTo: 'settings';
+        value: number | Setting;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: number | Redirect;
       } | null)
@@ -1638,6 +1842,7 @@ export interface PayloadMigration {
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   hero?: T | HeroSelect<T>;
   layout?:
@@ -2126,6 +2331,7 @@ export interface CarouselBlockSelect<T extends boolean = true> {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   heroImage?: T;
   content?: T;
@@ -2157,6 +2363,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  tenant?: T;
   alt?: T;
   caption?: T;
   createdBy?: T;
@@ -2252,6 +2459,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   slug?: T;
   slugLock?: T;
@@ -2275,6 +2483,12 @@ export interface UsersSelect<T extends boolean = true> {
   name?: T;
   super_user?: T;
   role?: T;
+  tenants?:
+    | T
+    | {
+        tenant?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -2341,6 +2555,7 @@ export interface RoleGlobalPermissionsSelect<T extends boolean = true> {
  * via the `definition` "analytics_select".
  */
 export interface AnalyticsSelect<T extends boolean = true> {
+  tenant?: T;
   ip?: T;
   email?: T;
   phone?: T;
@@ -2356,9 +2571,158 @@ export interface AnalyticsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants_select".
+ */
+export interface TenantsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  domains?:
+    | T
+    | {
+        domain?: T;
+        id?: T;
+      };
+  isActive?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header_select".
+ */
+export interface HeaderSelect<T extends boolean = true> {
+  tenant?: T;
+  navItems?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              items?:
+                | T
+                | {
+                    URL?: T;
+                    label?: T;
+                    id?: T;
+                  };
+              label?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  tenant?: T;
+  navItems?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              items?:
+                | T
+                | {
+                    URL?: T;
+                    label?: T;
+                    id?: T;
+                  };
+              label?: T;
+            };
+        id?: T;
+      };
+  copyright?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "theme_select".
+ */
+export interface ThemeSelect<T extends boolean = true> {
+  tenant?: T;
+  themes?: T | ThemeConfigSelect<T>;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ThemeConfig_select".
+ */
+export interface ThemeConfigSelect<T extends boolean = true> {
+  active?: T;
+  name?: T;
+  css?: T;
+  js?: T;
+  id?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_select".
+ */
+export interface SettingsSelect<T extends boolean = true> {
+  tenant?: T;
+  favicon?: T;
+  logo?: T;
+  localeSwitch?:
+    | T
+    | {
+        enableLocaleHeader?: T;
+        enableLocaleFooter?: T;
+      };
+  siteName?: T;
+  homepage?: T;
+  contact?:
+    | T
+    | {
+        email?: T;
+        phone?: T;
+        fax?: T;
+      };
+  address?:
+    | T
+    | {
+        full_address?: T;
+      };
+  socialMedia?:
+    | T
+    | {
+        facebook?: T;
+        twitter?: T;
+        instagram?: T;
+        linkedin?: T;
+        youtube?: T;
+        pinterest?: T;
+        tiktok?: T;
+        whatsapp?: T;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects_select".
  */
 export interface RedirectsSelect<T extends boolean = true> {
+  tenant?: T;
   from?: T;
   to?:
     | T
@@ -2375,6 +2739,7 @@ export interface RedirectsSelect<T extends boolean = true> {
  * via the `definition` "forms_select".
  */
 export interface FormsSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   fields?:
     | T
@@ -2514,6 +2879,7 @@ export interface FormsSelect<T extends boolean = true> {
  * via the `definition` "form-submissions_select".
  */
 export interface FormSubmissionsSelect<T extends boolean = true> {
+  tenant?: T;
   form?: T;
   submissionData?:
     | T
@@ -2530,6 +2896,7 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
  * via the `definition` "search_select".
  */
 export interface SearchSelect<T extends boolean = true> {
+  tenant?: T;
   title?: T;
   priority?: T;
   doc?: T;
@@ -2613,277 +2980,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header".
- */
-export interface Header {
-  id: number;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom' | 'group') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: number | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: number | Post;
-              } | null);
-          url?: string | null;
-          items?:
-            | {
-                URL?: string | null;
-                label?: string | null;
-                id?: string | null;
-              }[]
-            | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer".
- */
-export interface Footer {
-  id: number;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom' | 'group') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: number | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: number | Post;
-              } | null);
-          url?: string | null;
-          items?:
-            | {
-                URL?: string | null;
-                label?: string | null;
-                id?: string | null;
-              }[]
-            | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Copyright text to be dispalyed at the bottom of the footer
-   */
-  copyright?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "theme".
- */
-export interface Theme {
-  id: number;
-  themes?: ThemeConfig;
-  createdBy?: (number | null) | User;
-  updatedBy?: (number | null) | User;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "settings".
- */
-export interface Setting {
-  id: number;
-  favicon?: (number | null) | Media;
-  logo?: (number | null) | Media;
-  localeSwitch?: {
-    enableLocaleHeader?: boolean | null;
-    enableLocaleFooter?: boolean | null;
-  };
-  siteName?: string | null;
-  /**
-   * Select the homepage for your website
-   */
-  homepage?: (number | null) | Page;
-  contact?: {
-    email?: string | null;
-    phone?: string | null;
-    fax?: string | null;
-  };
-  address?: {
-    full_address?: string | null;
-  };
-  socialMedia?: {
-    facebook?: string | null;
-    twitter?: string | null;
-    instagram?: string | null;
-    linkedin?: string | null;
-    youtube?: string | null;
-    pinterest?: string | null;
-    tiktok?: string | null;
-    whatsapp?: string | null;
-  };
-  createdBy?: (number | null) | User;
-  updatedBy?: (number | null) | User;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header_select".
- */
-export interface HeaderSelect<T extends boolean = true> {
-  navItems?:
-    | T
-    | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              items?:
-                | T
-                | {
-                    URL?: T;
-                    label?: T;
-                    id?: T;
-                  };
-              label?: T;
-            };
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer_select".
- */
-export interface FooterSelect<T extends boolean = true> {
-  navItems?:
-    | T
-    | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              items?:
-                | T
-                | {
-                    URL?: T;
-                    label?: T;
-                    id?: T;
-                  };
-              label?: T;
-            };
-        id?: T;
-      };
-  copyright?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "theme_select".
- */
-export interface ThemeSelect<T extends boolean = true> {
-  themes?: T | ThemeConfigSelect<T>;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ThemeConfig_select".
- */
-export interface ThemeConfigSelect<T extends boolean = true> {
-  active?: T;
-  name?: T;
-  css?: T;
-  js?: T;
-  id?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "settings_select".
- */
-export interface SettingsSelect<T extends boolean = true> {
-  favicon?: T;
-  logo?: T;
-  localeSwitch?:
-    | T
-    | {
-        enableLocaleHeader?: T;
-        enableLocaleFooter?: T;
-      };
-  siteName?: T;
-  homepage?: T;
-  contact?:
-    | T
-    | {
-        email?: T;
-        phone?: T;
-        fax?: T;
-      };
-  address?:
-    | T
-    | {
-        full_address?: T;
-      };
-  socialMedia?:
-    | T
-    | {
-        facebook?: T;
-        twitter?: T;
-        instagram?: T;
-        linkedin?: T;
-        youtube?: T;
-        pinterest?: T;
-        tiktok?: T;
-        whatsapp?: T;
-      };
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

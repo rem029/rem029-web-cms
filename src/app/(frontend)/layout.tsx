@@ -6,16 +6,17 @@ import { GeistSans } from 'geist/font/sans'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
-import { Footer } from '@/Footer/Component'
-import { Header } from '@/Header/Component'
+import { Footer } from '@/collections/Footer/Component'
+import { Header } from '@/collections/Header/Component'
 
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
 
 import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
-import { getGlobal } from '@/utilities/getGlobals'
+import { getDefaultTenantId, getTenantDoc } from '@/common/utils/getTenantDoc'
 import Script from 'next/script'
+
 import { Media } from '@/payload-types'
 import { defaultThemeCSS } from '@/utilities/defaults'
 import DOMPurify from 'isomorphic-dompurify'
@@ -29,8 +30,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { isEnabled } = await draftMode()
   const cookieStore = await cookies()
   const locale = (cookieStore.get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE) as TypedLocale
-  const themes = await getGlobal('theme', 1, locale as TypedLocale)
-  const settings = await getGlobal('settings', 1, locale as TypedLocale)
+  const defaultTenantId = await getDefaultTenantId()
+  const themes = await getTenantDoc('theme', defaultTenantId, {
+    depth: 1,
+    locale: locale as TypedLocale,
+  })
+  const settings = await getTenantDoc('settings', defaultTenantId, {
+    depth: 1,
+    locale: locale as TypedLocale,
+  })
 
   const theme = themes?.themes?.find((theme) => theme.active === true)
   const css = theme?.css || defaultThemeCSS
