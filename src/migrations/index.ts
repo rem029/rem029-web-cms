@@ -17,6 +17,13 @@ import * as migration_20260509_182521_user_roles_update_add_super_user from './2
 import * as migration_20260509_191323_set_users_as_super_user from './20260509_191323_set_users_as_super_user';
 import * as migration_20261002_072703_multi_tenancy_tenants from './20261002_072703_multi_tenancy_tenants';
 import * as migration_20261002_185443_globals_to_tenant_docs from './20261002_185443_globals_to_tenant_docs';
+import * as migration_20261002_225304_users_access from './20261002_225304_users_access';
+import * as migration_20261002_234322_roles_to_users_access from './20261002_234322_roles_to_users_access';
+import * as migration_20261003_004242_users_is_disabled from './20261003_004242_users_is_disabled';
+import * as migration_20261003_013511_users_tenant_access from './20261003_013511_users_tenant_access';
+import * as migration_20261003_102355_tenant_admins from './20261003_102355_tenant_admins';
+import * as migration_20261003_122558_hidden_documents from './20261003_122558_hidden_documents';
+import * as migration_20261003_160746_access_templates from './20261003_160746_access_templates';
 
 export const migrations = [
   {
@@ -112,6 +119,41 @@ export const migrations = [
   {
     up: migration_20261002_185443_globals_to_tenant_docs.up,
     down: migration_20261002_185443_globals_to_tenant_docs.down,
-    name: '20261002_185443_globals_to_tenant_docs'
+    name: '20261002_185443_globals_to_tenant_docs',
+  },
+  {
+    up: migration_20261002_225304_users_access.up,
+    down: migration_20261002_225304_users_access.down,
+    name: '20261002_225304_users_access',
+  },
+  {
+    up: migration_20261002_234322_roles_to_users_access.up,
+    down: migration_20261002_234322_roles_to_users_access.down,
+    name: '20261002_234322_roles_to_users_access',
+  },
+  {
+    up: migration_20261003_004242_users_is_disabled.up,
+    down: migration_20261003_004242_users_is_disabled.down,
+    name: '20261003_004242_users_is_disabled',
+  },
+  {
+    up: migration_20261003_013511_users_tenant_access.up,
+    down: migration_20261003_013511_users_tenant_access.down,
+    name: '20261003_013511_users_tenant_access',
+  },
+  {
+    up: migration_20261003_102355_tenant_admins.up,
+    down: migration_20261003_102355_tenant_admins.down,
+    name: '20261003_102355_tenant_admins',
+  },
+  {
+    up: migration_20261003_122558_hidden_documents.up,
+    down: migration_20261003_122558_hidden_documents.down,
+    name: '20261003_122558_hidden_documents',
+  },
+  {
+    up: migration_20261003_160746_access_templates.up,
+    down: migration_20261003_160746_access_templates.down,
+    name: '20261003_160746_access_templates'
   },
 ];

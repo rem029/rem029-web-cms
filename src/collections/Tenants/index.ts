@@ -1,9 +1,15 @@
 import type { CollectionConfig, TextFieldValidation } from 'payload'
-import { accessCheckResolver } from '@/utilities/access'
+import {
+  accessCheckResolver,
+  hiddenResolver,
+  isSuperUser,
+  isSuperUserField,
+} from '@/common/utils/access'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { formatTenantSlugHook, validateTenantSlug } from './hooks/validateTenantSlug'
 import { createTenantDocs } from './hooks/createTenantDocs'
+import { guardTenantFields } from './hooks/guardTenantFields'
 
 const HOSTNAME_REGEX =
   /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/
@@ -37,17 +43,18 @@ const validateDomain: TextFieldValidation = (value) => {
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
   access: {
-    create: ({ req }) => Boolean(req.user?.super_user),
-    delete: ({ req }) => Boolean(req.user?.super_user),
+    create: isSuperUser,
+    delete: isSuperUser,
     // any signed-in user; the multi-tenant plugin narrows this to the user's own tenants
     // (super users see all). needed so the tenant selector works for every member.
     read: ({ req }) => Boolean(req.user),
-    update: accessCheckResolver('tenants', 'canUpdate'),
+    update: accessCheckResolver('tenants', 'update'),
   },
   admin: {
     group: 'Admin',
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug', 'isActive', 'updatedAt'],
+    hidden: hiddenResolver('tenants'),
   },
   timestamps: true,
   fields: [
@@ -62,6 +69,9 @@ export const Tenants: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
+      access: {
+        update: isSuperUserField,
+      },
       admin: {
         position: 'sidebar',
       },
@@ -74,6 +84,9 @@ export const Tenants: CollectionConfig = {
       name: 'domains',
       type: 'array',
       label: 'Domains',
+      access: {
+        update: isSuperUserField,
+      },
       fields: [
         {
           name: 'domain',
@@ -98,14 +111,18 @@ export const Tenants: CollectionConfig = {
       name: 'isActive',
       type: 'checkbox',
       defaultValue: true,
+      access: {
+        update: isSuperUserField,
+      },
       admin: {
         description:
-          'Controls whether the tenant is active. Inactive tenants are not accessible to public users.',
+          'Inactive businesses are read-only for their members (super users can still edit). Their public site is unaffected for now.',
       },
     },
     ...createdUpdatedByFields,
   ],
   hooks: {
+    beforeOperation: [guardTenantFields],
     beforeChange: [setCreatedUpdatedByCollection],
     afterChange: [createTenantDocs],
   },

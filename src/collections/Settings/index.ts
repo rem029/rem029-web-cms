@@ -1,6 +1,12 @@
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
-import { accessCheckResolver, isSuperUser } from '@/utilities/access'
+import {
+  accessCheckResolver,
+  hiddenResolver,
+  isSuperUser,
+  publicOrVisible,
+} from '@/common/utils/access'
+import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 import type { CollectionConfig } from 'payload'
 import { validateHomepageTenant } from './hooks/validateHomepageTenant'
@@ -9,15 +15,17 @@ export const Settings: CollectionConfig = {
   slug: 'settings',
   labels: { singular: 'Settings', plural: 'Settings' },
   access: {
-    read: () => true,
-    update: accessCheckResolver('settings', 'canUpdate'),
+    read: publicOrVisible('settings'),
+    update: accessCheckResolver('settings', 'update', { hideable: true }),
     create: isSuperUser,
     delete: isSuperUser,
   },
   admin: {
     group: 'Admin',
+    hidden: hiddenResolver('settings'),
   },
   fields: [
+    hiddenBannerField,
     { type: 'upload', relationTo: 'media', name: 'favicon', label: 'Favicon', localized: true },
     { type: 'upload', relationTo: 'media', name: 'logo', label: 'Logo', localized: true },
     {
@@ -131,6 +139,9 @@ export const Settings: CollectionConfig = {
         },
       ],
     },
+    ...hiddenFields({
+      description: 'Hides it from other members in the admin only. The public site always uses it.',
+    }),
     ...createdUpdatedByFields,
   ],
   hooks: {

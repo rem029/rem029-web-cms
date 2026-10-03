@@ -11,6 +11,8 @@ import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
+import { UsersAccess } from './collections/UsersAccess'
+import { withAccessSlugOptions } from './collections/UsersAccess/utils/withAccessSlugOptions'
 import { Footer } from './collections/Footer'
 import { Header } from './collections/Header'
 import { plugins } from './plugins'
@@ -20,7 +22,6 @@ import { Theme } from './collections/Theme'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { Settings } from './collections/Settings'
 
-import { Roles } from './collections/Roles'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 import { Analytics } from './collections/Analytics'
 import { Tenants } from './collections/Tenants'
@@ -41,6 +42,7 @@ export default buildConfig({
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
       beforeLogin: ['@/components/BeforeLogin'],
+      header: ['@/common/components/InactiveTenantNotice#InactiveTenantNotice'],
       // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
       // beforeDashboard: ['@/components/BeforeDashboard'],
@@ -98,7 +100,7 @@ export default buildConfig({
     Media,
     Categories,
     Users,
-    Roles,
+    UsersAccess,
     Analytics,
     Tenants,
     Header,
@@ -109,7 +111,7 @@ export default buildConfig({
   cors: [getServerSideURL()].filter(Boolean),
   globals: [],
 
-  plugins: [...plugins],
+  plugins: [...plugins, withAccessSlugOptions],
   secret: process.env.PAYLOAD_SECRET,
   email: nodemailerAdapter({
     defaultFromAddress: process.env.DEFAULT_FROM_ADDRESS || '',

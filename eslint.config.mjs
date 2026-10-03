@@ -32,7 +32,7 @@ const eslintConfig = [
     },
   },
   {
-    ignores: ['.next/'],
+    ignores: ['.next/', '.temp/'],
   },
 ]
 

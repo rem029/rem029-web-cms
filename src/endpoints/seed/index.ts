@@ -4,7 +4,6 @@ import { getDefaultTenantId } from '@/common/utils/getTenantDoc'
 
 import { contactForm as contactFormData } from './contact-form'
 
-// import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
@@ -86,47 +85,14 @@ export const seed = async ({
     ),
   ])
 
-  const role = await payload.create({
-    collection: 'roles',
-    data: {
-      name: 'Demo Author',
-      slug: 'demo-author',
-      collections: {
-        permissions: [
-          { collection: 'pages', canCreate: true, canDelete: true, canRead: true, canUpdate: true },
-          { collection: 'media', canCreate: true, canDelete: true, canRead: true, canUpdate: true },
-        ],
-      },
-      globals: {
-        permissions: [
-          {
-            global: 'header',
-            canRead: true,
-            canUpdate: true,
-          },
-          {
-            global: 'footer',
-            canRead: true,
-            canUpdate: true,
-          },
-          {
-            global: 'themes',
-            canRead: true,
-            canUpdate: true,
-          },
-        ],
-      },
-    },
-  })
-
   const [demoAuthor, image1Doc, image2Doc, image3Doc, _] = await Promise.all([
     payload.create({
       collection: 'users',
       data: {
         name: 'Demo Author',
         email: 'demo-author@example.com',
+        // post author only: no tenant row, so no profile and no admin access (rem0001 phase 4)
         password: 'password',
-        role: role.id,
       },
     }),
     payload.create({
@@ -290,21 +256,6 @@ export const seed = async ({
     data: contactFormData,
   })
 
-  payload.logger.info(`— Seeding pages...`)
-
-  // const [_,contact] = await Promise.all([
-  //   payload.create({
-  //     collection: 'pages',
-  //     depth: 0,
-  //     data: home({ heroImage: imageHomeDoc, metaImage: image2Doc }),
-  //   }),
-  //   payload.create({
-  //     collection: 'pages',
-  //     depth: 0,
-  //     data: contactPageData({ contactForm: contactForm }),
-  //   }),
-  // ])
-
   payload.logger.info(`— Seeding globals...`)
 
   await Promise.all([
@@ -317,16 +268,6 @@ export const seed = async ({
             url: '/posts',
           },
         },
-        // {
-        //   link: {
-        //     type: 'reference',
-        //     label: 'Contact',
-        //     reference: {
-        //       relationTo: 'pages',
-        //       value: contactPage.id,
-        //     },
-        //   },
-        // },
       ],
     }),
     updateDefaultTenantDoc(payload, req, 'footer', {

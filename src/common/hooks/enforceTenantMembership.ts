@@ -1,18 +1,16 @@
-import type { CollectionBeforeChangeHook } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionSlug } from 'payload'
 import { Forbidden, parseCookies } from 'payload'
-
-type TenantValue = number | string | { id: number | string } | null | undefined
-
-const toTenantId = (tenant: TenantValue): number | string | undefined => {
-  if (!tenant) return undefined
-  return typeof tenant === 'object' ? tenant.id : tenant
-}
+import { getTenantRows, isActiveSuperUser, isDisabledUser, rowAllows } from '@/common/utils/access'
+import { extractTenantId } from '@/common/utils/tenantCollections'
 
 /**
  * The multi-tenant plugin limits access with a `where` on the doc's tenant, which Payload
  * can't apply to creates or to changing a doc's tenant. This blocks writing a doc into a
  * tenant the user isn't a member of. Anonymous writes (e.g. form submissions) are left to
  * the collection's own access and hooks.
+ *
+ * Local API calls that pass `user` are checked as that user even with overrideAccess
+ * (beforeChange hooks don't get the flag); bypassing calls don't pass a user.
  */
 export const enforceTenantMembership: CollectionBeforeChangeHook = ({
   collection,
@@ -22,32 +20,66 @@ export const enforceTenantMembership: CollectionBeforeChangeHook = ({
   req,
 }) => {
   const { user } = req
-  if (!user || user.super_user) return data
+  if (!user) return data
 
-  // create: same fallback as the plugin's tenant field hook (value, then the admin's cookie).
-  // update: an omitted tenant keeps the stored one, so check that, not the cookie.
-  const tenantId =
-    toTenantId(data?.tenant) ??
+  const targetTenantId =
+    extractTenantId(data?.tenant) ??
     (operation === 'create'
-      ? parseCookies(req.headers).get('payload-tenant')
-      : toTenantId(originalDoc?.tenant))
+      ? extractTenantId(parseCookies(req.headers).get('payload-tenant'))
+      : extractTenantId(originalDoc?.tenant))
+
+  if (isDisabledUser(user)) {
+    req.payload.logger.warn({
+      msg: 'Blocked disabled user write to tenant',
+      collection: collection.slug,
+      operation,
+      tenantId: targetTenantId,
+      userId: user.id,
+    })
+    throw new Forbidden(req.t)
+  }
+
+  if (isActiveSuperUser(user)) return data
 
   // a missing tenant is rejected by the plugin's tenant field hook
-  if (!tenantId) return data
+  if (targetTenantId === null) return data
 
-  const isMember = (user.tenants ?? []).some(
-    (row) => String(toTenantId(row.tenant)) === String(tenantId),
-  )
+  const rows = getTenantRows(user, req.payload.logger)
+  const memberRow = rows.find((r) => r.tenantId === targetTenantId)
 
-  if (!isMember) {
+  if (!memberRow) {
     req.payload.logger.warn({
       msg: 'Blocked write to a tenant the user is not a member of',
       collection: collection.slug,
       operation,
-      tenantId,
+      tenantId: targetTenantId,
       userId: user.id,
     })
     throw new Forbidden(req.t)
+  }
+
+  const isTenantChange =
+    operation === 'update' &&
+    data?.tenant !== undefined &&
+    extractTenantId(data.tenant) !== extractTenantId(originalDoc?.tenant)
+
+  // search docs are written by the search plugin's sync with the editor's req (a post save),
+  // not by the user, so only membership applies to them
+  const isPluginSynced = collection.slug === 'search'
+
+  if (!isPluginSynced && (operation === 'create' || isTenantChange)) {
+    // collection.slug is typed as string on SanitizedCollectionConfig in Payload types
+    const canCreate = rowAllows(memberRow, collection.slug as CollectionSlug, 'create')
+    if (!canCreate) {
+      req.payload.logger.warn({
+        msg: 'Blocked write to tenant without create permission',
+        collection: collection.slug,
+        operation,
+        tenantId: targetTenantId,
+        userId: user.id,
+      })
+      throw new Forbidden(req.t)
+    }
   }
 
   return data

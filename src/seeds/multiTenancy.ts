@@ -1,16 +1,14 @@
 /**
  * Multi-tenancy test data: tenants, a home + about page per tenant, and test users.
  *
- *   pnpm seed:tenants
+ *   pnpm seed
  *
  * - Idempotent: creates only what's missing and never overwrites existing docs.
- * - Refuses to run in production.
+ * - Never runs in production (src/seeds/index.ts refuses).
  * - Test users (`*@example.test`) log in with their email as the password, and are created only
  *   once a first (super) user exists. Existing test users get their password reset to it.
  */
-import config from '@payload-config'
 import type { Payload, RequiredDataFromCollectionSlug } from 'payload'
-import { getPayload } from 'payload'
 
 import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
 import type { Page, Tenant } from '@/payload-types'
@@ -21,10 +19,11 @@ type SeedTenant = {
   tagline: string
 }
 
+// a profile (users-access slug) per tenant row (rem0001 phase 4)
 type SeedUser = {
   email: string
   name: string
-  tenantSlugs: string[]
+  memberships: { tenantSlug: string; profileSlug: string }[]
 }
 
 // business names match the slugs so tenants are easy to tell apart while testing
@@ -56,12 +55,24 @@ const USERS: SeedUser[] = [
   ...TENANTS.map((tenant) => ({
     email: `${tenant.slug}-editor@example.test`,
     name: `${tenant.name.en} editor`,
-    tenantSlugs: [tenant.slug],
+    memberships: [{ tenantSlug: tenant.slug, profileSlug: 'editor' }],
   })),
   {
     email: 'multi-editor@example.test',
     name: 'Editor of tenant1 + tenant2',
-    tenantSlugs: ['tenant1', 'tenant2'],
+    memberships: [
+      { tenantSlug: 'tenant1', profileSlug: 'editor' },
+      { tenantSlug: 'tenant2', profileSlug: 'editor' },
+    ],
+  },
+  {
+    // different access per tenant: edits tenant1, reads tenant2, nothing in tenant3
+    email: 'mixed@example.test',
+    name: 'Editor in tenant1, viewer in tenant2',
+    memberships: [
+      { tenantSlug: 'tenant1', profileSlug: 'editor' },
+      { tenantSlug: 'tenant2', profileSlug: 'viewer' },
+    ],
   },
 ]
 
@@ -82,7 +93,7 @@ const text = (value: string) => ({
   style: '',
 })
 
-const richText = (heading: string, ...paragraphs: string[]): RichText => ({
+export const richText = (heading: string, ...paragraphs: string[]): RichText => ({
   root: {
     type: 'root',
     version: 1,
@@ -111,7 +122,7 @@ const richText = (heading: string, ...paragraphs: string[]): RichText => ({
   },
 })
 
-const contentLayout = (content: RichText): Page['layout'] => [
+export const contentLayout = (content: RichText): Page['layout'] => [
   { blockType: 'content', columns: [{ size: 'full', richText: content }] },
 ]
 
@@ -223,8 +234,17 @@ const upsertUser = async (
   payload: Payload,
   seed: SeedUser,
   tenantsBySlug: Map<string, Tenant>,
-  roleId: number | undefined,
+  profileIdsBySlug: Map<string, number>,
 ) => {
+  const tenants = seed.memberships.flatMap(({ tenantSlug, profileSlug }) => {
+    const tenant = tenantsBySlug.get(tenantSlug)
+    const access = profileIdsBySlug.get(profileSlug)
+    if (!tenant || !access) {
+      throw new Error(`seed: tenant "${tenantSlug}" or profile "${profileSlug}" missing for ${seed.email}`)
+    }
+    return [{ tenant: tenant.id, access }]
+  })
+
   // test-only accounts: the email doubles as the password so anyone testing can log in
   const password = seed.email
   const { docs } = await payload.find({
@@ -234,24 +254,24 @@ const upsertUser = async (
     depth: 0,
   })
   if (docs[0]) {
-    await payload.update({ collection: 'users', id: docs[0].id, data: { password } })
-    payload.logger.info(`seed: reset password of ${seed.email} to its email`)
+    await payload.update({
+      collection: 'users',
+      id: docs[0].id,
+      data: { password, tenants },
+    })
+    payload.logger.info(`seed: reset password and memberships of ${seed.email}`)
     return
   }
 
-  const tenants = seed.tenantSlugs.flatMap((slug) => {
-    const tenant = tenantsBySlug.get(slug)
-    return tenant ? [{ tenant: tenant.id }] : []
-  })
-
   await payload.create({
     collection: 'users',
-    data: { email: seed.email, name: seed.name, password, role: roleId, tenants },
+    data: { email: seed.email, name: seed.name, password, tenants },
   })
-  payload.logger.info(`seed: created user ${seed.email} (${seed.tenantSlugs.join(', ')})`)
+  const summary = seed.memberships.map((m) => `${m.tenantSlug}:${m.profileSlug}`).join(', ')
+  payload.logger.info(`seed: created user ${seed.email} (${summary})`)
 }
 
-const seed = async (payload: Payload) => {
+export const seedMultiTenancy = async (payload: Payload) => {
   const tenantsBySlug = new Map<string, Tenant>()
   for (const seedTenant of TENANTS) {
     const tenant = await upsertTenant(payload, seedTenant)
@@ -285,29 +305,21 @@ const seed = async (payload: Payload) => {
     return
   }
 
-  // the "admin" role from the roles migration; phase 3 replaces this with per-tenant access
-  const { docs: roles } = await payload.find({
-    collection: 'roles',
-    where: { slug: { equals: 'admin' } },
-    limit: 1,
+  // platform profiles (on the admin tenant) come from the access seed, which runs first; slugs are
+  // unique per tenant since rem0001 phase 5, so the tenant is part of the lookup
+  const { docs: profiles } = await payload.find({
+    collection: 'users-access',
+    where: {
+      and: [
+        { slug: { in: ['editor', 'viewer'] } },
+        { 'tenant.slug': { equals: DEFAULT_TENANT_SLUG } },
+      ],
+    },
+    limit: 10,
     depth: 0,
   })
+  const profileIdsBySlug = new Map(profiles.map((profile) => [profile.slug, profile.id]))
   for (const user of USERS) {
-    await upsertUser(payload, user, tenantsBySlug, roles[0]?.id)
+    await upsertUser(payload, user, tenantsBySlug, profileIdsBySlug)
   }
-}
-
-if (process.env.NODE_ENV === 'production') {
-  console.error('seed: refusing to run with NODE_ENV=production')
-  process.exit(1)
-}
-
-const payload = await getPayload({ config })
-try {
-  await seed(payload)
-  payload.logger.info('seed: multi-tenancy seed done')
-  process.exit(0)
-} catch (err) {
-  payload.logger.error({ msg: 'seed: multi-tenancy seed failed', err })
-  process.exit(1)
 }

@@ -9,8 +9,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
-import { accessCheckResolver } from '@/utilities/access'
+import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 
@@ -18,11 +17,14 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 export const Media: CollectionConfig = {
   slug: 'media',
+  admin: {
+    hidden: hiddenResolver('media'),
+  },
   access: {
-    create: accessCheckResolver('media', 'canCreate'),
-    delete: accessCheckResolver('media', 'canDelete'),
+    create: accessCheckResolver('media', 'create'),
+    delete: accessCheckResolver('media', 'delete'),
     read: anyone,
-    update: accessCheckResolver('media', 'canUpdate'),
+    update: accessCheckResolver('media', 'update'),
   },
   fields: [
     {

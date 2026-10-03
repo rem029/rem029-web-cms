@@ -9,9 +9,11 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { authenticated } from '../../access/authenticated'
-import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
-import { accessCheckResolver } from '@/utilities/access'
+import { accessCheckResolver, publishedOrPermission, versionsAccess } from '@/common/utils/access'
+import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
+import { syncHiddenToDoc } from '@/common/hooks/syncHiddenToDoc'
+import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
+import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { Banner } from '../../blocks/old/Banner/config'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
@@ -32,10 +34,11 @@ import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugU
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
-    create: accessCheckResolver('posts', 'canCreate'),
-    delete: accessCheckResolver('posts', 'canDelete'),
-    read: authenticatedOrPublished,
-    update: accessCheckResolver('posts', 'canUpdate'),
+    create: accessCheckResolver('posts', 'create'),
+    delete: accessCheckResolver('posts', 'delete', { hideable: true }),
+    read: publishedOrPermission('posts', { hideable: true }),
+    readVersions: versionsAccess('posts'),
+    update: accessCheckResolver('posts', 'update', { hideable: true }),
   },
   // This config controls what's populated by default when a post is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -72,6 +75,7 @@ export const Posts: CollectionConfig<'posts'> = {
     useAsTitle: 'title',
   },
   fields: [
+    hiddenBannerField,
     {
       name: 'title',
       type: 'text',
@@ -221,6 +225,8 @@ export const Posts: CollectionConfig<'posts'> = {
       ],
     },
     ...slugField(),
+    ...hiddenFields(),
+    ...createdUpdatedByFields,
   ],
   indexes: [
     {
@@ -229,7 +235,8 @@ export const Posts: CollectionConfig<'posts'> = {
     },
   ],
   hooks: {
-    afterChange: [revalidatePost],
+    afterChange: [syncHiddenToDoc, revalidatePost],
+    beforeChange: [setCreatedUpdatedByCollection],
     beforeValidate: [validateTenantSlugUniqueness('posts', 'post')],
     afterRead: [populateAuthors],
     afterDelete: [revalidateDelete],

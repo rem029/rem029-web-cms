@@ -2,7 +2,13 @@ import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { defaultThemeCSS } from '@/utilities/defaults'
 import { generateThemePreviewPath } from '@/utilities/generatePreviewPath'
-import { accessCheckResolver, isSuperUser } from '@/utilities/access'
+import {
+  accessCheckResolver,
+  hiddenResolver,
+  isSuperUser,
+  publicOrVisible,
+} from '@/common/utils/access'
+import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 
 import type { CollectionConfig } from 'payload'
@@ -13,13 +19,14 @@ export const Theme: CollectionConfig = {
   // one doc per business, so no plural in the admin nav
   labels: { singular: 'Theme', plural: 'Theme' },
   access: {
-    read: () => true,
-    update: accessCheckResolver('theme', 'canUpdate'),
+    read: publicOrVisible('theme'),
+    update: accessCheckResolver('theme', 'update', { hideable: true }),
     create: isSuperUser,
     delete: isSuperUser,
   },
   admin: {
     group: 'Admin',
+    hidden: hiddenResolver('theme'),
     livePreview: {
       url: ({ data }) => {
         const tenantId = typeof data?.tenant === 'object' ? data?.tenant?.id : data?.tenant
@@ -28,6 +35,7 @@ export const Theme: CollectionConfig = {
     },
   },
   fields: [
+    hiddenBannerField,
     {
       name: 'themes',
       type: 'array',
@@ -81,6 +89,9 @@ export const Theme: CollectionConfig = {
         },
       ],
     },
+    ...hiddenFields({
+      description: 'Hides it from other members in the admin only. The public site always uses it.',
+    }),
     ...createdUpdatedByFields,
   ],
   hooks: {

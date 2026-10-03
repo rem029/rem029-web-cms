@@ -19,9 +19,8 @@
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "release": "standard-version",
-    "seed": "pnpm seed:admin && pnpm seed:tenants",
-    "seed:admin": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seeds/defaultAdmin.ts",
-    "seed:tenants": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seeds/multiTenancy.ts",
+    "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seeds/index.ts",
+    "verify": "for f in scripts/verify/*.ts; do cross-env NODE_OPTIONS=--no-deprecation payload run \"$f\" || exit 1; done",
     "setup:docs": "git clone git@github.com:rem029/rem029-web-cms-docs.git docs || echo docs/ already cloned",
     "postsetup:docs": "node docs/scripts/setup.mjs"
   },

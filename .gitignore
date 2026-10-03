@@ -25,3 +25,4 @@ pnpm-workspace.yaml
 
 # typescript incremental build cache
 *.tsbuildinfo
+.temp

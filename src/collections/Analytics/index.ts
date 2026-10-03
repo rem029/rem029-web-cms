@@ -1,14 +1,14 @@
 import { CollectionConfig } from 'payload'
-import { accessCheckResolver } from '@/utilities/access'
+import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
 
 export const Analytics: CollectionConfig = {
   slug: 'analytics',
-  admin: { useAsTitle: 'pagePath' },
+  admin: { useAsTitle: 'pagePath', hidden: hiddenResolver('analytics') },
   access: {
-    read: accessCheckResolver('analytics', 'canRead'),
-    create: accessCheckResolver('analytics', 'canCreate'),
-    update: accessCheckResolver('analytics', 'canUpdate'),
-    delete: accessCheckResolver('analytics', 'canDelete'),
+    read: accessCheckResolver('analytics', 'read'),
+    create: accessCheckResolver('analytics', 'create'),
+    update: accessCheckResolver('analytics', 'update'),
+    delete: accessCheckResolver('analytics', 'delete'),
   },
   fields: [
     { name: 'ip', type: 'text', label: 'IP Address' },

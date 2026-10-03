@@ -7,60 +7,6 @@
  */
 
 /**
- * Set permissions for each collection
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RoleCollectionPermissions".
- */
-export type RoleCollectionPermissions =
-  | {
-      /**
-       * Collection slug (e.g., "pages", "posts")
-       */
-      collection: string;
-      /**
-       * Allow creating new items in this collection
-       */
-      canCreate?: boolean | null;
-      /**
-       * Allow viewing items in this collection
-       */
-      canRead?: boolean | null;
-      /**
-       * Allow editing items in this collection
-       */
-      canUpdate?: boolean | null;
-      /**
-       * Allow deleting items in this collection
-       */
-      canDelete?: boolean | null;
-      id?: string | null;
-    }[]
-  | null;
-/**
- * Set permissions for each global
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RoleGlobalPermissions".
- */
-export type RoleGlobalPermissions =
-  | {
-      /**
-       * Global slug (e.g., "settings", "theme")
-       */
-      global?: string | null;
-      /**
-       * Allow viewing this global
-       */
-      canRead?: boolean | null;
-      /**
-       * Allow editing this global
-       */
-      canUpdate?: boolean | null;
-      id?: string | null;
-    }[]
-  | null;
-/**
  * Add and configure individual slides for the carousel.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -184,7 +130,7 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
-    roles: Role;
+    'users-access': UsersAccess;
     analytics: Analytics;
     tenants: Tenant;
     header: Header;
@@ -207,7 +153,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    roles: RolesSelect<false> | RolesSelect<true>;
+    'users-access': UsersAccessSelect<false> | UsersAccessSelect<true>;
     analytics: AnalyticsSelect<false> | AnalyticsSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -293,6 +239,11 @@ export interface Page {
    */
   fullSlug?: string | null;
   category?: (number | null) | Category;
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -314,7 +265,7 @@ export interface Tenant {
       }[]
     | null;
   /**
-   * Controls whether the tenant is active. Inactive tenants are not accessible to public users.
+   * Inactive businesses are read-only for their members (super users can still edit). Their public site is unaffected for now.
    */
   isActive?: boolean | null;
   createdBy?: (number | null) | User;
@@ -328,15 +279,27 @@ export interface Tenant {
  */
 export interface User {
   id: number;
+  password?: string | null;
   name?: string | null;
   /**
    * A super user has full access to all collections and settings.
    */
   super_user?: boolean | null;
-  role?: (number | null) | Role;
+  /**
+   * A disabled user can't log in, and any open session gets no access.
+   */
+  is_disabled?: boolean | null;
   tenants?:
     | {
         tenant: number | Tenant;
+        /**
+         * Manages this business: its content, members and access profiles.
+         */
+        isTenantAdmin?: boolean | null;
+        /**
+         * What this user can see and do in this business. Tenant admins and super users bypass it.
+         */
+        access?: (number | null) | UsersAccess;
         id?: string | null;
       }[]
     | null;
@@ -356,38 +319,59 @@ export interface User {
         expiresAt: string;
       }[]
     | null;
-  password?: string | null;
 }
 /**
- * Manage user roles and permissions
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "roles".
+ * via the `definition` "users-access".
  */
-export interface Role {
+export interface UsersAccess {
   id: number;
-  /**
-   * Display name for this role
-   */
+  tenant?: (number | null) | Tenant;
   name: string;
   /**
-   * Unique identifier for this role (e.g., "admin", "editor", "contributor")
+   * Identifies the profile in code, e.g. "default". Lowercase kebab-case.
    */
   slug: string;
-  /**
-   * Brief description of what this role is for
-   */
+  business?: string | null;
   description?: string | null;
-  collections?: {
-    permissions?: RoleCollectionPermissions;
-  };
-  globals?: {
-    permissions?: RoleGlobalPermissions;
-  };
+  access?:
+    | {
+        slug:
+          | 'pages'
+          | 'posts'
+          | 'media'
+          | 'categories'
+          | 'users'
+          | 'users-access'
+          | 'analytics'
+          | 'tenants'
+          | 'header'
+          | 'footer'
+          | 'theme'
+          | 'settings'
+          | 'redirects'
+          | 'forms'
+          | 'form-submissions'
+          | 'search';
+        hidden?: boolean | null;
+        read?: boolean | null;
+        create?: boolean | null;
+        update?: boolean | null;
+        delete?: boolean | null;
+        /**
+         * Can open the admin panel. On this row only Admin and Hidden apply: only super users manage other users.
+         */
+        admin?: boolean | null;
+        access?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
-   * Admin roles bypass all permission checks (use carefully)
+   * Ready-made profile any business can assign. Only for profiles of the platform business (admin).
    */
-  isAdmin?: boolean | null;
+  isTemplate?: boolean | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -645,6 +629,13 @@ export interface Post {
     | null;
   slug?: string | null;
   slugLock?: boolean | null;
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1440,6 +1431,16 @@ export interface Header {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Hides it from other members in the admin only. The public site always uses it.
+   */
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1495,6 +1496,16 @@ export interface Footer {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Hides it from other members in the admin only. The public site always uses it.
+   */
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1506,6 +1517,14 @@ export interface Theme {
   id: number;
   tenant?: (number | null) | Tenant;
   themes?: ThemeConfig;
+  /**
+   * Hides it from other members in the admin only. The public site always uses it.
+   */
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -1547,6 +1566,14 @@ export interface Setting {
     tiktok?: string | null;
     whatsapp?: string | null;
   };
+  /**
+   * Hides it from other members in the admin only. The public site always uses it.
+   */
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -1748,8 +1775,8 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
-        relationTo: 'roles';
-        value: number | Role;
+        relationTo: 'users-access';
+        value: number | UsersAccess;
       } | null)
     | ({
         relationTo: 'analytics';
@@ -1870,6 +1897,8 @@ export interface PagesSelect<T extends boolean = true> {
   slugLock?: T;
   fullSlug?: T;
   category?: T;
+  isHidden?: T;
+  visibleTo?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -2354,6 +2383,10 @@ export interface PostsSelect<T extends boolean = true> {
       };
   slug?: T;
   slugLock?: T;
+  isHidden?: T;
+  visibleTo?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2480,13 +2513,16 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  password?: T;
   name?: T;
   super_user?: T;
-  role?: T;
+  is_disabled?: T;
   tenants?:
     | T
     | {
         tenant?: T;
+        isTenantAdmin?: T;
+        access?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -2508,47 +2544,32 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "roles_select".
+ * via the `definition` "users-access_select".
  */
-export interface RolesSelect<T extends boolean = true> {
+export interface UsersAccessSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
   slug?: T;
+  business?: T;
   description?: T;
-  collections?:
+  access?:
     | T
     | {
-        permissions?: T | RoleCollectionPermissionsSelect<T>;
+        slug?: T;
+        hidden?: T;
+        read?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+        admin?: T;
+        access?: T;
+        id?: T;
       };
-  globals?:
-    | T
-    | {
-        permissions?: T | RoleGlobalPermissionsSelect<T>;
-      };
-  isAdmin?: T;
+  isTemplate?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RoleCollectionPermissions_select".
- */
-export interface RoleCollectionPermissionsSelect<T extends boolean = true> {
-  collection?: T;
-  canCreate?: T;
-  canRead?: T;
-  canUpdate?: T;
-  canDelete?: T;
-  id?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RoleGlobalPermissions_select".
- */
-export interface RoleGlobalPermissionsSelect<T extends boolean = true> {
-  global?: T;
-  canRead?: T;
-  canUpdate?: T;
-  id?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2615,6 +2636,10 @@ export interface HeaderSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  isHidden?: T;
+  visibleTo?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2646,6 +2671,10 @@ export interface FooterSelect<T extends boolean = true> {
         id?: T;
       };
   copyright?: T;
+  isHidden?: T;
+  visibleTo?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2656,6 +2685,8 @@ export interface FooterSelect<T extends boolean = true> {
 export interface ThemeSelect<T extends boolean = true> {
   tenant?: T;
   themes?: T | ThemeConfigSelect<T>;
+  isHidden?: T;
+  visibleTo?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -2712,6 +2743,8 @@ export interface SettingsSelect<T extends boolean = true> {
         tiktok?: T;
         whatsapp?: T;
       };
+  isHidden?: T;
+  visibleTo?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

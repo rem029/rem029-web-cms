@@ -1,8 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../../access/authenticated'
-import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
-import { accessCheckResolver } from '@/utilities/access'
+import {
+  accessCheckResolver,
+  hiddenResolver,
+  publishedOrPermission,
+  versionsAccess,
+} from '@/common/utils/access'
+import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
+import { syncHiddenToDoc } from '@/common/hooks/syncHiddenToDoc'
 
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
@@ -32,10 +37,11 @@ import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugU
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
-    create: accessCheckResolver('pages', 'canCreate'),
-    delete: accessCheckResolver('pages', 'canDelete'),
-    read: authenticatedOrPublished,
-    update: accessCheckResolver('pages', 'canUpdate'),
+    create: accessCheckResolver('pages', 'create'),
+    delete: accessCheckResolver('pages', 'delete', { hideable: true }),
+    read: publishedOrPermission('pages', { hideable: true }),
+    readVersions: versionsAccess('pages'),
+    update: accessCheckResolver('pages', 'update', { hideable: true }),
   },
   // This config controls what's populated by default when a page is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -46,6 +52,7 @@ export const Pages: CollectionConfig<'pages'> = {
     category: true,
   },
   admin: {
+    hidden: hiddenResolver('pages'),
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {
@@ -67,6 +74,7 @@ export const Pages: CollectionConfig<'pages'> = {
     useAsTitle: 'title',
   },
   fields: [
+    hiddenBannerField,
     {
       name: 'title',
       type: 'text',
@@ -159,6 +167,7 @@ export const Pages: CollectionConfig<'pages'> = {
       relationTo: 'categories',
     },
 
+    ...hiddenFields(),
     ...createdUpdatedByFields,
   ],
   indexes: [
@@ -168,7 +177,7 @@ export const Pages: CollectionConfig<'pages'> = {
     },
   ],
   hooks: {
-    afterChange: [revalidatePage],
+    afterChange: [syncHiddenToDoc, revalidatePage],
     beforeChange: [populatePublishedAt, setCreatedUpdatedByCollection, populateFullSlug],
     beforeValidate: [validateTenantSlugUniqueness('pages', 'page')],
     afterDelete: [revalidateDelete],
