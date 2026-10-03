@@ -4,7 +4,6 @@ import { getDefaultTenantId } from '@/common/utils/getTenantDoc'
 
 import { contactForm as contactFormData } from './contact-form'
 
-// import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
@@ -85,7 +84,6 @@ export const seed = async ({
       'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
     ),
   ])
-
 
   const [demoAuthor, image1Doc, image2Doc, image3Doc, _] = await Promise.all([
     payload.create({
@@ -258,21 +256,6 @@ export const seed = async ({
     data: contactFormData,
   })
 
-  payload.logger.info(`— Seeding pages...`)
-
-  // const [_,contact] = await Promise.all([
-  //   payload.create({
-  //     collection: 'pages',
-  //     depth: 0,
-  //     data: home({ heroImage: imageHomeDoc, metaImage: image2Doc }),
-  //   }),
-  //   payload.create({
-  //     collection: 'pages',
-  //     depth: 0,
-  //     data: contactPageData({ contactForm: contactForm }),
-  //   }),
-  // ])
-
   payload.logger.info(`— Seeding globals...`)
 
   await Promise.all([
@@ -285,16 +268,6 @@ export const seed = async ({
             url: '/posts',
           },
         },
-        // {
-        //   link: {
-        //     type: 'reference',
-        //     label: 'Contact',
-        //     reference: {
-        //       relationTo: 'pages',
-        //       value: contactPage.id,
-        //     },
-        //   },
-        // },
       ],
     }),
     updateDefaultTenantDoc(payload, req, 'footer', {

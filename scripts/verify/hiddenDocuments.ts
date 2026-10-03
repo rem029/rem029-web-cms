@@ -1,7 +1,7 @@
 /**
  * Checks hidden documents (rem0001 phase 6): a page with "Hide from other members" ticked is only
  * read, updated and deleted by its creator, the users in "Visible to", tenant admins and super
- * users. As the seeded users (`pnpm seed`): editor1@/editor2@/editor3@ (tenant1 editors),
+ * users. As the seeded users (`pnpm seed`): editor1@ (tenant1, `pages-editor` template), editor2@/editor3@ (tenant1 editors),
  * owner@ (tenant admin of tenant1 + tenant2), cashier2@ (tenant2).
  *
  *   pnpm payload run scripts/verify/hiddenDocuments.ts
@@ -403,12 +403,12 @@ try {
     collection: 'header',
     id: header.id,
     data: { isHidden: true },
-    user: editor1,
+    user: editor2,
     overrideAccess: false,
     context,
   })
   check(
-    'header: editor1@ (not creator or admin) cannot hide it',
+    'header: editor2@ (not creator or admin) cannot hide it',
     (await payload.findByID({ collection: 'header', id: header.id, depth: 0 })).isHidden !== true,
   )
   check(
@@ -424,9 +424,9 @@ try {
       }),
     ),
   )
-  check('header: editor1@ does not find it', !(await findHeaderAs(editor1)))
+  check('header: editor2@ does not find it', !(await findHeaderAs(editor2)))
   check(
-    'header: editor1@ cannot update it',
+    'header: editor2@ cannot update it',
     await isRefused(
       payload,
       () =>
@@ -434,7 +434,7 @@ try {
           collection: 'header',
           id: header.id,
           data: { navItems: [] },
-          user: editor1,
+          user: editor2,
           overrideAccess: false,
           context,
         }),

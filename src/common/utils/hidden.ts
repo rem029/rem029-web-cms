@@ -38,13 +38,15 @@ export const canManageHidden: FieldAccess = ({ req, id, doc }) => {
 /**
  * `admin.condition` for "Hide from other members": only people who can change it see it (on a new
  * doc that's anyone creating it). UI only; `canManageHidden` decides what's saved.
+ * New docs are told apart by `operation`, not `data.id`: the form state rebuilt after a change
+ * (e.g. the slug field filling itself in) has no `id`, which showed the control to everyone.
  */
 export const showHiddenControl = (
   data: HideableDoc,
   _siblingData: unknown,
-  { user }: { user: ClientUser | User | null | undefined },
+  { operation, user }: { operation?: string; user: ClientUser | User | null | undefined },
 ): boolean => {
   if (!user || isDisabledUser(user)) return false
-  if (isActiveSuperUser(user) || data?.id === undefined) return true
+  if (isActiveSuperUser(user) || operation === 'create') return true
   return isCreatorOrTenantAdmin(user, data)
 }

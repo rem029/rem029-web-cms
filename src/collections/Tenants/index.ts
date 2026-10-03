@@ -116,7 +116,7 @@ export const Tenants: CollectionConfig = {
       },
       admin: {
         description:
-          'Controls whether the tenant is active. Inactive tenants are not accessible to public users.',
+          'Inactive businesses are read-only for their members (super users can still edit). Their public site is unaffected for now.',
       },
     },
     ...createdUpdatedByFields,

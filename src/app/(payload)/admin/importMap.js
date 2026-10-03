@@ -25,6 +25,7 @@ import { RowLabel as RowLabel_ba1355e46507ebf8162dc3396bc8d138 } from '@/collect
 import { RowLabel as RowLabel_3478630308bdf5be7efe3c9e4153b49d } from '@/collections/Footer/RowLabel'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
+import { InactiveTenantNotice as InactiveTenantNotice_ef18b90de477fae44c273195e3f857c9 } from '@/common/components/InactiveTenantNotice'
 import { GlobalViewRedirect as GlobalViewRedirect_d6d5f193a167989e2ee7d14202901e62 } from '@payloadcms/plugin-multi-tenant/rsc'
 import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/components/BeforeLogin'
 import { TenantSelector as TenantSelector_1d0591e3cf4f332c83a86da13a0de59a } from '@payloadcms/plugin-multi-tenant/client'
@@ -58,6 +59,7 @@ export const importMap = {
   "@/collections/Footer/RowLabel#RowLabel": RowLabel_3478630308bdf5be7efe3c9e4153b49d,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
+  "@/common/components/InactiveTenantNotice#InactiveTenantNotice": InactiveTenantNotice_ef18b90de477fae44c273195e3f857c9,
   "@payloadcms/plugin-multi-tenant/rsc#GlobalViewRedirect": GlobalViewRedirect_d6d5f193a167989e2ee7d14202901e62,
   "@/components/BeforeLogin#default": default_8a7ab0eb7ab5c511aba12e68480bfe5e,
   "@payloadcms/plugin-multi-tenant/client#TenantSelector": TenantSelector_1d0591e3cf4f332c83a86da13a0de59a,

@@ -265,7 +265,7 @@ export interface Tenant {
       }[]
     | null;
   /**
-   * Controls whether the tenant is active. Inactive tenants are not accessible to public users.
+   * Inactive businesses are read-only for their members (super users can still edit). Their public site is unaffected for now.
    */
   isActive?: boolean | null;
   createdBy?: (number | null) | User;
@@ -366,6 +366,10 @@ export interface UsersAccess {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Ready-made profile any business can assign. Only for profiles of the platform business (admin).
+   */
+  isTemplate?: boolean | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -2561,6 +2565,7 @@ export interface UsersAccessSelect<T extends boolean = true> {
         access?: T;
         id?: T;
       };
+  isTemplate?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

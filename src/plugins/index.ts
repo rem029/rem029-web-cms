@@ -27,7 +27,7 @@ import {
   tenantGlobalCollections,
   tenantScopedCollections,
 } from '@/common/utils/tenantCollections'
-import { PLATFORM_DEFAULT_WHERE } from '@/collections/UsersAccess/utils/access'
+import { TEMPLATE_WHERE } from '@/collections/UsersAccess/utils/access'
 import { filterTenantRowsForReader } from '@/collections/Users/hooks/filterTenantRowsForReader'
 
 import { Config, Page, Post } from '@/payload-types'
@@ -246,9 +246,10 @@ export const plugins: Plugin[] = [
             description:
               'What this user can see and do in this business. Tenant admins and super users bypass it.',
           },
-          // Payload validates the saved value against filterOptions server-side.
-          // Including the row's current access ID prevents rejecting untouched rows
-          // (e.g. platform profiles assigned earlier by super users) when a tenant admin saves.
+          // Payload validates the saved value against filterOptions server-side:
+          // own tenant or any template. Including the row's current access ID
+          // prevents rejecting untouched rows (e.g. platform profiles assigned
+          // earlier by super users) when a tenant admin saves.
           // The strict assignment rule is enforced in guardTenantRows for added/changed rows only.
           filterOptions: ({ siblingData, user }) => {
             if (isActiveSuperUser(user)) return true
@@ -261,7 +262,7 @@ export const plugins: Plugin[] = [
                 ? extractTenantId(siblingData.access)
                 : null
 
-            const orConditions: Where[] = [PLATFORM_DEFAULT_WHERE]
+            const orConditions: Where[] = [TEMPLATE_WHERE]
             if (rowTenant !== null) {
               orConditions.unshift({ tenant: { equals: rowTenant } })
             }

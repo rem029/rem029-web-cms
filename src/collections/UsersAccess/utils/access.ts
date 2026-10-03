@@ -17,6 +17,15 @@ export const PLATFORM_DEFAULT_WHERE: Where = {
 }
 
 /**
+ * Filter that matches any platform template profile on the admin tenant.
+ * Both conditions are required: a tenant profile with isTemplate would otherwise
+ * be assignable everywhere while its tenant admin can edit it.
+ */
+export const TEMPLATE_WHERE: Where = {
+  and: [{ isTemplate: { equals: true } }, { 'tenant.slug': { equals: DEFAULT_TENANT_SLUG } }],
+}
+
+/**
  * Tenant IDs where the user is a tenant admin, excluding the platform admin tenant.
  * Profiles on the admin tenant are platform templates managed by super users only.
  */
@@ -36,7 +45,7 @@ export const managedProfileTenantIds = async (req: PayloadRequest): Promise<numb
 /**
  * Read access for access profiles:
  * - Super users read all profiles
- * - Tenant admins read profiles in their administered tenants, plus the platform default profile
+ * - Tenant admins read profiles in their administered tenants, plus platform templates
  */
 export const readProfiles: Access = ({ req }) => {
   const { user } = req
@@ -55,7 +64,7 @@ export const readProfiles: Access = ({ req }) => {
   }
 
   return {
-    or: [{ tenant: { in: ids } }, PLATFORM_DEFAULT_WHERE],
+    or: [{ tenant: { in: ids } }, TEMPLATE_WHERE],
   }
 }
 

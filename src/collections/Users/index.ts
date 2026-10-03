@@ -16,6 +16,7 @@ import {
   readUsers,
   updateUsers,
 } from './utils/access'
+import { logoutEndpoint } from './endpoints/logout'
 import { assignDefaultAccess } from './hooks/assignDefaultAccess'
 import { blockDisabledLogin } from './hooks/blockDisabledLogin'
 import { guardSensitiveFields } from './hooks/guardSensitiveFields'
@@ -44,6 +45,8 @@ export const Users: CollectionConfig = {
     hidden: hiddenResolver('users'),
   },
   auth: true,
+  // replaces Payload's logout, which can wipe `tenants` rows when two run at once (see the file)
+  endpoints: [logoutEndpoint],
   fields: [
     {
       name: 'email',

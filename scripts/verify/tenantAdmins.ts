@@ -16,6 +16,7 @@ import { getPayload } from 'payload'
 import { canCreatePassword, isSelfOrSuperUserField } from '@/collections/Users/utils/access'
 import { adminAccess, hiddenResolver } from '@/common/utils/access'
 import { extractTenantId } from '@/common/utils/tenantCollections'
+import { PAGES_EDITOR_TEMPLATE } from '@/collections/UsersAccess/utils/templates'
 import type { Tenant, User } from '@/payload-types'
 import {
   adminTenantIdOf,
@@ -157,6 +158,7 @@ try {
   }
   const platformDefault = await platform('default')
   const platformEditor = await platform('editor')
+  const pagesEditorTemplate = await platform(PAGES_EDITOR_TEMPLATE)
 
   // seed shape
   const ownerRows = rowsOf(owner)
@@ -167,9 +169,9 @@ try {
       JSON.stringify(tenantIdsOf(ownerRows).sort()) === JSON.stringify([t1.id, t2.id].sort()),
   )
   check(
-    'seed: editor1@ has tenant1 editor, cashier2@ tenant2 cashier',
+    'seed: editor1@ has the pages-editor template in tenant1, cashier2@ tenant2 cashier',
     JSON.stringify(rowsOf(editor1).map((r) => [r.tenant, r.access])) ===
-      JSON.stringify([[t1.id, t1Editor]]) &&
+      JSON.stringify([[t1.id, pagesEditorTemplate]]) &&
       JSON.stringify(rowsOf(cashier2).map((r) => [r.tenant, r.access])) ===
         JSON.stringify([[t2.id, t2Cashier]]),
   )
@@ -629,11 +631,16 @@ try {
     pagination: false,
   })
   check(
-    'profiles: owner@ reads tenant1/tenant2 profiles and the platform default only',
+    'profiles: owner@ reads tenant1/tenant2 profiles and the platform templates only',
     ownerProfiles.every((p) => {
       const tenant = extractTenantId(p.tenant)
-      return tenant === t1.id || tenant === t2.id || p.id === platformDefault
-    }) && ownerProfiles.some((p) => p.id === platformDefault),
+      return (
+        tenant === t1.id || tenant === t2.id || (p.isTemplate === true && tenant === adminTenantId)
+      )
+    }) &&
+      ownerProfiles.some((p) => p.id === platformDefault) &&
+      ownerProfiles.some((p) => p.id === pagesEditorTemplate) &&
+      !ownerProfiles.some((p) => p.id === platformEditor),
   )
   check(
     'profiles: editor1@ cannot read profiles',

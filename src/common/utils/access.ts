@@ -4,6 +4,8 @@
  * In Phase 5 (tenant admins), permissions come from the user's `users.tenants[]` rows:
  * either a `users-access` profile or the `isTenantAdmin` flag. Tenant admins have hardcoded
  * permissions to manage content, members, and access within their assigned tenant(s).
+ * Inactive tenants (`tenants.isActive` false) are read-only for their members: writes on tenant
+ * collections and `tenants` skip those rows (`allowedTenantIds`).
  * Super users bypass checks; disabled users are always denied before super-user checks.
  */
 import type {
@@ -67,6 +69,7 @@ export interface TenantRow {
   tenantId: number
   record: UsersAccess | null
   isTenantAdmin: boolean
+  isActive: boolean
 }
 
 const isRecord = (val: unknown): val is Record<string, unknown> =>
@@ -76,7 +79,7 @@ const isUsersAccess = (val: unknown): val is UsersAccess =>
   isRecord(val) && typeof val.id === 'number' && typeof val.slug === 'string'
 
 /**
- * Returns tenant rows for a user: { tenantId, record, isTenantAdmin }.
+ * Returns tenant rows for a user: { tenantId, record, isTenantAdmin, isActive }.
  * Unpopulated access IDs trigger a warning and are treated as null.
  */
 export const getTenantRows = (
@@ -96,9 +99,20 @@ export const getTenantRows = (
 
     const isTenantAdmin = 'isTenantAdmin' in row && row.isTenantAdmin === true
 
+    let isActive = false
+    if (isRecord(row.tenant)) {
+      isActive = row.tenant.isActive !== false
+    } else {
+      logger?.warn({
+        msg: 'access: tenant row tenant is not populated, treating as inactive',
+        userId: user.id,
+        tenantId,
+      })
+    }
+
     const access = 'access' in row ? row.access : null
     if (!access) {
-      rows.push({ tenantId, record: null, isTenantAdmin })
+      rows.push({ tenantId, record: null, isTenantAdmin, isActive })
       continue
     }
 
@@ -109,14 +123,14 @@ export const getTenantRows = (
         userId: user.id,
         tenantId,
       })
-      rows.push({ tenantId, record: null, isTenantAdmin })
+      rows.push({ tenantId, record: null, isTenantAdmin, isActive })
       continue
     }
 
     if (isUsersAccess(access)) {
-      rows.push({ tenantId, record: access, isTenantAdmin })
+      rows.push({ tenantId, record: access, isTenantAdmin, isActive })
     } else {
-      rows.push({ tenantId, record: null, isTenantAdmin })
+      rows.push({ tenantId, record: null, isTenantAdmin, isActive })
     }
   }
 
@@ -213,8 +227,25 @@ export const allowedTenantIds = (
   const rows = getTenantRows(user, req.payload.logger)
   const ids: number[] = []
 
+  const isWriteOp = op === 'create' || op === 'update' || op === 'delete'
+  const isContentOrTenants = isTenantCollection(slug) || slug === 'tenants'
+
   for (const row of rows) {
-    if (rowAllows(row, slug, op) && !ids.includes(row.tenantId)) {
+    if (!rowAllows(row, slug, op)) continue
+
+    if (isWriteOp && isContentOrTenants && !row.isActive) {
+      req.payload.logger.debug({
+        msg: 'access: denied',
+        slug,
+        op,
+        userId: user.id,
+        tenantId: row.tenantId,
+        reason: 'inactive',
+      })
+      continue
+    }
+
+    if (!ids.includes(row.tenantId)) {
       ids.push(row.tenantId)
     }
   }
@@ -353,6 +384,7 @@ export const visibleTenantWhere = ({
  * - Tenant collections:
  *     read/update/delete → `{ tenant: { in: ids } }` (or visibleTenantWhere when hideable), empty → false + debug log
  *     create → target tenant (`data.tenant` else `getSelectedTenant(req)`) in allowedTenantIds(create)
+ * - Inactive tenants are excluded from allowedTenantIds on writes (content is read-only).
  * - 'tenants':
  *     read/update/delete → `{ id: { in: ids } }`
  *     create → hasAccess

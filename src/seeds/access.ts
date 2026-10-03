@@ -18,6 +18,7 @@ import type { Payload } from 'payload'
 
 import { getAccessSlugs } from '@/collections/UsersAccess/utils/accessSlugs'
 import { DEFAULT_ACCESS_SLUG } from '@/collections/UsersAccess/utils/defaultProfile'
+import { PAGES_EDITOR_TEMPLATE } from '@/collections/UsersAccess/utils/templates'
 import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
 import type { Tenant, UsersAccess } from '@/payload-types'
 
@@ -121,14 +122,6 @@ const upsertProfile = async (
   slugs: string[],
   tenant: Tenant,
 ): Promise<number> => {
-  const data = {
-    name: profile.name,
-    slug: profile.slug,
-    description: profile.description,
-    tenant: tenant.id,
-    access: buildRows(slugs, profile.grants),
-  }
-
   const { docs } = await payload.find({
     collection: 'users-access',
     where: { and: [{ slug: { equals: profile.slug } }, { tenant: { equals: tenant.id } }] },
@@ -136,8 +129,30 @@ const upsertProfile = async (
     depth: 0,
   })
 
-  if (docs[0]) {
-    const updated = await payload.update({ collection: 'users-access', id: docs[0].id, data })
+  const existing = docs[0]
+  const isDefaultOnAdmin =
+    tenant.slug === DEFAULT_TENANT_SLUG && profile.slug === DEFAULT_ACCESS_SLUG
+
+  const data: {
+    name: string
+    slug: string
+    description: string
+    tenant: number
+    access: AccessRow[]
+    isTemplate?: boolean
+  } = {
+    name: profile.name,
+    slug: profile.slug,
+    description: profile.description,
+    tenant: tenant.id,
+    access: buildRows(slugs, profile.grants),
+  }
+
+  // `default` is a template since the access_templates migration; keep it one
+  if (isDefaultOnAdmin) data.isTemplate = true
+
+  if (existing) {
+    const updated = await payload.update({ collection: 'users-access', id: existing.id, data })
     payload.logger.info(`seed: updated access profile ${tenant.slug}/${profile.slug}`)
     return updated.id
   }
@@ -234,13 +249,18 @@ const TENANT_PROFILES: Profile[] = [
     },
   },
 ]
-const TENANT_PROFILE_TENANTS = ['tenant1', 'tenant2']
+const TENANT_PROFILE_TENANTS = ['tenant1', 'tenant2', 'tenant3']
 
 type TenantSeedUser = {
   name: string
   email: string
-  // profileSlug is a profile of that tenant (TENANT_PROFILES); omitted for tenant admins
-  memberships: { tenantSlug: string; profileSlug?: string; isTenantAdmin?: boolean }[]
+  // profileSlug is a profile of that tenant (TENANT_PROFILES) or templateSlug; omitted for tenant admins
+  memberships: {
+    tenantSlug: string
+    profileSlug?: string
+    templateSlug?: string
+    isTenantAdmin?: boolean
+  }[]
 }
 
 const TENANT_USERS: TenantSeedUser[] = [
@@ -253,9 +273,9 @@ const TENANT_USERS: TenantSeedUser[] = [
     ],
   },
   {
-    name: 'tenant1 editor (tenant profile)',
+    name: 'tenant1 editor (pages-editor template)',
     email: 'editor1@example.test',
-    memberships: [{ tenantSlug: 'tenant1', profileSlug: 'editor' }],
+    memberships: [{ tenantSlug: 'tenant1', templateSlug: PAGES_EDITOR_TEMPLATE }],
   },
   // hidden documents (hiddenDocuments.ts): editor2@ is in the hidden page's "Visible to",
   // editor3@ isn't
@@ -274,6 +294,16 @@ const TENANT_USERS: TenantSeedUser[] = [
     email: 'cashier2@example.test',
     memberships: [{ tenantSlug: 'tenant2', profileSlug: 'cashier' }],
   },
+  {
+    name: 'tenant3 member (inactive business)',
+    email: 'member3@example.test',
+    memberships: [{ tenantSlug: 'tenant3', profileSlug: 'editor' }],
+  },
+  {
+    name: 'Owner of tenant3 (inactive business)',
+    email: 'admin3@example.test',
+    memberships: [{ tenantSlug: 'tenant3', isTenantAdmin: true }],
+  },
 ]
 
 export const seedTenantAccess = async (payload: Payload): Promise<void> => {
@@ -284,6 +314,27 @@ export const seedTenantAccess = async (payload: Payload): Promise<void> => {
   }
 
   const slugs = getAccessSlugs(payload.config.collections)
+  const { docs: defaultTenants } = await payload.find({
+    collection: 'tenants',
+    where: { slug: { equals: DEFAULT_TENANT_SLUG } },
+    limit: 1,
+    depth: 0,
+  })
+  const adminTenant = defaultTenants[0]
+  if (!adminTenant) {
+    throw new Error(
+      `seed: default tenant "${DEFAULT_TENANT_SLUG}" not found; run defaultAdmin / migrations first`,
+    )
+  }
+
+  // templates come from the access_templates migration, not from this seed
+  const { docs: templateDocs } = await payload.find({
+    collection: 'users-access',
+    where: { and: [{ isTemplate: { equals: true } }, { tenant: { equals: adminTenant.id } }] },
+    depth: 0,
+  })
+  const templateIds = new Map(templateDocs.map((doc) => [doc.slug, doc.id]))
+
   const { docs: tenants } = await payload.find({
     collection: 'tenants',
     where: { slug: { in: TENANT_PROFILE_TENANTS } },
@@ -304,16 +355,30 @@ export const seedTenantAccess = async (payload: Payload): Promise<void> => {
   }
 
   for (const user of TENANT_USERS) {
-    const rows = user.memberships.map(({ tenantSlug, profileSlug, isTenantAdmin }) => {
-      const tenant = tenantsBySlug.get(tenantSlug)
-      if (!tenant) throw new Error(`seed: tenant "${tenantSlug}" missing for ${user.email}`)
-      const access = profileSlug ? profileIds.get(`${tenantSlug}/${profileSlug}`) : undefined
-      if (profileSlug && !access) {
-        throw new Error(`seed: profile "${tenantSlug}/${profileSlug}" missing for ${user.email}`)
-      }
-      // a tenant admin row without a profile gets `default` from assignDefaultAccess
-      return { tenant: tenant.id, access: access ?? null, isTenantAdmin: isTenantAdmin === true }
-    })
+    const rows = user.memberships.map(
+      ({ tenantSlug, profileSlug, templateSlug, isTenantAdmin }) => {
+        const tenant = tenantsBySlug.get(tenantSlug)
+        if (!tenant) throw new Error(`seed: tenant "${tenantSlug}" missing for ${user.email}`)
+
+        let access: number | undefined
+        if (templateSlug) {
+          access = templateIds.get(templateSlug)
+          if (!access) {
+            throw new Error(`seed: template "${templateSlug}" not found; run pnpm payload migrate`)
+          }
+        } else if (profileSlug) {
+          access = profileIds.get(`${tenantSlug}/${profileSlug}`)
+          if (!access) {
+            throw new Error(
+              `seed: profile "${tenantSlug}/${profileSlug}" missing for ${user.email}`,
+            )
+          }
+        }
+
+        // a tenant admin row without a profile gets `default` from assignDefaultAccess
+        return { tenant: tenant.id, access: access ?? null, isTenantAdmin: isTenantAdmin === true }
+      },
+    )
 
     const { docs } = await payload.find({
       collection: 'users',

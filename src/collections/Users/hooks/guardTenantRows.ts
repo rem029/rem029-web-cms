@@ -3,7 +3,6 @@ import { Forbidden } from 'payload'
 import type { User, UsersAccess } from '@/payload-types'
 import { isActiveSuperUser, tenantAdminTenantIds } from '@/common/utils/access'
 import { extractTenantId } from '@/common/utils/tenantCollections'
-import { DEFAULT_ACCESS_SLUG } from '@/collections/UsersAccess/utils/defaultProfile'
 import { getAdminTenantId } from '@/common/utils/adminTenant'
 import { countOtherTenantAdmins } from '@/collections/Users/utils/tenantAdmins'
 
@@ -31,7 +30,7 @@ interface StoredManagedRow {
  * - Cannot modify super users
  * - Cannot touch/edit rows of tenants they do not administer
  * - On create: requires at least one tenant row, and forbids setting super_user or is_disabled
- * - Only assign profiles of the row's tenant or the platform default profile
+ * - Only assign profiles of the row's tenant or a platform template
  * - Preserves unmanaged stored rows (from other tenants) on update
  * - Refuses removing or demoting the last tenant admin of any tenant
  */
@@ -219,16 +218,14 @@ export const guardTenantRows: CollectionBeforeOperationHook = async ({ args, ope
       }
 
       const profileTenantId = extractTenantId(profile.tenant)
-      const isPlatformDefault =
-        profile.slug === DEFAULT_ACCESS_SLUG &&
-        adminTenantId !== null &&
-        profileTenantId === adminTenantId
+      const isTemplate =
+        profile.isTemplate === true && adminTenantId !== null && profileTenantId === adminTenantId
 
       const isSameTenant = profileTenantId === submitted.tenantId
 
-      if (!isSameTenant && !isPlatformDefault) {
+      if (!isSameTenant && !isTemplate) {
         req.payload.logger.warn({
-          msg: 'Cannot assign access profile from another tenant',
+          msg: 'Cannot assign access profile from another tenant (must be own tenant or a template)',
           userId: req.user.id,
           targetId: args?.id,
           tenantId: submitted.tenantId,

@@ -1,10 +1,11 @@
 import type { CollectionConfig } from 'payload'
-import { hiddenResolver } from '@/common/utils/access'
+import { hiddenResolver, isSuperUserField, showToSuperUsers } from '@/common/utils/access'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { defaultAccessRows } from './hooks/defaultAccessRows'
 import { businessLabel } from './hooks/businessLabel'
 import { enforceProfileTenant } from './hooks/enforceProfileTenant'
+import { guardTemplateTenant } from './hooks/guardTemplateTenant'
 import { createProfile, deleteProfile, readProfiles, updateProfile } from './utils/access'
 import { validateAccessRows, validateProfileSlug } from './utils/validateAccessRows'
 
@@ -134,11 +135,27 @@ export const UsersAccess: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'isTemplate',
+      type: 'checkbox',
+      label: 'Template',
+      defaultValue: false,
+      access: {
+        create: isSuperUserField,
+        update: isSuperUserField,
+      },
+      admin: {
+        position: 'sidebar',
+        description:
+          'Ready-made profile any business can assign. Only for profiles of the platform business (admin).',
+        condition: showToSuperUsers,
+      },
+    },
     ...createdUpdatedByFields,
   ],
   hooks: {
     beforeValidate: [defaultAccessRows],
-    beforeChange: [enforceProfileTenant, setCreatedUpdatedByCollection],
+    beforeChange: [enforceProfileTenant, guardTemplateTenant, setCreatedUpdatedByCollection],
   },
   timestamps: true,
 }
