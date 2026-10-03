@@ -305,10 +305,16 @@ export const seedMultiTenancy = async (payload: Payload) => {
     return
   }
 
-  // profiles come from the access seed, which runs first
+  // platform profiles (on the admin tenant) come from the access seed, which runs first; slugs are
+  // unique per tenant since rem0001 phase 5, so the tenant is part of the lookup
   const { docs: profiles } = await payload.find({
     collection: 'users-access',
-    where: { slug: { in: ['editor', 'viewer'] } },
+    where: {
+      and: [
+        { slug: { in: ['editor', 'viewer'] } },
+        { 'tenant.slug': { equals: DEFAULT_TENANT_SLUG } },
+      ],
+    },
     limit: 10,
     depth: 0,
   })

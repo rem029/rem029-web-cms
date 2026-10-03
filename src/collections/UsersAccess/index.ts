@@ -1,12 +1,16 @@
 import type { CollectionConfig } from 'payload'
-import { hiddenResolver, isSuperUser } from '@/common/utils/access'
+import { hiddenResolver } from '@/common/utils/access'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { defaultAccessRows } from './hooks/defaultAccessRows'
+import { businessLabel } from './hooks/businessLabel'
+import { enforceProfileTenant } from './hooks/enforceProfileTenant'
+import { createProfile, deleteProfile, readProfiles, updateProfile } from './utils/access'
 import { validateAccessRows, validateProfileSlug } from './utils/validateAccessRows'
 
 /**
- * Profiles are platform-wide (not tenant-scoped) until rem0001 phase 5 makes them tenant-scoped.
+ * Access profiles for role-based permissions (rem0001).
+ * Tenant-scoped since rem0001 phase 5; profiles on the `admin` tenant are platform templates.
  */
 export const UsersAccess: CollectionConfig = {
   slug: 'users-access',
@@ -14,34 +18,53 @@ export const UsersAccess: CollectionConfig = {
     singular: 'Access',
     plural: 'Access',
   },
+  indexes: [
+    {
+      fields: ['tenant', 'slug'],
+      unique: true,
+    },
+    {
+      fields: ['tenant', 'name'],
+      unique: true,
+    },
+  ],
   admin: {
     group: 'Admin',
     useAsTitle: 'name',
-    defaultColumns: ['name', 'slug', 'description'],
+    defaultColumns: ['name', 'business', 'slug', 'description'],
     hidden: hiddenResolver('users-access'),
   },
   access: {
-    read: isSuperUser,
-    create: isSuperUser,
-    update: isSuperUser,
-    delete: isSuperUser,
+    read: readProfiles,
+    create: createProfile,
+    update: updateProfile,
+    delete: deleteProfile,
   },
   fields: [
     {
       name: 'name',
       type: 'text',
       required: true,
-      unique: true,
     },
     {
       name: 'slug',
       type: 'text',
       required: true,
-      unique: true,
       validate: validateProfileSlug,
       admin: {
         description: 'Identifies the profile in code, e.g. "default". Lowercase kebab-case.',
       },
+    },
+    {
+      // not stored: which business the profile belongs to, for the list (profiles share names
+      // across businesses) and the sidebar; the plugin's tenant field is hidden in the admin
+      name: 'business',
+      type: 'text',
+      label: 'Business',
+      virtual: true,
+      access: { create: () => false, update: () => false },
+      hooks: { afterRead: [businessLabel] },
+      admin: { readOnly: true, position: 'sidebar' },
     },
     {
       name: 'description',
@@ -115,7 +138,7 @@ export const UsersAccess: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [defaultAccessRows],
-    beforeChange: [setCreatedUpdatedByCollection],
+    beforeChange: [enforceProfileTenant, setCreatedUpdatedByCollection],
   },
   timestamps: true,
 }

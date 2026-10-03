@@ -10,7 +10,7 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
-import { seedAccess } from './access'
+import { seedAccess, seedTenantAccess } from './access'
 import { seedDefaultAdmin } from './defaultAdmin'
 import { seedMultiTenancy } from './multiTenancy'
 
@@ -23,6 +23,7 @@ const seeds = [
   { name: 'defaultAdmin', run: seedDefaultAdmin },
   { name: 'access', run: seedAccess },
   { name: 'multiTenancy', run: seedMultiTenancy },
+  { name: 'tenantAccess', run: seedTenantAccess },
 ]
 
 const payload = await getPayload({ config })

@@ -1,6 +1,6 @@
 import type { CollectionBeforeChangeHook, CollectionSlug } from 'payload'
 import { Forbidden, parseCookies } from 'payload'
-import { getTenantRows, hasPermission, isActiveSuperUser, isDisabledUser } from '@/common/utils/access'
+import { getTenantRows, isActiveSuperUser, isDisabledUser, rowAllows } from '@/common/utils/access'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 
 /**
@@ -69,7 +69,7 @@ export const enforceTenantMembership: CollectionBeforeChangeHook = ({
 
   if (!isPluginSynced && (operation === 'create' || isTenantChange)) {
     // collection.slug is typed as string on SanitizedCollectionConfig in Payload types
-    const canCreate = hasPermission(memberRow.record, collection.slug as CollectionSlug, 'create')
+    const canCreate = rowAllows(memberRow, collection.slug as CollectionSlug, 'create')
     if (!canCreate) {
       req.payload.logger.warn({
         msg: 'Blocked write to tenant without create permission',

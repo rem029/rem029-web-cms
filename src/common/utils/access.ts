@@ -1,9 +1,10 @@
 /**
- * Access checks backed by `users-access` profiles (rem0001).
+ * Access checks backed by `users-access` profiles and tenant admin roles (rem0001).
  *
- * In Phase 4 (per-tenant access), permissions come from the user's `users.tenants[]` rows
- * (`users-access` profile per tenant). Super users bypass checks; disabled users are always
- * denied before super-user checks.
+ * In Phase 5 (tenant admins), permissions come from the user's `users.tenants[]` rows:
+ * either a `users-access` profile or the `isTenantAdmin` flag. Tenant admins have hardcoded
+ * permissions to manage content, members, and access within their assigned tenant(s).
+ * Super users bypass checks; disabled users are always denied before super-user checks.
  */
 import type {
   Access,
@@ -15,16 +16,25 @@ import type {
 } from 'payload'
 
 import type { User, UsersAccess } from '@/payload-types'
-import { extractTenantId, isTenantCollection } from '@/common/utils/tenantCollections'
+import {
+  extractTenantId,
+  isTenantCollection,
+  tenantGlobalCollections,
+  tenantScopedCollections,
+} from '@/common/utils/tenantCollections'
 import { getSelectedTenant } from '@/common/utils/getSelectedTenant'
 
 export type AccessOperation = 'read' | 'create' | 'update' | 'delete' | 'admin' | 'access'
 
-export function isDisabledUser(user: User | ClientUser | null | undefined): boolean {
+export function isDisabledUser(
+  user: User | ClientUser | Partial<User> | null | undefined,
+): boolean {
   return user?.is_disabled === true
 }
 
-export function isActiveSuperUser(user: User | ClientUser | null | undefined): boolean {
+export function isActiveSuperUser(
+  user: User | ClientUser | Partial<User> | null | undefined,
+): boolean {
   return Boolean(user?.super_user) && !isDisabledUser(user)
 }
 
@@ -52,6 +62,7 @@ export const isHidden = (record: UsersAccess | null | undefined, slug: Collectio
 export interface TenantRow {
   tenantId: number
   record: UsersAccess | null
+  isTenantAdmin: boolean
 }
 
 const isRecord = (val: unknown): val is Record<string, unknown> =>
@@ -61,7 +72,7 @@ const isUsersAccess = (val: unknown): val is UsersAccess =>
   isRecord(val) && typeof val.id === 'number' && typeof val.slug === 'string'
 
 /**
- * Returns tenant rows for a user: { tenantId, record }.
+ * Returns tenant rows for a user: { tenantId, record, isTenantAdmin }.
  * Unpopulated access IDs trigger a warning and are treated as null.
  */
 export const getTenantRows = (
@@ -79,9 +90,11 @@ export const getTenantRows = (
     const tenantId = extractTenantId(row.tenant)
     if (tenantId === null) continue
 
+    const isTenantAdmin = 'isTenantAdmin' in row && row.isTenantAdmin === true
+
     const access = 'access' in row ? row.access : null
     if (!access) {
-      rows.push({ tenantId, record: null })
+      rows.push({ tenantId, record: null, isTenantAdmin })
       continue
     }
 
@@ -92,19 +105,101 @@ export const getTenantRows = (
         userId: user.id,
         tenantId,
       })
-      rows.push({ tenantId, record: null })
+      rows.push({ tenantId, record: null, isTenantAdmin })
       continue
     }
 
     if (isUsersAccess(access)) {
-      rows.push({ tenantId, record: access })
+      rows.push({ tenantId, record: access, isTenantAdmin })
     } else {
-      rows.push({ tenantId, record: null })
+      rows.push({ tenantId, record: null, isTenantAdmin })
     }
   }
 
   return rows
 }
+
+/**
+ * Returns tenant IDs where the user has the tenant admin checkbox ticked.
+ * Returns [] for no user or disabled user (deduped). Super users don't need it (callers check super first).
+ */
+export const tenantAdminTenantIds = (
+  user: User | ClientUser | null | undefined,
+): number[] => {
+  if (!user || isDisabledUser(user)) return []
+
+  const rows = getTenantRows(user)
+  const ids: number[] = []
+
+  for (const row of rows) {
+    if (row.isTenantAdmin && !ids.includes(row.tenantId)) {
+      ids.push(row.tenantId)
+    }
+  }
+
+  return ids
+}
+
+/**
+ * Returns true if the user is a tenant admin of any tenant.
+ */
+export const isAnyTenantAdmin = (
+  user: User | ClientUser | null | undefined,
+): boolean => tenantAdminTenantIds(user).length > 0
+
+/**
+ * Hardcoded grants for tenant admins within their tenant (not driven by a profile):
+ * - tenant-scoped collections -> read/create/update/delete
+ * - tenant globals and tenants -> read/update only
+ * - users -> admin only
+ * - everything else and access op -> false
+ */
+export const tenantAdminAllows = (slug: CollectionSlug, op: AccessOperation): boolean => {
+  if (op === 'access') return false
+
+  if (tenantScopedCollections.includes(slug)) {
+    return op === 'read' || op === 'create' || op === 'update' || op === 'delete'
+  }
+
+  if (tenantGlobalCollections.includes(slug) || slug === 'tenants') {
+    return op === 'read' || op === 'update'
+  }
+
+  if (slug === 'users') {
+    return op === 'admin'
+  }
+
+  return false
+}
+
+/**
+ * Collections visible in the admin UI to a tenant admin:
+ * tenant-scoped, tenant-global, tenants, users, users-access.
+ */
+export const tenantAdminShows = (slug: CollectionSlug): boolean => {
+  if (tenantScopedCollections.includes(slug)) return true
+  if (tenantGlobalCollections.includes(slug)) return true
+  if (slug === 'tenants' || slug === 'users' || slug === 'users-access') return true
+  return false
+}
+
+/**
+ * Checks whether a tenant row allows an operation on a collection slug.
+ * Uses hardcoded grants for tenant admins; otherwise checks the profile record.
+ */
+export const rowAllows = (
+  row: TenantRow,
+  slug: CollectionSlug,
+  op: AccessOperation,
+): boolean =>
+  row.isTenantAdmin ? tenantAdminAllows(slug, op) : hasPermission(row.record, slug, op)
+
+/**
+ * Checks whether a collection slug is visible in the admin UI for a tenant row.
+ * Uses hardcoded visibility for tenant admins; otherwise checks the profile record.
+ */
+export const rowShows = (row: TenantRow, slug: CollectionSlug): boolean =>
+  row.isTenantAdmin ? tenantAdminShows(slug) : !isHidden(row.record, slug)
 
 /**
  * Returns tenant ids where the user's row profile allows `op` on `slug`.
@@ -121,9 +216,9 @@ export const allowedTenantIds = (
   const rows = getTenantRows(user, req.payload.logger)
   const ids: number[] = []
 
-  for (const { tenantId, record } of rows) {
-    if (hasPermission(record, slug, op) && !ids.includes(tenantId)) {
-      ids.push(tenantId)
+  for (const row of rows) {
+    if (rowAllows(row, slug, op) && !ids.includes(row.tenantId)) {
+      ids.push(row.tenantId)
     }
   }
 
@@ -145,7 +240,7 @@ export const hasAccess = (
   if (isActiveSuperUser(user)) return true
 
   const rows = getTenantRows(user, req.payload.logger)
-  const allowed = rows.some(({ record }) => hasPermission(record, slug, op))
+  const allowed = rows.some((row) => rowAllows(row, slug, op))
   if (allowed) return true
 
   req.payload.logger.debug({ msg: 'access: denied', slug, op, userId: user.id })
@@ -255,7 +350,7 @@ export const hiddenResolver =
     const rows = getTenantRows(user)
     if (rows.length === 0) return true
 
-    const isShownInAnyTenant = rows.some(({ record }) => isHidden(record, slug) === false)
+    const isShownInAnyTenant = rows.some((row) => rowShows(row, slug))
     return !isShownInAnyTenant
   }
 
@@ -298,3 +393,31 @@ export const showToSuperUsers = (
   _siblingData: unknown,
   { user }: { user: ClientUser | User | null | undefined },
 ): boolean => isActiveSuperUser(user)
+
+/**
+ * Field access for tenant membership rows on users.
+ * Active super users can manage any row.
+ * Disabled users cannot manage rows.
+ * Tenant admins can manage rows when editing other users (not themselves) and on user creation.
+ */
+export const canManageTenantRows: FieldAccess = ({ req, id }) => {
+  const { user } = req
+  if (!user || isDisabledUser(user)) return false
+  if (isActiveSuperUser(user)) return true
+
+  if (isAnyTenantAdmin(user)) {
+    if (id === undefined) return true
+    return String(id) !== String(user.id)
+  }
+
+  return false
+}
+
+/**
+ * `admin.condition` for fields visible to super users and tenant admins.
+ */
+export const showToTenantManagers = (
+  _data: unknown,
+  _siblingData: unknown,
+  { user }: { user: ClientUser | User | null | undefined },
+): boolean => isActiveSuperUser(user) || isAnyTenantAdmin(user)

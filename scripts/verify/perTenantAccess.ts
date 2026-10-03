@@ -28,6 +28,7 @@ import {
   isRefused,
   loadUser,
   makeUser,
+  platformProfileWhere,
   reqFor,
   succeeds,
   type SessionUser,
@@ -296,7 +297,7 @@ try {
 
   // a deleted profile leaves the row empty (ON DELETE set null): the user is denied
   const editorProfile = (
-    await payload.find({ collection: 'users-access', where: { slug: { equals: 'editor' } } })
+    await payload.find({ collection: 'users-access', where: platformProfileWhere('editor') })
   ).docs[0]
   if (!editorProfile) throw new Error('verify: editor profile not found, run pnpm seed')
   const tempProfile = await payload.create({
@@ -304,6 +305,7 @@ try {
     data: {
       name: 'Verify temp',
       slug: `${PREFIX}-temp`,
+      tenant: t1.id,
       access: (editorProfile.access ?? []).map(({ id: _id, ...row }) =>
         row.slug === 'tenants' ? { ...row, hidden: false, read: true, update: true } : row,
       ),
@@ -311,7 +313,7 @@ try {
   })
   const tempEmail = `${PREFIX}-user@example.test`
   const viewerProfile = (
-    await payload.find({ collection: 'users-access', where: { slug: { equals: 'viewer' } } })
+    await payload.find({ collection: 'users-access', where: platformProfileWhere('viewer') })
   ).docs[0]
   if (!viewerProfile) throw new Error('verify: viewer profile not found, run pnpm seed')
   await payload.create({

@@ -5,9 +5,10 @@
  * Typed against `@/payload-types`, no casts: users are real docs or full `User` literals, and
  * requests come from `createLocalReq`, as Payload builds them.
  */
-import type { Payload, PayloadRequest } from 'payload'
+import type { Payload, PayloadRequest, Where } from 'payload'
 import { createLocalReq } from 'payload'
 
+import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
 import type { User, UsersAccess } from '@/payload-types'
 
 /**
@@ -127,3 +128,20 @@ export const reqFor = async (
 
 export const idOf = (value: unknown): unknown =>
   value && typeof value === 'object' && 'id' in value ? value.id : value
+
+/** A platform profile (on the `admin` tenant); slugs are unique per tenant since rem0001 phase 5. */
+export const platformProfileWhere = (slug: string): Where => ({
+  and: [{ slug: { equals: slug } }, { 'tenant.slug': { equals: DEFAULT_TENANT_SLUG } }],
+})
+
+/** The id of the default tenant (`admin`), where platform profiles live. */
+export const adminTenantIdOf = async (payload: Payload): Promise<number> => {
+  const { docs } = await payload.find({
+    collection: 'tenants',
+    where: { slug: { equals: DEFAULT_TENANT_SLUG } },
+    limit: 1,
+    depth: 0,
+  })
+  if (!docs[0]) throw new Error(`verify: tenant ${DEFAULT_TENANT_SLUG} not found, run migrations`)
+  return docs[0].id
+}

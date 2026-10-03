@@ -20,9 +20,11 @@ import {
   isHidden,
 } from '@/common/utils/access'
 import {
+  adminTenantIdOf,
   createChecker,
   makeRecord,
   makeUser,
+  platformProfileWhere,
   reqFor,
   type AccessRow,
 } from './lib/verifyKit'
@@ -241,6 +243,7 @@ try {
     check(`collection: super user ${adminEmail} exists (run "pnpm seed" first)`, false)
   } else {
     check(`collection: super user ${adminEmail} found`, true)
+    const adminTenantId = await adminTenantIdOf(payload)
 
     // Delete leftovers first
     await payload.delete({
@@ -255,6 +258,7 @@ try {
       data: {
         name: 'Verify Default Rows',
         slug: 'verify-default-rows',
+        tenant: adminTenantId,
       },
       overrideAccess: false,
       user: superUser,
@@ -293,6 +297,7 @@ try {
         data: {
           name: 'Verify Duplicate Rows',
           slug: 'verify-duplicate-rows',
+          tenant: adminTenantId,
           access: [
             { slug: 'pages', read: true },
             { slug: 'pages', read: false },
@@ -317,6 +322,7 @@ try {
         data: {
           name: 'Verify Unknown Slug',
           slug: 'verify-unknown-slug',
+          tenant: adminTenantId,
           access: [
             // deliberately invalid input
             { slug: 'nope' as unknown as AccessRow['slug'], read: true },
@@ -341,6 +347,7 @@ try {
         data: {
           name: 'Verify Bad Slug',
           slug: 'Bad Slug',
+          tenant: adminTenantId,
         },
         overrideAccess: false,
         user: superUser,
@@ -373,7 +380,7 @@ try {
     // Seeded editor and viewer profiles exist
     const { docs: editorDocs } = await payload.find({
       collection: 'users-access',
-      where: { slug: { equals: 'editor' } },
+      where: platformProfileWhere('editor'),
       overrideAccess: true,
     })
     check('collection: seeded editor profile exists', editorDocs.length === 1)
@@ -390,7 +397,7 @@ try {
 
     const { docs: viewerDocs } = await payload.find({
       collection: 'users-access',
-      where: { slug: { equals: 'viewer' } },
+      where: platformProfileWhere('viewer'),
       overrideAccess: true,
     })
     check('collection: seeded viewer profile exists', viewerDocs.length === 1)

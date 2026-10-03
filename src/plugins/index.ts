@@ -5,7 +5,7 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
-import type { Block, CollectionSlug, Field, Plugin } from 'payload'
+import type { Block, CollectionSlug, Field, Plugin, Where } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -17,15 +17,18 @@ import { setFormSubmissionTenant } from '@/plugins/hooks/setFormSubmissionTenant
 import { enforceTenantMembership } from '@/common/hooks/enforceTenantMembership'
 import {
   accessCheckResolver,
+  canManageTenantRows,
   hiddenResolver,
   isActiveSuperUser,
-  isSuperUserField,
-  showToSuperUsers,
+  showToTenantManagers,
 } from '@/common/utils/access'
 import {
+  extractTenantId,
   tenantGlobalCollections,
   tenantScopedCollections,
 } from '@/common/utils/tenantCollections'
+import { PLATFORM_DEFAULT_WHERE } from '@/collections/UsersAccess/utils/access'
+import { filterTenantRowsForReader } from '@/collections/Users/hooks/filterTenantRowsForReader'
 
 import { Config, Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -40,6 +43,9 @@ const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
 
   return doc?.slug ? `${url}/${doc.slug}` : url
 }
+
+const isRecord = (val: unknown): val is Record<string, unknown> =>
+  typeof val === 'object' && val !== null
 
 const addFormmBuilderField = (fieldName: string, newFields: Field[]) => {
   return { ...fields[fieldName], fields: [...(fields[fieldName] as Block).fields, ...newFields] }
@@ -79,9 +85,8 @@ const profileGatedOps: Partial<
   search: ['update', 'delete'],
 }
 
-// the multi-tenant plugin's `tenants` array on users: only super users see it in the admin
-// (they're the only ones who can change it, see `arrayFieldAccess`)
-const hideTenantsFieldFromNonSuperUsers: Plugin = (config) => ({
+// the multi-tenant plugin's `tenants` array on users: super users and tenant admins of any tenant see it in the admin
+const showTenantsFieldToManagers: Plugin = (config) => ({
   ...config,
   collections: config.collections?.map((collection) => {
     if (collection.slug !== 'users') return collection
@@ -89,7 +94,14 @@ const hideTenantsFieldFromNonSuperUsers: Plugin = (config) => ({
       ...collection,
       fields: collection.fields.map((field) =>
         field.type === 'array' && field.name === 'tenants'
-          ? { ...field, admin: { ...field.admin, condition: showToSuperUsers } }
+          ? {
+              ...field,
+              admin: { ...field.admin, condition: showToTenantManagers },
+              hooks: {
+                ...field.hooks,
+                afterRead: [filterTenantRowsForReader, ...(field.hooks?.afterRead ?? [])],
+              },
+            }
           : field,
       ),
     }
@@ -200,21 +212,64 @@ export const plugins: Plugin[] = [
     collections: {
       ...Object.fromEntries(tenantScopedCollections.map((slug) => [slug, {}])),
       ...Object.fromEntries(tenantGlobalCollections.map((slug) => [slug, { isGlobal: true }])),
+      // users-access uses our own access control; the plugin's wrapper would AND
+      // `tenant in <my tenants>` and hide the platform `default` profile (on the `admin` tenant)
+      // from tenant admins of other tenants.
+      'users-access': { useTenantAccess: false },
     },
     tenantsArrayField: {
       includeDefaultField: true,
-      // only super users manage memberships for now; tenant admins come in phase 5
-      arrayFieldAccess: { create: isSuperUserField, update: isSuperUserField },
+      arrayFieldAccess: { create: canManageTenantRows, update: canManageTenantRows },
       rowFields: [
+        {
+          name: 'isTenantAdmin',
+          type: 'checkbox',
+          label: 'Tenant admin',
+          defaultValue: false,
+          access: { create: canManageTenantRows, update: canManageTenantRows },
+          admin: {
+            condition: (data, _sibling, ctx) =>
+              showToTenantManagers(data, _sibling, ctx) && !data?.super_user,
+            description: 'Manages this business: its content, members and access profiles.',
+          },
+        },
         {
           name: 'access',
           type: 'relationship',
           relationTo: 'users-access',
-          access: { create: isSuperUserField, update: isSuperUserField },
+          access: { create: canManageTenantRows, update: canManageTenantRows },
           admin: {
             condition: (data, siblingData, ctx) =>
-              showToSuperUsers(data, siblingData, ctx) && !data?.super_user,
-            description: 'What this user can see and do in this business. Super users bypass it.',
+              showToTenantManagers(data, siblingData, ctx) &&
+              !data?.super_user &&
+              !siblingData?.isTenantAdmin,
+            description:
+              'What this user can see and do in this business. Tenant admins and super users bypass it.',
+          },
+          // Payload validates the saved value against filterOptions server-side.
+          // Including the row's current access ID prevents rejecting untouched rows
+          // (e.g. platform profiles assigned earlier by super users) when a tenant admin saves.
+          // The strict assignment rule is enforced in guardTenantRows for added/changed rows only.
+          filterOptions: ({ siblingData, user }) => {
+            if (isActiveSuperUser(user)) return true
+            const rowTenant =
+              isRecord(siblingData) && 'tenant' in siblingData
+                ? extractTenantId(siblingData.tenant)
+                : null
+            const currentAccessId =
+              isRecord(siblingData) && 'access' in siblingData
+                ? extractTenantId(siblingData.access)
+                : null
+
+            const orConditions: Where[] = [PLATFORM_DEFAULT_WHERE]
+            if (rowTenant !== null) {
+              orConditions.unshift({ tenant: { equals: rowTenant } })
+            }
+            if (currentAccessId !== null) {
+              orConditions.push({ id: { equals: currentAccessId } })
+            }
+
+            return { or: orConditions }
           },
         },
       ],
@@ -226,7 +281,7 @@ export const plugins: Plugin[] = [
   }),
   addTenantMembershipCheck,
   gatePluginCollections,
-  hideTenantsFieldFromNonSuperUsers,
+  showTenantsFieldToManagers,
   payloadCloudPlugin(),
   ...(process.env.S3_ENDPOINT
     ? [

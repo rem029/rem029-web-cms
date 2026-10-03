@@ -1,14 +1,16 @@
 import type { CollectionBeforeChangeHook, PayloadRequest } from 'payload'
 import { DEFAULT_ACCESS_SLUG } from '@/collections/UsersAccess/utils/defaultProfile'
+import { PLATFORM_DEFAULT_WHERE } from '@/collections/UsersAccess/utils/access'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 
 const getDefaultProfileId = async (req: PayloadRequest): Promise<number | null> => {
   const { docs } = await req.payload.find({
     collection: 'users-access',
-    where: { slug: { equals: DEFAULT_ACCESS_SLUG } },
+    where: PLATFORM_DEFAULT_WHERE,
     depth: 0,
     limit: 1,
     req,
+    overrideAccess: true,
   })
   const first = docs[0]
   return typeof first?.id === 'number' ? first.id : null
@@ -30,9 +32,7 @@ export const assignDefaultAccess: CollectionBeforeChangeHook = async ({
   req,
 }) => {
   const isResultSuperUser =
-    data?.super_user !== undefined
-      ? Boolean(data.super_user)
-      : Boolean(originalDoc?.super_user)
+    data?.super_user !== undefined ? Boolean(data.super_user) : Boolean(originalDoc?.super_user)
 
   if (isResultSuperUser) {
     return data

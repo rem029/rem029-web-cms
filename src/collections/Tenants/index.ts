@@ -1,9 +1,15 @@
 import type { CollectionConfig, TextFieldValidation } from 'payload'
-import { accessCheckResolver, hiddenResolver, isSuperUser } from '@/common/utils/access'
+import {
+  accessCheckResolver,
+  hiddenResolver,
+  isSuperUser,
+  isSuperUserField,
+} from '@/common/utils/access'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { formatTenantSlugHook, validateTenantSlug } from './hooks/validateTenantSlug'
 import { createTenantDocs } from './hooks/createTenantDocs'
+import { guardTenantFields } from './hooks/guardTenantFields'
 
 const HOSTNAME_REGEX =
   /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/
@@ -63,6 +69,9 @@ export const Tenants: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
+      access: {
+        update: isSuperUserField,
+      },
       admin: {
         position: 'sidebar',
       },
@@ -75,6 +84,9 @@ export const Tenants: CollectionConfig = {
       name: 'domains',
       type: 'array',
       label: 'Domains',
+      access: {
+        update: isSuperUserField,
+      },
       fields: [
         {
           name: 'domain',
@@ -99,6 +111,9 @@ export const Tenants: CollectionConfig = {
       name: 'isActive',
       type: 'checkbox',
       defaultValue: true,
+      access: {
+        update: isSuperUserField,
+      },
       admin: {
         description:
           'Controls whether the tenant is active. Inactive tenants are not accessible to public users.',
@@ -107,6 +122,7 @@ export const Tenants: CollectionConfig = {
     ...createdUpdatedByFields,
   ],
   hooks: {
+    beforeOperation: [guardTenantFields],
     beforeChange: [setCreatedUpdatedByCollection],
     afterChange: [createTenantDocs],
   },

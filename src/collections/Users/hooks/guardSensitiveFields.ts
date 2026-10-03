@@ -15,7 +15,7 @@ export const guardSensitiveFields: CollectionBeforeOperationHook = async ({
   operation,
   req,
 }) => {
-  const op = operation as string
+  const op: string = operation
   if (op !== 'update' && op !== 'updateByID') {
     return args
   }
@@ -48,6 +48,7 @@ export const guardSensitiveFields: CollectionBeforeOperationHook = async ({
 
   const data = args.data || {}
   const changedFields: string[] = []
+  const isSelf = String(targetId) === String(req.user.id)
 
   // 1. super_user: null/undefined -> false
   if ('super_user' in data) {
@@ -67,55 +68,67 @@ export const guardSensitiveFields: CollectionBeforeOperationHook = async ({
     }
   }
 
-  // 3. tenants: compare sorted (tenant, access) pairs; null/undefined -> []
-  if ('tenants' in data) {
-    const extractTenantAccessPairs = (tenants: unknown): string[] => {
-      if (!Array.isArray(tenants)) return []
-      const pairs: { tenantId: number; accessId: number | null; key: string }[] = []
-      for (const row of tenants) {
-        if (!row || typeof row !== 'object') continue
-        const t = 'tenant' in row ? row.tenant : row
-        const tenantId = extractTenantId(t)
-        if (tenantId === null) continue
-        const a = 'access' in row ? row.access : null
-        const accessId = extractTenantId(a)
-        pairs.push({
-          tenantId,
-          accessId,
-          key: `${tenantId}:${accessId ?? 'null'}`,
-        })
-      }
-      pairs.sort((a, b) => {
-        if (a.tenantId !== b.tenantId) {
-          return a.tenantId - b.tenantId
-        }
-        if (a.accessId === b.accessId) return 0
-        if (a.accessId === null) return -1
-        if (b.accessId === null) return 1
-        return a.accessId - b.accessId
-      })
-      return pairs.map((p) => p.key)
-    }
-
-    const dataPairs = extractTenantAccessPairs(data.tenants)
-    const targetPairs = extractTenantAccessPairs(target.tenants)
-
-    const differs =
-      dataPairs.length !== targetPairs.length ||
-      dataPairs.some((key, idx) => key !== targetPairs[idx])
-
-    if (differs) {
-      changedFields.push('tenants')
-    }
-  }
-
-  // 5. email: trim + lowercase
+  // 3. email: trim + lowercase
   if ('email' in data) {
     const normalizeEmail = (val: unknown): string =>
       typeof val === 'string' ? val.trim().toLowerCase() : ''
 
     if (normalizeEmail(data.email) !== normalizeEmail(target.email)) {
       changedFields.push('email')
+    }
+  }
+
+  if (isSelf) {
+    // 4. tenants for self: compare sorted (tenant, access, isTenantAdmin) pairs; null/undefined -> []
+    if ('tenants' in data) {
+      const extractTenantAccessPairs = (tenants: unknown): string[] => {
+        if (!Array.isArray(tenants)) return []
+        const pairs: { tenantId: number; accessId: number | null; key: string }[] = []
+        for (const row of tenants) {
+          if (!row || typeof row !== 'object') continue
+          const t = 'tenant' in row ? row.tenant : row
+          const tenantId = extractTenantId(t)
+          if (tenantId === null) continue
+          const a = 'access' in row ? row.access : null
+          const accessId = extractTenantId(a)
+          const isAdmin = 'isTenantAdmin' in row && row.isTenantAdmin === true
+          pairs.push({
+            tenantId,
+            accessId,
+            key: `${tenantId}:${accessId ?? 'null'}:${isAdmin ? 'admin' : 'member'}`,
+          })
+        }
+        pairs.sort((a, b) => a.key.localeCompare(b.key))
+        return pairs.map((p) => p.key)
+      }
+
+      const dataPairs = extractTenantAccessPairs(data.tenants)
+      const targetPairs = extractTenantAccessPairs(target.tenants)
+
+      const differs =
+        dataPairs.length !== targetPairs.length ||
+        dataPairs.some((key, idx) => key !== targetPairs[idx])
+
+      if (differs) {
+        changedFields.push('tenants')
+      }
+    }
+  } else {
+    // When target is another user: refuse name or password modifications
+    // (tenants modifications on other users are guarded by guardTenantRows)
+    if ('name' in data) {
+      const normalizeName = (val: unknown): string => (typeof val === 'string' ? val.trim() : '')
+
+      if (normalizeName(data.name) !== normalizeName(target.name)) {
+        changedFields.push('name')
+      }
+    }
+
+    if ('password' in data) {
+      const pwd = data.password
+      if (typeof pwd === 'string' && pwd.trim() !== '') {
+        changedFields.push('password')
+      }
     }
   }
 

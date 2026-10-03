@@ -274,6 +274,7 @@ export interface Tenant {
  */
 export interface User {
   id: number;
+  password?: string | null;
   name?: string | null;
   /**
    * A super user has full access to all collections and settings.
@@ -287,7 +288,11 @@ export interface User {
     | {
         tenant: number | Tenant;
         /**
-         * What this user can see and do in this business. Super users bypass it.
+         * Manages this business: its content, members and access profiles.
+         */
+        isTenantAdmin?: boolean | null;
+        /**
+         * What this user can see and do in this business. Tenant admins and super users bypass it.
          */
         access?: (number | null) | UsersAccess;
         id?: string | null;
@@ -309,7 +314,6 @@ export interface User {
         expiresAt: string;
       }[]
     | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -317,11 +321,13 @@ export interface User {
  */
 export interface UsersAccess {
   id: number;
+  tenant?: (number | null) | Tenant;
   name: string;
   /**
    * Identifies the profile in code, e.g. "default". Lowercase kebab-case.
    */
   slug: string;
+  business?: string | null;
   description?: string | null;
   access?:
     | {
@@ -2449,6 +2455,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  password?: T;
   name?: T;
   super_user?: T;
   is_disabled?: T;
@@ -2456,6 +2463,7 @@ export interface UsersSelect<T extends boolean = true> {
     | T
     | {
         tenant?: T;
+        isTenantAdmin?: T;
         access?: T;
         id?: T;
       };
@@ -2481,8 +2489,10 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "users-access_select".
  */
 export interface UsersAccessSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
   slug?: T;
+  business?: T;
   description?: T;
   access?:
     | T
