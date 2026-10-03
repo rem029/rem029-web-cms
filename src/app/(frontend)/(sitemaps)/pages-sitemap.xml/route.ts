@@ -2,14 +2,30 @@ import { getServerSideSitemap } from 'next-sitemap'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
+import { frontendTenantWhere, getFrontendTenantId } from '@/common/utils/frontendTenant'
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+  'https://example.com'
+
+const getDefaultSitemap = () => {
+  const dateFallback = new Date().toISOString()
+  return [
+    {
+      loc: `${SITE_URL}/search`,
+      lastmod: dateFallback,
+    },
+    {
+      loc: `${SITE_URL}/posts`,
+      lastmod: dateFallback,
+    },
+  ]
+}
 
 const getPagesSitemap = unstable_cache(
-  async () => {
+  async (tenantId: number) => {
     const payload = await getPayload({ config })
-    const SITE_URL =
-      process.env.NEXT_PUBLIC_SERVER_URL ||
-      process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-      'https://example.com'
 
     const results = await payload.find({
       collection: 'pages',
@@ -18,11 +34,11 @@ const getPagesSitemap = unstable_cache(
       depth: 0,
       limit: 1000,
       pagination: false,
-      where: {
+      where: frontendTenantWhere(tenantId, {
         _status: {
           equals: 'published',
         },
-      },
+      }),
       select: {
         slug: true,
         updatedAt: true,
@@ -30,17 +46,7 @@ const getPagesSitemap = unstable_cache(
     })
 
     const dateFallback = new Date().toISOString()
-
-    const defaultSitemap = [
-      {
-        loc: `${SITE_URL}/search`,
-        lastmod: dateFallback,
-      },
-      {
-        loc: `${SITE_URL}/posts`,
-        lastmod: dateFallback,
-      },
-    ]
+    const defaultSitemap = getDefaultSitemap()
 
     const sitemap = results.docs
       ? results.docs
@@ -62,7 +68,12 @@ const getPagesSitemap = unstable_cache(
 )
 
 export async function GET() {
-  const sitemap = await getPagesSitemap()
+  const tenantId = await getFrontendTenantId()
+  if (!tenantId) {
+    return getServerSideSitemap(getDefaultSitemap())
+  }
+
+  const sitemap = await getPagesSitemap(tenantId)
 
   return getServerSideSitemap(sitemap)
 }

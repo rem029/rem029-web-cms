@@ -7,6 +7,7 @@ import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
 import RichText from '@/components/RichText'
+import { frontendTenantWhere, getFrontendTenantId } from '@/common/utils/frontendTenant'
 
 import type { Post } from '@/payload-types'
 
@@ -16,6 +17,11 @@ import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 
 export async function generateStaticParams() {
+  const tenantId = await getFrontendTenantId()
+  if (!tenantId) {
+    return []
+  }
+
   const payload = await getPayload({ config: configPromise })
   const posts = await payload.find({
     collection: 'posts',
@@ -23,6 +29,7 @@ export async function generateStaticParams() {
     limit: 1000,
     overrideAccess: false,
     pagination: false,
+    where: frontendTenantWhere(tenantId),
     select: {
       slug: true,
     },
@@ -83,6 +90,11 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 }
 
 const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
+  const tenantId = await getFrontendTenantId()
+  if (!tenantId) {
+    return null
+  }
+
   const { isEnabled: draft } = await draftMode()
 
   const payload = await getPayload({ config: configPromise })
@@ -93,11 +105,11 @@ const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
     limit: 1,
     overrideAccess: draft,
     pagination: false,
-    where: {
+    where: frontendTenantWhere(tenantId, {
       slug: {
         equals: slug,
       },
-    },
+    }),
   })
 
   return result.docs?.[0] || null

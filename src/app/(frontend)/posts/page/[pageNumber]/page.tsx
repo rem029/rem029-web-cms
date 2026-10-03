@@ -8,6 +8,7 @@ import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
+import { frontendTenantWhere, getFrontendTenantId } from '@/common/utils/frontendTenant'
 
 export const revalidate = 600
 
@@ -19,11 +20,14 @@ type Args = {
 
 export default async function Page({ params: paramsPromise }: Args) {
   const { pageNumber } = await paramsPromise
-  const payload = await getPayload({ config: configPromise })
-
   const sanitizedPageNumber = Number(pageNumber)
 
   if (!Number.isInteger(sanitizedPageNumber)) notFound()
+
+  const tenantId = await getFrontendTenantId()
+  if (!tenantId) notFound()
+
+  const payload = await getPayload({ config: configPromise })
 
   const posts = await payload.find({
     collection: 'posts',
@@ -31,6 +35,7 @@ export default async function Page({ params: paramsPromise }: Args) {
     limit: 12,
     page: sanitizedPageNumber,
     overrideAccess: false,
+    where: frontendTenantWhere(tenantId),
   })
 
   return (
@@ -70,10 +75,16 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 }
 
 export async function generateStaticParams() {
+  const tenantId = await getFrontendTenantId()
+  if (!tenantId) {
+    return []
+  }
+
   const payload = await getPayload({ config: configPromise })
   const { totalDocs } = await payload.count({
     collection: 'posts',
     overrideAccess: false,
+    where: frontendTenantWhere(tenantId),
   })
 
   const totalPages = Math.ceil(totalDocs / 10)

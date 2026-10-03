@@ -6,6 +6,7 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
+import { frontendTenantWhere, getFrontendTenantId } from '@/common/utils/frontendTenant'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
@@ -19,29 +20,34 @@ export const ArchiveBlock: React.FC<
   let posts: Post[] = []
 
   if (populateBy === 'collection') {
-    const payload = await getPayload({ config: configPromise })
+    const tenantId = await getFrontendTenantId()
 
-    const flattenedCategories = categories?.map((category) => {
-      if (typeof category === 'object') return category.id
-      else return category
-    })
+    if (tenantId) {
+      const payload = await getPayload({ config: configPromise })
 
-    const fetchedPosts = await payload.find({
-      collection: 'posts',
-      depth: 1,
-      limit,
-      ...(flattenedCategories && flattenedCategories.length > 0
-        ? {
-            where: {
+      const flattenedCategories = categories?.map((category) => {
+        if (typeof category === 'object') return category.id
+        else return category
+      })
+
+      const categoriesWhere =
+        flattenedCategories && flattenedCategories.length > 0
+          ? {
               categories: {
                 in: flattenedCategories,
               },
-            },
-          }
-        : {}),
-    })
+            }
+          : undefined
 
-    posts = fetchedPosts.docs
+      const fetchedPosts = await payload.find({
+        collection: 'posts',
+        depth: 1,
+        limit,
+        where: frontendTenantWhere(tenantId, categoriesWhere),
+      })
+
+      posts = fetchedPosts.docs
+    }
   } else {
     if (selectedDocs?.length) {
       const filteredSelectedPosts = selectedDocs.map((post) => {

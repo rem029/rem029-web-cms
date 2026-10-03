@@ -15,8 +15,14 @@ import { css } from '@/utilities/constants'
 import { getStyles } from '@/fields/css'
 import { homeStatic } from './homeStatic'
 import { LOCALE_STORAGE_KEY, DEFAULT_LOCALE } from '@/utilities/constant'
+import { frontendTenantWhere, getFrontendTenantId } from '@/common/utils/frontendTenant'
 
 export async function generateStaticParams() {
+  const tenantId = await getFrontendTenantId()
+  if (!tenantId) {
+    return []
+  }
+
   const payload = await getPayload({ config: configPromise })
   const pages = await payload.find({
     collection: 'pages',
@@ -24,6 +30,7 @@ export async function generateStaticParams() {
     limit: 1000,
     overrideAccess: false,
     pagination: false,
+    where: frontendTenantWhere(tenantId),
     select: {
       slug: true,
     },
@@ -122,6 +129,11 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 const queryPageBySlug = cache(async ({ slug, locale }: { slug: string; locale?: TypedLocale }) => {
   locale = locale || 'en'
 
+  const tenantId = await getFrontendTenantId()
+  if (!tenantId) {
+    return null
+  }
+
   const { isEnabled: draft } = await draftMode()
   const payload = await getPayload({ config: configPromise })
 
@@ -131,11 +143,11 @@ const queryPageBySlug = cache(async ({ slug, locale }: { slug: string; locale?: 
     limit: 1,
     pagination: false,
     overrideAccess: draft,
-    where: {
+    where: frontendTenantWhere(tenantId, {
       slug: {
         equals: slug,
       },
-    },
+    }),
     locale,
   })
 

@@ -4,6 +4,7 @@ import type { Page, Post } from '@/payload-types'
 import { getCachedDocument } from '@/utilities/getDocument'
 import { getCachedRedirects } from '@/utilities/getRedirects'
 import { notFound, redirect } from 'next/navigation'
+import { getFrontendTenantId } from '@/common/utils/frontendTenant'
 
 interface Props {
   disableNotFound?: boolean
@@ -12,11 +13,13 @@ interface Props {
 
 /* This component helps us with SSR based dynamic redirects */
 export const PayloadRedirects: React.FC<Props> = async ({ disableNotFound, url }) => {
-  const redirects = await getCachedRedirects()()
+  // no tenant to serve: no redirects either (fail closed)
+  const tenantId = await getFrontendTenantId()
+  const redirects = tenantId ? await getCachedRedirects()(tenantId) : []
 
   const redirectItem = redirects.find((redirect) => redirect.from === url)
 
-  if (redirectItem) {
+  if (tenantId && redirectItem) {
     if (redirectItem.to?.url) {
       redirect(redirectItem.to.url)
     }
@@ -27,7 +30,7 @@ export const PayloadRedirects: React.FC<Props> = async ({ disableNotFound, url }
       const collection = redirectItem.to?.reference?.relationTo
       const id = redirectItem.to?.reference?.value
 
-      const document = (await getCachedDocument(collection, id)()) as Page | Post
+      const document = (await getCachedDocument(collection, id)(tenantId)) as Page | Post
       redirectUrl = `${redirectItem.to?.reference?.relationTo !== 'pages' ? `/${redirectItem.to?.reference?.relationTo}` : ''}/${
         document?.slug
       }`

@@ -1,5 +1,7 @@
 /**
- * Multi-tenancy test data: tenants, a home + about page per tenant, and test users.
+ * Multi-tenancy test data: tenants, a home + about page and a `welcome` post per tenant (same slugs
+ * everywhere, so a public page showing another tenant's doc is easy to spot), a tenant1-only page
+ * and redirect (must 404 on the public site until rem0011 phase 1), and test users.
  *
  *   pnpm seed
  *
@@ -79,9 +81,12 @@ const USERS: SeedUser[] = [
 // pages are created outside next.js, so skip the revalidatePath hooks
 const context = { disableRevalidate: true }
 
+// non-null: the post content field is required, the content block column is optional
 type RichText = NonNullable<
-  Extract<Page['layout'][number], { blockType: 'content' }>['columns']
->[number]['richText']
+  NonNullable<
+    Extract<Page['layout'][number], { blockType: 'content' }>['columns']
+  >[number]['richText']
+>
 
 const text = (value: string) => ({
   type: 'text',
@@ -185,6 +190,48 @@ const upsertPage = async (
   payload.logger.info(`seed: created page ${tenant.slug}/${page.slug}`)
 }
 
+const upsertPost = async (payload: Payload, tenant: Tenant, seed: SeedTenant) => {
+  const slug = 'welcome'
+  const { totalDocs } = await payload.count({
+    collection: 'posts',
+    where: { and: [{ tenant: { equals: tenant.id } }, { slug: { equals: slug } }] },
+  })
+  if (totalDocs > 0) return
+
+  await payload.create({
+    collection: 'posts',
+    data: {
+      title: `Welcome to ${seed.name.en}`,
+      slug,
+      tenant: tenant.id,
+      content: richText(
+        `Welcome to ${seed.name.en}`,
+        `This post belongs to tenant "${seed.slug}".`,
+      ),
+      publishedAt: new Date().toISOString(),
+      _status: 'published',
+    },
+    locale: 'en',
+    context,
+  })
+  payload.logger.info(`seed: created post ${tenant.slug}/${slug}`)
+}
+
+const upsertRedirect = async (payload: Payload, tenant: Tenant, from: string, url: string) => {
+  const { totalDocs } = await payload.count({
+    collection: 'redirects',
+    where: { and: [{ tenant: { equals: tenant.id } }, { from: { equals: from } }] },
+  })
+  if (totalDocs > 0) return
+
+  await payload.create({
+    collection: 'redirects',
+    data: { from, tenant: tenant.id, to: { type: 'custom', url } },
+    context,
+  })
+  payload.logger.info(`seed: created redirect ${tenant.slug}${from} -> ${url}`)
+}
+
 // header/footer/theme/settings are one doc per tenant. tenants created since phase 2 get empty ones
 // from createTenantDocs; older tenants get them here. only empty docs are filled, so edits survive
 const upsertTenantDocs = async (payload: Payload, tenant: Tenant, seed: SeedTenant) => {
@@ -240,7 +287,9 @@ const upsertUser = async (
     const tenant = tenantsBySlug.get(tenantSlug)
     const access = profileIdsBySlug.get(profileSlug)
     if (!tenant || !access) {
-      throw new Error(`seed: tenant "${tenantSlug}" or profile "${profileSlug}" missing for ${seed.email}`)
+      throw new Error(
+        `seed: tenant "${tenantSlug}" or profile "${profileSlug}" missing for ${seed.email}`,
+      )
     }
     return [{ tenant: tenant.id, access }]
   })
@@ -295,6 +344,21 @@ export const seedMultiTenancy = async (payload: Payload) => {
         `${seedTenant.name.en} is a demo business for testing multi-tenancy (tenant "${seedTenant.slug}").`,
       ),
     })
+    await upsertPost(payload, tenant, seedTenant)
+  }
+
+  // only tenant1 has these: the public site serves admin, so they must 404 there
+  const tenant1 = tenantsBySlug.get('tenant1')
+  if (tenant1) {
+    await upsertPage(payload, tenant1, {
+      slug: 'tenant1-only',
+      title: { en: 'Only in tenant1', ar: 'فقط في tenant1' },
+      content: richText(
+        'Only in tenant1',
+        'If the admin site shows this page, isolation is broken.',
+      ),
+    })
+    await upsertRedirect(payload, tenant1, '/tenant1-redirect', '/about')
   }
 
   // the first user becomes the super user (setupFirstUser), so that must be a real person

@@ -2,9 +2,10 @@ import { getServerSideSitemap } from 'next-sitemap'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
+import { frontendTenantWhere, getFrontendTenantId } from '@/common/utils/frontendTenant'
 
 const getPostsSitemap = unstable_cache(
-  async () => {
+  async (tenantId: number) => {
     const payload = await getPayload({ config })
     const SITE_URL =
       process.env.NEXT_PUBLIC_SERVER_URL ||
@@ -18,11 +19,11 @@ const getPostsSitemap = unstable_cache(
       depth: 0,
       limit: 1000,
       pagination: false,
-      where: {
+      where: frontendTenantWhere(tenantId, {
         _status: {
           equals: 'published',
         },
-      },
+      }),
       select: {
         slug: true,
         updatedAt: true,
@@ -49,7 +50,12 @@ const getPostsSitemap = unstable_cache(
 )
 
 export async function GET() {
-  const sitemap = await getPostsSitemap()
+  const tenantId = await getFrontendTenantId()
+  if (!tenantId) {
+    return getServerSideSitemap([])
+  }
+
+  const sitemap = await getPostsSitemap(tenantId)
 
   return getServerSideSitemap(sitemap)
 }

@@ -6,7 +6,8 @@ import type { Media, Page, Post, Config } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 import { getServerSideURL } from './getURL'
-import { getDefaultTenantId, getTenantDoc } from '@/common/utils/getTenantDoc'
+import { getTenantDoc } from '@/common/utils/getTenantDoc'
+import { getFrontendTenantId } from '@/common/utils/frontendTenant'
 import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from './constant'
 
 const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
@@ -27,11 +28,11 @@ export const generateMeta = async (args: {
   doc: Partial<Page> | Partial<Post> | null
 }): Promise<Metadata> => {
   const { doc } = args
-  const defaultTenantId = await getDefaultTenantId()
+  const tenantId = await getFrontendTenantId()
   // same locale source as the root layout, so ar pages get the ar site name in <title>
   const cookieStore = await cookies()
   const locale = (cookieStore.get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE) as TypedLocale
-  const settings = await getTenantDoc('settings', defaultTenantId, { depth: 1, locale })
+  const settings = await getTenantDoc('settings', tenantId, { depth: 1, locale })
 
   const ogImage = getImageURL(doc?.meta?.image)
 

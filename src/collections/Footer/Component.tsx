@@ -1,4 +1,5 @@
-import { getDefaultTenantId, getTenantDoc } from '@/common/utils/getTenantDoc'
+import { getTenantDoc } from '@/common/utils/getTenantDoc'
+import { getFrontendTenantId } from '@/common/utils/frontendTenant'
 import Link from 'next/link'
 import React from 'react'
 
@@ -19,8 +20,8 @@ interface FooterProps {
 }
 
 export async function Footer({ settings, locale }: FooterProps) {
-  const defaultTenantId = await getDefaultTenantId()
-  const footerData = await getTenantDoc('footer', defaultTenantId, { depth: 1, locale })
+  const tenantId = await getFrontendTenantId()
+  const footerData = await getTenantDoc('footer', tenantId, { depth: 1, locale })
 
   const navItems = footerData?.navItems || []
   // a tenant without a footer doc gets the field default, like the old global did
