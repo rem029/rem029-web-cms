@@ -7,7 +7,7 @@
  * Refuses to run in production.
  */
 import config from '@payload-config'
-import type { PayloadRequest, Where } from 'payload'
+import type { Where } from 'payload'
 import { getPayload } from 'payload'
 
 import { getAccessSlugs } from '@/collections/UsersAccess/utils/accessSlugs'
@@ -19,7 +19,13 @@ import {
   hiddenResolver,
   isHidden,
 } from '@/common/utils/access'
-import type { User, UsersAccess } from '@/payload-types'
+import {
+  createChecker,
+  makeRecord,
+  makeUser,
+  reqFor,
+  type AccessRow,
+} from './lib/verifyKit'
 
 if (process.env.NODE_ENV === 'production') {
   console.error('verify: refusing to run with NODE_ENV=production')
@@ -27,16 +33,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const payload = await getPayload({ config })
-
-let failures = 0
-const check = (name: string, ok: boolean): void => {
-  if (ok) {
-    payload.logger.info(`PASS ${name}`)
-    return
-  }
-  failures++
-  payload.logger.error(`FAIL ${name}`)
-}
+const { check, fail, failures } = createChecker(payload)
 
 const errorText = (err: unknown): string => {
   if (!err || typeof err !== 'object') return String(err)
@@ -64,27 +61,6 @@ const errorText = (err: unknown): string => {
   }
   return parts.join(' ')
 }
-
-type RowInput = {
-  slug: string
-  hidden?: boolean
-  read?: boolean
-  create?: boolean
-  update?: boolean
-  delete?: boolean
-  admin?: boolean
-  access?: boolean
-}
-
-const makeRecord = (rows: RowInput[]): UsersAccess =>
-  ({
-    id: 99999,
-    name: 'test-record',
-    slug: 'test-record',
-    access: rows as unknown as UsersAccess['access'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }) as UsersAccess
 
 const cleanup = async (): Promise<void> => {
   try {
@@ -137,7 +113,7 @@ try {
   const checkPagesRead = accessCheckResolver('pages', 'read')
 
   // No user -> false / hidden
-  const reqNoUser = { user: null, payload } as unknown as PayloadRequest
+  const reqNoUser = await reqFor(payload, null)
   check('req: no user accessCheckResolver false', checkPagesRead({ req: reqNoUser }) === false)
   check('req: no user adminAccess false', adminAccess({ req: reqNoUser }) === false)
   check('req: no user hasApiAccess false', hasApiAccess(reqNoUser, 'pages') === false)
@@ -147,8 +123,8 @@ try {
   )
 
   // Super user -> true / not hidden
-  const superUserObj = { id: 101, super_user: true, collection: 'users' } as unknown as User
-  const reqSuperUser = { user: superUserObj, payload } as unknown as PayloadRequest
+  const superUserObj = makeUser({ id: 101, super_user: true })
+  const reqSuperUser = await reqFor(payload, superUserObj)
   check('req: super user accessCheckResolver true', checkPagesRead({ req: reqSuperUser }) === true)
   check('req: super user adminAccess true', adminAccess({ req: reqSuperUser }) === true)
   check('req: super user hasApiAccess true', hasApiAccess(reqSuperUser, 'pages') === true)
@@ -157,44 +133,58 @@ try {
     hiddenResolver('pages')({ user: superUserObj }) === false,
   )
 
-  // Populated record with pages.read true -> true and returns where object when provided
+  // Populated record with pages.read true on tenant 1 -> returns tenant where object
   const testWhere: Where = { id: { equals: 1 } }
-  const userPopulated = {
+  const userPopulated = makeUser({
     id: 102,
     super_user: false,
-    access: makeRecord([
-      { slug: 'pages', read: true, hidden: false, access: true },
-      { slug: 'users', admin: true },
-    ]),
-    collection: 'users',
-  } as unknown as User
-  const reqPopulated = { user: userPopulated, payload } as unknown as PayloadRequest
+    tenants: [
+      {
+        tenant: 1,
+        access: makeRecord([
+          { slug: 'pages', read: true, hidden: false, access: true },
+          { slug: 'users', admin: true },
+        ]),
+      },
+    ],
+  })
+  const reqPopulated = await reqFor(payload, userPopulated)
 
-  check('req: populated user pages.read true', checkPagesRead({ req: reqPopulated }) === true)
+  const pagesReadResult = checkPagesRead({ req: reqPopulated })
+  check(
+    'req: populated user pages.read returns tenant where',
+    JSON.stringify(pagesReadResult) === JSON.stringify({ tenant: { in: [1] } }),
+  )
 
   const checkWithWhere = accessCheckResolver('pages', 'read', { where: () => testWhere })
   const whereResult = checkWithWhere({ req: reqPopulated })
-  check('req: populated user returns where object', whereResult === testWhere)
+  check(
+    'req: populated user returns combined where object',
+    JSON.stringify(whereResult) === JSON.stringify({ and: [{ tenant: { in: [1] } }, testWhere] }),
+  )
 
   // Populated record with read false + where option -> false (where NOT returned)
-  const userPopulatedFalse = {
+  const userPopulatedFalse = makeUser({
     id: 103,
     super_user: false,
-    access: makeRecord([{ slug: 'pages', read: false, hidden: false }]),
-    collection: 'users',
-  } as unknown as User
-  const reqPopulatedFalse = { user: userPopulatedFalse, payload } as unknown as PayloadRequest
+    tenants: [
+      {
+        tenant: 1,
+        access: makeRecord([{ slug: 'pages', read: false, hidden: false }]),
+      },
+    ],
+  })
+  const reqPopulatedFalse = await reqFor(payload, userPopulatedFalse)
   const whereFalseResult = checkWithWhere({ req: reqPopulatedFalse })
   check('req: read false with where option returns false', whereFalseResult === false)
 
   // User with unpopulated access id -> false / hidden
-  const userIdAccess = {
+  const userIdAccess = makeUser({
     id: 104,
     super_user: false,
-    access: 12345,
-    collection: 'users',
-  } as unknown as User
-  const reqIdAccess = { user: userIdAccess, payload } as unknown as PayloadRequest
+    tenants: [{ tenant: 1, access: 12345 }],
+  })
+  const reqIdAccess = await reqFor(payload, userIdAccess)
 
   check(
     'req: unpopulated access id accessCheckResolver false',
@@ -211,17 +201,21 @@ try {
   )
 
   // User with is_disabled: true and granting record -> false / hidden
-  const userDisabled = {
+  const userDisabled = makeUser({
     id: 105,
     super_user: false,
     is_disabled: true,
-    access: makeRecord([
-      { slug: 'pages', read: true, hidden: false, access: true },
-      { slug: 'users', admin: true },
-    ]),
-    collection: 'users',
-  } as unknown as User
-  const reqDisabled = { user: userDisabled, payload } as unknown as PayloadRequest
+    tenants: [
+      {
+        tenant: 1,
+        access: makeRecord([
+          { slug: 'pages', read: true, hidden: false, access: true },
+          { slug: 'users', admin: true },
+        ]),
+      },
+    ],
+  })
+  const reqDisabled = await reqFor(payload, userDisabled)
 
   check(
     'req: disabled user accessCheckResolver false',
@@ -302,7 +296,7 @@ try {
           access: [
             { slug: 'pages', read: true },
             { slug: 'pages', read: false },
-          ] as UsersAccess['access'],
+          ],
         },
         overrideAccess: false,
         user: superUser,
@@ -323,7 +317,10 @@ try {
         data: {
           name: 'Verify Unknown Slug',
           slug: 'verify-unknown-slug',
-          access: [{ slug: 'nope' as unknown as 'pages', read: true }] as UsersAccess['access'],
+          access: [
+            // deliberately invalid input
+            { slug: 'nope' as unknown as AccessRow['slug'], read: true },
+          ],
         },
         overrideAccess: false,
         user: superUser,
@@ -359,11 +356,10 @@ try {
 
     // Non-super user cannot read users-access
     try {
-      const nonSuperUser = {
+      const nonSuperUser = makeUser({
         id: superUser.id,
         super_user: false,
-        collection: 'users',
-      } as unknown as User
+      })
       const res = await payload.find({
         collection: 'users-access',
         overrideAccess: false,
@@ -384,7 +380,8 @@ try {
     const editor = editorDocs[0]
     check(
       'collection: editor can update pages, open /admin, not read users or tenants',
-      hasPermission(editor, 'pages', 'update') &&
+      editor !== undefined &&
+        hasPermission(editor, 'pages', 'update') &&
         hasPermission(editor, 'users', 'admin') &&
         !hasPermission(editor, 'users', 'read') &&
         !hasPermission(editor, 'tenants', 'read') &&
@@ -400,13 +397,13 @@ try {
   }
 } catch (err) {
   payload.logger.error({ msg: 'verify: unexpected error during verification', err })
-  failures++
+  fail()
 } finally {
   await cleanup()
 }
 
-if (failures > 0) {
-  payload.logger.error(`verify: completed with ${failures} failure(s)`)
+if (failures() > 0) {
+  payload.logger.error(`verify: completed with ${failures()} failure(s)`)
   process.exit(1)
 }
 

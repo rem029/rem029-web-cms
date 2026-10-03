@@ -19,10 +19,11 @@ type SeedTenant = {
   tagline: string
 }
 
+// a profile (users-access slug) per tenant row (rem0001 phase 4)
 type SeedUser = {
   email: string
   name: string
-  tenantSlugs: string[]
+  memberships: { tenantSlug: string; profileSlug: string }[]
 }
 
 // business names match the slugs so tenants are easy to tell apart while testing
@@ -54,12 +55,24 @@ const USERS: SeedUser[] = [
   ...TENANTS.map((tenant) => ({
     email: `${tenant.slug}-editor@example.test`,
     name: `${tenant.name.en} editor`,
-    tenantSlugs: [tenant.slug],
+    memberships: [{ tenantSlug: tenant.slug, profileSlug: 'editor' }],
   })),
   {
     email: 'multi-editor@example.test',
     name: 'Editor of tenant1 + tenant2',
-    tenantSlugs: ['tenant1', 'tenant2'],
+    memberships: [
+      { tenantSlug: 'tenant1', profileSlug: 'editor' },
+      { tenantSlug: 'tenant2', profileSlug: 'editor' },
+    ],
+  },
+  {
+    // different access per tenant: edits tenant1, reads tenant2, nothing in tenant3
+    email: 'mixed@example.test',
+    name: 'Editor in tenant1, viewer in tenant2',
+    memberships: [
+      { tenantSlug: 'tenant1', profileSlug: 'editor' },
+      { tenantSlug: 'tenant2', profileSlug: 'viewer' },
+    ],
   },
 ]
 
@@ -221,8 +234,17 @@ const upsertUser = async (
   payload: Payload,
   seed: SeedUser,
   tenantsBySlug: Map<string, Tenant>,
-  accessId: number,
+  profileIdsBySlug: Map<string, number>,
 ) => {
+  const tenants = seed.memberships.flatMap(({ tenantSlug, profileSlug }) => {
+    const tenant = tenantsBySlug.get(tenantSlug)
+    const access = profileIdsBySlug.get(profileSlug)
+    if (!tenant || !access) {
+      throw new Error(`seed: tenant "${tenantSlug}" or profile "${profileSlug}" missing for ${seed.email}`)
+    }
+    return [{ tenant: tenant.id, access }]
+  })
+
   // test-only accounts: the email doubles as the password so anyone testing can log in
   const password = seed.email
   const { docs } = await payload.find({
@@ -235,22 +257,18 @@ const upsertUser = async (
     await payload.update({
       collection: 'users',
       id: docs[0].id,
-      data: { password, access: accessId },
+      data: { password, tenants },
     })
-    payload.logger.info(`seed: reset password of ${seed.email} to its email`)
+    payload.logger.info(`seed: reset password and memberships of ${seed.email}`)
     return
   }
 
-  const tenants = seed.tenantSlugs.flatMap((slug) => {
-    const tenant = tenantsBySlug.get(slug)
-    return tenant ? [{ tenant: tenant.id }] : []
-  })
-
   await payload.create({
     collection: 'users',
-    data: { email: seed.email, name: seed.name, password, access: accessId, tenants },
+    data: { email: seed.email, name: seed.name, password, tenants },
   })
-  payload.logger.info(`seed: created user ${seed.email} (${seed.tenantSlugs.join(', ')})`)
+  const summary = seed.memberships.map((m) => `${m.tenantSlug}:${m.profileSlug}`).join(', ')
+  payload.logger.info(`seed: created user ${seed.email} (${summary})`)
 }
 
 export const seedMultiTenancy = async (payload: Payload) => {
@@ -287,20 +305,15 @@ export const seedMultiTenancy = async (payload: Payload) => {
     return
   }
 
-  // the "editor" profile from users-access; phase 3 replaces this with per-tenant access
-  const { docs: editorProfiles } = await payload.find({
+  // profiles come from the access seed, which runs first
+  const { docs: profiles } = await payload.find({
     collection: 'users-access',
-    where: { slug: { equals: 'editor' } },
-    limit: 1,
+    where: { slug: { in: ['editor', 'viewer'] } },
+    limit: 10,
     depth: 0,
   })
-  const editorProfile = editorProfiles[0]
-  if (!editorProfile) {
-    throw new Error(
-      'seed: editor profile not found in users-access (seed order bug: access must run before multiTenancy)',
-    )
-  }
+  const profileIdsBySlug = new Map(profiles.map((profile) => [profile.slug, profile.id]))
   for (const user of USERS) {
-    await upsertUser(payload, user, tenantsBySlug, editorProfile.id)
+    await upsertUser(payload, user, tenantsBySlug, profileIdsBySlug)
   }
 }

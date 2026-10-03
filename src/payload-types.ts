@@ -283,13 +283,13 @@ export interface User {
    * A disabled user can't log in, and any open session gets no access.
    */
   is_disabled?: boolean | null;
-  /**
-   * What this user can see and do. Super users bypass it.
-   */
-  access?: (number | null) | UsersAccess;
   tenants?:
     | {
         tenant: number | Tenant;
+        /**
+         * What this user can see and do in this business. Super users bypass it.
+         */
+        access?: (number | null) | UsersAccess;
         id?: string | null;
       }[]
     | null;
@@ -2452,11 +2452,11 @@ export interface UsersSelect<T extends boolean = true> {
   name?: T;
   super_user?: T;
   is_disabled?: T;
-  access?: T;
   tenants?:
     | T
     | {
         tenant?: T;
+        access?: T;
         id?: T;
       };
   updatedAt?: T;

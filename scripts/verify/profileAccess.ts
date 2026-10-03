@@ -9,13 +9,22 @@
  * Refuses to run in production.
  */
 import config from '@payload-config'
-import type { CollectionSlug, PayloadRequest, RequiredDataFromCollectionSlug } from 'payload'
+import type { CollectionSlug, RequiredDataFromCollectionSlug } from 'payload'
 import { getPayload } from 'payload'
 
 import { DEFAULT_ACCESS_SLUG } from '@/collections/UsersAccess/utils/defaultProfile'
 import { adminAccess, hiddenResolver } from '@/common/utils/access'
 import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
 import type { User } from '@/payload-types'
+import {
+  createChecker,
+  idOf,
+  isRefused,
+  loadUser,
+  reqFor,
+  succeeds,
+  type SessionUser,
+} from './lib/verifyKit'
 
 if (process.env.NODE_ENV === 'production') {
   console.error('verify: refusing to run with NODE_ENV=production')
@@ -23,48 +32,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const payload = await getPayload({ config })
-
-let failures = 0
-const check = (name: string, ok: boolean): void => {
-  if (ok) {
-    payload.logger.info(`PASS ${name}`)
-    return
-  }
-  failures++
-  payload.logger.error(`FAIL ${name}`)
-}
-
-/** true when the call is refused by access control (Forbidden), false when it succeeds. */
-const isForbidden = async (fn: () => Promise<unknown>): Promise<boolean> => {
-  try {
-    await fn()
-    return false
-  } catch (err) {
-    if (err && typeof err === 'object' && 'status' in err && err.status === 403) return true
-    payload.logger.error({ msg: 'verify: unexpected error', err })
-    return false
-  }
-}
+const { check, failures } = createChecker(payload)
 
 const VERIFY_PAGE_SLUG = 'verify-profile-access'
 const VERIFY_USER_EMAIL = 'verify-profile-access@example.test'
-
-/** A seeded user with the access record populated, as `payload.auth()` gives it. */
-const loadUser = async (email: string): Promise<User> => {
-  const { docs } = await payload.find({
-    collection: 'users',
-    where: { email: { equals: email } },
-    depth: 1,
-    limit: 1,
-  })
-  if (!docs[0]) throw new Error(`verify: seeded user ${email} not found, run pnpm seed`)
-  return { ...docs[0], collection: 'users' } as User
-}
-
-const asReq = (user: User): PayloadRequest => ({ user, payload }) as unknown as PayloadRequest
-
-const profileSlug = (user: User): string | null =>
-  user.access && typeof user.access === 'object' ? user.access.slug : null
 
 const cleanup = async (): Promise<void> => {
   await payload.delete({ collection: 'pages', where: { slug: { equals: VERIFY_PAGE_SLUG } } })
@@ -74,10 +45,10 @@ const cleanup = async (): Promise<void> => {
 try {
   await cleanup()
 
-  const superUser = await loadUser(process.env.SEED_ADMIN_EMAIL || 'default@payload.com')
-  const defaultUser = await loadUser('default@example.test')
-  const editor = await loadUser('editor@example.test')
-  const viewer = await loadUser('viewer@example.test')
+  const superUser = await loadUser(payload, process.env.SEED_ADMIN_EMAIL || 'default@payload.com')
+  const defaultUser = await loadUser(payload, 'default@example.test')
+  const editor = await loadUser(payload, 'editor@example.test')
+  const viewer = await loadUser(payload, 'viewer@example.test')
 
   const { docs: tenants } = await payload.find({
     collection: 'tenants',
@@ -88,6 +59,12 @@ try {
   const tenantId = tenants[0]?.id
   if (!tenantId) throw new Error(`verify: tenant ${DEFAULT_TENANT_SLUG} not found`)
 
+  const profileSlug = (user: SessionUser | User): string | null => {
+    const row = (user.tenants ?? []).find((r) => idOf(r.tenant) === tenantId)
+    const access = row?.access
+    return access && typeof access === 'object' && 'slug' in access ? access.slug : null
+  }
+
   // profiles
   check('seed: default@ has the default profile', profileSlug(defaultUser) === DEFAULT_ACCESS_SLUG)
   check('seed: editor@ has the editor profile', profileSlug(editor) === 'editor')
@@ -95,17 +72,26 @@ try {
 
   // /admin
   for (const user of [defaultUser, editor, viewer]) {
-    check(`admin: ${user.email} can open /admin`, adminAccess({ req: asReq(user) }) === true)
+    check(
+      `admin: ${user.email} can open /admin`,
+      adminAccess({ req: await reqFor(payload, user) }) === true,
+    )
   }
-  check('admin: super user can open /admin', adminAccess({ req: asReq(superUser) }) === true)
-  const noProfile = { ...viewer, access: null } as User
+  check(
+    'admin: super user can open /admin',
+    adminAccess({ req: await reqFor(payload, superUser) }) === true,
+  )
+  const noProfile: SessionUser = {
+    ...viewer,
+    tenants: (viewer.tenants ?? []).map((row) => ({ ...row, access: null })),
+  }
   check(
     'admin: user without a profile is refused',
-    adminAccess({ req: asReq(noProfile) }) === false,
+    adminAccess({ req: await reqFor(payload, noProfile) }) === false,
   )
 
   // nav (admin.hidden)
-  const hidden = (slug: CollectionSlug, user: User) => hiddenResolver(slug)({ user })
+  const hidden = (slug: CollectionSlug, user: SessionUser) => hiddenResolver(slug)({ user })
   check('nav: editor sees pages', hidden('pages', editor) === false)
   check('nav: editor sees header', hidden('header', editor) === false)
   check('nav: editor does not see users-access', hidden('users-access', editor) === true)
@@ -124,13 +110,13 @@ try {
   for (const user of [defaultUser, editor, viewer]) {
     check(
       `form-submissions: ${user.email} cannot read`,
-      await isForbidden(() =>
+      await isRefused(payload, () =>
         payload.find({ collection: 'form-submissions', user, overrideAccess: false }),
       ),
     )
     check(
       `forms: ${user.email} cannot create`,
-      await isForbidden(() =>
+      await isRefused(payload, () =>
         payload.create({
           collection: 'forms',
           data: { title: 'verify', fields: [] },
@@ -142,15 +128,16 @@ try {
   }
   check(
     'forms: anonymous can still read (public)',
-    !(await isForbidden(() => payload.find({ collection: 'forms', overrideAccess: false }))),
+    await succeeds(payload, () => payload.find({ collection: 'forms', overrideAccess: false })),
   )
   check(
     'redirects: anonymous can still read (public)',
-    !(await isForbidden(() => payload.find({ collection: 'redirects', overrideAccess: false }))),
+    await succeeds(payload, () => payload.find({ collection: 'redirects', overrideAccess: false })),
   )
 
   // pages: editor CRUD, viewer and default read-only via the public rule
   // saved as a draft, so hero and layout aren't validated
+  // draft: true bypasses required hero and layout fields, but TypeScript requires them on RequiredDataFromCollectionSlug<'pages'>
   const pageData = {
     title: 'Verify profile access',
     slug: VERIFY_PAGE_SLUG,
@@ -159,7 +146,7 @@ try {
   const context = { disableRevalidate: true }
   check(
     'pages: viewer cannot create',
-    await isForbidden(() =>
+    await isRefused(payload, () =>
       payload.create({
         collection: 'pages',
         draft: true,
@@ -172,7 +159,7 @@ try {
   )
   check(
     'pages: default cannot create',
-    await isForbidden(() =>
+    await isRefused(payload, () =>
       payload.create({
         collection: 'pages',
         draft: true,
@@ -192,7 +179,7 @@ try {
     context,
   })
   check('pages: editor can create', Boolean(page.id))
-  const seesDraft = async (user: User | null): Promise<boolean> => {
+  const seesDraft = async (user: SessionUser | null): Promise<boolean> => {
     const { docs } = await payload.find({
       collection: 'pages',
       where: { id: { equals: page.id } },
@@ -209,7 +196,7 @@ try {
   check('pages: anonymous does not see the draft', !(await seesDraft(null)))
   check(
     'pages: viewer cannot update',
-    await isForbidden(() =>
+    await isRefused(payload, () =>
       payload.update({
         collection: 'pages',
         draft: true,
@@ -223,7 +210,7 @@ try {
   )
   check(
     'pages: editor can update',
-    !(await isForbidden(() =>
+    await succeeds(payload, () =>
       payload.update({
         collection: 'pages',
         draft: true,
@@ -233,11 +220,11 @@ try {
         overrideAccess: false,
         context,
       }),
-    )),
+    ),
   )
   check(
     'pages: viewer cannot delete',
-    await isForbidden(() =>
+    await isRefused(payload, () =>
       payload.delete({
         collection: 'pages',
         id: page.id,
@@ -249,7 +236,7 @@ try {
   )
   check(
     'pages: editor can delete',
-    !(await isForbidden(() =>
+    await succeeds(payload, () =>
       payload.delete({
         collection: 'pages',
         id: page.id,
@@ -257,7 +244,7 @@ try {
         overrideAccess: false,
         context,
       }),
-    )),
+    ),
   )
 
   // header (former global): editor read + update, viewer read only
@@ -269,7 +256,7 @@ try {
   })
   const header = headers[0]
   if (!header) throw new Error('verify: no header doc for the default tenant')
-  const updateHeader = (user: User) => () =>
+  const updateHeader = (user: SessionUser) => () =>
     payload.update({
       collection: 'header',
       id: header.id,
@@ -278,21 +265,21 @@ try {
       overrideAccess: false,
       context,
     })
-  check('header: editor can update', !(await isForbidden(updateHeader(editor))))
-  check('header: viewer cannot update', await isForbidden(updateHeader(viewer)))
-  check('header: default cannot update', await isForbidden(updateHeader(defaultUser)))
+  check('header: editor can update', await succeeds(payload, updateHeader(editor)))
+  check('header: viewer cannot update', await isRefused(payload, updateHeader(viewer)))
+  check('header: default cannot update', await isRefused(payload, updateHeader(defaultUser)))
 
   // collections without a row in the profile
   for (const user of [defaultUser, editor, viewer]) {
     check(
       `analytics: ${user.email} cannot read`,
-      await isForbidden(() =>
+      await isRefused(payload, () =>
         payload.find({ collection: 'analytics', user, overrideAccess: false }),
       ),
     )
     check(
       `users-access: ${user.email} cannot read`,
-      await isForbidden(() =>
+      await isRefused(payload, () =>
         payload.find({ collection: 'users-access', user, overrideAccess: false }),
       ),
     )
@@ -310,7 +297,7 @@ try {
   }
   check(
     'users: editor cannot create users',
-    await isForbidden(() =>
+    await isRefused(payload, () =>
       payload.create({
         collection: 'users',
         data: { email: VERIFY_USER_EMAIL, password: VERIFY_USER_EMAIL },
@@ -330,18 +317,18 @@ try {
     },
     user: superUser,
     overrideAccess: false,
-    depth: 1,
+    depth: 2,
   })
   check('users: new user gets the default profile', profileSlug(created) === DEFAULT_ACCESS_SLUG)
 } catch (err) {
-  failures++
+  check('verify: profileAccess unexpected error', false)
   payload.logger.error({ msg: 'verify: profileAccess crashed', err })
 } finally {
   await cleanup()
 }
 
-if (failures > 0) {
-  payload.logger.error(`verify: profileAccess ${failures} check(s) failed`)
+if (failures() > 0) {
+  payload.logger.error(`verify: profileAccess ${failures()} check(s) failed`)
   process.exit(1)
 }
 payload.logger.info('verify: profileAccess all checks passed')

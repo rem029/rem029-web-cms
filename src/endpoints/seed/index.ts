@@ -86,18 +86,6 @@ export const seed = async ({
     ),
   ])
 
-  const { docs: editorProfiles } = await payload.find({
-    collection: 'users-access',
-    where: { slug: { equals: 'editor' } },
-    limit: 1,
-    depth: 0,
-  })
-  const editorProfile = editorProfiles[0]
-  if (!editorProfile) {
-    payload.logger.warn({
-      msg: 'seed: editor users-access profile not found, leaving access empty',
-    })
-  }
 
   const [demoAuthor, image1Doc, image2Doc, image3Doc, _] = await Promise.all([
     payload.create({
@@ -105,8 +93,8 @@ export const seed = async ({
       data: {
         name: 'Demo Author',
         email: 'demo-author@example.com',
+        // post author only: no tenant row, so no profile and no admin access (rem0001 phase 4)
         password: 'password',
-        access: editorProfile?.id,
       },
     }),
     payload.create({

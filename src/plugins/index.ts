@@ -22,6 +22,10 @@ import {
   isSuperUserField,
   showToSuperUsers,
 } from '@/common/utils/access'
+import {
+  tenantGlobalCollections,
+  tenantScopedCollections,
+} from '@/common/utils/tenantCollections'
 
 import { Config, Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -40,21 +44,6 @@ const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
 const addFormmBuilderField = (fieldName: string, newFields: Field[]) => {
   return { ...fields[fieldName], fields: [...(fields[fieldName] as Block).fields, ...newFields] }
 }
-
-const tenantScopedCollections: CollectionSlug[] = [
-  'pages',
-  'posts',
-  'media',
-  'categories',
-  'analytics',
-  'redirects',
-  'forms',
-  'form-submissions',
-  'search',
-]
-
-// one doc per tenant (were globals before multi-tenancy)
-const tenantGlobalCollections: CollectionSlug[] = ['header', 'footer', 'theme', 'settings']
 
 // form submissions take their tenant from the form (setFormSubmissionTenant), so anyone,
 // signed in or not, can submit any tenant's public form
@@ -216,6 +205,19 @@ export const plugins: Plugin[] = [
       includeDefaultField: true,
       // only super users manage memberships for now; tenant admins come in phase 5
       arrayFieldAccess: { create: isSuperUserField, update: isSuperUserField },
+      rowFields: [
+        {
+          name: 'access',
+          type: 'relationship',
+          relationTo: 'users-access',
+          access: { create: isSuperUserField, update: isSuperUserField },
+          admin: {
+            condition: (data, siblingData, ctx) =>
+              showToSuperUsers(data, siblingData, ctx) && !data?.super_user,
+            description: 'What this user can see and do in this business. Super users bypass it.',
+          },
+        },
+      ],
     },
     userHasAccessToAllTenants: (user) => isActiveSuperUser(user),
     tenantSelectorLabel: { en: 'Business', ar: 'النشاط التجاري' },

@@ -83,22 +83,6 @@ export const Users: CollectionConfig = {
         position: 'sidebar',
       },
     },
-    {
-      name: 'access',
-      type: 'relationship',
-      relationTo: 'users-access',
-      required: false,
-      access: {
-        create: isSuperUserField,
-        update: isSuperUserField,
-      },
-      admin: {
-        // super users bypass profiles, so it's hidden when ticked; non-super users don't see it
-        condition: (data, siblingData, ctx) =>
-          showToSuperUsers(data, siblingData, ctx) && !data?.super_user,
-        description: 'What this user can see and do. Super users bypass it.',
-      },
-    },
   ],
   hooks: {
     beforeOperation: [guardSensitiveFields],

@@ -10,12 +10,21 @@
  * Refuses to run in production.
  */
 import config from '@payload-config'
-import type { PayloadRequest } from 'payload'
 import { createLocalReq, getPayload } from 'payload'
 
 import { DEFAULT_ACCESS_SLUG } from '@/collections/UsersAccess/utils/defaultProfile'
 import { adminAccess, hasAccess } from '@/common/utils/access'
-import type { User } from '@/payload-types'
+import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
+import {
+  asSessionUser,
+  createChecker,
+  idOf,
+  isRefused,
+  loadUser,
+  reqFor,
+  succeeds,
+  type SessionUser,
+} from './lib/verifyKit'
 
 if (process.env.NODE_ENV === 'production') {
   console.error('verify: refusing to run with NODE_ENV=production')
@@ -23,63 +32,12 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const payload = await getPayload({ config })
-
-let failures = 0
-const check = (name: string, ok: boolean): void => {
-  if (ok) {
-    payload.logger.info(`PASS ${name}`)
-    return
-  }
-  failures++
-  payload.logger.error(`FAIL ${name}`)
-}
-
-const statusOf = (err: unknown): number | undefined =>
-  err && typeof err === 'object' && 'status' in err ? (err.status as number) : undefined
-
-/** true when the call is refused with one of the given statuses, false when it succeeds. */
-const isRefused = async (fn: () => Promise<unknown>, statuses = [403]): Promise<boolean> => {
-  try {
-    await fn()
-    return false
-  } catch (err) {
-    const status = statusOf(err)
-    if (status && statuses.includes(status)) return true
-    payload.logger.error({ msg: 'verify: unexpected error', status, err })
-    return false
-  }
-}
-
-const succeeds = async (fn: () => Promise<unknown>): Promise<boolean> => {
-  try {
-    await fn()
-    return true
-  } catch (err) {
-    payload.logger.error({ msg: 'verify: unexpected error', err })
-    return false
-  }
-}
+const { check, failures } = createChecker(payload)
 
 const TEMP_PREFIX = 'verify-user-field-access'
 const tempEmail = (name: string) => `${TEMP_PREFIX}-${name}@example.test`
 
-const loadUser = async (email: string): Promise<User> => {
-  const { docs } = await payload.find({
-    collection: 'users',
-    where: { email: { equals: email } },
-    depth: 1,
-    limit: 1,
-  })
-  if (!docs[0]) throw new Error(`verify: user ${email} not found, run pnpm seed`)
-  return { ...docs[0], collection: 'users' } as User
-}
-
-const asReq = (user: User): PayloadRequest => ({ user, payload }) as unknown as PayloadRequest
-
-const idOf = (value: unknown): unknown =>
-  value && typeof value === 'object' && 'id' in value ? value.id : value
-
-const tenantIds = (user: User): unknown[] => (user.tenants ?? []).map((row) => idOf(row.tenant))
+const tenantIds = (user: SessionUser): unknown[] => (user.tenants ?? []).map((row) => idOf(row.tenant))
 
 const cleanup = async (): Promise<void> => {
   await payload.delete({
@@ -100,10 +58,19 @@ const canLogin = async (email: string, password: string): Promise<boolean> => {
 try {
   await cleanup()
 
-  const superUser = await loadUser(process.env.SEED_ADMIN_EMAIL || 'default@payload.com')
-  const editor = await loadUser('editor@example.test')
-  const viewer = await loadUser('viewer@example.test')
+  const superUser = await loadUser(payload, process.env.SEED_ADMIN_EMAIL || 'default@payload.com')
+  const editor = await loadUser(payload, 'editor@example.test')
+  const viewer = await loadUser(payload, 'viewer@example.test')
   const editorTenants = tenantIds(editor)
+
+  const { docs: adminTenants } = await payload.find({
+    collection: 'tenants',
+    where: { slug: { equals: DEFAULT_TENANT_SLUG } },
+    limit: 1,
+    depth: 0,
+  })
+  const adminTenantId = adminTenants[0]?.id
+  if (!adminTenantId) throw new Error('verify: admin tenant not found')
 
   const updateSelf = (data: Record<string, unknown>) => () =>
     payload.update({
@@ -115,50 +82,80 @@ try {
     })
 
   // escalation on self: an error, not a silent strip
-  const otherProfile = idOf(viewer.access)
+  const viewerProfileId = idOf(viewer.tenants?.[0]?.access)
+  const escalatedTenants = (editor.tenants ?? []).map((row) => ({
+    ...row,
+    tenant: idOf(row.tenant),
+    access: viewerProfileId,
+  }))
   const escalations: [string, Record<string, unknown>][] = [
     ['super_user', { super_user: true }],
-    ['access', { access: otherProfile }],
+    ['tenants.access', { tenants: escalatedTenants }],
     ['tenants', { tenants: [] }],
     ['is_disabled', { is_disabled: true }],
     ['email', { email: tempEmail('renamed') }],
   ]
   for (const [field, data] of escalations) {
-    check(`self: editor cannot set ${field}`, await isRefused(updateSelf(data)))
+    check(`self: editor cannot set ${field}`, await isRefused(payload, updateSelf(data)))
   }
-  const editorAfter = await loadUser(editor.email)
+
+  // duplicate tenant rows check
+  const firstTenant = editor.tenants?.[0]
+  if (firstTenant) {
+    const duplicateRows = [
+      ...(editor.tenants ?? []).map((row) => ({
+        tenant: idOf(row.tenant),
+        access: idOf(row.access),
+      })),
+      { tenant: idOf(firstTenant.tenant), access: viewerProfileId },
+    ]
+    check(
+      'self: editor sending duplicate rows refused',
+      await isRefused(payload, updateSelf({ tenants: duplicateRows })),
+    )
+  }
+
+  const rowPairs = (u: SessionUser): string[] =>
+    (u.tenants ?? [])
+      .map((r) => `${String(idOf(r.tenant))}:${String(idOf(r.access))}`)
+      .sort()
+  const editorAfter = await loadUser(payload, editor.email)
   check('self: editor still not a super user', editorAfter.super_user !== true)
   check(
     'self: editor profile unchanged',
-    idOf(editorAfter.access) === idOf(editor.access) && editorAfter.email === editor.email,
+    JSON.stringify(rowPairs(editorAfter)) === JSON.stringify(rowPairs(editor)) &&
+      editorAfter.email === editor.email,
   )
 
   // own name, and a save that resends unchanged fields (what the admin form does)
-  check('self: editor can change own name', await succeeds(updateSelf({ name: 'Editor Renamed' })))
+  check(
+    'self: editor can change own name',
+    await succeeds(payload, updateSelf({ name: 'Editor Renamed' })),
+  )
   check(
     'self: editor save with unchanged sensitive fields works',
     await succeeds(
+      payload,
       updateSelf({
         name: 'Editor User',
         email: ` ${editor.email.toUpperCase()} `,
         super_user: false,
         is_disabled: null,
-        access: editor.access,
         tenants: editor.tenants,
       }),
     ),
   )
   check(
     'self: editor keeps tenant membership after own saves (phase 2 watch)',
-    JSON.stringify(tenantIds(await loadUser(editor.email))) === JSON.stringify(editorTenants) &&
-      editorTenants.length > 0,
+    JSON.stringify(tenantIds(await loadUser(payload, editor.email))) ===
+      JSON.stringify(editorTenants) && editorTenants.length > 0,
   )
 
   // own password
   const newPassword = `${editor.email}-new`
   check(
     'self: editor can change own password',
-    await succeeds(updateSelf({ password: newPassword })),
+    await succeeds(payload, updateSelf({ password: newPassword })),
   )
   check('self: editor logs in with the new password', await canLogin(editor.email, newPassword))
   await payload.update({ collection: 'users', id: editor.id, data: { password: editor.email } })
@@ -167,6 +164,7 @@ try {
   check(
     'others: editor cannot change viewer name',
     await isRefused(
+      payload,
       () =>
         payload.update({
           collection: 'users',
@@ -181,6 +179,7 @@ try {
   check(
     'others: editor cannot make viewer a super user',
     await isRefused(
+      payload,
       () =>
         payload.update({
           collection: 'users',
@@ -194,11 +193,11 @@ try {
   )
   check(
     'others: viewer is still not a super user',
-    (await loadUser(viewer.email)).super_user !== true,
+    (await loadUser(payload, viewer.email)).super_user !== true,
   )
   check(
     'others: editor bulk update refused',
-    await isRefused(() =>
+    await isRefused(payload, () =>
       payload.update({
         collection: 'users',
         where: { id: { equals: editor.id } },
@@ -221,7 +220,7 @@ try {
   )
   check(
     'create: editor cannot create users',
-    await isRefused(() =>
+    await isRefused(payload, () =>
       payload.create({
         collection: 'users',
         data: { email: tempEmail('by-editor'), password: tempEmail('by-editor') },
@@ -233,14 +232,20 @@ try {
   check(
     'delete: editor cannot delete viewer',
     await isRefused(
+      payload,
       () =>
-        payload.delete({ collection: 'users', id: viewer.id, user: editor, overrideAccess: false }),
+        payload.delete({
+          collection: 'users',
+          id: viewer.id,
+          user: editor,
+          overrideAccess: false,
+        }),
       [403, 404],
     ),
   )
 
   // disabled users
-  const disabledSeed = await loadUser('disabled@example.test')
+  const disabledSeed = await loadUser(payload, 'disabled@example.test')
   check('disabled: seeded disabled@ is disabled', disabledSeed.is_disabled === true)
   check(
     'disabled: seeded disabled@ cannot log in',
@@ -268,15 +273,15 @@ try {
   const { user: sessionUser } = await payload.auth({
     headers: new Headers({ Authorization: `JWT ${token}` }),
   })
-  const oldSession = sessionUser ? ({ ...sessionUser, collection: 'users' } as User) : null
+  const oldSession = sessionUser ? asSessionUser(sessionUser) : null
   check(
     'disabled: an old token gets no /admin',
-    oldSession !== null && adminAccess({ req: asReq(oldSession) }) === false,
+    oldSession !== null && adminAccess({ req: await reqFor(payload, oldSession) }) === false,
   )
   check(
     'disabled: an old token cannot read users',
     oldSession !== null &&
-      (await isRefused(() =>
+      (await isRefused(payload, () =>
         payload.find({ collection: 'users', user: oldSession, overrideAccess: false }),
       )),
   )
@@ -289,30 +294,42 @@ try {
   const tempEmailSuper = tempEmail('super')
   const tempSuper = await payload.create({
     collection: 'users',
-    data: { email: tempEmailSuper, password: tempEmailSuper, super_user: true },
+    data: {
+      email: tempEmailSuper,
+      password: tempEmailSuper,
+      super_user: true,
+      tenants: [{ tenant: adminTenantId }],
+    },
     user: superUser,
     overrideAccess: false,
   })
-  const disabledSuper = { ...tempSuper, is_disabled: true, collection: 'users' } as User
+  const disabledSuper: SessionUser = {
+    ...tempSuper,
+    is_disabled: true,
+    collection: 'users',
+  }
   check(
     'disabled: a disabled super user is denied',
-    hasAccess(asReq(disabledSuper), 'pages', 'update') === false,
+    hasAccess(await reqFor(payload, disabledSuper), 'pages', 'update') === false,
   )
 
   // unticking super_user on a user without a profile assigns the default one
-  const unticked = await payload.update({
+  await payload.update({
     collection: 'users',
     id: tempSuper.id,
-    data: { super_user: false, access: null },
+    data: { super_user: false },
     user: superUser,
     overrideAccess: false,
-    depth: 1,
   })
+  const unticked = await loadUser(payload, tempEmailSuper)
+  const untickedRow = (unticked.tenants ?? []).find((r) => idOf(r.tenant) === adminTenantId)
+  const untickedAccess = untickedRow?.access
   check(
     'super_user: unticked user without a profile gets default',
-    unticked.access !== null &&
-      typeof unticked.access === 'object' &&
-      unticked.access.slug === DEFAULT_ACCESS_SLUG,
+    untickedAccess !== null &&
+      typeof untickedAccess === 'object' &&
+      'slug' in untickedAccess &&
+      untickedAccess.slug === DEFAULT_ACCESS_SLUG,
   )
 
   // last super user: in a rolled-back transaction, make the seeded super user the only one
@@ -336,15 +353,16 @@ try {
       })
     check(
       'last super user: cannot untick themselves',
-      await isRefused(asLast({ super_user: false }), [400]),
+      await isRefused(payload, asLast({ super_user: false }), [400]),
     )
     check(
       'last super user: cannot disable themselves',
-      await isRefused(asLast({ is_disabled: true }), [400]),
+      await isRefused(payload, asLast({ is_disabled: true }), [400]),
     )
     check(
       'last super user: cannot be deleted',
       await isRefused(
+        payload,
         () =>
           payload.delete({
             collection: 'users',
@@ -361,7 +379,7 @@ try {
   }
   check(
     'last super user: rollback kept the super user',
-    (await loadUser(superUser.email)).super_user === true,
+    (await loadUser(payload, superUser.email)).super_user === true,
   )
 
   // forgot / reset password (unauthenticated) for a non-super user
@@ -379,7 +397,7 @@ try {
   })
   check(
     'reset: reset password works for a non-super user',
-    await succeeds(() =>
+    await succeeds(payload, () =>
       payload.resetPassword({
         collection: 'users',
         data: { token: String(resetToken), password: `${tempEmailReset}-new` },
@@ -394,14 +412,14 @@ try {
     await canLogin(tempEmailReset, `${tempEmailReset}-new`),
   )
 } catch (err) {
-  failures++
+  check('verify: userFieldAccess unexpected error', false)
   payload.logger.error({ msg: 'verify: userFieldAccess crashed', err })
 } finally {
   await cleanup()
 }
 
-if (failures > 0) {
-  payload.logger.error(`verify: userFieldAccess ${failures} check(s) failed`)
+if (failures() > 0) {
+  payload.logger.error(`verify: userFieldAccess ${failures()} check(s) failed`)
   process.exit(1)
 }
 payload.logger.info('verify: userFieldAccess all checks passed')

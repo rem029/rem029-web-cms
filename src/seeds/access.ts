@@ -5,7 +5,8 @@
  *
  * - Upserts by slug (profiles) and email (users), so re-running converges on the definitions below.
  * - Every collection gets an explicit row; anything not granted here is hidden and denied.
- * - Test users belong to the default tenant (`admin`) and have password equal to their email.
+ * - Test users belong to the default tenant (`admin`), with their profile on that tenant row, and
+ *   have password equal to their email. Users in several tenants are in `multiTenancy.ts`.
  */
 import type { Payload } from 'payload'
 
@@ -171,7 +172,8 @@ export const seedAccess = async (payload: Payload): Promise<void> => {
       depth: 0,
     })
 
-    const tenants = [{ tenant: defaultTenant.id }]
+    // the profile lives on the tenant row (rem0001 phase 4)
+    const tenants = [{ tenant: defaultTenant.id, access: profileId }]
     const is_disabled = user.isDisabled === true
 
     if (existingUsers[0]) {
@@ -180,7 +182,6 @@ export const seedAccess = async (payload: Payload): Promise<void> => {
         id: existingUsers[0].id,
         data: {
           name: user.name,
-          access: profileId,
           tenants,
           is_disabled,
         },
@@ -193,7 +194,6 @@ export const seedAccess = async (payload: Payload): Promise<void> => {
           email: user.email,
           name: user.name,
           password: user.email,
-          access: profileId,
           tenants,
           is_disabled,
         },

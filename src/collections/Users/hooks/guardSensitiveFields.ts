@@ -1,6 +1,7 @@
 import type { CollectionBeforeOperationHook } from 'payload'
 import { Forbidden } from 'payload'
 import { isActiveSuperUser } from '@/common/utils/access'
+import { extractTenantId } from '@/common/utils/tenantCollections'
 
 /**
  * Guard sensitive fields against non-super user modification.
@@ -66,45 +67,42 @@ export const guardSensitiveFields: CollectionBeforeOperationHook = async ({
     }
   }
 
-  // 3. access: object -> id
-  if ('access' in data) {
-    const extractId = (val: unknown): string | number | null => {
-      if (val === null || val === undefined) return null
-      if (typeof val === 'object' && 'id' in val) {
-        return (val as { id: string | number }).id
-      }
-      return val as string | number
-    }
-    const dataAccessId = extractId(data.access)
-    const targetAccessId = extractId(target.access)
-    if (dataAccessId !== targetAccessId) {
-      changedFields.push('access')
-    }
-  }
-
-  // 4. tenants: array of rows; each row's tenant object->id; compare sorted id lists; null/undefined -> []
+  // 3. tenants: compare sorted (tenant, access) pairs; null/undefined -> []
   if ('tenants' in data) {
-    const extractTenantIds = (tenants: unknown): (string | number)[] => {
+    const extractTenantAccessPairs = (tenants: unknown): string[] => {
       if (!Array.isArray(tenants)) return []
-      return tenants
-        .map((row) => {
-          if (!row) return null
-          const t = typeof row === 'object' && 'tenant' in row ? row.tenant : row
-          if (typeof t === 'object' && t !== null && 'id' in t) {
-            return (t as { id: string | number }).id
-          }
-          return t as string | number
+      const pairs: { tenantId: number; accessId: number | null; key: string }[] = []
+      for (const row of tenants) {
+        if (!row || typeof row !== 'object') continue
+        const t = 'tenant' in row ? row.tenant : row
+        const tenantId = extractTenantId(t)
+        if (tenantId === null) continue
+        const a = 'access' in row ? row.access : null
+        const accessId = extractTenantId(a)
+        pairs.push({
+          tenantId,
+          accessId,
+          key: `${tenantId}:${accessId ?? 'null'}`,
         })
-        .filter((id): id is string | number => id != null)
-        .sort((a, b) => String(a).localeCompare(String(b)))
+      }
+      pairs.sort((a, b) => {
+        if (a.tenantId !== b.tenantId) {
+          return a.tenantId - b.tenantId
+        }
+        if (a.accessId === b.accessId) return 0
+        if (a.accessId === null) return -1
+        if (b.accessId === null) return 1
+        return a.accessId - b.accessId
+      })
+      return pairs.map((p) => p.key)
     }
 
-    const dataTenantIds = extractTenantIds(data.tenants)
-    const targetTenantIds = extractTenantIds(target.tenants)
+    const dataPairs = extractTenantAccessPairs(data.tenants)
+    const targetPairs = extractTenantAccessPairs(target.tenants)
 
     const differs =
-      dataTenantIds.length !== targetTenantIds.length ||
-      dataTenantIds.some((id, idx) => String(id) !== String(targetTenantIds[idx]))
+      dataPairs.length !== targetPairs.length ||
+      dataPairs.some((key, idx) => key !== targetPairs[idx])
 
     if (differs) {
       changedFields.push('tenants')
