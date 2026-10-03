@@ -13,9 +13,8 @@ import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
 
 import './globals.css'
-import { getServerSideURL } from '@/utilities/getURL'
 import { getTenantDoc } from '@/common/utils/getTenantDoc'
-import { getFrontendTenantId } from '@/common/utils/frontendTenant'
+import { getFrontendTenantId, getFrontendTenantURL } from '@/common/utils/frontendTenant'
 import Script from 'next/script'
 
 import { Media } from '@/payload-types'
@@ -93,7 +92,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   )
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getServerSideURL()),
-  openGraph: mergeOpenGraph(),
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    metadataBase: new URL(await getFrontendTenantURL()),
+    openGraph: mergeOpenGraph(),
+  }
 }

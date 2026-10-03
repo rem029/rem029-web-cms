@@ -9,9 +9,6 @@ node_modules
 # Payload default media upload directory
 public/media/
 
-public/robots.txt
-public/sitemap*.xml
-
 # Claude Code files live in docs/ (private repo); `pnpm setup:docs` links them here
 /.claude
 /CLAUDE.md

@@ -31,17 +31,31 @@ import { TEMPLATE_WHERE } from '@/collections/UsersAccess/utils/access'
 import { filterTenantRowsForReader } from '@/collections/Users/hooks/filterTenantRowsForReader'
 
 import { Config, Page, Post } from '@/payload-types'
-import { getServerSideURL } from '@/utilities/getURL'
+import { getServerSideURL, getTenantURL } from '@/utilities/getURL'
 import { iconField } from '@/fields/icon'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | CMS Website` : 'CMS Website'
 }
 
-const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
-  const url = getServerSideURL()
-
-  return doc?.slug ? `${url}/${doc.slug}` : url
+// the doc's own tenant url, so previews and canonical urls point at the tenant's site
+const generateURL: GenerateURL<Post | Page> = async ({ doc, req }) => {
+  const path = !doc?.slug || doc.slug === 'home' ? '' : doc.slug
+  const tenantId = extractTenantId(doc?.tenant)
+  const { docs } = tenantId
+    ? await req.payload.find({
+        collection: 'tenants',
+        where: { id: { equals: tenantId } },
+        limit: 1,
+        depth: 0,
+        req,
+      })
+    : { docs: [] }
+  if (!docs[0]) {
+    req.payload.logger.warn({ msg: 'seo generateURL: no tenant', tenantId, docId: doc?.id })
+    return `${getServerSideURL()}/${path}`
+  }
+  return `${getTenantURL(docs[0])}/${path}`
 }
 
 const isRecord = (val: unknown): val is Record<string, unknown> =>

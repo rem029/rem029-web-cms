@@ -45,13 +45,22 @@ export const Settings: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'homepageNotice',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/collections/Settings/components/HomepageNotice#HomepageNotice',
+        },
+      },
+    },
+    {
       type: 'relationship',
       name: 'homepage',
       label: 'Homepage',
       hasMany: false,
       relationTo: 'pages',
       required: false,
-      admin: { description: 'Select the homepage for your website' },
+      admin: { description: 'The page visitors see at your site address (/).' },
       filterOptions: ({ data }) => {
         const tenantId = typeof data?.tenant === 'object' ? data?.tenant?.id : data?.tenant
         return tenantId ? { tenant: { equals: tenantId } } : false

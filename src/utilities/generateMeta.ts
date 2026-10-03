@@ -5,13 +5,12 @@ import type { TypedLocale } from 'payload'
 import type { Media, Page, Post, Config } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
-import { getServerSideURL } from './getURL'
 import { getTenantDoc } from '@/common/utils/getTenantDoc'
-import { getFrontendTenantId } from '@/common/utils/frontendTenant'
+import { getFrontendTenantId, getFrontendTenantURL } from '@/common/utils/frontendTenant'
 import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from './constant'
 
-const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
-  const serverUrl = getServerSideURL()
+const getImageURL = async (image?: Media | Config['db']['defaultIDType'] | null) => {
+  const serverUrl = await getFrontendTenantURL()
 
   let url = serverUrl + '/website-template-OG.webp'
 
@@ -34,7 +33,7 @@ export const generateMeta = async (args: {
   const locale = (cookieStore.get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE) as TypedLocale
   const settings = await getTenantDoc('settings', tenantId, { depth: 1, locale })
 
-  const ogImage = getImageURL(doc?.meta?.image)
+  const ogImage = await getImageURL(doc?.meta?.image)
 
   const siteName = settings?.siteName || 'CMS Website'
 

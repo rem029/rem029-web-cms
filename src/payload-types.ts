@@ -235,6 +235,10 @@ export interface Page {
   slug?: string | null;
   slugLock?: boolean | null;
   /**
+   * Visitors see this page at your site address. Change it in Settings.
+   */
+  isHomepage?: boolean | null;
+  /**
    * This is the full slug of the page, including the category slug. It is used for SEO purposes and should not be changed.
    */
   fullSlug?: string | null;
@@ -1545,7 +1549,7 @@ export interface Setting {
   };
   siteName?: string | null;
   /**
-   * Select the homepage for your website
+   * The page visitors see at your site address (/).
    */
   homepage?: (number | null) | Page;
   contact?: {
@@ -1895,6 +1899,7 @@ export interface PagesSelect<T extends boolean = true> {
   publishedAt?: T;
   slug?: T;
   slugLock?: T;
+  isHomepage?: T;
   fullSlug?: T;
   category?: T;
   isHidden?: T;

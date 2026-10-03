@@ -32,6 +32,7 @@ import { CSSNameWithCustomFiled } from '@/fields/css'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { populateFullSlug } from './hooks/populateFullSlug'
+import { isHomepage } from './hooks/isHomepage'
 import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 
 export const Pages: CollectionConfig<'pages'> = {
@@ -53,7 +54,7 @@ export const Pages: CollectionConfig<'pages'> = {
   },
   admin: {
     hidden: hiddenResolver('pages'),
-    defaultColumns: ['title', 'slug', 'updatedAt'],
+    defaultColumns: ['title', 'slug', 'isHomepage', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {
         const path = generatePreviewPath({
@@ -143,6 +144,22 @@ export const Pages: CollectionConfig<'pages'> = {
       },
     },
     ...slugField(),
+    {
+      name: 'isHomepage',
+      type: 'checkbox',
+      label: 'Homepage',
+      virtual: true,
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Visitors see this page at your site address. Change it in Settings.',
+        disableListFilter: true,
+        components: { Cell: '@/collections/Pages/components/HomepageCell#HomepageCell' },
+      },
+      hooks: {
+        afterRead: [isHomepage],
+      },
+    },
     {
       name: 'fullSlug',
       type: 'text',

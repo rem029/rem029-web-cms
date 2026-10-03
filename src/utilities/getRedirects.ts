@@ -22,7 +22,7 @@ export async function getRedirects(tenantId: number, depth = 1) {
  *
  * Cache all redirects together to avoid multiple fetches.
  */
-export const getCachedRedirects = () =>
-  unstable_cache(async (tenantId: number) => getRedirects(tenantId), ['redirects'], {
-    tags: ['redirects'],
-  })
+export const getCachedRedirects = (tenantId: number) =>
+  unstable_cache(async (id: number) => getRedirects(id), ['redirects'], {
+    tags: [`redirects_${tenantId}`],
+  })(tenantId)

@@ -26,11 +26,7 @@ async function getDocument(collection: Collection, slug: string, tenantId: numbe
 /**
  * Returns a unstable_cache function mapped with the cache tag for the slug
  */
-export const getCachedDocument = (collection: Collection, slug: string) =>
-  unstable_cache(
-    async (tenantId: number) => getDocument(collection, slug, tenantId),
-    [collection, slug],
-    {
-      tags: [`${collection}_${slug}`],
-    },
-  )
+export const getCachedDocument = (collection: Collection, slug: string, tenantId: number) =>
+  unstable_cache(async (id: number) => getDocument(collection, slug, id), [collection, slug], {
+    tags: [`${collection}_${slug}_${tenantId}`],
+  })(tenantId)

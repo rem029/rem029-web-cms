@@ -1,7 +1,8 @@
 /**
  * Multi-tenancy test data: tenants, a home + about page and a `welcome` post per tenant (same slugs
- * everywhere, so a public page showing another tenant's doc is easy to spot), a tenant1-only page
- * and redirect (must 404 on the public site until rem0011 phase 1), and test users.
+ * everywhere, so a public page showing another tenant's doc is easy to spot), tenant2's homepage
+ * set to its about page (tests Settings -> Homepage resolution vs. the slug `home` fallback), a
+ * tenant1-only page and redirect, and test users.
  *
  *   pnpm seed
  *
@@ -144,6 +145,7 @@ const upsertTenant = async (payload: Payload, seed: SeedTenant): Promise<Tenant>
     collection: 'tenants',
     data: { name: seed.name.en, slug: seed.slug },
     locale: 'en',
+    context: { ...context, skipHomePage: true },
   })
   await payload.update({
     collection: 'tenants',
@@ -158,22 +160,46 @@ const upsertTenant = async (payload: Payload, seed: SeedTenant): Promise<Tenant>
 const upsertPage = async (
   payload: Payload,
   tenant: Tenant,
-  page: { slug: string; title: { en: string; ar: string }; content: RichText },
+  page: {
+    slug: string
+    title: { en: string; ar: string }
+    content: RichText
+    layout?: Page['layout']
+  },
 ) => {
-  const { totalDocs } = await payload.count({
+  const { docs } = await payload.find({
     collection: 'pages',
     where: { and: [{ tenant: { equals: tenant.id } }, { slug: { equals: page.slug } }] },
+    limit: 1,
+    depth: 0,
   })
-  if (totalDocs > 0) return
+  const existing = docs[0]
+  if (existing) {
+    // pages seeded before slugs were unlocked
+    if (existing.slugLock !== false) {
+      await payload.update({
+        collection: 'pages',
+        id: existing.id,
+        // keep the status: without it the update saves the page as a draft
+        data: { slugLock: false, slug: existing.slug, _status: existing._status },
+        depth: 0,
+        context,
+      })
+      payload.logger.info(`seed: unlocked slug of ${tenant.slug}/${page.slug}`)
+    }
+    return
+  }
 
   const created = await payload.create({
     collection: 'pages',
     data: {
       title: page.title.en,
       slug: page.slug,
+      // unlocked: a locked slug follows the title ("tenant1 — Home" → tenant1--home) once opened
+      slugLock: false,
       tenant: tenant.id,
       hero: { main: { type: 'none' } },
-      layout: contentLayout(page.content),
+      layout: page.layout ?? contentLayout(page.content),
       publishedAt: new Date().toISOString(),
       _status: 'published',
     },
@@ -215,6 +241,32 @@ const upsertPost = async (payload: Payload, tenant: Tenant, seed: SeedTenant) =>
     context,
   })
   payload.logger.info(`seed: created post ${tenant.slug}/${slug}`)
+}
+
+// a tenant's contact form: submitting it on the tenant's host must create a tenant submission
+const upsertContactForm = async (payload: Payload, tenant: Tenant): Promise<number> => {
+  const title = `${tenant.slug} contact`
+  const { docs } = await payload.find({
+    collection: 'forms',
+    where: { and: [{ tenant: { equals: tenant.id } }, { title: { equals: title } }] },
+    limit: 1,
+    depth: 0,
+  })
+  if (docs[0]) return docs[0].id
+
+  const form = await payload.create({
+    collection: 'forms',
+    data: {
+      title,
+      tenant: tenant.id,
+      fields: [{ blockType: 'email', name: 'email', label: 'Email', required: true }],
+      confirmationType: 'message',
+      confirmationMessage: richText('Thanks!'),
+    },
+    context,
+  })
+  payload.logger.info(`seed: created form ${title}`)
+  return form.id
 }
 
 const upsertRedirect = async (payload: Payload, tenant: Tenant, from: string, url: string) => {
@@ -347,7 +399,39 @@ export const seedMultiTenancy = async (payload: Payload) => {
     await upsertPost(payload, tenant, seedTenant)
   }
 
-  // only tenant1 has these: the public site serves admin, so they must 404 there
+  // set tenant2's settings.homepage to its about page if empty (Settings -> Homepage resolution)
+  const tenant2 = tenantsBySlug.get('tenant2')
+  if (tenant2) {
+    const { docs: settingsDocs } = await payload.find({
+      collection: 'settings',
+      where: { tenant: { equals: tenant2.id } },
+      limit: 1,
+      depth: 0,
+    })
+    const tenant2Settings = settingsDocs[0]
+    if (tenant2Settings && !tenant2Settings.homepage) {
+      const { docs: aboutPages } = await payload.find({
+        collection: 'pages',
+        where: {
+          and: [{ tenant: { equals: tenant2.id } }, { slug: { equals: 'about' } }],
+        },
+        limit: 1,
+        depth: 0,
+      })
+      const aboutPage = aboutPages[0]
+      if (aboutPage) {
+        await payload.update({
+          collection: 'settings',
+          id: tenant2Settings.id,
+          data: { homepage: aboutPage.id },
+          context,
+        })
+        payload.logger.info('seed: set tenant2 homepage to about page')
+      }
+    }
+  }
+
+  // only tenant1 has these: they must 404 on every other tenant's host
   const tenant1 = tenantsBySlug.get('tenant1')
   if (tenant1) {
     await upsertPage(payload, tenant1, {
@@ -359,6 +443,13 @@ export const seedMultiTenancy = async (payload: Payload) => {
       ),
     })
     await upsertRedirect(payload, tenant1, '/tenant1-redirect', '/about')
+    const formId = await upsertContactForm(payload, tenant1)
+    await upsertPage(payload, tenant1, {
+      slug: 'contact',
+      title: { en: 'Contact tenant1', ar: 'اتصل بـ tenant1' },
+      content: richText('Contact tenant1'),
+      layout: [{ blockType: 'formBlock', form: formId }],
+    })
   }
 
   // the first user becomes the super user (setupFirstUser), so that must be a real person
