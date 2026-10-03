@@ -1,8 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../../access/authenticated'
-import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
-import { accessCheckResolver } from '@/utilities/access'
+import { accessCheckResolver, hiddenResolver, publishedOrPermission } from '@/common/utils/access'
 
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
@@ -32,10 +30,10 @@ import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugU
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
-    create: accessCheckResolver('pages', 'canCreate'),
-    delete: accessCheckResolver('pages', 'canDelete'),
-    read: authenticatedOrPublished,
-    update: accessCheckResolver('pages', 'canUpdate'),
+    create: accessCheckResolver('pages', 'create'),
+    delete: accessCheckResolver('pages', 'delete'),
+    read: publishedOrPermission('pages'),
+    update: accessCheckResolver('pages', 'update'),
   },
   // This config controls what's populated by default when a page is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -46,6 +44,7 @@ export const Pages: CollectionConfig<'pages'> = {
     category: true,
   },
   admin: {
+    hidden: hiddenResolver('pages'),
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {

@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { isSuperUser } from '@/common/utils/access'
+import { hiddenResolver, isSuperUser } from '@/common/utils/access'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { defaultAccessRows } from './hooks/defaultAccessRows'
@@ -18,6 +18,7 @@ export const UsersAccess: CollectionConfig = {
     group: 'Admin',
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug', 'description'],
+    hidden: hiddenResolver('users-access'),
   },
   access: {
     read: isSuperUser,

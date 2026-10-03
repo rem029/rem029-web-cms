@@ -25,7 +25,6 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
   createdBy: {
     id: 1,
     name: 'default@payload.com',
-    role: 1,
     updatedAt: '2025-05-10T18:28:37.087Z',
     createdAt: '2025-05-10T18:28:36.963Z',
     email: 'default@payload.com',
@@ -35,7 +34,6 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
   updatedBy: {
     id: 1,
     name: 'default@payload.com',
-    role: 1,
     updatedAt: '2025-05-10T18:28:37.087Z',
     createdAt: '2025-05-10T18:28:36.963Z',
     email: 'default@payload.com',

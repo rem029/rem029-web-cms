@@ -21,8 +21,8 @@ if (process.env.NODE_ENV === 'production') {
 
 const seeds = [
   { name: 'defaultAdmin', run: seedDefaultAdmin },
-  { name: 'multiTenancy', run: seedMultiTenancy },
   { name: 'access', run: seedAccess },
+  { name: 'multiTenancy', run: seedMultiTenancy },
 ]
 
 const payload = await getPayload({ config })

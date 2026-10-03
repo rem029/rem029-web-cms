@@ -1,6 +1,6 @@
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
-import { accessCheckResolver, isSuperUser } from '@/utilities/access'
+import { accessCheckResolver, hiddenResolver, isSuperUser } from '@/common/utils/access'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 import type { CollectionConfig } from 'payload'
 import { validateHomepageTenant } from './hooks/validateHomepageTenant'
@@ -10,12 +10,13 @@ export const Settings: CollectionConfig = {
   labels: { singular: 'Settings', plural: 'Settings' },
   access: {
     read: () => true,
-    update: accessCheckResolver('settings', 'canUpdate'),
+    update: accessCheckResolver('settings', 'update'),
     create: isSuperUser,
     delete: isSuperUser,
   },
   admin: {
     group: 'Admin',
+    hidden: hiddenResolver('settings'),
   },
   fields: [
     { type: 'upload', relationTo: 'media', name: 'favicon', label: 'Favicon', localized: true },

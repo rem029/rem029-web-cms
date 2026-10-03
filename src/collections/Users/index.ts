@@ -1,37 +1,37 @@
-import type { CollectionConfig } from 'payload'
+import type { Access, CollectionConfig } from 'payload'
 
-import { authenticated } from '../../access/authenticated'
-import { accessCheckResolver } from '@/utilities/access'
-import { isSuperUserField } from '@/common/utils/access'
+import {
+  accessCheckResolver,
+  adminAccess,
+  hasAccess,
+  hiddenResolver,
+  isSuperUserField,
+} from '@/common/utils/access'
+import { assignDefaultAccess } from './hooks/assignDefaultAccess'
 import { setupFirstUser } from './hooks/setupFirstUser'
+
+const selfOrPermission =
+  (op: 'read' | 'update'): Access =>
+  ({ req }) => {
+    if (!req.user) return false
+    if (hasAccess(req, 'users', op)) return true
+    return { id: { equals: req.user.id } }
+  }
 
 export const Users: CollectionConfig = {
   slug: 'users',
   access: {
-    admin: authenticated,
-    create: accessCheckResolver('users', 'canCreate'),
-    delete: accessCheckResolver('users', 'canDelete'),
-    read: accessCheckResolver('users', 'canRead', {
-      fallbackAccess: false,
-      refineAccess: async (hasAccess, _, req) => {
-        if (hasAccess) return true
-        if (req.user) return { id: { equals: req.user.id } }
-        return false
-      },
-    }),
-    update: accessCheckResolver('users', 'canUpdate', {
-      fallbackAccess: false,
-      refineAccess: async (hasAccess, _, req) => {
-        if (hasAccess) return true
-        if (req.user) return { id: { equals: req.user.id } }
-        return false
-      },
-    }),
+    admin: adminAccess,
+    create: accessCheckResolver('users', 'create'),
+    delete: accessCheckResolver('users', 'delete'),
+    read: selfOrPermission('read'),
+    update: selfOrPermission('update'),
   },
   admin: {
     defaultColumns: ['name', 'email'],
     useAsTitle: 'name',
     group: 'Admin',
+    hidden: hiddenResolver('users'),
   },
   auth: true,
   fields: [
@@ -49,15 +49,6 @@ export const Users: CollectionConfig = {
       },
     },
     {
-      name: 'role',
-      type: 'relationship',
-      relationTo: 'roles',
-      required: false,
-      admin: {
-        condition: (data) => !data?.super_user,
-      },
-    },
-    {
       name: 'access',
       type: 'relationship',
       relationTo: 'users-access',
@@ -66,7 +57,6 @@ export const Users: CollectionConfig = {
         create: isSuperUserField,
         update: isSuperUserField,
       },
-      // Note: Not used by access checks yet (rem0001 phase 2).
       admin: {
         condition: (data) => !data?.super_user,
         description: 'What this user can see and do. Super users bypass it.',
@@ -74,7 +64,7 @@ export const Users: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [setupFirstUser],
+    beforeChange: [setupFirstUser, assignDefaultAccess],
   },
   timestamps: true,
 }

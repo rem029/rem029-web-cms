@@ -7,60 +7,6 @@
  */
 
 /**
- * Set permissions for each collection
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RoleCollectionPermissions".
- */
-export type RoleCollectionPermissions =
-  | {
-      /**
-       * Collection slug (e.g., "pages", "posts")
-       */
-      collection: string;
-      /**
-       * Allow creating new items in this collection
-       */
-      canCreate?: boolean | null;
-      /**
-       * Allow viewing items in this collection
-       */
-      canRead?: boolean | null;
-      /**
-       * Allow editing items in this collection
-       */
-      canUpdate?: boolean | null;
-      /**
-       * Allow deleting items in this collection
-       */
-      canDelete?: boolean | null;
-      id?: string | null;
-    }[]
-  | null;
-/**
- * Set permissions for each global
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RoleGlobalPermissions".
- */
-export type RoleGlobalPermissions =
-  | {
-      /**
-       * Global slug (e.g., "settings", "theme")
-       */
-      global?: string | null;
-      /**
-       * Allow viewing this global
-       */
-      canRead?: boolean | null;
-      /**
-       * Allow editing this global
-       */
-      canUpdate?: boolean | null;
-      id?: string | null;
-    }[]
-  | null;
-/**
  * Add and configure individual slides for the carousel.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -185,7 +131,6 @@ export interface Config {
     categories: Category;
     users: User;
     'users-access': UsersAccess;
-    roles: Role;
     analytics: Analytics;
     tenants: Tenant;
     header: Header;
@@ -209,7 +154,6 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'users-access': UsersAccessSelect<false> | UsersAccessSelect<true>;
-    roles: RolesSelect<false> | RolesSelect<true>;
     analytics: AnalyticsSelect<false> | AnalyticsSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -335,7 +279,6 @@ export interface User {
    * A super user has full access to all collections and settings.
    */
   super_user?: boolean | null;
-  role?: (number | null) | Role;
   /**
    * What this user can see and do. Super users bypass it.
    */
@@ -365,39 +308,6 @@ export interface User {
   password?: string | null;
 }
 /**
- * Manage user roles and permissions
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "roles".
- */
-export interface Role {
-  id: number;
-  /**
-   * Display name for this role
-   */
-  name: string;
-  /**
-   * Unique identifier for this role (e.g., "admin", "editor", "contributor")
-   */
-  slug: string;
-  /**
-   * Brief description of what this role is for
-   */
-  description?: string | null;
-  collections?: {
-    permissions?: RoleCollectionPermissions;
-  };
-  globals?: {
-    permissions?: RoleGlobalPermissions;
-  };
-  /**
-   * Admin roles bypass all permission checks (use carefully)
-   */
-  isAdmin?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users-access".
  */
@@ -418,7 +328,6 @@ export interface UsersAccess {
           | 'categories'
           | 'users'
           | 'users-access'
-          | 'roles'
           | 'analytics'
           | 'tenants'
           | 'header'
@@ -1808,10 +1717,6 @@ export interface PayloadLockedDocument {
         value: number | UsersAccess;
       } | null)
     | ({
-        relationTo: 'roles';
-        value: number | Role;
-      } | null)
-    | ({
         relationTo: 'analytics';
         value: number | Analytics;
       } | null)
@@ -2542,7 +2447,6 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   super_user?: T;
-  role?: T;
   access?: T;
   tenants?:
     | T
@@ -2592,50 +2496,6 @@ export interface UsersAccessSelect<T extends boolean = true> {
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "roles_select".
- */
-export interface RolesSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  description?: T;
-  collections?:
-    | T
-    | {
-        permissions?: T | RoleCollectionPermissionsSelect<T>;
-      };
-  globals?:
-    | T
-    | {
-        permissions?: T | RoleGlobalPermissionsSelect<T>;
-      };
-  isAdmin?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RoleCollectionPermissions_select".
- */
-export interface RoleCollectionPermissionsSelect<T extends boolean = true> {
-  collection?: T;
-  canCreate?: T;
-  canRead?: T;
-  canUpdate?: T;
-  canDelete?: T;
-  id?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "RoleGlobalPermissions_select".
- */
-export interface RoleGlobalPermissionsSelect<T extends boolean = true> {
-  global?: T;
-  canRead?: T;
-  canUpdate?: T;
-  id?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

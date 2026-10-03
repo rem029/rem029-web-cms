@@ -19,8 +19,6 @@ import { SlugComponent as SlugComponent_92cc057d0a2abb4f6cf0307edf59f986 } from 
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { AccessRowLabel as AccessRowLabel_ba213f06845338de55773f5b475be731 } from '@/collections/UsersAccess/components/AccessRowLabel'
-import { CollectionsRowLabel as CollectionsRowLabel_c2e92a55f06affc88e01572bdfd0713c } from '@/collections/Roles/components/CollectionsRowLabel'
-import { GlobalsRowLabel as GlobalsRowLabel_807fd3a4ebfb202adbd09d4c7ba21e8b } from '@/collections/Roles/components/GlobalsRowLabel'
 import { WatchTenantCollection as WatchTenantCollection_1d0591e3cf4f332c83a86da13a0de59a } from '@payloadcms/plugin-multi-tenant/client'
 import { RowLabel as RowLabel_ba1355e46507ebf8162dc3396bc8d138 } from '@/collections/Header/RowLabel'
 import { RowLabel as RowLabel_3478630308bdf5be7efe3c9e4153b49d } from '@/collections/Footer/RowLabel'
@@ -53,8 +51,6 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlocksFeatureClient": BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/collections/UsersAccess/components/AccessRowLabel#AccessRowLabel": AccessRowLabel_ba213f06845338de55773f5b475be731,
-  "@/collections/Roles/components/CollectionsRowLabel#CollectionsRowLabel": CollectionsRowLabel_c2e92a55f06affc88e01572bdfd0713c,
-  "@/collections/Roles/components/GlobalsRowLabel#GlobalsRowLabel": GlobalsRowLabel_807fd3a4ebfb202adbd09d4c7ba21e8b,
   "@payloadcms/plugin-multi-tenant/client#WatchTenantCollection": WatchTenantCollection_1d0591e3cf4f332c83a86da13a0de59a,
   "@/collections/Header/RowLabel#RowLabel": RowLabel_ba1355e46507ebf8162dc3396bc8d138,
   "@/collections/Footer/RowLabel#RowLabel": RowLabel_3478630308bdf5be7efe3c9e4153b49d,

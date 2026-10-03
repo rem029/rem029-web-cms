@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { link } from '@/fields/link'
-import { accessCheckResolver, isSuperUser } from '@/utilities/access'
+import { accessCheckResolver, hiddenResolver, isSuperUser } from '@/common/utils/access'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 import { revalidateHeader } from './hooks/revalidateHeader'
 
@@ -9,9 +9,12 @@ export const Header: CollectionConfig = {
   slug: 'header',
   // one doc per business, so no plural in the admin nav
   labels: { singular: 'Header', plural: 'Header' },
+  admin: {
+    hidden: hiddenResolver('header'),
+  },
   access: {
     read: () => true,
-    update: accessCheckResolver('header', 'canUpdate'),
+    update: accessCheckResolver('header', 'update'),
     create: isSuperUser,
     delete: isSuperUser,
   },

@@ -2,7 +2,7 @@ import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { defaultThemeCSS } from '@/utilities/defaults'
 import { generateThemePreviewPath } from '@/utilities/generatePreviewPath'
-import { accessCheckResolver, isSuperUser } from '@/utilities/access'
+import { accessCheckResolver, hiddenResolver, isSuperUser } from '@/common/utils/access'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 
 import type { CollectionConfig } from 'payload'
@@ -14,12 +14,13 @@ export const Theme: CollectionConfig = {
   labels: { singular: 'Theme', plural: 'Theme' },
   access: {
     read: () => true,
-    update: accessCheckResolver('theme', 'canUpdate'),
+    update: accessCheckResolver('theme', 'update'),
     create: isSuperUser,
     delete: isSuperUser,
   },
   admin: {
     group: 'Admin',
+    hidden: hiddenResolver('theme'),
     livePreview: {
       url: ({ data }) => {
         const tenantId = typeof data?.tenant === 'object' ? data?.tenant?.id : data?.tenant

@@ -9,9 +9,7 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { authenticated } from '../../access/authenticated'
-import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
-import { accessCheckResolver } from '@/utilities/access'
+import { accessCheckResolver, publishedOrPermission } from '@/common/utils/access'
 import { Banner } from '../../blocks/old/Banner/config'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
@@ -32,10 +30,10 @@ import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugU
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
-    create: accessCheckResolver('posts', 'canCreate'),
-    delete: accessCheckResolver('posts', 'canDelete'),
-    read: authenticatedOrPublished,
-    update: accessCheckResolver('posts', 'canUpdate'),
+    create: accessCheckResolver('posts', 'create'),
+    delete: accessCheckResolver('posts', 'delete'),
+    read: publishedOrPermission('posts'),
+    update: accessCheckResolver('posts', 'update'),
   },
   // This config controls what's populated by default when a post is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property

@@ -86,38 +86,18 @@ export const seed = async ({
     ),
   ])
 
-  const role = await payload.create({
-    collection: 'roles',
-    data: {
-      name: 'Demo Author',
-      slug: 'demo-author',
-      collections: {
-        permissions: [
-          { collection: 'pages', canCreate: true, canDelete: true, canRead: true, canUpdate: true },
-          { collection: 'media', canCreate: true, canDelete: true, canRead: true, canUpdate: true },
-        ],
-      },
-      globals: {
-        permissions: [
-          {
-            global: 'header',
-            canRead: true,
-            canUpdate: true,
-          },
-          {
-            global: 'footer',
-            canRead: true,
-            canUpdate: true,
-          },
-          {
-            global: 'themes',
-            canRead: true,
-            canUpdate: true,
-          },
-        ],
-      },
-    },
+  const { docs: editorProfiles } = await payload.find({
+    collection: 'users-access',
+    where: { slug: { equals: 'editor' } },
+    limit: 1,
+    depth: 0,
   })
+  const editorProfile = editorProfiles[0]
+  if (!editorProfile) {
+    payload.logger.warn({
+      msg: 'seed: editor users-access profile not found, leaving access empty',
+    })
+  }
 
   const [demoAuthor, image1Doc, image2Doc, image3Doc, _] = await Promise.all([
     payload.create({
@@ -126,7 +106,7 @@ export const seed = async ({
         name: 'Demo Author',
         email: 'demo-author@example.com',
         password: 'password',
-        role: role.id,
+        access: editorProfile?.id,
       },
     }),
     payload.create({

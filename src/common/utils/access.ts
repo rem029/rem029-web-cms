@@ -1,7 +1,6 @@
 /**
  * Access checks backed by `users-access` profiles (rem0001).
  *
- * Not wired yet: every collection still uses `@/utilities/access` (roles) until rem0001 phase 2.
  * The checks take the access record as input, so phase 4 (per-tenant access) only changes
  * `getAccessRecord`.
  */
@@ -63,7 +62,11 @@ export const getAccessRecord = (req: PayloadRequest): UsersAccess | null => {
 }
 
 /** Shared rules for every check: no user → deny, super user → allow, disabled → deny, else the record. */
-const checkAccess = (req: PayloadRequest, slug: CollectionSlug, op: AccessOperation): boolean => {
+export const hasAccess = (
+  req: PayloadRequest,
+  slug: CollectionSlug,
+  op: AccessOperation,
+): boolean => {
   const { user } = req
   if (!user) return false
   if (user.super_user) return true
@@ -83,20 +86,20 @@ export const accessCheckResolver =
     options?: { where?: (req: PayloadRequest) => Where },
   ): Access =>
   ({ req }) => {
-    if (!checkAccess(req, slug, op)) return false
+    if (!hasAccess(req, slug, op)) return false
     return options?.where ? options.where(req) : true
   }
 
 /** `Users.access.admin`: the `users` row's `admin` checkbox decides who can open `/admin`. */
 export const adminAccess = ({ req }: { req: PayloadRequest }): boolean =>
-  checkAccess(req, 'users', 'admin')
+  hasAccess(req, 'users', 'admin')
 
 /**
  * The `access` ("API access") column. No endpoint uses it yet (rem0001 decision); custom
  * endpoints exposed externally call it later.
  */
 export const hasApiAccess = (req: PayloadRequest, slug: CollectionSlug): boolean =>
-  checkAccess(req, slug, 'access')
+  hasAccess(req, slug, 'access')
 
 /** `admin.hidden` for a collection: super users see everything; no record or row means hidden. */
 export const hiddenResolver =
@@ -109,4 +112,16 @@ export const hiddenResolver =
     const access = 'access' in user ? user.access : null
     const record = access && typeof access === 'object' ? (access as UsersAccess) : null
     return isHidden(record, slug)
+  }
+
+/**
+ * Read for collections with drafts (pages, posts): published docs are public; drafts need the
+ * profile's `read` on the slug (super users always). Replaces `authenticatedOrPublished`, which
+ * showed drafts to every signed-in user.
+ */
+export const publishedOrPermission =
+  (slug: CollectionSlug): Access =>
+  ({ req }) => {
+    if (hasAccess(req, slug, 'read')) return true
+    return { _status: { equals: 'published' } }
   }

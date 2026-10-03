@@ -15,6 +15,7 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
 import { setFormSubmissionTenant } from '@/plugins/hooks/setFormSubmissionTenant'
 import { enforceTenantMembership } from '@/common/hooks/enforceTenantMembership'
+import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
 
 import { Config, Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -69,6 +70,35 @@ const addTenantMembershipCheck: Plugin = (config) => ({
         ...collection.hooks,
         beforeChange: [enforceTenantMembership, ...(collection.hooks?.beforeChange ?? [])],
       },
+    }
+  }),
+})
+
+// plugin collections: the ops a plugin leaves open to any signed-in user come from the profile
+// instead, and so does the nav. public ops stay as the plugins set them (forms/redirects/search
+// read, form-submissions create); form-submissions update stays off.
+const profileGatedOps: Partial<
+  Record<CollectionSlug, ('read' | 'create' | 'update' | 'delete')[]>
+> = {
+  forms: ['create', 'update', 'delete'],
+  'form-submissions': ['read', 'delete'],
+  redirects: ['create', 'update', 'delete'],
+  search: ['update', 'delete'],
+}
+
+const gatePluginCollections: Plugin = (config) => ({
+  ...config,
+  collections: config.collections?.map((collection) => {
+    const slug = collection.slug as CollectionSlug
+    const ops = profileGatedOps[slug]
+    if (!ops) return collection
+    return {
+      ...collection,
+      access: {
+        ...collection.access,
+        ...Object.fromEntries(ops.map((op) => [op, accessCheckResolver(slug, op)])),
+      },
+      admin: { ...collection.admin, hidden: hiddenResolver(slug) },
     }
   }),
 })
@@ -172,6 +202,7 @@ export const plugins: Plugin[] = [
     cleanupAfterTenantDelete: false,
   }),
   addTenantMembershipCheck,
+  gatePluginCollections,
   payloadCloudPlugin(),
   ...(process.env.S3_ENDPOINT
     ? [

@@ -18,6 +18,7 @@ import * as migration_20260509_191323_set_users_as_super_user from './20260509_1
 import * as migration_20261002_072703_multi_tenancy_tenants from './20261002_072703_multi_tenancy_tenants';
 import * as migration_20261002_185443_globals_to_tenant_docs from './20261002_185443_globals_to_tenant_docs';
 import * as migration_20261002_225304_users_access from './20261002_225304_users_access';
+import * as migration_20261002_234322_roles_to_users_access from './20261002_234322_roles_to_users_access';
 
 export const migrations = [
   {
@@ -118,6 +119,11 @@ export const migrations = [
   {
     up: migration_20261002_225304_users_access.up,
     down: migration_20261002_225304_users_access.down,
-    name: '20261002_225304_users_access'
+    name: '20261002_225304_users_access',
+  },
+  {
+    up: migration_20261002_234322_roles_to_users_access.up,
+    down: migration_20261002_234322_roles_to_users_access.down,
+    name: '20261002_234322_roles_to_users_access'
   },
 ];

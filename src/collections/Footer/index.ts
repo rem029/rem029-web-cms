@@ -9,16 +9,19 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import { defaultFooterCopyRight } from '@/utilities/defaults'
-import { accessCheckResolver, isSuperUser } from '@/utilities/access'
+import { accessCheckResolver, hiddenResolver, isSuperUser } from '@/common/utils/access'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 
 export const Footer: CollectionConfig = {
   slug: 'footer',
   // one doc per business, so no plural in the admin nav
   labels: { singular: 'Footer', plural: 'Footer' },
+  admin: {
+    hidden: hiddenResolver('footer'),
+  },
   access: {
     read: () => true,
-    update: accessCheckResolver('footer', 'canUpdate'),
+    update: accessCheckResolver('footer', 'update'),
     create: isSuperUser,
     delete: isSuperUser,
   },

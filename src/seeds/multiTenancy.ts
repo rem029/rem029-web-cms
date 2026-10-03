@@ -221,7 +221,7 @@ const upsertUser = async (
   payload: Payload,
   seed: SeedUser,
   tenantsBySlug: Map<string, Tenant>,
-  roleId: number | undefined,
+  accessId: number,
 ) => {
   // test-only accounts: the email doubles as the password so anyone testing can log in
   const password = seed.email
@@ -232,7 +232,11 @@ const upsertUser = async (
     depth: 0,
   })
   if (docs[0]) {
-    await payload.update({ collection: 'users', id: docs[0].id, data: { password } })
+    await payload.update({
+      collection: 'users',
+      id: docs[0].id,
+      data: { password, access: accessId },
+    })
     payload.logger.info(`seed: reset password of ${seed.email} to its email`)
     return
   }
@@ -244,7 +248,7 @@ const upsertUser = async (
 
   await payload.create({
     collection: 'users',
-    data: { email: seed.email, name: seed.name, password, role: roleId, tenants },
+    data: { email: seed.email, name: seed.name, password, access: accessId, tenants },
   })
   payload.logger.info(`seed: created user ${seed.email} (${seed.tenantSlugs.join(', ')})`)
 }
@@ -283,14 +287,20 @@ export const seedMultiTenancy = async (payload: Payload) => {
     return
   }
 
-  // the "admin" role from the roles migration; phase 3 replaces this with per-tenant access
-  const { docs: roles } = await payload.find({
-    collection: 'roles',
-    where: { slug: { equals: 'admin' } },
+  // the "editor" profile from users-access; phase 3 replaces this with per-tenant access
+  const { docs: editorProfiles } = await payload.find({
+    collection: 'users-access',
+    where: { slug: { equals: 'editor' } },
     limit: 1,
     depth: 0,
   })
+  const editorProfile = editorProfiles[0]
+  if (!editorProfile) {
+    throw new Error(
+      'seed: editor profile not found in users-access (seed order bug: access must run before multiTenancy)',
+    )
+  }
   for (const user of USERS) {
-    await upsertUser(payload, user, tenantsBySlug, roles[0]?.id)
+    await upsertUser(payload, user, tenantsBySlug, editorProfile.id)
   }
 }

@@ -1,5 +1,5 @@
 import type { CollectionConfig, TextFieldValidation } from 'payload'
-import { accessCheckResolver } from '@/utilities/access'
+import { accessCheckResolver, hiddenResolver, isSuperUser } from '@/common/utils/access'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { formatTenantSlugHook, validateTenantSlug } from './hooks/validateTenantSlug'
@@ -37,17 +37,18 @@ const validateDomain: TextFieldValidation = (value) => {
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
   access: {
-    create: ({ req }) => Boolean(req.user?.super_user),
-    delete: ({ req }) => Boolean(req.user?.super_user),
+    create: isSuperUser,
+    delete: isSuperUser,
     // any signed-in user; the multi-tenant plugin narrows this to the user's own tenants
     // (super users see all). needed so the tenant selector works for every member.
     read: ({ req }) => Boolean(req.user),
-    update: accessCheckResolver('tenants', 'canUpdate'),
+    update: accessCheckResolver('tenants', 'update'),
   },
   admin: {
     group: 'Admin',
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug', 'isActive', 'updatedAt'],
+    hidden: hiddenResolver('tenants'),
   },
   timestamps: true,
   fields: [

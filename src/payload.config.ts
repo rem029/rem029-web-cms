@@ -22,7 +22,6 @@ import { Theme } from './collections/Theme'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { Settings } from './collections/Settings'
 
-import { Roles } from './collections/Roles'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 import { Analytics } from './collections/Analytics'
 import { Tenants } from './collections/Tenants'
@@ -101,7 +100,6 @@ export default buildConfig({
     Categories,
     Users,
     UsersAccess,
-    Roles,
     Analytics,
     Tenants,
     Header,
