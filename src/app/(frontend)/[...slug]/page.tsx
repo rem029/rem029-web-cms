@@ -13,7 +13,7 @@ import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { css } from '@/utilities/constants'
 import { getStyles } from '@/fields/css'
-import { homeStatic } from '@/endpoints/seed/home-static'
+import { homeStatic } from './homeStatic'
 import { LOCALE_STORAGE_KEY, DEFAULT_LOCALE } from '@/utilities/constant'
 
 export async function generateStaticParams() {

@@ -203,7 +203,7 @@ pnpm setup:docs
 
 This clones the repo into `docs/` and links `CLAUDE.md` and `.claude` (Claude Code instructions and config) from it to the project root. All three are ignored by this repo. Setup details are in that repo's README. The app builds and runs without it.
 
-To spin up this example locally, follow the [Quick Start](#quick-start). Then [Seed](#seed) the database with a few pages, posts, and projects.
+To spin up this example locally, follow the [Quick Start](#quick-start). Then [seed](#seed) the database with test tenants, users and pages.
 
 ### Working with Postgres
 
@@ -256,15 +256,13 @@ That's it! The Docker instance will help you get up and running quickly while al
 
 ### Seed
 
-To seed the database with a few pages, posts, and projects you can click the 'seed database' link from the admin panel.
+Seeds are for local development only and never run against staging or production.
 
-The seed script will also create a demo user for demonstration purposes only:
+```bash
+pnpm seed
+```
 
-- Demo Author
-  - Email: `demo-author@payloadcms.com`
-  - Password: `password`
-
-> NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
+`pnpm seed` runs every seed in `src/seeds/index.ts` (tenants, access profiles, test users and pages). Seeds are idempotent, so running them again is safe. Test users log in with their email as the password.
 
 ## Production
 
