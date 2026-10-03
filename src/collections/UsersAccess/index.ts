@@ -97,7 +97,8 @@ export const UsersAccess: CollectionConfig = {
               defaultValue: false,
               admin: {
                 condition: (_, siblingData) => siblingData?.slug === 'users',
-                description: 'Can open the admin panel',
+                description:
+                  'Can open the admin panel. On this row only Admin and Hidden apply: only super users manage other users.',
               },
             },
             {

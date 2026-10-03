@@ -5,7 +5,7 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
-import type { Block, CollectionSlug, Field, FieldAccess, Plugin } from 'payload'
+import type { Block, CollectionSlug, Field, Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -15,7 +15,13 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
 import { setFormSubmissionTenant } from '@/plugins/hooks/setFormSubmissionTenant'
 import { enforceTenantMembership } from '@/common/hooks/enforceTenantMembership'
-import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
+import {
+  accessCheckResolver,
+  hiddenResolver,
+  isActiveSuperUser,
+  isSuperUserField,
+  showToSuperUsers,
+} from '@/common/utils/access'
 
 import { Config, Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -50,8 +56,6 @@ const tenantScopedCollections: CollectionSlug[] = [
 // one doc per tenant (were globals before multi-tenancy)
 const tenantGlobalCollections: CollectionSlug[] = ['header', 'footer', 'theme', 'settings']
 
-const isSuperUser: FieldAccess = ({ req }) => Boolean(req.user?.super_user)
-
 // form submissions take their tenant from the form (setFormSubmissionTenant), so anyone,
 // signed in or not, can submit any tenant's public form
 const membershipCheckedCollections: CollectionSlug[] = [
@@ -85,6 +89,23 @@ const profileGatedOps: Partial<
   redirects: ['create', 'update', 'delete'],
   search: ['update', 'delete'],
 }
+
+// the multi-tenant plugin's `tenants` array on users: only super users see it in the admin
+// (they're the only ones who can change it, see `arrayFieldAccess`)
+const hideTenantsFieldFromNonSuperUsers: Plugin = (config) => ({
+  ...config,
+  collections: config.collections?.map((collection) => {
+    if (collection.slug !== 'users') return collection
+    return {
+      ...collection,
+      fields: collection.fields.map((field) =>
+        field.type === 'array' && field.name === 'tenants'
+          ? { ...field, admin: { ...field.admin, condition: showToSuperUsers } }
+          : field,
+      ),
+    }
+  }),
+})
 
 const gatePluginCollections: Plugin = (config) => ({
   ...config,
@@ -193,16 +214,17 @@ export const plugins: Plugin[] = [
     },
     tenantsArrayField: {
       includeDefaultField: true,
-      // only super users manage memberships for now; tenant admins come in phase 3
-      arrayFieldAccess: { create: isSuperUser, update: isSuperUser },
+      // only super users manage memberships for now; tenant admins come in phase 5
+      arrayFieldAccess: { create: isSuperUserField, update: isSuperUserField },
     },
-    userHasAccessToAllTenants: (user) => Boolean(user?.super_user),
+    userHasAccessToAllTenants: (user) => isActiveSuperUser(user),
     tenantSelectorLabel: { en: 'Business', ar: 'النشاط التجاري' },
     // deleting a tenant must never hard-delete its documents; deactivate it with `isActive`
     cleanupAfterTenantDelete: false,
   }),
   addTenantMembershipCheck,
   gatePluginCollections,
+  hideTenantsFieldFromNonSuperUsers,
   payloadCloudPlugin(),
   ...(process.env.S3_ENDPOINT
     ? [

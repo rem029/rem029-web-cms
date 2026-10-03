@@ -17,12 +17,15 @@ import type { User, UsersAccess } from '@/payload-types'
 
 export type AccessOperation = 'read' | 'create' | 'update' | 'delete' | 'admin' | 'access'
 
-export const isSuperUser: Access = ({ req }) => Boolean(req.user?.super_user)
+export const isDisabledUser = (user: User | ClientUser | null | undefined): boolean =>
+  user?.is_disabled === true
 
-export const isSuperUserField: FieldAccess = ({ req }) => Boolean(req.user?.super_user)
+export const isActiveSuperUser = (user: User | ClientUser | null | undefined): boolean =>
+  Boolean(user?.super_user) && !isDisabledUser(user)
 
-// `is_disabled` lands on users in rem0001 phase 3; read it defensively until then
-const isDisabled = (user: object): boolean => 'is_disabled' in user && user.is_disabled === true
+export const isSuperUser: Access = ({ req }) => isActiveSuperUser(req.user)
+
+export const isSuperUserField: FieldAccess = ({ req }) => isActiveSuperUser(req.user)
 
 /** Pure: true only when the record has a row for the slug with the checkbox ticked. */
 export const hasPermission = (
@@ -61,7 +64,7 @@ export const getAccessRecord = (req: PayloadRequest): UsersAccess | null => {
   return access
 }
 
-/** Shared rules for every check: no user → deny, super user → allow, disabled → deny, else the record. */
+/** Shared rules for every check: no user → deny, disabled → deny, super user → allow, else the record. */
 export const hasAccess = (
   req: PayloadRequest,
   slug: CollectionSlug,
@@ -69,8 +72,8 @@ export const hasAccess = (
 ): boolean => {
   const { user } = req
   if (!user) return false
-  if (user.super_user) return true
-  if (isDisabled(user)) return false
+  if (isDisabledUser(user)) return false
+  if (isActiveSuperUser(user)) return true
 
   if (hasPermission(getAccessRecord(req), slug, op)) return true
 
@@ -106,8 +109,8 @@ export const hiddenResolver =
   (slug: CollectionSlug) =>
   ({ user }: { user: ClientUser | User | null }): boolean => {
     if (!user) return true
-    if (user.super_user) return false
-    if (isDisabled(user)) return true
+    if (isDisabledUser(user)) return true
+    if (isActiveSuperUser(user)) return false
 
     const access = 'access' in user ? user.access : null
     const record = access && typeof access === 'object' ? (access as UsersAccess) : null
@@ -125,3 +128,13 @@ export const publishedOrPermission =
     if (hasAccess(req, slug, 'read')) return true
     return { _status: { equals: 'published' } }
   }
+
+/**
+ * `admin.condition` for fields only super users should see in the admin (`super_user`, `access`,
+ * `tenants`). UI only: field access still decides what can be read and changed.
+ */
+export const showToSuperUsers = (
+  _data: unknown,
+  _siblingData: unknown,
+  { user }: { user: ClientUser | User | null | undefined },
+): boolean => isActiveSuperUser(user)

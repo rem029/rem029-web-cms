@@ -69,7 +69,7 @@ const PROFILES: Profile[] = [
   },
 ]
 
-const USERS = [
+const USERS: { name: string; email: string; profileSlug: string; isDisabled?: boolean }[] = [
   {
     name: 'Default User',
     email: 'default@example.test',
@@ -84,6 +84,13 @@ const USERS = [
     name: 'Viewer User',
     email: 'viewer@example.test',
     profileSlug: 'viewer',
+  },
+  {
+    // can't log in; an open session gets no access
+    name: 'Disabled User',
+    email: 'disabled@example.test',
+    profileSlug: 'editor',
+    isDisabled: true,
   },
 ]
 
@@ -165,6 +172,7 @@ export const seedAccess = async (payload: Payload): Promise<void> => {
     })
 
     const tenants = [{ tenant: defaultTenant.id }]
+    const is_disabled = user.isDisabled === true
 
     if (existingUsers[0]) {
       await payload.update({
@@ -174,6 +182,7 @@ export const seedAccess = async (payload: Payload): Promise<void> => {
           name: user.name,
           access: profileId,
           tenants,
+          is_disabled,
         },
       })
       payload.logger.info(`seed: updated user ${user.email}`)
@@ -186,6 +195,7 @@ export const seedAccess = async (payload: Payload): Promise<void> => {
           password: user.email,
           access: profileId,
           tenants,
+          is_disabled,
         },
       })
       payload.logger.info(`seed: created user ${user.email}`)

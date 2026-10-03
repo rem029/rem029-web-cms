@@ -280,6 +280,10 @@ export interface User {
    */
   super_user?: boolean | null;
   /**
+   * A disabled user can't log in, and any open session gets no access.
+   */
+  is_disabled?: boolean | null;
+  /**
    * What this user can see and do. Super users bypass it.
    */
   access?: (number | null) | UsersAccess;
@@ -344,7 +348,7 @@ export interface UsersAccess {
         update?: boolean | null;
         delete?: boolean | null;
         /**
-         * Can open the admin panel
+         * Can open the admin panel. On this row only Admin and Hidden apply: only super users manage other users.
          */
         admin?: boolean | null;
         access?: boolean | null;
@@ -2447,6 +2451,7 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   super_user?: T;
+  is_disabled?: T;
   access?: T;
   tenants?:
     | T
