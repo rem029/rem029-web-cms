@@ -236,9 +236,11 @@ try {
     overrideAccess: false,
     depth: 0,
   })
+  // members read their colleagues for the "Visible to" picker (rem0001 phase 6), without rows
   check(
-    'users: editor1@ (not a tenant admin) sees only themselves',
-    editorSees.length === 1 && editorSees[0]?.id === editor1.id,
+    'users: editor1@ (not a tenant admin) sees colleagues without their rows',
+    editorSees.some((u) => u.id === editor1.id) &&
+      editorSees.every((u) => u.id === editor1.id || rowsOf(u).length === 0),
   )
 
   // users: update rows of a shared user; the hidden tenant3 row must survive

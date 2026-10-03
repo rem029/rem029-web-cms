@@ -9,7 +9,15 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import { defaultFooterCopyRight } from '@/utilities/defaults'
-import { accessCheckResolver, hiddenResolver, isSuperUser } from '@/common/utils/access'
+import {
+  accessCheckResolver,
+  hiddenResolver,
+  isSuperUser,
+  publicOrVisible,
+} from '@/common/utils/access'
+import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
+import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
+import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 
 export const Footer: CollectionConfig = {
@@ -20,12 +28,13 @@ export const Footer: CollectionConfig = {
     hidden: hiddenResolver('footer'),
   },
   access: {
-    read: () => true,
-    update: accessCheckResolver('footer', 'update'),
+    read: publicOrVisible('footer'),
+    update: accessCheckResolver('footer', 'update', { hideable: true }),
     create: isSuperUser,
     delete: isSuperUser,
   },
   fields: [
+    hiddenBannerField,
     {
       name: 'navItems',
       type: 'array',
@@ -63,9 +72,14 @@ export const Footer: CollectionConfig = {
         description: 'Copyright text to be dispalyed at the bottom of the footer',
       },
     },
+    ...hiddenFields({
+      description: 'Hides it from other members in the admin only. The public site always uses it.',
+    }),
+    ...createdUpdatedByFields,
   ],
   hooks: {
     beforeValidate: [validateTenantDocUniqueness('footer', 'Footer')],
+    beforeChange: [setCreatedUpdatedByCollection],
     afterChange: [revalidateFooter],
   },
 }

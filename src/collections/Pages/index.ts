@@ -1,6 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
-import { accessCheckResolver, hiddenResolver, publishedOrPermission } from '@/common/utils/access'
+import {
+  accessCheckResolver,
+  hiddenResolver,
+  publishedOrPermission,
+  versionsAccess,
+} from '@/common/utils/access'
+import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
+import { syncHiddenToDoc } from '@/common/hooks/syncHiddenToDoc'
 
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
@@ -31,9 +38,10 @@ export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
     create: accessCheckResolver('pages', 'create'),
-    delete: accessCheckResolver('pages', 'delete'),
-    read: publishedOrPermission('pages'),
-    update: accessCheckResolver('pages', 'update'),
+    delete: accessCheckResolver('pages', 'delete', { hideable: true }),
+    read: publishedOrPermission('pages', { hideable: true }),
+    readVersions: versionsAccess('pages'),
+    update: accessCheckResolver('pages', 'update', { hideable: true }),
   },
   // This config controls what's populated by default when a page is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -66,6 +74,7 @@ export const Pages: CollectionConfig<'pages'> = {
     useAsTitle: 'title',
   },
   fields: [
+    hiddenBannerField,
     {
       name: 'title',
       type: 'text',
@@ -158,6 +167,7 @@ export const Pages: CollectionConfig<'pages'> = {
       relationTo: 'categories',
     },
 
+    ...hiddenFields(),
     ...createdUpdatedByFields,
   ],
   indexes: [
@@ -167,7 +177,7 @@ export const Pages: CollectionConfig<'pages'> = {
     },
   ],
   hooks: {
-    afterChange: [revalidatePage],
+    afterChange: [syncHiddenToDoc, revalidatePage],
     beforeChange: [populatePublishedAt, setCreatedUpdatedByCollection, populateFullSlug],
     beforeValidate: [validateTenantSlugUniqueness('pages', 'page')],
     afterDelete: [revalidateDelete],

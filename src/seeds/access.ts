@@ -5,7 +5,7 @@
  *   templates since rem0001 phase 5) and test users of the default tenant.
  * - `seedTenantAccess` (runs after `multiTenancy`, which creates tenant1/tenant2): tenant-made
  *   `editor`/`cashier` profiles in tenant1 and tenant2, and `owner@` (tenant admin of both),
- *   `editor1@` (tenant1 editor), `cashier2@` (tenant2 cashier).
+ *   `editor1@`/`editor2@`/`editor3@` (tenant1 editors), `cashier2@` (tenant2 cashier).
  *
  *   pnpm seed
  *
@@ -255,6 +255,18 @@ const TENANT_USERS: TenantSeedUser[] = [
   {
     name: 'tenant1 editor (tenant profile)',
     email: 'editor1@example.test',
+    memberships: [{ tenantSlug: 'tenant1', profileSlug: 'editor' }],
+  },
+  // hidden documents (hiddenDocuments.ts): editor2@ is in the hidden page's "Visible to",
+  // editor3@ isn't
+  {
+    name: 'tenant1 editor 2',
+    email: 'editor2@example.test',
+    memberships: [{ tenantSlug: 'tenant1', profileSlug: 'editor' }],
+  },
+  {
+    name: 'tenant1 editor 3',
+    email: 'editor3@example.test',
     memberships: [{ tenantSlug: 'tenant1', profileSlug: 'editor' }],
   },
   {

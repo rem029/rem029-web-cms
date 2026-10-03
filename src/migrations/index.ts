@@ -22,6 +22,7 @@ import * as migration_20261002_234322_roles_to_users_access from './20261002_234
 import * as migration_20261003_004242_users_is_disabled from './20261003_004242_users_is_disabled';
 import * as migration_20261003_013511_users_tenant_access from './20261003_013511_users_tenant_access';
 import * as migration_20261003_102355_tenant_admins from './20261003_102355_tenant_admins';
+import * as migration_20261003_122558_hidden_documents from './20261003_122558_hidden_documents';
 
 export const migrations = [
   {
@@ -142,6 +143,11 @@ export const migrations = [
   {
     up: migration_20261003_102355_tenant_admins.up,
     down: migration_20261003_102355_tenant_admins.down,
-    name: '20261003_102355_tenant_admins'
+    name: '20261003_102355_tenant_admins',
+  },
+  {
+    up: migration_20261003_122558_hidden_documents.up,
+    down: migration_20261003_122558_hidden_documents.down,
+    name: '20261003_122558_hidden_documents'
   },
 ];

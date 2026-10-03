@@ -1,6 +1,6 @@
 /**
  * Checks field-level access on `users` (rem0001 phase 3): a non-super user edits only their own
- * name and password, sees only themselves, can't raise anyone's access; disabled users get
+ * name and password, sees only themselves and their colleagues (since phase 6), can't raise anyone's access; disabled users get
  * nothing; the last super user can't be removed. Uses the seeded users (`pnpm seed`).
  *
  *   pnpm payload run scripts/verify/userFieldAccess.ts
@@ -37,7 +37,8 @@ const { check, failures } = createChecker(payload)
 const TEMP_PREFIX = 'verify-user-field-access'
 const tempEmail = (name: string) => `${TEMP_PREFIX}-${name}@example.test`
 
-const tenantIds = (user: SessionUser): unknown[] => (user.tenants ?? []).map((row) => idOf(row.tenant))
+const tenantIds = (user: SessionUser): unknown[] =>
+  (user.tenants ?? []).map((row) => idOf(row.tenant))
 
 const cleanup = async (): Promise<void> => {
   await payload.delete({
@@ -116,9 +117,7 @@ try {
   }
 
   const rowPairs = (u: SessionUser): string[] =>
-    (u.tenants ?? [])
-      .map((r) => `${String(idOf(r.tenant))}:${String(idOf(r.access))}`)
-      .sort()
+    (u.tenants ?? []).map((r) => `${String(idOf(r.tenant))}:${String(idOf(r.access))}`).sort()
   const editorAfter = await loadUser(payload, editor.email)
   check('self: editor still not a super user', editorAfter.super_user !== true)
   check(
@@ -213,10 +212,15 @@ try {
     overrideAccess: false,
     depth: 0,
   })
-  check('read: editor sees only themselves', seen.length === 1 && seen[0]?.id === editor.id)
+  // colleagues are readable since rem0001 phase 6 (the "Visible to" picker); super users aren't
+  const editorSelf = seen.find((u) => u.id === editor.id)
+  check(
+    'read: editor sees themselves, no super users',
+    editorSelf !== undefined && !seen.some((u) => u.super_user === true),
+  )
   check(
     'read: editor does not see is_disabled',
-    seen[0] !== undefined && !('is_disabled' in seen[0]),
+    seen.length > 0 && seen.every((u) => !('is_disabled' in u)),
   )
   check(
     'create: editor cannot create users',

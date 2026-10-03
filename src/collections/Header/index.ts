@@ -1,7 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
 import { link } from '@/fields/link'
-import { accessCheckResolver, hiddenResolver, isSuperUser } from '@/common/utils/access'
+import {
+  accessCheckResolver,
+  hiddenResolver,
+  isSuperUser,
+  publicOrVisible,
+} from '@/common/utils/access'
+import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
+import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
+import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 import { revalidateHeader } from './hooks/revalidateHeader'
 
@@ -13,12 +21,13 @@ export const Header: CollectionConfig = {
     hidden: hiddenResolver('header'),
   },
   access: {
-    read: () => true,
-    update: accessCheckResolver('header', 'update'),
+    read: publicOrVisible('header'),
+    update: accessCheckResolver('header', 'update', { hideable: true }),
     create: isSuperUser,
     delete: isSuperUser,
   },
   fields: [
+    hiddenBannerField,
     {
       name: 'navItems',
       type: 'array',
@@ -36,9 +45,14 @@ export const Header: CollectionConfig = {
         },
       },
     },
+    ...hiddenFields({
+      description: 'Hides it from other members in the admin only. The public site always uses it.',
+    }),
+    ...createdUpdatedByFields,
   ],
   hooks: {
     beforeValidate: [validateTenantDocUniqueness('header', 'Header')],
+    beforeChange: [setCreatedUpdatedByCollection],
     afterChange: [revalidateHeader],
   },
 }

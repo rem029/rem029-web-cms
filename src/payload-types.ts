@@ -239,6 +239,11 @@ export interface Page {
    */
   fullSlug?: string | null;
   category?: (number | null) | Category;
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -620,6 +625,13 @@ export interface Post {
     | null;
   slug?: string | null;
   slugLock?: boolean | null;
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1415,6 +1427,16 @@ export interface Header {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Hides it from other members in the admin only. The public site always uses it.
+   */
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1470,6 +1492,16 @@ export interface Footer {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Hides it from other members in the admin only. The public site always uses it.
+   */
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1481,6 +1513,14 @@ export interface Theme {
   id: number;
   tenant?: (number | null) | Tenant;
   themes?: ThemeConfig;
+  /**
+   * Hides it from other members in the admin only. The public site always uses it.
+   */
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -1522,6 +1562,14 @@ export interface Setting {
     tiktok?: string | null;
     whatsapp?: string | null;
   };
+  /**
+   * Hides it from other members in the admin only. The public site always uses it.
+   */
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -1845,6 +1893,8 @@ export interface PagesSelect<T extends boolean = true> {
   slugLock?: T;
   fullSlug?: T;
   category?: T;
+  isHidden?: T;
+  visibleTo?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -2329,6 +2379,10 @@ export interface PostsSelect<T extends boolean = true> {
       };
   slug?: T;
   slugLock?: T;
+  isHidden?: T;
+  visibleTo?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2577,6 +2631,10 @@ export interface HeaderSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  isHidden?: T;
+  visibleTo?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2608,6 +2666,10 @@ export interface FooterSelect<T extends boolean = true> {
         id?: T;
       };
   copyright?: T;
+  isHidden?: T;
+  visibleTo?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2618,6 +2680,8 @@ export interface FooterSelect<T extends boolean = true> {
 export interface ThemeSelect<T extends boolean = true> {
   tenant?: T;
   themes?: T | ThemeConfigSelect<T>;
+  isHidden?: T;
+  visibleTo?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -2674,6 +2738,8 @@ export interface SettingsSelect<T extends boolean = true> {
         tiktok?: T;
         whatsapp?: T;
       };
+  isHidden?: T;
+  visibleTo?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

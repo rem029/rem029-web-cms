@@ -93,7 +93,7 @@ const text = (value: string) => ({
   style: '',
 })
 
-const richText = (heading: string, ...paragraphs: string[]): RichText => ({
+export const richText = (heading: string, ...paragraphs: string[]): RichText => ({
   root: {
     type: 'root',
     version: 1,
@@ -122,7 +122,7 @@ const richText = (heading: string, ...paragraphs: string[]): RichText => ({
   },
 })
 
-const contentLayout = (content: RichText): Page['layout'] => [
+export const contentLayout = (content: RichText): Page['layout'] => [
   { blockType: 'content', columns: [{ size: 'full', richText: content }] },
 ]
 

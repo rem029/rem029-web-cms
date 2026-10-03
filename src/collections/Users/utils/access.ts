@@ -1,36 +1,37 @@
 import type { Access, FieldAccess, Where } from 'payload'
 import {
+  NOT_SUPER_USER,
+  getTenantRows,
   isActiveSuperUser,
   isAnyTenantAdmin,
   isDisabledUser,
   tenantAdminTenantIds,
 } from '@/common/utils/access'
 
-export const NOT_SUPER_USER: Where = {
-  or: [{ super_user: { equals: false } }, { super_user: { exists: false } }],
-}
-
 /**
  * Read access for users collection:
  * - Active super users read all users
  * - Tenant admins read themselves plus members with a row in any tenant they administer
- * - Other users read only themselves
+ * - Everyone else reads themselves plus colleagues who share a tenant with them (not super users)
  */
 export const readUsers: Access = ({ req }) => {
   const { user } = req
   if (!user || isDisabledUser(user)) return false
   if (isActiveSuperUser(user)) return true
 
-  const a = tenantAdminTenantIds(user)
   const selfWhere: Where = { id: { equals: user.id } }
-  if (a.length === 0) {
-    return selfWhere
-  }
+  const adminIds = tenantAdminTenantIds(user)
+  // colleagues of every tenant the user belongs to, for the "Visible to" picker (phase 6)
+  const memberIds = [...new Set(getTenantRows(user).map((row) => row.tenantId))]
+  if (memberIds.length === 0) return selfWhere
 
-  const result: Where = {
-    or: [selfWhere, { 'tenants.tenant': { in: a } }],
-  }
-  return result
+  const branches: Where[] = [
+    selfWhere,
+    { and: [{ 'tenants.tenant': { in: memberIds } }, NOT_SUPER_USER] },
+  ]
+  // tenant admins also read super users with a row in their tenants (phase 5)
+  if (adminIds.length > 0) branches.push({ 'tenants.tenant': { in: adminIds } })
+  return { or: branches }
 }
 
 /**

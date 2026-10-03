@@ -7,6 +7,8 @@ const isRecord = (val: unknown): val is Record<string, unknown> =>
 
 /**
  * Filters out tenant rows of tenants the reader does not administer when reading other users.
+ * For plain members (who administer no tenants), this returns no tenant rows for other users,
+ * ensuring members cannot see which tenants their colleagues belong to.
  *
  * Skipped for:
  * - Internal reads with overrideAccess (originalDoc, findByID with overrideAccess, JWT lookup)

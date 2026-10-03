@@ -12,6 +12,7 @@ import { getPayload } from 'payload'
 
 import { seedAccess, seedTenantAccess } from './access'
 import { seedDefaultAdmin } from './defaultAdmin'
+import { seedHiddenDocuments } from './hiddenDocuments'
 import { seedMultiTenancy } from './multiTenancy'
 
 if (process.env.NODE_ENV === 'production') {
@@ -24,6 +25,7 @@ const seeds = [
   { name: 'access', run: seedAccess },
   { name: 'multiTenancy', run: seedMultiTenancy },
   { name: 'tenantAccess', run: seedTenantAccess },
+  { name: 'hiddenDocuments', run: seedHiddenDocuments },
 ]
 
 const payload = await getPayload({ config })

@@ -285,7 +285,8 @@ try {
     )
   }
 
-  // users: without `users.read` you only see yourself
+  // users: members see themselves and colleagues of their tenants (the "Visible to" picker,
+  // rem0001 phase 6), never super users
   for (const user of [defaultUser, viewer]) {
     const { docs } = await payload.find({
       collection: 'users',
@@ -293,7 +294,10 @@ try {
       overrideAccess: false,
       depth: 0,
     })
-    check(`users: ${user.email} sees only themselves`, docs.length === 1 && docs[0]?.id === user.id)
+    check(
+      `users: ${user.email} sees themselves and colleagues, no super users`,
+      docs.some((doc) => doc.id === user.id) && !docs.some((doc) => doc.super_user === true),
+    )
   }
   check(
     'users: editor cannot create users',

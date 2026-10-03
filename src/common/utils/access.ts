@@ -42,6 +42,10 @@ export const isSuperUser: Access = ({ req }) => isActiveSuperUser(req.user)
 
 export const isSuperUserField: FieldAccess = ({ req }) => isActiveSuperUser(req.user)
 
+export const NOT_SUPER_USER: Where = {
+  or: [{ super_user: { equals: false } }, { super_user: { exists: false } }],
+}
+
 /** Pure: true only when the record has a row for the slug with the checkbox ticked. */
 export const hasPermission = (
   record: UsersAccess | null | undefined,
@@ -123,9 +127,7 @@ export const getTenantRows = (
  * Returns tenant IDs where the user has the tenant admin checkbox ticked.
  * Returns [] for no user or disabled user (deduped). Super users don't need it (callers check super first).
  */
-export const tenantAdminTenantIds = (
-  user: User | ClientUser | null | undefined,
-): number[] => {
+export const tenantAdminTenantIds = (user: User | ClientUser | null | undefined): number[] => {
   if (!user || isDisabledUser(user)) return []
 
   const rows = getTenantRows(user)
@@ -143,9 +145,8 @@ export const tenantAdminTenantIds = (
 /**
  * Returns true if the user is a tenant admin of any tenant.
  */
-export const isAnyTenantAdmin = (
-  user: User | ClientUser | null | undefined,
-): boolean => tenantAdminTenantIds(user).length > 0
+export const isAnyTenantAdmin = (user: User | ClientUser | null | undefined): boolean =>
+  tenantAdminTenantIds(user).length > 0
 
 /**
  * Hardcoded grants for tenant admins within their tenant (not driven by a profile):
@@ -187,11 +188,7 @@ export const tenantAdminShows = (slug: CollectionSlug): boolean => {
  * Checks whether a tenant row allows an operation on a collection slug.
  * Uses hardcoded grants for tenant admins; otherwise checks the profile record.
  */
-export const rowAllows = (
-  row: TenantRow,
-  slug: CollectionSlug,
-  op: AccessOperation,
-): boolean =>
+export const rowAllows = (row: TenantRow, slug: CollectionSlug, op: AccessOperation): boolean =>
   row.isTenantAdmin ? tenantAdminAllows(slug, op) : hasPermission(row.record, slug, op)
 
 /**
@@ -260,10 +257,101 @@ const combineWhere = (
 }
 
 /**
+ * Builds the WHERE clause for hidden documents:
+ * matches documents that are not hidden (isHidden equals false OR exists false),
+ * documents created by the user, or documents where the user is in visibleTo.
+ */
+export const hiddenRuleWhere = (
+  userId: number,
+  prefix: '' | 'parent.' | 'version.' = '',
+): Where => ({
+  or: [
+    { [`${prefix}isHidden`]: { equals: false } },
+    { [`${prefix}isHidden`]: { exists: false } },
+    { [`${prefix}createdBy`]: { equals: userId } },
+    { [`${prefix}visibleTo`]: { in: [userId] } },
+  ],
+})
+
+export interface VisibleTenantWhereArgs {
+  user: User | ClientUser | null | undefined
+  tenantIds: number[]
+  tenantPath: 'tenant' | 'version.tenant'
+  /** versions: the rule on both the parent (current state) and the version snapshot */
+  forVersions?: boolean
+  logger?: { debug: (data: Record<string, unknown>) => void } | null
+  slug?: CollectionSlug | string
+  op?: AccessOperation | 'readVersions' | string
+}
+
+/**
+ * Builds a WHERE constraint for a hideable tenant collection based on allowed tenant IDs.
+ * Tenant admins have no hidden document restrictions in their administered tenants.
+ * Other members can only see non-hidden documents (or documents visible to / created by them).
+ */
+export const visibleTenantWhere = ({
+  user,
+  tenantIds,
+  tenantPath,
+  forVersions = false,
+  logger,
+  slug,
+  op,
+}: VisibleTenantWhereArgs): Where | false => {
+  if (!user || isDisabledUser(user) || tenantIds.length === 0) {
+    return false
+  }
+
+  const adminTenants = tenantAdminTenantIds(user)
+  const adminIds = tenantIds.filter((id) => adminTenants.includes(id))
+  const memberIds = tenantIds.filter((id) => !adminTenants.includes(id))
+
+  if (adminIds.length === 0 && memberIds.length === 0) {
+    return false
+  }
+
+  const userId = typeof user.id === 'number' ? user.id : Number(user.id)
+  if (!Number.isInteger(userId)) {
+    return false
+  }
+
+  if (memberIds.length > 0) {
+    logger?.debug({
+      msg: 'access: hidden rule applied',
+      slug,
+      op,
+      userId,
+      reason: 'hidden',
+    })
+  }
+
+  const adminBranch: Where = { [tenantPath]: { in: adminIds } }
+  const memberBranch: Where = {
+    and: [
+      { [tenantPath]: { in: memberIds } },
+      // a draft of a published doc only writes the version, so `parent.isHidden` can lag behind
+      ...(forVersions
+        ? [hiddenRuleWhere(userId, 'parent.'), hiddenRuleWhere(userId, 'version.')]
+        : [hiddenRuleWhere(userId)]),
+    ],
+  }
+
+  if (adminIds.length > 0 && memberIds.length > 0) {
+    return { or: [adminBranch, memberBranch] }
+  }
+
+  if (adminIds.length > 0) {
+    return adminBranch
+  }
+
+  return memberBranch
+}
+
+/**
  * Collection access function.
  * - Active super user → true (disabled first → false).
  * - Tenant collections:
- *     read/update/delete → `{ tenant: { in: ids } }`, empty → false + debug log
+ *     read/update/delete → `{ tenant: { in: ids } }` (or visibleTenantWhere when hideable), empty → false + debug log
  *     create → target tenant (`data.tenant` else `getSelectedTenant(req)`) in allowedTenantIds(create)
  * - 'tenants':
  *     read/update/delete → `{ id: { in: ids } }`
@@ -274,7 +362,7 @@ export const accessCheckResolver =
   (
     slug: CollectionSlug,
     op: Exclude<AccessOperation, 'admin' | 'access'>,
-    options?: { where?: (req: PayloadRequest) => Where },
+    options?: { where?: (req: PayloadRequest) => Where; hideable?: boolean },
   ): Access =>
   ({ req, data }) => {
     const { user } = req
@@ -303,6 +391,19 @@ export const accessCheckResolver =
         req.payload.logger.debug({ msg: 'access: denied', slug, op, userId: user.id })
         return false
       }
+
+      if (options?.hideable) {
+        const visibleWhere = visibleTenantWhere({
+          user,
+          tenantIds: ids,
+          tenantPath: 'tenant',
+          logger: req.payload.logger,
+          slug,
+          op,
+        })
+        return combineWhere(visibleWhere, options?.where, req)
+      }
+
       return combineWhere({ tenant: { in: ids } }, options?.where, req)
     }
 
@@ -326,6 +427,40 @@ export const accessCheckResolver =
       return combineWhere(true, options?.where, req)
     }
     return false
+  }
+
+/**
+ * Collection `readVersions` access function for hideable tenant collections.
+ * Non-super users can read versions only within their allowed tenant IDs,
+ * constrained by the hidden rule on both the parent document and the version.
+ */
+export const versionsAccess =
+  (slug: CollectionSlug): Access =>
+  ({ req }) => {
+    const { user } = req
+    if (!user || isDisabledUser(user)) return false
+    if (isActiveSuperUser(user)) return true
+
+    const ids = allowedTenantIds(req, slug, 'read')
+    if (ids.length === 0) {
+      req.payload.logger.debug({
+        msg: 'access: denied',
+        slug,
+        op: 'readVersions',
+        userId: user.id,
+      })
+      return false
+    }
+
+    return visibleTenantWhere({
+      user,
+      tenantIds: ids,
+      tenantPath: 'version.tenant',
+      forVersions: true,
+      logger: req.payload.logger,
+      slug,
+      op: 'readVersions',
+    })
   }
 
 /** `Users.access.admin`: any row's profile having `users.admin` decides who can open `/admin`. */
@@ -357,9 +492,12 @@ export const hiddenResolver =
 /**
  * Read for collections with drafts (pages, posts): published docs are public; drafts need the
  * profile's `read` on the slug in that tenant (super users always).
+ * When `hideable` is enabled, signed-in non-super users have the hidden rule applied:
+ * tenant admins see all documents in their administered tenants, while other documents
+ * (drafts in member tenants, or published docs) must satisfy the hidden rule.
  */
 export const publishedOrPermission =
-  (slug: CollectionSlug): Access =>
+  (slug: CollectionSlug, options?: { hideable?: boolean }): Access =>
   ({ req }) => {
     const publishedOnly: Where = { _status: { equals: 'published' } }
     const { user } = req
@@ -374,14 +512,67 @@ export const publishedOrPermission =
     }
 
     const ids = allowedTenantIds(req, slug, 'read')
-    if (ids.length === 0) {
-      return publishedOnly
+    const baseWhere: Where =
+      ids.length === 0 ? publishedOnly : { or: [{ tenant: { in: ids } }, publishedOnly] }
+
+    if (!options?.hideable) {
+      return baseWhere
     }
 
-    const tenantOrPublished: Where = {
-      or: [{ tenant: { in: ids } }, publishedOnly],
+    const adminTenants = tenantAdminTenantIds(user)
+    const adminIds = ids.filter((id) => adminTenants.includes(id))
+
+    req.payload.logger.debug({
+      msg: 'access: hidden rule applied',
+      slug,
+      op: 'read',
+      userId: user.id,
+      reason: 'hidden',
+    })
+
+    const memberWhere: Where = {
+      and: [baseWhere, hiddenRuleWhere(user.id)],
     }
-    return tenantOrPublished
+
+    if (adminIds.length > 0) {
+      return {
+        or: [{ tenant: { in: adminIds } }, memberWhere],
+      }
+    }
+
+    return memberWhere
+  }
+
+/**
+ * Read access for tenant globals (header, footer, theme, settings).
+ * Public site reads them (anonymous/disabled → true, super user → true).
+ * Signed-in non-super users see documents in their administered tenants or matching the hidden rule.
+ * The multi-tenant plugin already adds the user's tenants constraint for signed-in users.
+ */
+export const publicOrVisible =
+  (slug: CollectionSlug): Access =>
+  ({ req }) => {
+    const { user } = req
+    if (!user || isDisabledUser(user)) return true
+    if (isActiveSuperUser(user)) return true
+
+    const adminIds = tenantAdminTenantIds(user)
+
+    req.payload.logger.debug({
+      msg: 'access: hidden rule applied',
+      slug,
+      op: 'read',
+      userId: user.id,
+      reason: 'hidden',
+    })
+
+    if (adminIds.length > 0) {
+      return {
+        or: [{ tenant: { in: adminIds } }, hiddenRuleWhere(user.id)],
+      }
+    }
+
+    return hiddenRuleWhere(user.id)
   }
 
 /**
