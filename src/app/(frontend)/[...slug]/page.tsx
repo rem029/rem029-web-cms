@@ -3,7 +3,8 @@ import type { Metadata } from 'next'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload, TypedLocale } from 'payload'
-import { cookies, draftMode } from 'next/headers'
+import { cookies } from 'next/headers'
+import { isPreviewing } from '@/common/utils/isPreviewing'
 import { notFound } from 'next/navigation'
 import React, { cache } from 'react'
 
@@ -30,7 +31,7 @@ type Args = {
 const slugPathOf = (slug?: string[]): string | null => (slug?.length ? slug.join('/') : null)
 
 export default async function Page({ params: paramsPromise }: Args) {
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isPreviewing()
   const slugPath = slugPathOf((await paramsPromise).slug)
   const url = '/' + (slugPath ?? '')
 
@@ -102,7 +103,7 @@ const queryPage = cache(async (slugPath: string | null, locale: TypedLocale) => 
   const tenantId = await getFrontendTenantId()
   if (!tenantId) return null
 
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isPreviewing()
   const payload = await getPayload({ config: configPromise })
   const { page } = await findHomePage(payload, tenantId, { draft, locale })
   return page
@@ -116,7 +117,7 @@ const queryPageBySlug = cache(async ({ slug, locale }: { slug: string; locale?: 
     return null
   }
 
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isPreviewing()
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({

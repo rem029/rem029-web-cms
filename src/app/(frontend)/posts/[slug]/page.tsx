@@ -4,7 +4,7 @@ import { RelatedPosts } from '@/blocks/old/RelatedPosts/Component'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import { draftMode } from 'next/headers'
+import { isPreviewing } from '@/common/utils/isPreviewing'
 import React, { cache } from 'react'
 import RichText from '@/components/RichText'
 import { frontendTenantWhere, getFrontendTenantId } from '@/common/utils/frontendTenant'
@@ -23,7 +23,7 @@ type Args = {
 }
 
 export default async function Post({ params: paramsPromise }: Args) {
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isPreviewing()
   const { slug = '' } = await paramsPromise
   const url = '/posts/' + slug
   const post = await queryPostBySlug({ slug })
@@ -69,7 +69,7 @@ const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
     return null
   }
 
-  const { isEnabled: draft } = await draftMode()
+  const draft = await isPreviewing()
 
   const payload = await getPayload({ config: configPromise })
 

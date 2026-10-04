@@ -2,7 +2,8 @@
  * Multi-tenancy test data: tenants, a home + about page and a `welcome` post per tenant (same slugs
  * everywhere, so a public page showing another tenant's doc is easy to spot), tenant2's homepage
  * set to its about page (tests Settings -> Homepage resolution vs. the slug `home` fallback), a
- * tenant1-only page and redirect, and test users.
+ * tenant1-only page and redirect, different active themes for tenant1 (Ocean) and tenant2 (Sunset,
+ * other font), and test users.
  *
  *   pnpm seed
  *
@@ -14,12 +15,15 @@
 import type { Payload, RequiredDataFromCollectionSlug } from 'payload'
 
 import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
+import { defaultThemeCSS } from '@/utilities/defaults'
 import type { Page, Tenant } from '@/payload-types'
 
 type SeedTenant = {
   slug: string
   name: { en: string; ar: string }
   tagline: string
+  // an active theme (name + --primary, optional extra css), so tenants look different
+  theme?: { name: string; primary: string; extraCSS?: string }
 }
 
 // a profile (users-access slug) per tenant row (rem0001 phase 4)
@@ -40,8 +44,18 @@ const TENANTS: SeedTenant[] = [
     slug: 'tenant1',
     name: { en: 'tenant1', ar: 'tenant1' },
     tagline: 'Fresh handmade pasta every day.',
+    theme: { name: 'Ocean', primary: '#1d4ed8' },
   },
-  { slug: 'tenant2', name: { en: 'tenant2', ar: 'tenant2' }, tagline: 'Sushi rolled to order.' },
+  {
+    slug: 'tenant2',
+    name: { en: 'tenant2', ar: 'tenant2' },
+    tagline: 'Sushi rolled to order.',
+    theme: {
+      name: 'Sunset',
+      primary: '#b4232c',
+      extraCSS: "* { font-family: 'Urbanist', sans-serif; }",
+    },
+  },
   {
     slug: 'tenant3',
     name: { en: 'tenant3', ar: 'tenant3' },
@@ -312,7 +326,19 @@ const upsertTenantDocs = async (payload: Payload, tenant: Tenant, seed: SeedTena
   }
 
   await findOrCreate('footer')
-  await findOrCreate('theme')
+  const theme = await findOrCreate('theme')
+  if (seed.theme && !theme.themes?.length) {
+    const css = defaultThemeCSS.replace('--primary: #102721', `--primary: ${seed.theme.primary}`)
+    const themes = [
+      {
+        active: true,
+        name: seed.theme.name,
+        css: [css, seed.theme.extraCSS].filter(Boolean).join('\n'),
+      },
+    ]
+    await payload.update({ collection: 'theme', id: theme.id, data: { themes }, context })
+    payload.logger.info(`seed: set theme ${seed.theme.name} for ${tenant.slug}`)
+  }
 
   const settings = await findOrCreate('settings')
   if (!settings.siteName || settings.siteName === 'CMS Website') {

@@ -11,6 +11,7 @@ import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
+import { previewURL } from '@/common/utils/preview'
 import { revalidateHeader } from './hooks/revalidateHeader'
 
 export const Header: CollectionConfig = {
@@ -19,6 +20,17 @@ export const Header: CollectionConfig = {
   labels: { singular: 'Header', plural: 'Header' },
   admin: {
     hidden: hiddenResolver('header'),
+    livePreview: {
+      url: async ({ data, req }) => {
+        return (
+          (await previewURL({
+            collection: 'header',
+            tenant: data?.tenant,
+            req,
+          })) ?? ''
+        )
+      },
+    },
   },
   access: {
     read: publicOrVisible('header'),

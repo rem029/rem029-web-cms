@@ -19,6 +19,7 @@ import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
+import { previewURL } from '@/common/utils/preview'
 
 export const Footer: CollectionConfig = {
   slug: 'footer',
@@ -26,6 +27,17 @@ export const Footer: CollectionConfig = {
   labels: { singular: 'Footer', plural: 'Footer' },
   admin: {
     hidden: hiddenResolver('footer'),
+    livePreview: {
+      url: async ({ data, req }) => {
+        return (
+          (await previewURL({
+            collection: 'footer',
+            tenant: data?.tenant,
+            req,
+          })) ?? ''
+        )
+      },
+    },
   },
   access: {
     read: publicOrVisible('footer'),

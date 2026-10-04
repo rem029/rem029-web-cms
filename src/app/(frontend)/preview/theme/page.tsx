@@ -1,27 +1,21 @@
 import React from 'react'
 import { Metadata } from 'next'
-import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { ThemePreviewClient } from './page.client'
-import { getDefaultTenantId, getTenantDoc } from '@/common/utils/getTenantDoc'
+import { getTenantDoc } from '@/common/utils/getTenantDoc'
+import { getFrontendTenantId } from '@/common/utils/frontendTenant'
+import { isPreviewing } from '@/common/utils/isPreviewing'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 
-export default async function ThemePreview({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
-  const { previewSecret, tenant } = await searchParams
-
-  if (previewSecret !== process.env.PREVIEW_SECRET) {
+export default async function ThemePreview() {
+  if (!(await isPreviewing())) {
     return notFound()
   }
-  const { isEnabled: isDraftMode } = await draftMode()
 
-  // the theme live preview passes the edited doc's tenant; without one, show the default tenant
-  const tenantParam = Array.isArray(tenant) ? tenant[0] : tenant
-  if (tenantParam && !/^\d+$/.test(tenantParam)) return notFound()
-  const tenantId = tenantParam ? Number(tenantParam) : await getDefaultTenantId()
+  const tenantId = await getFrontendTenantId()
+  if (!tenantId) {
+    return notFound()
+  }
 
   const themes = await getTenantDoc('theme', tenantId)
   const settings = await getTenantDoc('settings', tenantId)
@@ -30,10 +24,10 @@ export default async function ThemePreview({
 
   return (
     <React.Fragment>
-      {isDraftMode && <LivePreviewListener />}
+      <LivePreviewListener />
       <ThemePreviewClient
         activeThemeName={activeTheme?.name || 'Default CSS'}
-        isPreview={isDraftMode}
+        isPreview={true}
         settings={settings}
       />
     </React.Fragment>

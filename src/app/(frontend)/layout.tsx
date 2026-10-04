@@ -10,7 +10,7 @@ import { Footer } from '@/collections/Footer/Component'
 import { Header } from '@/collections/Header/Component'
 
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import { draftMode } from 'next/headers'
+import { isPreviewing } from '@/common/utils/isPreviewing'
 
 import './globals.css'
 import { getTenantDoc } from '@/common/utils/getTenantDoc'
@@ -27,7 +27,7 @@ import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from '@/utilities/constant'
 import { AnalyticsComponent } from '@/components/Analytics'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { isEnabled } = await draftMode()
+  const isEnabled = await isPreviewing()
   const cookieStore = await cookies()
   const locale = (cookieStore.get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE) as TypedLocale
   const tenantId = await getFrontendTenantId()

@@ -12,7 +12,7 @@ import { syncHiddenToDoc } from '@/common/hooks/syncHiddenToDoc'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
-import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { previewURL } from '@/common/utils/preview'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 
 import {
@@ -56,22 +56,24 @@ export const Pages: CollectionConfig<'pages'> = {
     hidden: hiddenResolver('pages'),
     defaultColumns: ['title', 'slug', 'isHomepage', 'updatedAt'],
     livePreview: {
-      url: ({ data, req }) => {
-        const path = generatePreviewPath({
-          slug: typeof data?.slug === 'string' ? data.slug : '',
-          collection: 'pages',
-          req,
-        })
-
-        return path
+      url: async ({ data, req }) => {
+        return (
+          (await previewURL({
+            collection: 'pages',
+            slug: typeof data?.slug === 'string' ? data.slug : '',
+            tenant: data?.tenant,
+            req,
+          })) ?? ''
+        )
       },
     },
-    preview: (data, { req }) =>
-      generatePreviewPath({
-        slug: typeof data?.slug === 'string' ? data.slug : '',
+    preview: async (data, { req }) =>
+      (await previewURL({
         collection: 'pages',
+        slug: typeof data?.slug === 'string' ? data.slug : '',
+        tenant: data?.tenant,
         req,
-      }),
+      })) ?? '',
     useAsTitle: 'title',
   },
   fields: [
