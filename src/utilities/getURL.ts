@@ -1,3 +1,5 @@
+import type { Tenant } from '@/payload-types'
+import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
 import canUseDOM from './canUseDOM'
 
 export const getServerSideURL = () => {
@@ -28,4 +30,21 @@ export const getClientSideURL = () => {
   }
 
   return process.env.NEXT_PUBLIC_SERVER_URL || ''
+}
+
+export const getTenantURL = (tenant: Pick<Tenant, 'slug' | 'domains'>): string => {
+  const base = process.env.TENANT_BASE_DOMAIN
+  if (!base || !base.trim()) {
+    return getServerSideURL()
+  }
+
+  const protocol = new URL(getServerSideURL()).protocol
+  const firstDomain = tenant.domains?.find((d) => Boolean(d?.domain?.trim()))?.domain?.trim()
+  const host = firstDomain
+    ? firstDomain
+    : tenant.slug === DEFAULT_TENANT_SLUG
+      ? base.trim()
+      : `${tenant.slug}.${base.trim()}`
+
+  return `${protocol}//${host}`
 }

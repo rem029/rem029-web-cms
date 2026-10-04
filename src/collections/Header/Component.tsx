@@ -1,5 +1,6 @@
 import { HeaderClient } from './Component.client'
-import { getDefaultTenantId, getTenantDoc } from '@/common/utils/getTenantDoc'
+import { getTenantDoc } from '@/common/utils/getTenantDoc'
+import { getFrontendTenantId } from '@/common/utils/frontendTenant'
 import React from 'react'
 
 import type { Setting } from '@/payload-types'
@@ -11,8 +12,8 @@ interface HeaderProps {
 }
 
 export async function Header({ settings, locale }: HeaderProps) {
-  const defaultTenantId = await getDefaultTenantId()
-  const headerData = await getTenantDoc('header', defaultTenantId, { depth: 1, locale })
+  const tenantId = await getFrontendTenantId()
+  const headerData = await getTenantDoc('header', tenantId, { depth: 1, locale })
 
   return <HeaderClient data={headerData} settings={settings} />
 }

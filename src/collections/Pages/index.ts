@@ -12,7 +12,7 @@ import { syncHiddenToDoc } from '@/common/hooks/syncHiddenToDoc'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
-import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { previewURL } from '@/common/utils/preview'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 
 import {
@@ -32,6 +32,7 @@ import { CSSNameWithCustomFiled } from '@/fields/css'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { populateFullSlug } from './hooks/populateFullSlug'
+import { isHomepage } from './hooks/isHomepage'
 import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 
 export const Pages: CollectionConfig<'pages'> = {
@@ -53,24 +54,26 @@ export const Pages: CollectionConfig<'pages'> = {
   },
   admin: {
     hidden: hiddenResolver('pages'),
-    defaultColumns: ['title', 'slug', 'updatedAt'],
+    defaultColumns: ['title', 'slug', 'isHomepage', 'updatedAt'],
     livePreview: {
-      url: ({ data, req }) => {
-        const path = generatePreviewPath({
-          slug: typeof data?.slug === 'string' ? data.slug : '',
-          collection: 'pages',
-          req,
-        })
-
-        return path
+      url: async ({ data, req }) => {
+        return (
+          (await previewURL({
+            collection: 'pages',
+            slug: typeof data?.slug === 'string' ? data.slug : '',
+            tenant: data?.tenant,
+            req,
+          })) ?? ''
+        )
       },
     },
-    preview: (data, { req }) =>
-      generatePreviewPath({
-        slug: typeof data?.slug === 'string' ? data.slug : '',
+    preview: async (data, { req }) =>
+      (await previewURL({
         collection: 'pages',
+        slug: typeof data?.slug === 'string' ? data.slug : '',
+        tenant: data?.tenant,
         req,
-      }),
+      })) ?? '',
     useAsTitle: 'title',
   },
   fields: [
@@ -143,6 +146,22 @@ export const Pages: CollectionConfig<'pages'> = {
       },
     },
     ...slugField(),
+    {
+      name: 'isHomepage',
+      type: 'checkbox',
+      label: 'Homepage',
+      virtual: true,
+      admin: {
+        readOnly: true,
+        position: 'sidebar',
+        description: 'Visitors see this page at your site address. Change it in Settings.',
+        disableListFilter: true,
+        components: { Cell: '@/collections/Pages/components/HomepageCell#HomepageCell' },
+      },
+      hooks: {
+        afterRead: [isHomepage],
+      },
+    },
     {
       name: 'fullSlug',
       type: 'text',

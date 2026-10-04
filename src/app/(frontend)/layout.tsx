@@ -10,11 +10,11 @@ import { Footer } from '@/collections/Footer/Component'
 import { Header } from '@/collections/Header/Component'
 
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import { draftMode } from 'next/headers'
+import { isPreviewing } from '@/common/utils/isPreviewing'
 
 import './globals.css'
-import { getServerSideURL } from '@/utilities/getURL'
-import { getDefaultTenantId, getTenantDoc } from '@/common/utils/getTenantDoc'
+import { getTenantDoc } from '@/common/utils/getTenantDoc'
+import { getFrontendTenantId, getFrontendTenantURL } from '@/common/utils/frontendTenant'
 import Script from 'next/script'
 
 import { Media } from '@/payload-types'
@@ -27,15 +27,15 @@ import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from '@/utilities/constant'
 import { AnalyticsComponent } from '@/components/Analytics'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { isEnabled } = await draftMode()
+  const isEnabled = await isPreviewing()
   const cookieStore = await cookies()
   const locale = (cookieStore.get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE) as TypedLocale
-  const defaultTenantId = await getDefaultTenantId()
-  const themes = await getTenantDoc('theme', defaultTenantId, {
+  const tenantId = await getFrontendTenantId()
+  const themes = await getTenantDoc('theme', tenantId, {
     depth: 1,
     locale: locale as TypedLocale,
   })
-  const settings = await getTenantDoc('settings', defaultTenantId, {
+  const settings = await getTenantDoc('settings', tenantId, {
     depth: 1,
     locale: locale as TypedLocale,
   })
@@ -92,7 +92,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   )
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getServerSideURL()),
-  openGraph: mergeOpenGraph(),
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    metadataBase: new URL(await getFrontendTenantURL()),
+    openGraph: mergeOpenGraph(),
+  }
 }

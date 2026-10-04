@@ -15,7 +15,7 @@ import { syncHiddenToDoc } from '@/common/hooks/syncHiddenToDoc'
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { Banner } from '../../blocks/old/Banner/config'
-import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { previewURL } from '@/common/utils/preview'
 import { populateAuthors } from './hooks/populateAuthors'
 import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
 
@@ -56,22 +56,24 @@ export const Posts: CollectionConfig<'posts'> = {
     hidden: true,
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data, req }) => {
-        const path = generatePreviewPath({
-          slug: typeof data?.slug === 'string' ? data.slug : '',
-          collection: 'posts',
-          req,
-        })
-
-        return path
+      url: async ({ data, req }) => {
+        return (
+          (await previewURL({
+            collection: 'posts',
+            slug: typeof data?.slug === 'string' ? data.slug : '',
+            tenant: data?.tenant,
+            req,
+          })) ?? ''
+        )
       },
     },
-    preview: (data, { req }) =>
-      generatePreviewPath({
-        slug: typeof data?.slug === 'string' ? data.slug : '',
+    preview: async (data, { req }) =>
+      (await previewURL({
         collection: 'posts',
+        slug: typeof data?.slug === 'string' ? data.slug : '',
+        tenant: data?.tenant,
         req,
-      }),
+      })) ?? '',
     useAsTitle: 'title',
   },
   fields: [

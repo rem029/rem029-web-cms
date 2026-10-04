@@ -1,7 +1,7 @@
 import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
 import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { defaultThemeCSS } from '@/utilities/defaults'
-import { generateThemePreviewPath } from '@/utilities/generatePreviewPath'
+import { previewURL } from '@/common/utils/preview'
 import {
   accessCheckResolver,
   hiddenResolver,
@@ -28,9 +28,14 @@ export const Theme: CollectionConfig = {
     group: 'Admin',
     hidden: hiddenResolver('theme'),
     livePreview: {
-      url: ({ data }) => {
-        const tenantId = typeof data?.tenant === 'object' ? data?.tenant?.id : data?.tenant
-        return generateThemePreviewPath(tenantId)
+      url: async ({ data, req }) => {
+        return (
+          (await previewURL({
+            collection: 'theme',
+            tenant: data?.tenant,
+            req,
+          })) ?? ''
+        )
       },
     },
   },

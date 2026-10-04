@@ -10,7 +10,6 @@ import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical
 import { IoIosSend } from 'react-icons/io'
 
 import { fields } from './fields'
-import { getClientSideURL } from '@/utilities/getURL'
 import { css } from '@/utilities/constants'
 import { addAnalytics } from '@/utilities/analytics'
 
@@ -93,7 +92,7 @@ export const FormBlock: React.FC<
         let phone = ''
 
         try {
-          const response = await fetch(`${getClientSideURL()}/api/form-submissions`, {
+          const response = await fetch('/api/form-submissions', {
             body: JSON.stringify({
               form: formID,
               submissionData: dataToSend,
