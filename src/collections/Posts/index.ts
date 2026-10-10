@@ -12,8 +12,6 @@ import {
 import { accessCheckResolver, publishedOrPermission, versionsAccess } from '@/common/utils/access'
 import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
 import { syncHiddenToDoc } from '@/common/hooks/syncHiddenToDoc'
-import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
-import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { Banner } from '../../blocks/old/Banner/config'
 import { previewURL } from '@/common/utils/preview'
 import { populateAuthors } from './hooks/populateAuthors'
@@ -228,7 +226,6 @@ export const Posts: CollectionConfig<'posts'> = {
     },
     ...slugField(),
     ...hiddenFields(),
-    ...createdUpdatedByFields,
   ],
   indexes: [
     {
@@ -238,7 +235,6 @@ export const Posts: CollectionConfig<'posts'> = {
   ],
   hooks: {
     afterChange: [syncHiddenToDoc, revalidatePost],
-    beforeChange: [setCreatedUpdatedByCollection],
     beforeValidate: [validateTenantSlugUniqueness('posts', 'post')],
     afterRead: [populateAuthors],
     afterDelete: [revalidateDelete],

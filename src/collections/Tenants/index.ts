@@ -5,8 +5,6 @@ import {
   isSuperUser,
   isSuperUserField,
 } from '@/common/utils/access'
-import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
-import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { formatTenantSlugHook, validateTenantSlug } from './hooks/validateTenantSlug'
 import { createTenantDocs } from './hooks/createTenantDocs'
 import { guardTenantFields } from './hooks/guardTenantFields'
@@ -119,11 +117,9 @@ export const Tenants: CollectionConfig = {
           'Inactive businesses are read-only for their members (super users can still edit). Their public site is unaffected for now.',
       },
     },
-    ...createdUpdatedByFields,
   ],
   hooks: {
     beforeOperation: [guardTenantFields],
-    beforeChange: [setCreatedUpdatedByCollection],
     afterChange: [createTenantDocs],
   },
 }

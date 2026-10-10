@@ -29,6 +29,9 @@ import {
 } from '@/common/utils/tenantCollections'
 import { TEMPLATE_WHERE } from '@/collections/UsersAccess/utils/access'
 import { filterTenantRowsForReader } from '@/collections/Users/hooks/filterTenantRowsForReader'
+import { createdUpdatedByFields } from '@/common/fields/createdUpdatedBy'
+import { setCreatedUpdatedBy } from '@/common/hooks/setCreatedUpdatedBy'
+import { createdUpdatedByCollections } from '@/common/utils/createdUpdatedByCollections'
 
 import { Config, Page, Post } from '@/payload-types'
 import { getServerSideURL, getTenantURL } from '@/utilities/getURL'
@@ -82,6 +85,23 @@ const addTenantMembershipCheck: Plugin = (config) => ({
       hooks: {
         ...collection.hooks,
         beforeChange: [enforceTenantMembership, ...(collection.hooks?.beforeChange ?? [])],
+      },
+    }
+  }),
+})
+
+// createdBy / updatedBy on every listed collection, plugin collections included. runs after the
+// plugins that create collections (forms, redirects), so they get them too
+const addCreatedUpdatedBy: Plugin = (config) => ({
+  ...config,
+  collections: config.collections?.map((collection) => {
+    if (!createdUpdatedByCollections.includes(collection.slug as CollectionSlug)) return collection
+    return {
+      ...collection,
+      fields: [...collection.fields, ...createdUpdatedByFields],
+      hooks: {
+        ...collection.hooks,
+        beforeChange: [...(collection.hooks?.beforeChange ?? []), setCreatedUpdatedBy],
       },
     }
   }),
@@ -149,13 +169,13 @@ export const plugins: Plugin[] = [
           unique: true,
         },
       ],
-      // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
-          if ('name' in field && field.name === 'from') {
+          if (field.type === 'text' && field.name === 'from') {
             return {
               ...field,
               admin: {
+                ...field.admin,
                 description: 'You will need to rebuild the website when changing this field.',
               },
             }
@@ -295,6 +315,7 @@ export const plugins: Plugin[] = [
     cleanupAfterTenantDelete: false,
   }),
   addTenantMembershipCheck,
+  addCreatedUpdatedBy,
   gatePluginCollections,
   showTenantsFieldToManagers,
   payloadCloudPlugin(),
