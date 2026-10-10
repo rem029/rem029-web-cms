@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 import { hiddenResolver, isSuperUserField, showToSuperUsers } from '@/common/utils/access'
-import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
-import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { defaultAccessRows } from './hooks/defaultAccessRows'
 import { businessLabel } from './hooks/businessLabel'
 import { enforceProfileTenant } from './hooks/enforceProfileTenant'
@@ -151,11 +149,10 @@ export const UsersAccess: CollectionConfig = {
         condition: showToSuperUsers,
       },
     },
-    ...createdUpdatedByFields,
   ],
   hooks: {
     beforeValidate: [defaultAccessRows],
-    beforeChange: [enforceProfileTenant, guardTemplateTenant, setCreatedUpdatedByCollection],
+    beforeChange: [enforceProfileTenant, guardTemplateTenant],
   },
   timestamps: true,
 }

@@ -29,8 +29,6 @@ import { Content } from '@/blocks/old/Content/config'
 import { Archive } from '@/blocks/old/ArchiveBlock/config'
 import { SectionBlock } from '@/blocks/Section/config'
 import { CSSNameWithCustomFiled } from '@/fields/css'
-import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
-import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { populateFullSlug } from './hooks/populateFullSlug'
 import { isHomepage } from './hooks/isHomepage'
 import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
@@ -187,7 +185,6 @@ export const Pages: CollectionConfig<'pages'> = {
     },
 
     ...hiddenFields(),
-    ...createdUpdatedByFields,
   ],
   indexes: [
     {
@@ -197,7 +194,7 @@ export const Pages: CollectionConfig<'pages'> = {
   ],
   hooks: {
     afterChange: [syncHiddenToDoc, revalidatePage],
-    beforeChange: [populatePublishedAt, setCreatedUpdatedByCollection, populateFullSlug],
+    beforeChange: [populatePublishedAt, populateFullSlug],
     beforeValidate: [validateTenantSlugUniqueness('pages', 'page')],
     afterDelete: [revalidateDelete],
   },

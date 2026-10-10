@@ -16,8 +16,6 @@ import {
   publicOrVisible,
 } from '@/common/utils/access'
 import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
-import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
-import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 import { previewURL } from '@/common/utils/preview'
 
@@ -87,11 +85,9 @@ export const Footer: CollectionConfig = {
     ...hiddenFields({
       description: 'Hides it from other members in the admin only. The public site always uses it.',
     }),
-    ...createdUpdatedByFields,
   ],
   hooks: {
     beforeValidate: [validateTenantDocUniqueness('footer', 'Footer')],
-    beforeChange: [setCreatedUpdatedByCollection],
     afterChange: [revalidateFooter],
   },
 }

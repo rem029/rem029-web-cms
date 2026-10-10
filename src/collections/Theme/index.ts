@@ -1,5 +1,3 @@
-import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
-import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import { defaultThemeCSS } from '@/utilities/defaults'
 import { previewURL } from '@/common/utils/preview'
 import {
@@ -97,10 +95,8 @@ export const Theme: CollectionConfig = {
     ...hiddenFields({
       description: 'Hides it from other members in the admin only. The public site always uses it.',
     }),
-    ...createdUpdatedByFields,
   ],
   hooks: {
     beforeValidate: [validateTenantDocUniqueness('theme', 'Theme')],
-    beforeChange: [setCreatedUpdatedByCollection],
   },
 }

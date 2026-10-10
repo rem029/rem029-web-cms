@@ -1,5 +1,3 @@
-import { createdUpdatedByFields } from '@/fields/createdUpdatedByFields'
-import { setCreatedUpdatedByCollection } from '@/hooks/setCreatedUpdatedBy'
 import {
   accessCheckResolver,
   hiddenResolver,
@@ -151,10 +149,8 @@ export const Settings: CollectionConfig = {
     ...hiddenFields({
       description: 'Hides it from other members in the admin only. The public site always uses it.',
     }),
-    ...createdUpdatedByFields,
   ],
   hooks: {
     beforeValidate: [validateTenantDocUniqueness('settings', 'Settings')],
-    beforeChange: [setCreatedUpdatedByCollection],
   },
 }

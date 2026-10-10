@@ -1,4 +1,4 @@
-import type { Field, FieldHook } from 'payload'
+import type { FieldHook, RelationshipField } from 'payload'
 
 import { isActiveSuperUser } from '@/common/utils/access'
 // a relationship value (id or populated doc) → numeric id; works for any collection
@@ -15,9 +15,10 @@ const readableCache = (context: Record<string, unknown>): Map<number, boolean> =
 }
 
 /**
- * Empties `createdBy` / `updatedBy` for readers who can't read that user (a super user, someone
- * from another business), so the admin hides the field instead of showing an id or a blank, and
- * the API doesn't hand out the id. Internal reads (overrideAccess) and super users keep it.
+ * Empties `createdBy` / `updatedBy` for signed-in readers who can't read that user (a super user
+ * seen by a member, someone from another business), so the admin hides the field instead of
+ * showing an id or a blank, and the API doesn't hand out the id. Anonymous readers never get here
+ * (the field's read access strips it). Internal reads (overrideAccess) and super users keep it.
  * Lookups are cached per request, so a list view asks once per user.
  */
 const hideUnreadableUser: FieldHook = async ({ value, req, overrideAccess, context }) => {
@@ -47,11 +48,16 @@ const hideUnreadableUser: FieldHook = async ({ value, req, overrideAccess, conte
   return null
 }
 
-const auditField = (name: 'createdBy' | 'updatedBy'): Field => ({
+const auditField = (name: 'createdBy' | 'updatedBy'): RelationshipField => ({
   name,
   type: 'relationship',
   relationTo: 'users',
+  // id only: populating a user populates its own createdBy, and so on
+  maxDepth: 0,
   access: {
+    // anonymous api readers get neither field; internal reads (overrideAccess, the frontend)
+    // skip field access
+    read: ({ req }) => Boolean(req.user),
     create: () => false,
     update: () => false,
   },
@@ -66,4 +72,8 @@ const auditField = (name: 'createdBy' | 'updatedBy'): Field => ({
   },
 })
 
-export const createdUpdatedByFields: Field[] = [auditField('createdBy'), auditField('updatedBy')]
+/** Added to every collection in `createdUpdatedByCollections` by the `addCreatedUpdatedBy` plugin. */
+export const createdUpdatedByFields: RelationshipField[] = [
+  auditField('createdBy'),
+  auditField('updatedBy'),
+]
