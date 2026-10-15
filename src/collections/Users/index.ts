@@ -18,6 +18,9 @@ import {
 } from './utils/access'
 import { logoutEndpoint } from './endpoints/logout'
 import { assignDefaultAccess } from './hooks/assignDefaultAccess'
+import { auditFailedLogin } from './hooks/auditFailedLogin'
+import { auditLogin } from './hooks/auditLogin'
+import { auditLogout } from './hooks/auditLogout'
 import { blockDisabledLogin } from './hooks/blockDisabledLogin'
 import { guardSensitiveFields } from './hooks/guardSensitiveFields'
 import { guardTenantRows } from './hooks/guardTenantRows'
@@ -108,6 +111,9 @@ export const Users: CollectionConfig = {
     beforeChange: [setupFirstUser, assignDefaultAccess, protectLastSuperUser],
     beforeDelete: [guardTenantAdminDelete, protectLastSuperUserDelete],
     beforeLogin: [blockDisabledLogin],
+    afterLogin: [auditLogin],
+    afterLogout: [auditLogout],
+    afterError: [auditFailedLogin],
   },
   timestamps: true,
 }
