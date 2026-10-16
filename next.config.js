@@ -26,6 +26,8 @@ const nextConfig = {
       { hostname: 'picsum.photos', protocol: 'https' },
     ],
   },
+  // next lint checks src/ by default; tests/ is linted like app code
+  eslint: { dirs: ['src', 'tests'] },
   reactStrictMode: true,
   redirects,
   output: process.env.NODE_ENV && 'standalone',
