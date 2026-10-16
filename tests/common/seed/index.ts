@@ -6,10 +6,9 @@
  * One file per kind of fixture (`tenants.ts`, `profiles.ts`, `users.ts`), run in dependency order
  * by `seedTestData`; the names tests read are in `fixtures.ts`.
  *
- * - Two businesses (`test-a`, `test-b`) on top of what the migrations create (the `admin` tenant,
+ * - Three businesses (`test-a`, `test-b`, and `test-c` without members) on top of what the migrations create (the `admin` tenant,
  *   the `default` profile and the platform templates).
- * - An `editor` profile in each business (CRUD on pages, posts, media, categories; read/update
- *   on header and footer; opens /admin).
+ * - An `editor` and a `viewer` profile in test-a and test-b (`TEST_PROFILES`, see `profiles.ts`).
  * - One user per role (`TEST_USERS`), each logging in with their email as the password.
  * - Idempotent: upserts tenants and profiles by slug (+ tenant), users by email, so a re-run
  *   converges on these definitions.
@@ -23,10 +22,10 @@ import { seedTestProfiles } from './profiles'
 import { seedTestTenants } from './tenants'
 import { seedTestUsers } from './users'
 
-export { TEST_PROFILE, TEST_TENANTS, TEST_USERS } from './fixtures'
+export { TEST_PROFILES, TEST_TENANTS, TEST_USERS } from './fixtures'
 
 export const seedTestData = async (payload: Payload): Promise<void> => {
   const tenants = await seedTestTenants(payload)
-  const editors = await seedTestProfiles(payload, tenants)
-  await seedTestUsers(payload, tenants, editors)
+  const profiles = await seedTestProfiles(payload, tenants)
+  await seedTestUsers(payload, tenants, profiles)
 }

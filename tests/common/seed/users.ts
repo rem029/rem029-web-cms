@@ -1,7 +1,7 @@
 /** One user per role (`TEST_USERS`); each logs in with their email as the password. */
 import type { Payload } from 'payload'
 
-import { TEST_USERS, type TenantIds } from './fixtures'
+import { TEST_USERS, type ProfileIds, type TenantIds } from './fixtures'
 
 type SeedUserSpec = {
   email: string
@@ -66,7 +66,7 @@ const upsertUser = async (payload: Payload, spec: SeedUserSpec): Promise<void> =
 export const seedTestUsers = async (
   payload: Payload,
   tenants: TenantIds,
-  editors: TenantIds,
+  profiles: ProfileIds,
 ): Promise<void> => {
   const users: SeedUserSpec[] = [
     {
@@ -74,7 +74,7 @@ export const seedTestUsers = async (
       name: 'Super User',
       super_user: true,
       is_disabled: false,
-      tenants: [{ tenant: tenants.a, access: editors.a }],
+      tenants: [{ tenant: tenants.a, access: profiles.editor.a }],
     },
     {
       email: TEST_USERS.tenantAdmin,
@@ -88,14 +88,29 @@ export const seedTestUsers = async (
       name: 'Tenant A Member',
       super_user: false,
       is_disabled: false,
-      tenants: [{ tenant: tenants.a, access: editors.a }],
+      tenants: [{ tenant: tenants.a, access: profiles.editor.a }],
+    },
+    {
+      email: TEST_USERS.viewer,
+      name: 'Tenant A Viewer',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.a, access: profiles.viewer.a }],
+    },
+    {
+      // no profile on the row: assignDefaultAccess gives it the platform `default`
+      email: TEST_USERS.defaultProfile,
+      name: 'Tenant A Default',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.a, access: null }],
     },
     {
       email: TEST_USERS.otherTenant,
       name: 'Tenant B Member',
       super_user: false,
       is_disabled: false,
-      tenants: [{ tenant: tenants.b, access: editors.b }],
+      tenants: [{ tenant: tenants.b, access: profiles.editor.b }],
     },
     {
       email: TEST_USERS.multiTenant,
@@ -103,8 +118,18 @@ export const seedTestUsers = async (
       super_user: false,
       is_disabled: false,
       tenants: [
-        { tenant: tenants.a, access: editors.a },
-        { tenant: tenants.b, access: editors.b },
+        { tenant: tenants.a, access: profiles.editor.a },
+        { tenant: tenants.b, access: profiles.editor.b },
+      ],
+    },
+    {
+      email: TEST_USERS.mixed,
+      name: 'Mixed Member',
+      super_user: false,
+      is_disabled: false,
+      tenants: [
+        { tenant: tenants.a, access: profiles.editor.a },
+        { tenant: tenants.b, access: profiles.viewer.b },
       ],
     },
     {
@@ -112,7 +137,7 @@ export const seedTestUsers = async (
       name: 'Disabled Member',
       super_user: false,
       is_disabled: true,
-      tenants: [{ tenant: tenants.a, access: editors.a }],
+      tenants: [{ tenant: tenants.a, access: profiles.editor.a }],
     },
   ]
 

@@ -48,3 +48,12 @@ export const reqFor = async (
       : new Headers()
   return createLocalReq({ ...(user ? { user } : {}), req: { headers } }, payload)
 }
+
+/** A user that exists only in memory, for checks of the access helpers without the db. */
+export const makeUser = (fields: Partial<SessionUser> & { id: number }): SessionUser => ({
+  email: `memory-${fields.id}@example.test`,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  ...fields,
+  collection: 'users',
+})

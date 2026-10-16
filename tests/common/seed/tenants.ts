@@ -36,4 +36,5 @@ const upsertTenant = async (payload: Payload, slug: string): Promise<number> => 
 export const seedTestTenants = async (payload: Payload): Promise<TenantIds> => ({
   a: await upsertTenant(payload, TEST_TENANTS.a),
   b: await upsertTenant(payload, TEST_TENANTS.b),
+  c: await upsertTenant(payload, TEST_TENANTS.c),
 })

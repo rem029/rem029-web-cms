@@ -39,7 +39,7 @@ describe('test database', () => {
 
   it('has the test businesses', async () => {
     // arrange
-    const slugs = [TEST_TENANTS.a, TEST_TENANTS.b]
+    const slugs = [TEST_TENANTS.a, TEST_TENANTS.b, TEST_TENANTS.c]
 
     // act
     const result = await payload.find({
@@ -51,16 +51,19 @@ describe('test database', () => {
     })
 
     // assert
-    expect(result.docs.map((doc) => doc.slug).sort()).toEqual(['test-a', 'test-b'])
-    expect(result.docs.map((doc) => doc.isActive)).toEqual([true, true])
+    expect(result.docs.map((doc) => doc.slug).sort()).toEqual(['test-a', 'test-b', 'test-c'])
+    expect(result.docs.map((doc) => doc.isActive)).toEqual([true, true, true])
   })
 
   it.each([
     ['superUser', TEST_TENANTS.a],
     ['tenantAdmin', TEST_TENANTS.a],
     ['member', TEST_TENANTS.a],
+    ['viewer', TEST_TENANTS.a],
+    ['defaultProfile', TEST_TENANTS.a],
     ['otherTenant', TEST_TENANTS.b],
     ['multiTenant', TEST_TENANTS.b],
+    ['mixed', TEST_TENANTS.b],
     ['disabled', TEST_TENANTS.a],
   ] as const)('has the %s user', async (role, tenantSlug) => {
     // arrange
