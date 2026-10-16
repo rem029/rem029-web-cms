@@ -60,6 +60,7 @@ describe('test database', () => {
     ['tenantAdmin', TEST_TENANTS.a],
     ['member', TEST_TENANTS.a],
     ['otherTenant', TEST_TENANTS.b],
+    ['multiTenant', TEST_TENANTS.b],
     ['disabled', TEST_TENANTS.a],
   ] as const)('has the %s user', async (role, tenantSlug) => {
     // arrange

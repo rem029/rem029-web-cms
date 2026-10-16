@@ -98,6 +98,16 @@ export const seedTestUsers = async (
       tenants: [{ tenant: tenants.b, access: editors.b }],
     },
     {
+      email: TEST_USERS.multiTenant,
+      name: 'Tenant A and B Member',
+      super_user: false,
+      is_disabled: false,
+      tenants: [
+        { tenant: tenants.a, access: editors.a },
+        { tenant: tenants.b, access: editors.b },
+      ],
+    },
+    {
       email: TEST_USERS.disabled,
       name: 'Disabled Member',
       super_user: false,

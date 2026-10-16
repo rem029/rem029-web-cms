@@ -15,6 +15,8 @@ export const TEST_USERS = {
   member: 'member-a@example.test',
   // editor in test-b only
   otherTenant: 'member-b@example.test',
+  // editor in test-a and test-b
+  multiTenant: 'member-ab@example.test',
   // editor in test-a, is_disabled
   disabled: 'disabled-a@example.test',
 } as const
