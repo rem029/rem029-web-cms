@@ -1,4 +1,9 @@
 import type { Block, Field } from 'payload'
+import { fields as pluginBlocks } from '@payloadcms/plugin-form-builder'
+
+import { iconField } from '@/fields/icon'
+
+import { cssClassField, helpTextField } from './childFields'
 
 /** The plugin's own blocks this app turns on (`payment` stays off). */
 export const STOCK_BLOCK_NAMES = [
@@ -44,15 +49,27 @@ export const directionField: Field = {
  * it was before, `direction` on radio. `message` is content only, so it gets `css_class` alone.
  */
 export const enhanceStockBlock = (name: StockBlockName): Block => {
-  // 1. take the plugin's block: `fields[name]` from '@payloadcms/plugin-form-builder' (throw if missing)
-  // 2. extra = message → [cssClassField]; else [helpTextField, cssClassField] (./childFields)
-  //    + iconField (@/fields/icon) when name is in ICON_BLOCKS, + directionField when 'radio'
-  // 3. return { ...block, fields: [...block.fields, ...extra] }
-  throw new Error(`enhanceStockBlock(${name}): not implemented`)
+  const block = pluginBlocks[name]
+  if (!block || typeof block !== 'object' || !('slug' in block)) {
+    throw new Error(`form builder: the plugin has no "${name}" block`)
+  }
+  const extra: Field[] = name === 'message' ? [cssClassField] : [helpTextField, cssClassField]
+  if (ICON_BLOCKS.includes(name)) extra.push(iconField)
+  if (name === 'radio') extra.push(directionField)
+  return { ...block, fields: [...block.fields, ...extra] }
 }
 
 /** Every enhanced stock block by name, built once so every nesting level shares the same config. */
-export const enhancedStockBlocks = (): Record<StockBlockName, Block> => {
-  // Object.fromEntries(STOCK_BLOCK_NAMES.map((name) => [name, enhanceStockBlock(name)]))
-  throw new Error('enhancedStockBlocks: not implemented')
-}
+export const enhancedStockBlocks = (): Record<StockBlockName, Block> => ({
+  text: enhanceStockBlock('text'),
+  textarea: enhanceStockBlock('textarea'),
+  email: enhanceStockBlock('email'),
+  number: enhanceStockBlock('number'),
+  select: enhanceStockBlock('select'),
+  checkbox: enhanceStockBlock('checkbox'),
+  radio: enhanceStockBlock('radio'),
+  date: enhanceStockBlock('date'),
+  country: enhanceStockBlock('country'),
+  state: enhanceStockBlock('state'),
+  message: enhanceStockBlock('message'),
+})
