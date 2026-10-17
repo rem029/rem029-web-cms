@@ -95,6 +95,7 @@ export default buildConfig({
     // push: false,
     logger: process.env.DB_LOGGER === 'true',
   }),
+  // rem0016 step 2: + FormUploads (src/collections/FormUploads)
   collections: [
     Pages,
     Posts,

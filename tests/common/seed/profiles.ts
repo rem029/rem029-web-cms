@@ -29,6 +29,7 @@ const OPEN_ADMIN: Grant = { hidden: true, admin: true }
 
 const EDITOR: ProfileSpec = {
   name: 'Editor',
+  // rem0016 step 2: editor + read/delete on form-uploads (the uploads tests read as an editor)
   slug: TEST_PROFILES.editor,
   description: 'Edits pages, posts, media and categories of this business.',
   grants: {

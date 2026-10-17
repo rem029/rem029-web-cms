@@ -9,6 +9,7 @@ export const tenantScopedCollections: CollectionSlug[] = [
   'redirects',
   'forms',
   'form-submissions',
+  // rem0016 step 2: + 'form-uploads'
   'search',
 ]
 

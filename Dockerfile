@@ -76,6 +76,7 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# rem0016 step 2: + mkdir/chown /app/form-uploads (visitor uploads, not public)
 RUN mkdir -p /app/public/media
 RUN chown -R nextjs:nodejs /app/public/media
 

@@ -70,6 +70,8 @@ export const formBuilder = formBuilderPlugin({
       beforeValidate: [validateTenantSlugUniqueness('forms', 'form')],
       beforeChange: [validateMultiStep],
     },
+    // rem0016 step 2: + a map that sets `localized: true` on `title` and `localized: false` on
+    // `emails[].subject` / `emails[].message` (only visitor-facing text is translated)
     fields: ({ defaultFields }) => formLayout(defaultFields.map(withRichConfirmation)),
   },
   formSubmissionOverrides: {

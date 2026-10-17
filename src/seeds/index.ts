@@ -21,6 +21,7 @@ if (process.env.NODE_ENV === 'production') {
   process.exit(1)
 }
 
+// rem0016 step 2: + { name: 'forms', run: seedForms } after hiddenDocuments
 const seeds = [
   { name: 'defaultAdmin', run: seedDefaultAdmin },
   { name: 'access', run: seedAccess },
