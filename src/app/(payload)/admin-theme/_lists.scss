@@ -1,0 +1,71 @@
+// List view pieces (rem0005 phase 3). Checked against Payload 3.44.0 (`@payloadcms/ui` elements
+// Table, Pill, Pagination, PerPage, NoListResults, ShimmerEffect, Loading, ListSelection). The list
+// controls (search, Columns, Filters) change by 3.91 and live in _volatile.scss.
+@use './motion' as *;
+
+// TODO(step 1) list header
+.list-header {
+  // 1. .list-header__title in the display font (h1 already is, via _base.scss): check only
+  // 2. .list-header__create-new-button: a pill button from phase 2, nothing new expected
+}
+
+// TODO(step 1) table: a bordered panel, no shadow (tables are large; user 2026-10-17: Claude's call)
+.table {
+  // 1. the wrapper: 2px --admin-border, radius -m, overflow hidden (keeps Payload's own scroll
+  //    on the table element)
+  // 2. thead: --admin-raised fill, --admin-muted text, mono uppercase 12px, 0.04em tracking;
+  //    2px --admin-border under it
+  // 3. rows: 1px --theme-elevation-150 between them, none after the last
+  // 4. tbody tr:hover → --admin-raised
+  // 5. a selected row (its .cell-_select checkbox checked, :has()) → --admin-primary mixed 25%
+  //    into --admin-surface
+  // 6. links in the first column: --admin-text, highlighter underline on hover like _base.scss
+}
+
+// TODO(step 1) list selection bar ("3 selected · Edit · Delete")
+.list-selection {
+  // mono count, its buttons as phase 2 buttons (nothing new expected: check)
+}
+
+// TODO(step 1) pills and badges
+.pill {
+  // 1. 2px --admin-border, radius -s, mono 12px, no soft shadow
+  // 2. --style-light / -light-gray / -white → --admin-raised fill, --admin-text
+  // 3. --style-success / -warning / -error → the status fill, --admin-ink text
+  // 4. --style-dark → --admin-text fill, --admin-bg text
+  // 5. .pill--has-action (a button) → press(var(--admin-shadow-xs), var(--admin-shadow-s), none)
+}
+
+// TODO(step 1) pagination
+.paginator {
+  // 1. .paginator__page and .clickable-arrow: 32px square chips, 2px border, radius -s, surface
+  // 2. hover → press with -xs (not the current page, not a disabled arrow)
+  // 3. .paginator__page--is-current → --admin-primary fill, --admin-ink, --admin-shadow-xs
+  // 4. .clickable-arrow--is-disabled → --admin-muted, no shadow, no motion
+  // 5. .paginator__separator: mono, --admin-muted
+}
+
+// TODO(step 1) per page ("Per page: 10")
+.per-page {
+  // 1. the trigger: mono, --admin-muted label, --admin-text value
+  // 2. .per-page__button-active → --admin-primary fill, --admin-ink (the list itself is a popup,
+  //    styled in step 2)
+}
+
+// TODO(step 1) empty state
+.no-results {
+  // dashed 2px --admin-border (Payload: 1px), radius -m, surface fill;
+  // its first line in the display font
+}
+
+// TODO(step 1) loading
+.shimmer-effect {
+  // --admin-raised base, 2px border; the shine (.shimmer-effect__shine) a lighter band of
+  // --admin-surface; _base.scss already stops it under reduced motion
+}
+
+.loading-overlay {
+  // 1. --admin-bg at 85% (color-mix), no blur
+  // 2. .loading-overlay__bar → --admin-primary with a 2px --admin-border
+  // 3. .loading-overlay__text → mono, --admin-text
+}

@@ -1,5 +1,6 @@
 // Areas Payload changes by 3.91 (rem0005): re-check this whole file in rem0013.
-// Checked against Payload 3.44.0: dashboard (`@payloadcms/next` views/Dashboard), login (views/Login).
+// Checked against Payload 3.44.0: dashboard (`@payloadcms/next` views/Dashboard), login (views/Login),
+// list controls (`@payloadcms/ui` elements/ListControls, SearchFilter, WhereBuilder, ColumnSelector).
 @use './motion' as *;
 
 // dashboard
@@ -79,4 +80,15 @@
     margin: 0;
     color: var(--admin-muted);
   }
+}
+
+// TODO(phase 3 step 1) list controls: search, Columns, Filters
+.list-controls {
+  // 1. .search-filter: the input style from _forms.scss already applies (.search-filter__input);
+  //    the search icon --admin-muted
+  // 2. .list-controls__buttons toggles (Columns / Filters): phase 2 pill buttons; the open one
+  //    (aria-expanded / .list-controls__modified) → --admin-primary fill, --admin-ink
+  // 3. the open panel (.where-builder, the columns .pill-selector): surface, 2px --admin-border,
+  //    radius -m, no shadow (it sits in the page, not on top)
+  // 4. .pill-selector__pill: a pill (see _lists.scss); --selected → --admin-primary fill, ink
 }
