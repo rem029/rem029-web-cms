@@ -397,3 +397,46 @@ $collapsible-inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width
     }
   }
 }
+
+// PLAN(step 2) rich text (`@payloadcms/richtext-lexical` 3.44 bundled.css; plain unlayered rules there,
+// so match its specificity, e.g. `.rich-text-lexical .editor-container`)
+// `.rich-text-lexical__wrap`: the $inputs look: surface, 2px border, radius-s, padding; focus-within
+//   --admin-shadow-s; `.rich-text-lexical--read-only`: dashed border, --admin-raised
+// `.rich-text-lexical .editor-container`: --font-body instead of Payload's --font-serif, no letter-spacing
+// gutter line (`--show-gutter … .ContentEditable__root::before`): --admin-border, 2px
+// `.editor-placeholder`: --admin-muted
+// error (`.rich-text-lexical.error`): border --admin-danger-text (replaces Payload's gutter-only red)
+// content: `.LexicalEditorTheme__quote`: 4px --admin-secondary rule on the inline start, padding;
+//   `__code` and inline code: mono on --admin-raised, radius-s; `__hr`: 2px --admin-border;
+//   headings: display font; links already get the highlighter in `_base.scss`
+
+// PLAN(step 2) rich text toolbars and menus: like popups (brutal-box -s, radius-s)
+// `.fixed-toolbar`: --admin-raised bar with a 2px rule under it (inside the editor box, no shadow)
+// `.inline-toolbar-popup`, `.slash-menu-popup`, `.toolbar-popup__dropdown-items`, `.link-editor`:
+//   brutal-box(var(--admin-shadow-s)), radius-s; `.inline-toolbar-popup .caret`: hidden
+// `.toolbar-popup__button`: 28px, radius-s; hover --admin-raised; `.active`: sky fill, ink (icons
+//   inherit); focus-visible --admin-shadow-xs
+// `.toolbar-popup__dropdown`: chip like the buttons; dark-mode caret filter stays Payload's
+// `.slash-menu-popup__group-title`: mono, uppercase, muted; `__item`: radius-s, hover --admin-raised;
+//   `__item--selected`: sky fill, ink
+// `.add-block-menu`, `.draggable-block-menu`: 2px border chips, surface, radius-s
+// `.lexical-block`: same as the blocks rows (collapsible look from step 1 already applies; check)
+
+// PLAN(step 2) upload
+// `.upload__dropzoneAndUpload .dropzone`, `.file-field .dropzone`, `.bulk-upload--add-files__dropArea`:
+//   dashed 2px --admin-border panel, radius-m, --admin-surface, muted text (like the empty state);
+//   `.dropzone.dragging` (check the class in Payload's Dropzone): sky mixed 25% into the surface
+// `.upload-relationship-details`, `.upload--has-many__dragItem`, `.file-details`: bordered card
+//   (2px, radius-s, surface, no shadow); `__filename`: body font 600; `__meta`: mono, muted;
+//   `__actions` buttons: chips with press like the row ⋮ (step 1)
+// `.thumbnail` inside them: 2px --admin-border, radius-s, --admin-raised behind transparent images
+// `.file-field__filename`, `.file-field__thumbnail-wrap`: same card language
+
+// PLAN(step 2) code / json: only the frame (Monaco keeps its own light/dark colours, user 2026-10-18)
+// `.code-editor`, `.json-field .code-editor`: 2px border, radius-s, overflow hidden so Monaco's
+//   corners don't stick out; focus-within --admin-shadow-s; `.error` / `.json-field.error`: border
+//   --admin-danger-text
+
+// PLAN(step 2) join table (`.relationship-table`, the Children join)
+// `.relationship-table__header`: label in the display font, count pill mono, "Add new" on one line
+// the table inside is the phase 3 `.table` panel; empty: the phase 3 dashed `.no-results`

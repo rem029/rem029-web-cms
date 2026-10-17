@@ -198,3 +198,11 @@
   background: var(--admin-border);
   border: 0;
 }
+
+// PLAN(step 2) live preview (Payload 3.44 `@payloadcms/next` `.live-preview*`; rem0013 redoes it)
+// `.live-preview-window`: --admin-raised behind the frame; `__wrapper`: no change
+// `.live-preview-iframe`: 2px --admin-border, radius-m, --admin-shadow-s, white background kept
+//   (the site paints its own)
+// `.live-preview-toolbar`: bordered bar (2px, radius-s, surface); `--draggable`: brutal-box -s
+// `__drag-handle`: chip like the row drag handle; controls (`__breakpoint`, `__zoom` selects,
+//   `__size` inputs): already `$inputs` / popup buttons, check; `__external` link: chip
