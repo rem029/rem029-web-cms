@@ -172,6 +172,18 @@ html[data-theme] {
     color: var(--admin-ink);
   }
 
+  // focus: Payload draws a soft success glow with a layered !important (which beats any unlayered
+  // rule) and thins the border to 1px. Its colour goes transparent here and the hard shadow is a
+  // blur-free drop-shadow, the same 4px offset as --admin-shadow-s on inputs.
+  &:not(.checkbox-input--read-only):focus-within {
+    --theme-success-400: transparent;
+
+    .checkbox-input__input {
+      border: var(--admin-border-width) solid var(--admin-border);
+      filter: drop-shadow(4px 4px 0 var(--admin-shadow));
+    }
+  }
+
   &.checkbox-input--read-only .checkbox-input__input {
     background: var(--admin-raised);
     border-style: dashed;
@@ -195,11 +207,20 @@ html[data-theme] {
     box-shadow: var(--admin-shadow-xs);
   }
 
+  // focus: the hard shadow instead of Payload's soft glow
+  input[type='radio']:focus + .radio-input__styled-radio {
+    box-shadow: var(--admin-shadow-s);
+  }
+
   &.radio-input--is-selected .radio-input__styled-radio {
     background: var(--admin-primary);
 
+    // Payload's dot has a 4px ring in --theme-elevation-0 (near black in dark) that hides the fill;
+    // the ring goes transparent and the ink stays inside it (content-box), an 8px dot on sky
     &::before {
       background: var(--admin-ink);
+      background-clip: content-box;
+      border-color: transparent;
     }
   }
 

@@ -92,6 +92,11 @@ $inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width));
   font-size: 0.75rem;
   box-shadow: none;
 
+  // column pills hold a `.field-label`, whose colour (_forms.scss) would beat the pill's fill pair
+  .field-label {
+    color: inherit;
+  }
+
   &--style-light,
   &--style-light-gray,
   &--style-white,
@@ -148,6 +153,9 @@ $inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width));
     width: 32px;
     height: 32px;
     padding: 0;
+    // Payload's chips are flex without alignment: centre the number in the square
+    align-items: center;
+    justify-content: center;
     border: var(--admin-border-width) solid var(--admin-border);
     border-radius: var(--admin-radius-s);
     background: var(--admin-surface);
@@ -195,8 +203,9 @@ $inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width));
   }
 }
 
-// empty state
-.no-results {
+// empty state: `.no-results` (NoListResults, e.g. join tables) and the collection list's own block
+.no-results,
+.collection-list__no-results {
   border: var(--admin-border-width) dashed var(--admin-border);
   border-radius: var(--admin-radius-m);
   background: var(--admin-surface);
@@ -204,6 +213,12 @@ $inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width));
   p:first-child {
     font-family: var(--admin-font-display);
   }
+}
+
+.collection-list__no-results {
+  align-items: center;
+  padding: calc(var(--base) * 2) var(--base);
+  text-align: center;
 }
 
 // loading shimmer and overlay
