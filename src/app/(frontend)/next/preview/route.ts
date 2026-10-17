@@ -7,6 +7,7 @@ import { canPreviewTenant } from '@/common/utils/preview'
 import { signPreview, verifyPreview } from '@/common/utils/previewToken'
 import { getFrontendTenantId } from '@/common/utils/frontendTenant'
 
+// step 3b: ADD — 'forms'
 const ALLOWED_COLLECTIONS = ['pages', 'posts', 'header', 'footer', 'theme'] as const
 type PreviewCollection = (typeof ALLOWED_COLLECTIONS)[number]
 

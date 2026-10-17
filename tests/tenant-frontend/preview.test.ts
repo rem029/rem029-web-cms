@@ -182,6 +182,13 @@ describe('preview', () => {
       })
     })
 
+    it('passes the form path for forms', async () => {
+      // arrange: a form in test-a (slug from its title); the tenant admin of test-a (forms read)
+      // act: previewURL({ collection: 'forms', slug: form.slug, tenant: test-a, req })
+      // assert: path '/forms/<slug>?lang=en', collection 'forms'
+      expect.fail('not implemented')
+    })
+
     it("gives another business's member no link", async () => {
       // act
       const url = await linkFor(otherTenant)

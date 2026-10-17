@@ -8,7 +8,7 @@ import { MultiMediaBlock } from '../MultiMedia/config'
 import { CardWithBackgroundBlock } from '../CardWithBackground/config'
 import { CardInlineImageBlock } from '../CardInlineImage/config'
 import { CardRowBlock } from '../CardRow/config'
-import { FormBlock } from '../old/Form/config'
+import { FormBlock } from '../Form/config'
 import { CarouselBlock } from '../Carousel/config'
 
 export const sectionBlocks: Block[] = [

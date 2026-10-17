@@ -7,6 +7,10 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
+/**
+ * A form inside a page (Pages layout and the Container block). Moved from `src/blocks/old/Form`
+ * with the same slug, fields and interface name, so the schema doesn't change (no migration).
+ */
 export const FormBlock: Block = {
   slug: 'formBlock',
   interfaceName: 'FormBlock',

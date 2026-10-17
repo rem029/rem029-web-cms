@@ -3,6 +3,8 @@
  * Field labels come from the form itself (localized in the admin); only these fixed strings
  * live here. Used by every renderer component through `formText(locale)`.
  */
+import type { FormRefusal } from '@/common/utils/formAvailability'
+
 import type { RendererLocale } from './types'
 
 export type FormText = {
@@ -109,3 +111,10 @@ const ar: FormText = {
 }
 
 export const formText = (locale: RendererLocale): FormText => (locale === 'ar' ? ar : en)
+
+/** Why a form takes no answers, in the visitor's words (the submit action and `/forms/<slug>`). */
+export const refusalMessage = (_reason: FormRefusal, _text: FormText): string => {
+  // step 3b: MOVE — refusalText from submissions.ts (not_open_yet → notOpenYet, members_only →
+  // membersOnly, else formClosed); submissions.ts imports it from here
+  throw new Error('not implemented')
+}

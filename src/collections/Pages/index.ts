@@ -24,7 +24,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { CallToAction } from '@/blocks/old/CallToAction/config'
-import { FormBlock } from '@/blocks/old/Form/config'
+import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/old/MediaBlock/config'
 import { Content } from '@/blocks/old/Content/config'
 import { Archive } from '@/blocks/old/ArchiveBlock/config'

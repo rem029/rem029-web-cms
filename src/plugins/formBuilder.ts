@@ -85,6 +85,9 @@ const formLayout = (defaultFields: Field[]): Field[] => {
 export const formBuilder = formBuilderPlugin({
   fields: formBuilderFields(),
   formOverrides: {
+    // step 3b: ADD — admin.livePreview.url and admin.preview: previewURL({ collection: 'forms',
+    // slug: data.slug, tenant: data.tenant, req }) ?? '' (as Pages); the page reloads on save
+    // (forms have no drafts, so no autosave)
     indexes: [{ fields: ['tenant', 'slug'], unique: true }],
     hooks: {
       beforeValidate: [validateTenantSlugUniqueness('forms', 'form')],

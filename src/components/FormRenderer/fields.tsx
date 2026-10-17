@@ -11,12 +11,11 @@
  */
 import React, { useEffect, useState } from 'react'
 
-import { countryOptions } from '@/blocks/old/Form/Country/options'
-import { stateOptions } from '@/blocks/old/Form/State/options'
 import { FORM_UPLOAD_MAX_BYTES, FORM_UPLOAD_MIME_TYPES } from '@/collections/FormUploads/constants'
 import { cn } from '@/utilities/ui'
 
 import { useFormRenderer } from './context'
+import { countryOptions, stateOptions } from './countries'
 import { buildIdSegment, fieldPath, isFilled } from './helpers'
 import { formText } from './i18n'
 import { SignaturePad } from './signaturePad'
