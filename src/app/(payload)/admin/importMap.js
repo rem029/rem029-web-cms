@@ -18,6 +18,7 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { SlugComponent as SlugComponent_92cc057d0a2abb4f6cf0307edf59f986 } from '@/fields/slug/SlugComponent'
 import { HomepageCell as HomepageCell_d8fa7309b44a761f90fada10d1698313 } from '@/collections/Pages/components/HomepageCell'
+import { SidebarToggle as SidebarToggle_1f9574ccc155fcd11145b8161078e083 } from '@/common/components/SidebarToggle/SidebarToggle'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { AccessRowLabel as AccessRowLabel_ba213f06845338de55773f5b475be731 } from '@/collections/UsersAccess/components/AccessRowLabel'
@@ -59,6 +60,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@/fields/slug/SlugComponent#SlugComponent": SlugComponent_92cc057d0a2abb4f6cf0307edf59f986,
   "@/collections/Pages/components/HomepageCell#HomepageCell": HomepageCell_d8fa7309b44a761f90fada10d1698313,
+  "@/common/components/SidebarToggle/SidebarToggle#SidebarToggle": SidebarToggle_1f9574ccc155fcd11145b8161078e083,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlocksFeatureClient": BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/collections/UsersAccess/components/AccessRowLabel#AccessRowLabel": AccessRowLabel_ba213f06845338de55773f5b475be731,
