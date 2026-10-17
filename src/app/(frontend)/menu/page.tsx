@@ -20,7 +20,8 @@ import { menuStrings } from './_i18n'
 export default async function MenuListPage() {
   // 1. tenantId = await getFrontendTenantId(); null → notFound()
   // 2. locale from the cookie; menus = await getMenuList(payload, tenantId, { locale })
-  // 3. t = menuStrings(locale); render a container with <h1>{t.menus}</h1>, then
+  // 3. t = menuStrings(locale); <MenuHeader title={settings.siteName} logo={settings logo} homeHref="/"
+  //    showLanguageSwitch />, then a container with <h1>{t.menus}</h1>, then
   //    menus.length === 0 → <p>{t.noMenus}</p>, else a grid (1 column on phones, 2–3 wider) of
   //    <MenuCard key menu={menu} />
   void configPromise

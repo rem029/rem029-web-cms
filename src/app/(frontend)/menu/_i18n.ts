@@ -25,6 +25,8 @@ const EN = {
   all_day: 'All day',
   all: 'All',
   backToTop: 'Back to top',
+  allMenus: 'All menus',
+  menuNotFound: 'This menu could not be found.',
 }
 
 export type MenuStrings = Record<keyof typeof EN, string>
@@ -52,6 +54,8 @@ const STRINGS: Record<TypedLocale, MenuStrings> = {
     all_day: 'طوال اليوم',
     all: 'الكل',
     backToTop: 'العودة للأعلى',
+    allMenus: 'كل القوائم',
+    menuNotFound: 'لم يتم العثور على هذه القائمة.',
   },
 }
 

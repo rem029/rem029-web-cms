@@ -27,7 +27,9 @@ export default async function MenuPage({ params }: Args) {
   // 2. draft = await isPreviewing(); locale from the cookie (as the [...slug] page)
   // 3. data = await loadMenuPage(slug, locale); null → notFound()
   // 4. render: wrapper div with style={menuColorVars(data.menu.colors)} and the theme classes
-  //    (bg-background text-foreground), {draft && <LivePreviewListener />}, then
+  //    (bg-background text-foreground), {draft && <LivePreviewListener />},
+  //    <MenuHeader title={header.title || title} logo={header.logo ?? settings logo} homeHref="/menu"
+  //    showLanguageSwitch={header.showLanguageSwitch !== false} />, then
   //    <Menu data={data} locale={locale} /> (step 3; until then the sections as a plain list)
   void params
   void notFound

@@ -6,8 +6,6 @@ import { GeistSans } from 'geist/font/sans'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
-import { Footer } from '@/collections/Footer/Component'
-import { Header } from '@/collections/Header/Component'
 
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { isPreviewing } from '@/common/utils/isPreviewing'
@@ -74,10 +72,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           }}
         />
 
-        <Header settings={settings} locale={locale} />
         <AnalyticsComponent draftMode={isEnabled} />
         {children}
-        <Footer settings={settings} locale={locale} />
 
         {js && (
           <Script
