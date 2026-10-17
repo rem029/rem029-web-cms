@@ -44,6 +44,7 @@ export default buildConfig({
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
       beforeLogin: ['@/components/BeforeLogin'],
       header: ['@/common/components/InactiveTenantNotice#InactiveTenantNotice'],
+      providers: ['@/common/components/AdminTheme/AdminTheme#AdminTheme'],
       graphics: {
         Icon: '@/common/components/AdminBranding/Icon#Icon',
         Logo: '@/common/components/AdminBranding/Logo#Logo',

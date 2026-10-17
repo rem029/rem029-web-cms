@@ -1,0 +1,80 @@
+// Admin design tokens (rem0005): minimal neo-brutalism from the portfolio design.
+// Checked against Payload 3.44.0. Components read the role tokens (`--admin-*`), never a literal
+// colour, so a rebrand (and phase 7's per-tenant colours) only changes this file's values.
+// Contrast of every text/fill pair: docs `tasks/rem0005-admin-ui-redesign/references/contrast.md`.
+
+// shared by both themes
+:root {
+  // brand fills; text on them is always --admin-ink (dark), never Payload's inverting colours
+  --admin-primary: #a5e1ff;
+  --admin-secondary: #d4a8ec;
+  --admin-yellow: #dcd894;
+  --admin-danger: #ffa8a0;
+  --admin-success: #9fe3b4;
+  --admin-warning: #ffd27a;
+
+  // shape
+  --admin-border-width: 2px;
+  --admin-radius-s: 4px;
+  --admin-radius-m: 6px;
+  --admin-shadow-s: 4px 4px 0 var(--admin-shadow);
+  --admin-shadow-m: 6px 6px 0 var(--admin-shadow);
+
+  // motion: transform/opacity/shadow offset only, see _base.scss for reduced motion
+  --admin-ease: cubic-bezier(0.2, 0, 0, 1);
+  --admin-duration: 120ms;
+  --admin-duration-slow: 200ms;
+
+  // fonts: the families come from AdminTheme (next/font, self-hosted at build)
+  --admin-font-display: var(--admin-font-space-grotesk), system-ui, sans-serif;
+  --admin-font-body: var(--admin-font-geist), system-ui, sans-serif;
+  --admin-font-mono: var(--admin-font-jetbrains-mono), ui-monospace, monospace;
+}
+
+// light also covers the moment before Payload sets data-theme
+:root,
+html[data-theme='light'] {
+  --admin-bg: #f5f5f2;
+  --admin-surface: #ffffff;
+  --admin-raised: #ecece6;
+  --admin-text: #111214;
+  --admin-muted: #55575d;
+  --admin-border: #111214;
+  --admin-ink: #111214;
+  --admin-shadow: #111214;
+  // text colours on the background: darker variants of the fills (AA on bg, surface, raised)
+  --admin-accent-text: #0b618e;
+  --admin-secondary-text: #6d2197;
+  --admin-danger-text: #b42318;
+  --admin-success-text: #17703a;
+  --admin-warning-text: #8a5300;
+}
+
+html[data-theme='dark'] {
+  --admin-bg: #0e0f12;
+  --admin-surface: #17191e;
+  --admin-raised: #22252b;
+  --admin-text: #e8e6e1;
+  --admin-muted: #a3a19a;
+  --admin-border: #e8e6e1;
+  --admin-ink: #0e0f12;
+  --admin-shadow: var(--admin-primary);
+  --admin-accent-text: #1cb0fc;
+  --admin-secondary-text: var(--admin-secondary);
+  --admin-danger-text: var(--admin-danger);
+  --admin-success-text: var(--admin-success);
+  --admin-warning-text: var(--admin-warning);
+}
+
+// Payload's own variables, so its stock UI picks the tokens up before phases 2–4 restyle it
+html[data-theme='light'],
+html[data-theme='dark'] {
+  // 1. --theme-bg / --theme-input-bg → --admin-bg / --admin-surface; --theme-text → --admin-text
+  // 2. --theme-elevation-0 … -1000 (21 steps): bg → text, each step a color-mix of the two
+  //    (0 = bg, 50 = surface, 100 = raised, 150 = a light border, …, 800 = text, 1000 = text)
+  // 3. --theme-success/warning/error-50 … 950: color-mix of the status fill with bg (low steps)
+  //    and with --admin-*-text (high steps), so Payload's toasts and pills keep readable pairs
+  // 4. --theme-border-color → --admin-border
+  // 5. --style-radius-s/m/l → --admin-radius-s / -m / -m
+  // 6. --font-body → --admin-font-body, --font-mono → --admin-font-mono
+}

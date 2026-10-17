@@ -15,6 +15,21 @@ const redirectAdminToServerURL = (request: NextRequest): NextResponse => {
   return NextResponse.redirect(new URL(pathname + search, serverURL), 307)
 }
 
+// Payload 3.44 keeps Light/Dark in `payload-theme` and stores Automatic by deleting it, so a missing
+// cookie can't tell a first visit from a chosen Automatic: a one-time marker says we already set
+// the dark default, after which nothing is touched again. Re-check on the Payload upgrade (rem0013).
+export const ADMIN_THEME_COOKIE = 'payload-theme'
+export const ADMIN_THEME_DEFAULT_MARKER = 'admin-theme-default'
+
+const defaultAdminTheme = (request: NextRequest, response: NextResponse): NextResponse => {
+  // 1. a redirect (admin on another host) → return it untouched
+  // 2. marker cookie present → return response (the user's choice, or Automatic, stands)
+  // 3. no `payload-theme` → set it to `dark` (path /, 1 year, lax, not httpOnly: Payload's client reads it)
+  // 4. set the marker (same options) and return
+  void request
+  return response
+}
+
 export function middleware(request: NextRequest) {
   const host = requestHost((n) => request.headers.get(n))
   const serverURL = process.env.NEXT_PUBLIC_SERVER_URL
@@ -25,7 +40,7 @@ export function middleware(request: NextRequest) {
   }
 
   if (/^\/admin(\/|$)/.test(request.nextUrl.pathname)) {
-    return redirectAdminToServerURL(request)
+    return defaultAdminTheme(request, redirectAdminToServerURL(request))
   }
 
   const { searchParams } = new URL(request.url)

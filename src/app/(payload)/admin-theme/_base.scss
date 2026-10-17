@@ -1,0 +1,9 @@
+// Base admin styles (rem0005): type, focus, links, motion. Checked against Payload 3.44.0.
+
+// 1. headings (h1–h4, .doc-header__title, .list-header h1) in --admin-font-display, weight 700
+// 2. :focus-visible on links, buttons and inputs: 2px solid --admin-accent-text, offset 2px
+// 3. ::selection: --admin-primary background, --admin-ink text
+// 4. links in rich text and descriptions: highlighter underline (background-size 0 → 100%,
+//    --admin-duration-slow, --admin-ease), colour inherited
+// 5. theme switch: background-color/color transition on body, --admin-duration-slow
+// 6. @media (prefers-reduced-motion: reduce): every animation and transition off
