@@ -222,28 +222,30 @@ describe('field-showcase', () => {
       // arrange
       const doc = await create(superUser, { tenant: tenantA.id })
 
-      // act
-      const find = findByTitle(defaultProfile, doc.title)
-      const createCall = create(defaultProfile, { tenant: tenantA.id })
-      const update = payload.update({
-        collection: 'field-showcase',
-        id: doc.id,
-        data: { text: 'no' },
-        user: defaultProfile,
-        overrideAccess: false,
-      })
-      const remove = payload.delete({
-        collection: 'field-showcase',
-        id: doc.id,
-        user: defaultProfile,
-        overrideAccess: false,
-      })
+      // act: each call starts when it's asserted, so no refusal goes unhandled meanwhile
+      const find = () => findByTitle(defaultProfile, doc.title)
+      const createCall = () => create(defaultProfile, { tenant: tenantA.id })
+      const update = () =>
+        payload.update({
+          collection: 'field-showcase',
+          id: doc.id,
+          data: { text: 'no' },
+          user: defaultProfile,
+          overrideAccess: false,
+        })
+      const remove = () =>
+        payload.delete({
+          collection: 'field-showcase',
+          id: doc.id,
+          user: defaultProfile,
+          overrideAccess: false,
+        })
 
       // assert
-      await expect(find).rejects.toMatchObject({ status: 403 })
-      await expect(createCall).rejects.toMatchObject({ status: 403 })
-      await expect(update).rejects.toMatchObject({ status: 403 })
-      await expect(remove).rejects.toMatchObject({ status: 403 })
+      await expect(find()).rejects.toMatchObject({ status: 403 })
+      await expect(createCall()).rejects.toMatchObject({ status: 403 })
+      await expect(update()).rejects.toMatchObject({ status: 403 })
+      await expect(remove()).rejects.toMatchObject({ status: 403 })
     })
 
     it('does not see it in the nav', () => {
@@ -273,13 +275,13 @@ describe('field-showcase', () => {
       // arrange
       const doc = await create(superUser, { tenant: tenantA.id })
 
-      // act
-      const find = findByTitle(disabled, doc.title)
-      const createCall = create(disabled, { tenant: tenantA.id })
+      // act: each call starts when it's asserted, so no refusal goes unhandled meanwhile
+      const find = () => findByTitle(disabled, doc.title)
+      const createCall = () => create(disabled, { tenant: tenantA.id })
 
       // assert
-      await expect(find).rejects.toMatchObject({ status: 403 })
-      await expect(createCall).rejects.toMatchObject({ status: 403 })
+      await expect(find()).rejects.toMatchObject({ status: 403 })
+      await expect(createCall()).rejects.toMatchObject({ status: 403 })
     })
   })
 })

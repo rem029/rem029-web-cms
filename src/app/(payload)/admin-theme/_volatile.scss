@@ -3,13 +3,73 @@
 @use './motion' as *;
 
 // dashboard
-// 1. .dashboard__label: like the nav group labels (mono, uppercase, --admin-muted)
-// 2. .dashboard__card-list .card: brutal-box(--admin-shadow-m); .card--has-onclick gets
-//    press(--admin-shadow-m, 8px 8px 0, 2px 2px 0)
-// 3. .card__title: --admin-font-display 700
-// 4. .card__actions .btn (the "+" create button, kept: user 2026-10-17): secondary look, small
+.dashboard__label {
+  font-family: var(--admin-font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+}
 
-// login
-// 5. .login form: brutal-box(--admin-shadow-m), padding 32px, max-width 420px, centred
-// 6. .login__brand: logo kept (AdminBranding), margin below
-// 7. .login-intro (step 2's LoginIntro): heading in --admin-font-display, line in --admin-muted
+.dashboard__card-list .card {
+  @include brutal-box(var(--admin-shadow-m));
+
+  &.card--has-onclick {
+    @include press(
+      var(--admin-shadow-m),
+      8px 8px 0 var(--admin-shadow),
+      2px 2px 0 var(--admin-shadow)
+    );
+
+    &:hover {
+      background: var(--admin-surface);
+      border-color: var(--admin-border);
+    }
+  }
+}
+
+.card__title {
+  font-family: var(--admin-font-display);
+  font-weight: 700;
+}
+
+// the "+" create button stays (user, 2026-10-17): a square bordered chip
+.card__actions .btn__icon {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-surface);
+
+  &:hover {
+    border: var(--admin-border-width) solid var(--admin-border);
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+    box-shadow: none;
+  }
+}
+
+// login: the form on a card
+.template-minimal.login .template-minimal__wrap {
+  @include brutal-box(var(--admin-shadow-m));
+  max-width: 420px;
+  padding: 32px;
+}
+
+.login__brand {
+  margin-bottom: 24px;
+}
+
+// step 2's LoginIntro
+.login-intro {
+  margin-bottom: 24px;
+
+  &__title {
+    margin: 0 0 4px;
+    font-family: var(--admin-font-display);
+  }
+
+  &__text {
+    margin: 0;
+    color: var(--admin-muted);
+  }
+}
