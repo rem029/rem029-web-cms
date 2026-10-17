@@ -12,6 +12,9 @@
  * - An `editor` and a `viewer` profile in test-a, test-b and test-inactive (`TEST_PROFILES`, see
  *   `profiles.ts`).
  * - One user per role (`TEST_USERS`), each logging in with their email as the password.
+ * - Public site content for the tenant-frontend tests (`TEST_CONTENT`, `TEST_THEMES`, see
+ *   `content.ts`): posts, pages and redirects with the same slugs in several businesses, a custom
+ *   domain, test-b's homepage and two themes.
  * - Idempotent: upserts tenants and profiles by slug (+ tenant), users by email, so a re-run
  *   converges on these definitions.
  * - Tests never change these fixtures: a test that writes creates its own docs with unique names.
@@ -20,14 +23,16 @@
  */
 import type { Payload } from 'payload'
 
+import { seedTestContent } from './content'
 import { seedTestProfiles } from './profiles'
 import { seedTestTenants } from './tenants'
 import { seedTestUsers } from './users'
 
-export { TEST_PROFILES, TEST_TENANTS, TEST_USERS } from './fixtures'
+export { TEST_CONTENT, TEST_PROFILES, TEST_TENANTS, TEST_THEMES, TEST_USERS } from './fixtures'
 
 export const seedTestData = async (payload: Payload): Promise<void> => {
   const tenants = await seedTestTenants(payload)
   const profiles = await seedTestProfiles(payload, tenants)
   await seedTestUsers(payload, tenants, profiles)
+  await seedTestContent(payload, tenants)
 }

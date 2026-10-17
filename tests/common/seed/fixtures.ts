@@ -52,3 +52,27 @@ export type TenantIds = Record<keyof typeof TEST_TENANTS, number>
 
 /** Profile ids per business that has profiles (test-c has none). */
 export type ProfileIds = Record<keyof typeof TEST_PROFILES, Record<'a' | 'b' | 'inactive', number>>
+
+/**
+ * Public site content (`content.ts`): the same slugs in several businesses, so a public read that
+ * returns another business's doc is easy to spot.
+ */
+export const TEST_CONTENT = {
+  // a published post in admin, test-a and test-b
+  welcomePost: 'welcome',
+  // a published page in test-a only
+  onlyInA: 'only-in-a',
+  // a redirect in test-a only, and one in admin
+  redirectInA: '/redirect-in-a',
+  redirectInAdmin: '/redirect-in-admin',
+  // test-a's custom domain (`tenants.domains`)
+  domainOfA: 'shop-a.example.test',
+  // test-b's Settings → Homepage (admin has no homepage picked: its `home` page is the fallback)
+  homepageOfB: 'about',
+} as const
+
+/** The active theme of test-a and test-b, so their branding differs. */
+export const TEST_THEMES = {
+  a: { name: 'Ocean', primary: '#1d4ed8' },
+  b: { name: 'Sunset', primary: '#b4232c', font: 'Urbanist' },
+} as const
