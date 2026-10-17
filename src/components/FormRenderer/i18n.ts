@@ -28,8 +28,8 @@ export type FormText = {
   yes: string
   no: string
   stepOf: (current: number, total: number) => string
-  // step 2: ADD — draftSaved: string ('Draft saved' / 'تم حفظ المسودة')
   somethingWrong: string
+  draftSaved: string
 }
 
 const en: FormText = {
@@ -59,6 +59,7 @@ const en: FormText = {
   no: 'No',
   stepOf: (current, total) => `Step ${current} of ${total}`,
   somethingWrong: 'Something went wrong. Please try again.',
+  draftSaved: 'Draft saved on this device',
 }
 
 const ar: FormText = {
@@ -86,6 +87,7 @@ const ar: FormText = {
   no: 'لا',
   stepOf: (current, total) => `الخطوة ${current} من ${total}`,
   somethingWrong: 'حدث خطأ. يرجى المحاولة مرة أخرى.',
+  draftSaved: 'تم حفظ المسودة على هذا الجهاز',
 }
 
 export const formText = (locale: RendererLocale): FormText => (locale === 'ar' ? ar : en)

@@ -5,18 +5,19 @@
  * populated form in the visitor's locale and renders either one page of fields or the
  * multi-step flow, then the confirmation message or the redirect (the plugin's fields).
  *
- * Root: `<div className="fb-form" data-form-id dir lang>` (the Custom CSS scope, step 2).
+ * Root: `<div className="fb-form" data-form-id dir lang>` + the Appearance presets as `data-*` and
+ * css vars (`appearance.ts`); the form's Custom CSS is scoped to it (`customCss.ts`).
  * Answers are flat dotted paths (`helpers.ts`), kept as a draft in localStorage (`useDraft`).
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Form } from '@/payload-types'
 
-// step 2: ADD — import './formRenderer.css', appearanceToStyle, scopeCustomCss
 import RichText from '@/components/RichText'
-import { Button } from '@/components/ui/button'
 
+import { APPEARANCE_DEFAULTS, appearanceToStyle } from './appearance'
 import { FormRendererContext, type FormErrors, type FormRendererState } from './context'
+import { scopeCustomCss } from './customCss'
 import {
   focusFirstError,
   hiddenFieldPaths,
@@ -29,6 +30,7 @@ import { MultiStep } from './multiStep'
 import { RecursiveFields } from './recursiveFields'
 import type { FieldValue, RendererLocale, SubmitHandler, UploadHandler } from './types'
 import { useDraft } from './useDraft'
+import './formRenderer.css'
 
 export type FormRendererProps = {
   form: Form
@@ -48,12 +50,13 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   upload,
   saveDraft = true,
 }) => {
-  const { draft, updateDraft, clearDraft } = useDraft(form.id, saveDraft)
+  const { draft, updateDraft, clearDraft, savedAt } = useDraft(form.id, saveDraft)
   const { values, listCounts } = draft
   const [errors, setErrors] = useState<FormErrors>({})
   const [summary, setSummary] = useState<string | null>(null)
   const [status, setStatus] = useState<Status>('idle')
   const rootRef = useRef<HTMLDivElement>(null)
+  const confirmationRef = useRef<HTMLDivElement>(null)
   const text = formText(locale)
   const fields = useMemo(() => form.fields ?? [], [form.fields])
   const multiStep = fields.find((field) => field.blockType === 'multi-step')
@@ -99,6 +102,11 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     if (!Object.keys(errors).length) setSummary(null)
   }, [errors])
 
+  // the form is replaced by the message: move focus there so it is read and kept in view
+  useEffect(() => {
+    if (status === 'done') confirmationRef.current?.focus()
+  }, [status])
+
   const send = async () => {
     const missing = missingRequired(fields, values, listCounts)
     if (missing.length) {
@@ -128,8 +136,8 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     setStatus('done')
   }
 
-  // step 2: ADD — const { dataAttrs, cssVars } = appearanceToStyle(form.appearance)
-  // step 2: ADD — const scopedCss = scopeCustomCss(form.custom_css, form.id)
+  const { dataAttrs, cssVars } = appearanceToStyle(form.appearance)
+  const scopedCss = scopeCustomCss(form.custom_css, form.id)
   const state: FormRendererState = {
     formId: form.id,
     locale,
@@ -150,66 +158,74 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     upload,
   }
 
+  const draftNote =
+    savedAt && status === 'idle' ? <p className="fb-draft-status">{text.draftSaved}</p> : null
+
   return (
     <FormRendererContext.Provider value={state}>
       <div
-        // step 2: CHANGE — className 'fb-form' only (layout and look move to formRenderer.css);
-        // step 2:   spread {...dataAttrs}, style={cssVars}; render <style>{scopedCss}</style> first when set
-        // step 2: ADD — 'draft saved' note in fb-actions (savedAt from useDraft, aria-live polite)
-        className="fb-form flex flex-col gap-6"
+        {...dataAttrs}
+        className="fb-form"
         data-form-id={form.id}
         data-numbered={form.show_sequence_number || undefined}
         dir={locale === 'ar' ? 'rtl' : 'ltr'}
         lang={locale}
         ref={rootRef}
+        style={cssVars}
       >
-        {status === 'done' ? (
-          <div className="fb-confirmation" role="status">
-            {form.confirmationMessage && (
-              <RichText data={form.confirmationMessage} enableGutter={false} />
-            )}
-          </div>
-        ) : (
-          <>
-            {summary && (
-              <p
-                className="fb-error-summary rounded border border-destructive p-3 text-sm text-destructive"
-                role="alert"
-              >
-                {summary}
-              </p>
-            )}
-            {multiStep?.blockType === 'multi-step' ? (
-              <MultiStep
-                block={multiStep}
-                onSubmit={() => void send()}
-                submitLabel={submitLabel}
-                submitting={status === 'submitting'}
-              />
-            ) : (
-              <form
-                className="flex flex-col gap-6"
-                noValidate
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  void send()
-                }}
-              >
-                <RecursiveFields fields={fields} />
-                <div className="fb-actions flex justify-end">
-                  <Button
-                    className="fb-button fb-button--primary"
-                    disabled={status === 'submitting'}
-                    type="submit"
-                  >
-                    {status === 'submitting' ? text.submitting : submitLabel}
-                  </Button>
-                </div>
-              </form>
-            )}
-          </>
-        )}
+        {scopedCss && <style>{scopedCss}</style>}
+        <div className="fb-body">
+          {status === 'done' ? (
+            <div className="fb-confirmation" ref={confirmationRef} role="status" tabIndex={-1}>
+              {form.confirmationMessage && (
+                <RichText data={form.confirmationMessage} enableGutter={false} />
+              )}
+            </div>
+          ) : (
+            <>
+              {summary && (
+                <p className="fb-error-summary" role="alert">
+                  {summary}
+                </p>
+              )}
+              {multiStep?.blockType === 'multi-step' ? (
+                <MultiStep
+                  block={multiStep}
+                  onSubmit={() => void send()}
+                  status={draftNote}
+                  stepIndicator={appearanceStepIndicator(form)}
+                  submitLabel={submitLabel}
+                  submitting={status === 'submitting'}
+                />
+              ) : (
+                <form
+                  className="fb-steps-flow"
+                  noValidate
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    void send()
+                  }}
+                >
+                  <RecursiveFields fields={fields} />
+                  <div className="fb-actions">
+                    {draftNote}
+                    <button
+                      className="fb-button fb-button--primary"
+                      disabled={status === 'submitting'}
+                      type="submit"
+                    >
+                      {status === 'submitting' ? text.submitting : submitLabel}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </FormRendererContext.Provider>
   )
 }
+
+const appearanceStepIndicator = (form: Form) =>
+  form.appearance?.step_indicator ?? APPEARANCE_DEFAULTS.step_indicator

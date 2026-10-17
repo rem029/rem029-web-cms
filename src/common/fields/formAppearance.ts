@@ -3,6 +3,7 @@ import type { Field, Tab } from 'payload'
 /** The stable class names a form's Custom CSS can target (also listed in the field description). */
 export const FORM_CSS_HOOKS = [
   'fb-form',
+  'fb-body',
   'fb-header',
   'fb-steps',
   'fb-step',
@@ -15,9 +16,13 @@ export const FORM_CSS_HOOKS = [
   'fb-input',
   'fb-help',
   'fb-error',
+  'fb-error-summary',
+  'fb-choice',
   'fb-group',
   'fb-list',
   'fb-list-row',
+  'fb-conditional',
+  'fb-content',
   'fb-review',
   'fb-actions',
   'fb-button',

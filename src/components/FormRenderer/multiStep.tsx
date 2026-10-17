@@ -1,7 +1,7 @@
 'use client'
 /**
  * A multi-step form: one step at a time (`fb-step` / `fb-step--active`, the step's `css_class`),
- * the progress bar, Back / Next, then the review screen and Submit. Next checks only the
+ * the step indicator, Back / Next, then the review screen and Submit. Next checks only the
  * current step's required fields (`missingRequired` on that step) and focuses the first error.
  * "Edit" on the review screen jumps to that step and Next returns to review. Rendered by
  * `FormRenderer` when the form's top-level field is a `multi-step` block (phase 1's
@@ -9,32 +9,34 @@
  */
 import React, { useRef, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
 import { cn } from '@/utilities/ui'
 
 import { useFormRenderer } from './context'
 import { focusFirstError, missingRequired } from './helpers'
 import { formText } from './i18n'
-// step 2: CHANGE — ProgressBar → StepIndicator with variant = step_indicator prop from FormRenderer
-import { ProgressBar } from './progressBar'
 import { RecursiveFields } from './recursiveFields'
 import { ReviewScreen } from './reviewScreen'
+import { StepIndicator, type StepIndicatorVariant } from './stepIndicator'
 import type { MultiStepBlock } from './types'
 
 export type MultiStepProps = {
   block: MultiStepBlock
   submitLabel: string
   submitting: boolean
-  // step 2: ADD — stepIndicator: StepIndicatorVariant (from appearanceToStyle's preset)
+  stepIndicator: StepIndicatorVariant
   /** Called from the review screen; FormRenderer runs the full check and sends. */
   onSubmit: () => void
+  /** Shown beside the actions (the "draft saved" note). */
+  status?: React.ReactNode
 }
 
 export const MultiStep: React.FC<MultiStepProps> = ({
   block,
   submitLabel,
   submitting,
+  stepIndicator,
   onSubmit,
+  status,
 }) => {
   const { values, listCounts, setErrors, locale } = useFormRenderer()
   const [current, setCurrent] = useState(0)
@@ -68,7 +70,7 @@ export const MultiStep: React.FC<MultiStepProps> = ({
 
   if (reviewing) {
     return (
-      <div ref={topRef}>
+      <div className="fb-steps-flow" ref={topRef}>
         <ReviewScreen
           onEdit={(index) => {
             setReturnToReview(true)
@@ -76,6 +78,7 @@ export const MultiStep: React.FC<MultiStepProps> = ({
           }}
           onSubmit={onSubmit}
           sections={steps}
+          status={status}
           submitLabel={submitLabel}
           submitting={submitting}
         />
@@ -84,46 +87,35 @@ export const MultiStep: React.FC<MultiStepProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-6" ref={topRef}>
-      {steps.length > 1 && (
-        <ProgressBar
-          current={current}
-          labels={steps.map((s) => s.label)}
-          locale={locale}
-          total={steps.length}
-        />
-      )}
+    <div className="fb-steps-flow" ref={topRef}>
+      <StepIndicator
+        current={current}
+        labels={steps.map((s) => s.label)}
+        locale={locale}
+        variant={stepIndicator}
+      />
       <section
         aria-labelledby={`fb-step-${current}`}
-        // step 2: CHANGE — tailwind look → formRenderer.css (.fb-step); same for fb-actions
-        className={cn('fb-step fb-step--active flex flex-col gap-4', step.css_class)}
+        className={cn('fb-step fb-step--active', step.css_class)}
       >
         <div>
-          <h2 className="text-lg font-semibold" id={`fb-step-${current}`}>
+          <h2 className="fb-step-title" id={`fb-step-${current}`}>
             {step.label}
           </h2>
-          {step.description && (
-            <p className="mt-1 text-sm text-muted-foreground">{step.description}</p>
-          )}
+          {step.description && <p className="fb-step-description">{step.description}</p>}
         </div>
         <RecursiveFields fields={step.fields ?? []} />
       </section>
-      <div className="fb-actions flex justify-between gap-2">
-        {current > 0 ? (
-          <Button
-            className="fb-button"
-            onClick={() => show(current - 1)}
-            type="button"
-            variant="outline"
-          >
+      <div className={cn('fb-actions', current > 0 && 'fb-actions--split')}>
+        {status}
+        {current > 0 && (
+          <button className="fb-button" onClick={() => show(current - 1)} type="button">
             {text.back}
-          </Button>
-        ) : (
-          <span />
+          </button>
         )}
-        <Button className="fb-button fb-button--primary" onClick={next} type="button">
+        <button className="fb-button fb-button--primary" onClick={next} type="button">
           {last || returnToReview ? text.review : text.next}
-        </Button>
+        </button>
       </div>
     </div>
   )

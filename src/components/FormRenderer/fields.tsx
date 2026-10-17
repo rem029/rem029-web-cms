@@ -3,7 +3,7 @@
  * One input per answer field type: the plugin's stock fields (text, textarea, email, number,
  * select, radio, checkbox, date, country, state) and ours (phone, time, rating, scale, file,
  * signature). Rendered by `RecursiveFields`; reads and writes answers through
- * `useFormRenderer()`. Native inputs styled with theme tokens (as `src/components/ui`).
+ * `useFormRenderer()`. Native inputs; the look is in `formRenderer.css`.
  *
  * Custom CSS contract: the wrapper is `fb-field fb-field--<blockType>` (+ `fb-field--error`)
  * with `data-field="<path>"` and the field's own `css_class`; inside it `fb-label`, `fb-input`,
@@ -17,7 +17,7 @@ import { FORM_UPLOAD_MAX_BYTES, FORM_UPLOAD_MIME_TYPES } from '@/collections/For
 import { cn } from '@/utilities/ui'
 
 import { useFormRenderer } from './context'
-import { buildIdSegment, fieldPath } from './helpers'
+import { buildIdSegment, fieldPath, isFilled } from './helpers'
 import { formText } from './i18n'
 import { SignaturePad } from './signaturePad'
 import type { FieldOf, FieldValue, RenderField } from './types'
@@ -34,15 +34,6 @@ export type FieldControlProps = {
   prefix: string
 }
 
-// step 2: CHANGE — INPUT_CLASS / CHOICE_CLASS / star classes: keep only layout utilities; borders,
-// step 2:   colours, radius and focus move to formRenderer.css (.fb-input, .fb-choice, .fb-star) so the
-// step 2:   presets and Custom CSS can restyle them without fighting tailwind
-const INPUT_CLASS =
-  'fb-input w-full rounded border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
-
-const CHOICE_CLASS =
-  'fb-choice inline-flex min-h-10 min-w-10 cursor-pointer items-center justify-center rounded border border-border bg-background px-3 text-sm has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring'
-
 const inputIdFor = (path: string): string => `fb-${buildIdSegment(path)}`
 
 type ShellProps = {
@@ -53,6 +44,9 @@ type ShellProps = {
   group?: boolean
   children: React.ReactNode
 }
+
+/** Text-like inputs whose label can float inside them (Appearance → Labels → floating). */
+const FLOATABLE = ['text', 'email', 'phone', 'number', 'textarea']
 
 /** The wrapper every input shares: label (+ required mark), help text, error, width. */
 export const FieldShell: React.FC<ShellProps> = ({ field, path, inputId, group, children }) => {
@@ -67,9 +61,10 @@ export const FieldShell: React.FC<ShellProps> = ({ field, path, inputId, group, 
   return (
     <Wrapper
       className={cn(
-        'fb-field flex grow basis-full flex-col gap-1.5',
-        field.width && 'sm:basis-[calc(var(--fb-width)-1rem)]',
+        'fb-field',
         `fb-field--${field.blockType}`,
+        field.width && 'fb-field--sized',
+        FLOATABLE.includes(field.blockType) && 'fb-field--floatable',
         error && 'fb-field--error',
         field.css_class,
       )}
@@ -77,23 +72,23 @@ export const FieldShell: React.FC<ShellProps> = ({ field, path, inputId, group, 
       style={widthStyle}
     >
       {field.blockType !== 'checkbox' && (
-        <Label className="fb-label text-sm font-medium" {...(group ? {} : { htmlFor: inputId })}>
+        <Label className="fb-label" {...(group ? {} : { htmlFor: inputId })}>
           {field.label || field.name}
           {field.required && (
-            <span aria-hidden="true" className="text-destructive">
-              {' *'}
+            <span aria-hidden="true" className="fb-required">
+              *
             </span>
           )}
         </Label>
       )}
       {children}
       {field.help_text && (
-        <p className="fb-help text-sm text-muted-foreground" id={`${inputId}-help`}>
+        <p className="fb-help" id={`${inputId}-help`}>
           {field.help_text}
         </p>
       )}
       {error && (
-        <p className="fb-error text-sm text-destructive" id={`${inputId}-error`} role="alert">
+        <p className="fb-error" id={`${inputId}-error`} role="alert">
           {error}
         </p>
       )}
@@ -125,7 +120,7 @@ const defaultOf = (field: InputField): FieldValue | undefined =>
     : undefined
 
 export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => {
-  const { values, errors, disabled, setValue, locale } = useFormRenderer()
+  const { values, errors, disabled, setValue, setFieldError, locale } = useFormRenderer()
   const path = fieldPath(prefix, field.name)
   const inputId = inputIdFor(path)
   const value = values[path]
@@ -138,8 +133,11 @@ export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => 
     if (value === undefined && fallback !== undefined) setValue(path, fallback)
   }, [value, fallback, path, setValue])
 
-  // step 2: ADD — onBlur on every input: required and !isFilled(value) → setFieldError(path, text.required)
-  // step 2:   (inline validation when leaving a field; cleared again by setValue)
+  // leaving an empty required field says so straight away; typing clears it (setValue)
+  const onBlur = () => {
+    if (field.required && !isFilled(value)) setFieldError(path, text.required)
+  }
+
   const shell = (children: React.ReactNode, group = false) => (
     <FieldShell field={field} group={group} inputId={inputId} path={path}>
       {children}
@@ -148,6 +146,7 @@ export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => 
   const onText = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => setValue(path, event.target.value)
+  const textValue = typeof value === 'boolean' ? '' : (value ?? '')
 
   switch (field.blockType) {
     case 'text':
@@ -159,29 +158,33 @@ export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => 
       return shell(
         <input
           {...aria}
-          autoComplete={
-            field.blockType === 'email' ? 'email' : field.blockType === 'phone' ? 'tel' : undefined
-          }
-          className={INPUT_CLASS}
+          autoComplete={AUTOCOMPLETE[field.blockType]}
+          className="fb-input"
           dir={field.blockType === 'phone' || field.blockType === 'email' ? 'ltr' : undefined}
           disabled={disabled}
           id={inputId}
+          inputMode={field.blockType === 'number' ? 'decimal' : undefined}
           name={path}
+          onBlur={onBlur}
           onChange={onText}
+          // a blank placeholder lets css float the label while the field is empty
+          placeholder=" "
           type={TEXT_TYPES[field.blockType]}
-          value={typeof value === 'boolean' ? '' : (value ?? '')}
+          value={textValue}
         />,
       )
     case 'textarea':
       return shell(
         <textarea
           {...aria}
-          className={cn(INPUT_CLASS, 'min-h-28')}
+          className="fb-input"
           disabled={disabled}
           id={inputId}
           name={path}
+          onBlur={onBlur}
           onChange={onText}
-          value={typeof value === 'boolean' ? '' : (value ?? '')}
+          placeholder=" "
+          value={textValue}
         />,
       )
     case 'select':
@@ -196,10 +199,11 @@ export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => 
       return shell(
         <select
           {...aria}
-          className={cn(INPUT_CLASS, 'h-10')}
+          className="fb-input fb-select"
           disabled={disabled}
           id={inputId}
           name={path}
+          onBlur={onBlur}
           onChange={onText}
           value={typeof value === 'string' ? value : ''}
         >
@@ -232,22 +236,22 @@ export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => 
       )
     case 'checkbox':
       return shell(
-        <label className="flex items-center gap-2 text-sm" htmlFor={inputId}>
+        <label className="fb-check" htmlFor={inputId}>
           <input
             {...aria}
             checked={value === true}
-            className="fb-input h-4 w-4 accent-primary"
+            className="fb-checkbox"
             disabled={disabled}
             id={inputId}
             name={path}
             onChange={(event) => setValue(path, event.target.checked)}
             type="checkbox"
           />
-          <span className="fb-label font-medium">
+          <span className="fb-label">
             {field.label || field.name}
             {field.required && (
-              <span aria-hidden="true" className="text-destructive">
-                {' *'}
+              <span aria-hidden="true" className="fb-required">
+                *
               </span>
             )}
           </span>
@@ -284,7 +288,7 @@ export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => 
         return { value: point, label: String(point) }
       })
       return shell(
-        <div className="flex flex-col gap-1">
+        <>
           <ChoiceGroup
             aria={aria}
             choices={choices}
@@ -297,12 +301,12 @@ export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => 
             variant="button"
           />
           {(field.min_label || field.max_label) && (
-            <div className="fb-scale-labels flex justify-between text-xs text-muted-foreground">
+            <div aria-hidden="true" className="fb-scale-labels">
               <span>{field.min_label}</span>
               <span>{field.max_label}</span>
             </div>
           )}
-        </div>,
+        </>,
         true,
       )
     }
@@ -310,6 +314,11 @@ export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => 
     case 'signature':
       return shell(<UploadInput aria={aria} field={field} inputId={inputId} path={path} />)
   }
+}
+
+const AUTOCOMPLETE: Partial<Record<InputField['blockType'], string>> = {
+  email: 'email',
+  phone: 'tel',
 }
 
 type Choice = { value: string | number; label: string; title?: string }
@@ -329,21 +338,17 @@ const ChoiceGroup: React.FC<{
   <div
     aria-describedby={aria['aria-describedby']}
     aria-invalid={aria['aria-invalid']}
-    className={cn('fb-choices flex flex-wrap gap-2', direction === 'column' && 'flex-col')}
+    className={cn('fb-choices', `fb-choices--${direction}`, `fb-choices--${variant}`)}
     role="radiogroup"
   >
     {choices.map((choice, i) => {
       const id = `${inputId}-${i}`
       const checked = String(value ?? '') === String(choice.value)
-      const filledStar = variant === 'star' && Number(value) >= Number(choice.value)
       return (
         <label
           className={cn(
-            variant === 'radio' && 'flex items-center gap-2 text-sm',
-            variant === 'button' && CHOICE_CLASS,
-            variant === 'star' &&
-              'fb-star cursor-pointer text-3xl leading-none text-muted-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring',
-            filledStar && 'text-primary',
+            'fb-choice',
+            variant === 'star' && Number(value) >= Number(choice.value) && 'fb-star--on',
           )}
           htmlFor={id}
           key={choice.value}
@@ -351,7 +356,7 @@ const ChoiceGroup: React.FC<{
         >
           <input
             checked={checked}
-            className={variant === 'radio' ? 'h-4 w-4 accent-primary' : 'sr-only'}
+            className={variant === 'radio' ? 'fb-radio' : 'sr-only'}
             disabled={disabled}
             id={id}
             name={path}
@@ -402,8 +407,18 @@ const UploadInput: React.FC<{
     }
   }
 
+  const status = uploading
+    ? text.uploading
+    : values[path] !== undefined
+      ? field.blockType === 'signature'
+        ? text.signed
+        : text.fileAttached
+      : field.blockType === 'file'
+        ? text.uploadHint
+        : null
+
   return (
-    <div className="flex flex-col gap-1" aria-busy={uploading || undefined}>
+    <div aria-busy={uploading || undefined} className="fb-upload">
       {field.blockType === 'signature' ? (
         <SignaturePad
           clearLabel={text.clearSignature}
@@ -415,10 +430,7 @@ const UploadInput: React.FC<{
         <input
           {...aria}
           accept={FORM_UPLOAD_MIME_TYPES.join(',')}
-          className={cn(
-            INPUT_CLASS,
-            'h-auto file:me-3 file:rounded file:border-0 file:bg-muted file:px-3 file:py-1',
-          )}
+          className="fb-input"
           disabled={disabled || uploading}
           id={inputId}
           name={path}
@@ -426,16 +438,9 @@ const UploadInput: React.FC<{
           type="file"
         />
       )}
-      <p className="fb-help text-xs text-muted-foreground" aria-live="polite">
-        {uploading
-          ? text.uploading
-          : values[path] !== undefined
-            ? field.blockType === 'signature'
-              ? text.signed
-              : text.fileAttached
-            : field.blockType === 'file'
-              ? text.uploadHint
-              : null}
+      {/* always mounted: a live region added together with its text is often not announced */}
+      <p aria-live="polite" className="fb-help">
+        {status}
       </p>
     </div>
   )

@@ -39,8 +39,11 @@ export const useDraft = (
   draft: Draft
   updateDraft: (update: (prev: Draft) => Draft) => void
   clearDraft: () => void
+  /** When the last change was written to storage; null before any or without storage. */
+  savedAt: Date | null
 } => {
   const [draft, setDraft] = useState<Draft>(EMPTY)
+  const [savedAt, setSavedAt] = useState<Date | null>(null)
   // only the visitor's own changes are written, never the empty first render
   const changed = useRef(false)
 
@@ -55,12 +58,12 @@ export const useDraft = (
     if (!enabled || !changed.current) return
     try {
       localStorage.setItem(draftKey(formId), JSON.stringify(draft))
+      setSavedAt(new Date())
     } catch {
       // storage full or blocked: the form keeps working without a draft
     }
   }, [draft, formId, enabled])
 
-  // step 2: ADD — savedAt: Date | null, set after each successful write, returned for the 'draft saved' note
   const updateDraft = useCallback((update: (prev: Draft) => Draft) => {
     changed.current = true
     setDraft(update)
@@ -69,6 +72,7 @@ export const useDraft = (
   const clearDraft = useCallback(() => {
     changed.current = false
     setDraft(EMPTY)
+    setSavedAt(null)
     try {
       localStorage.removeItem(draftKey(formId))
     } catch {
@@ -76,5 +80,5 @@ export const useDraft = (
     }
   }, [formId])
 
-  return { draft, updateDraft, clearDraft }
+  return { draft, updateDraft, clearDraft, savedAt }
 }

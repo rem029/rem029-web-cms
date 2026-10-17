@@ -12,6 +12,7 @@ import {
   fakeUpload,
   formDoc,
   listFields,
+  richText,
   stockFields,
   twoStepFields,
 } from './renderForms'
@@ -164,33 +165,66 @@ describe('FormRenderer', () => {
   })
 
   it('adds field css classes and fb hooks', () => {
-    // arrange: formDoc([{ text full_name, css_class 'big-input' }])
-    // act: render
-    // assert: the field wrapper has fb-field, fb-field--text, big-input and data-field="full_name";
-    //         the input has fb-input; the label fb-label
-    expect.fail('not implemented')
+    // arrange
+    const form = formDoc([
+      { blockType: 'text', name: 'full_name', label: 'Full name', css_class: 'big-input' },
+    ])
+
+    // act
+    renderForm(form)
+
+    // assert
+    const input = screen.getByLabelText('Full name')
+    const wrapper = input.closest('[data-field="full_name"]')
+    expect(wrapper?.className).toMatch(/\bfb-field\b/)
+    expect(wrapper?.className).toMatch(/\bfb-field--text\b/)
+    expect(wrapper?.className).toMatch(/\bbig-input\b/)
+    expect(input.className).toMatch(/\bfb-input\b/)
+    expect(wrapper?.querySelector('label')?.className).toMatch(/\bfb-label\b/)
   })
 
-  it('renders content blocks without inputs', () => {
-    // arrange: formDoc([message 'Welcome'])
-    // act: render, then click Send
-    // assert: 'Welcome' shows in .fb-content--message, no textbox; submit called with []
-    expect.fail('not implemented')
+  it('renders content blocks without inputs', async () => {
+    // arrange
+    const { submit, container } = renderForm(
+      formDoc([{ blockType: 'message', message: richText('Welcome') }]),
+    )
+
+    // act
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+
+    // assert
+    expect(container.querySelector('.fb-content--message')?.textContent).toContain('Welcome')
+    expect(screen.queryByRole('textbox')).toBeNull()
+    await waitFor(() => expect(submit).toHaveBeenCalledWith({ formId: 1, submissionData: [] }))
   })
 
-  // proposed additions
   it('applies appearance and scoped custom css to the root', () => {
-    // arrange: formDoc(stockFields(), { appearance: { width: 'wide' }, custom_css: '.fb-label { color: red; }' })
-    // act: render
-    // assert: .fb-form has data-width="wide" and data-form-id="1"; a <style> holds
-    //         '[data-form-id="1"]'
-    expect.fail('not implemented')
+    // arrange
+    const form = formDoc(stockFields(), {
+      appearance: { width: 'wide' },
+      custom_css: '.fb-label { color: red; }',
+    })
+
+    // act
+    const { container } = renderForm(form)
+
+    // assert
+    const root = container.querySelector('.fb-form')
+    expect(root?.getAttribute('data-width')).toBe('wide')
+    expect(root?.getAttribute('data-form-id')).toBe('1')
+    expect(container.querySelector('style')?.textContent).toContain('[data-form-id="1"]')
   })
 
   it('shows a required error when leaving an empty field', () => {
-    // arrange: formDoc(twoStepFields()), rendered
-    // act: focus then blur the empty "Full name"
-    // assert: 'This field is required.' shows before any Next click
-    expect.fail('not implemented')
+    // arrange
+    renderForm(formDoc(twoStepFields()))
+
+    // act
+    const input = screen.getByLabelText(/Full name/)
+    fireEvent.focus(input)
+    fireEvent.blur(input)
+
+    // assert
+    expect(screen.getByText('This field is required.')).toBeTruthy()
   })
 })

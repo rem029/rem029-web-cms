@@ -12,13 +12,10 @@ import { cn } from '@/utilities/ui'
 
 import type { FieldOf } from './types'
 
-// step 2: CHANGE — image radius from var(--fb-radius)
-const IMAGE_SIZES = { small: 'max-w-xs', medium: 'max-w-md', full: 'w-full' } as const
-
 export const MessageContent: React.FC<{ block: FieldOf<'message'> }> = ({ block }) => {
   if (!block.message) return null
   return (
-    <div className={cn('fb-content fb-content--message basis-full', block.css_class)}>
+    <div className={cn('fb-content fb-content--message', block.css_class)}>
       <RichText data={block.message} enableGutter={false} />
     </div>
   )
@@ -30,15 +27,13 @@ export const ImageContent: React.FC<{ block: FieldOf<'image'> }> = ({ block }) =
   return (
     <figure
       className={cn(
-        'fb-content fb-content--image basis-full',
-        IMAGE_SIZES[block.size ?? 'full'],
+        'fb-content fb-content--image',
+        `fb-image--${block.size ?? 'full'}`,
         block.css_class,
       )}
     >
-      <Media imgClassName="h-auto w-full rounded" resource={block.media} />
-      {block.caption && (
-        <figcaption className="mt-2 text-sm text-muted-foreground">{block.caption}</figcaption>
-      )}
+      <Media resource={block.media} />
+      {block.caption && <figcaption className="fb-caption">{block.caption}</figcaption>}
     </figure>
   )
 }

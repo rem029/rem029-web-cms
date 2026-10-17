@@ -10,7 +10,6 @@
  */
 import React from 'react'
 
-import { Button } from '@/components/ui/button'
 import { cn } from '@/utilities/ui'
 
 import { ImageContent, MessageContent } from './content'
@@ -27,8 +26,7 @@ export type RecursiveFieldsProps = {
 }
 
 export const RecursiveFields: React.FC<RecursiveFieldsProps> = ({ fields, prefix = '' }) => (
-  // step 2: CHANGE — gap-4 → var(--fb-gap) in formRenderer.css; group / list borders and padding move there too
-  <div className="fb-fields flex flex-wrap gap-4">
+  <div className="fb-fields">
     {fields.map((field, i) => (
       <FieldNode field={field} key={field.id ?? i} prefix={prefix} />
     ))}
@@ -46,15 +44,11 @@ const FieldNode: React.FC<{ field: RenderField; prefix: string }> = ({ field, pr
     case 'group':
       return (
         <fieldset
-          className={cn('fb-group basis-full rounded border border-border p-4', field.css_class)}
+          className={cn('fb-group', field.css_class)}
           data-field={fieldPath(prefix, field.name)}
         >
-          {field.label && (
-            <legend className="fb-group-label px-1 text-base font-semibold">{field.label}</legend>
-          )}
-          {field.help_text && (
-            <p className="fb-help mb-3 text-sm text-muted-foreground">{field.help_text}</p>
-          )}
+          {field.label && <legend className="fb-group-label">{field.label}</legend>}
+          {field.help_text && <p className="fb-help">{field.help_text}</p>}
           <RecursiveFields fields={field.fields ?? []} prefix={`${prefix}${field.name}.`} />
         </fieldset>
       )
@@ -63,7 +57,7 @@ const FieldNode: React.FC<{ field: RenderField; prefix: string }> = ({ field, pr
     case 'conditional':
       if (!evaluateCondition(field, values, prefix)) return null
       return (
-        <div className={cn('fb-conditional basis-full', field.css_class)}>
+        <div className={cn('fb-conditional', field.css_class)}>
           <RecursiveFields fields={field.fields ?? []} prefix={prefix} />
         </div>
       )
@@ -84,47 +78,37 @@ const ListField: React.FC<{ field: FieldOf<'list'>; prefix: string }> = ({ field
   const full = Boolean(field.max_items && rows >= field.max_items)
 
   return (
-    <fieldset
-      className={cn('fb-list basis-full rounded border border-border p-4', field.css_class)}
-      data-field={path}
-    >
-      <legend className="fb-group-label px-1 text-base font-semibold">{label}</legend>
-      {field.help_text && (
-        <p className="fb-help mb-3 text-sm text-muted-foreground">{field.help_text}</p>
-      )}
-      <div className="flex flex-col gap-6">
+    <fieldset className={cn('fb-list', field.css_class)} data-field={path}>
+      <legend className="fb-group-label">{label}</legend>
+      {field.help_text && <p className="fb-help">{field.help_text}</p>}
+      <div className="fb-list-rows">
         {Array.from({ length: rows }, (_, row) => (
-          <div className="fb-list-row flex flex-col gap-3" key={row}>
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium text-muted-foreground">
-                {text.row(label, row + 1)}
-              </p>
+          <div className="fb-list-row" key={row}>
+            <div className="fb-list-row-head">
+              <p className="fb-list-row-title">{text.row(label, row + 1)}</p>
               {rows > 1 && (
-                <Button
-                  className="fb-button"
+                <button
+                  className="fb-button fb-button--quiet"
                   disabled={disabled}
                   onClick={() => removeListRow(path, row)}
-                  size="sm"
                   type="button"
-                  variant="ghost"
                 >
                   {text.removeRow(label, row + 1)}
-                </Button>
+                </button>
               )}
             </div>
             <RecursiveFields fields={field.fields ?? []} prefix={`${path}.${row}.`} />
           </div>
         ))}
       </div>
-      <Button
-        className="fb-button mt-4"
+      <button
+        className="fb-button fb-list-add"
         disabled={disabled || full}
         onClick={() => addListRow(path)}
         type="button"
-        variant="outline"
       >
         {text.addRow(label)}
-      </Button>
+      </button>
     </fieldset>
   )
 }

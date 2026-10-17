@@ -4,7 +4,8 @@ import { vi } from 'vitest'
 import type { FormField, SubmitHandler, UploadHandler } from '@/components/FormRenderer/types'
 import type { Form } from '@/payload-types'
 
-const paragraph = (text: string): NonNullable<Form['confirmationMessage']> => ({
+/** A one-paragraph rich text value. */
+export const richText = (text: string): NonNullable<Form['confirmationMessage']> => ({
   root: {
     type: 'root',
     version: 1,
@@ -22,7 +23,7 @@ export const formDoc = (fields: FormField[], overrides: Partial<Form> = {}): For
   fields,
   submitButtonLabel: 'Send',
   confirmationType: 'message',
-  confirmationMessage: paragraph('Thanks!'),
+  confirmationMessage: richText('Thanks!'),
   createdAt: '2026-10-17T00:00:00.000Z',
   updatedAt: '2026-10-17T00:00:00.000Z',
   ...overrides,
@@ -56,7 +57,7 @@ export const stockFields = (): FormField[] => [
   { blockType: 'date', name: 'visit', label: 'Visit date' },
   { blockType: 'country', name: 'country', label: 'Country' },
   { blockType: 'state', name: 'state', label: 'State' },
-  { blockType: 'message', message: paragraph('Fields marked * are required.') },
+  { blockType: 'message', message: richText('Fields marked * are required.') },
 ]
 
 /** A radio `party` (alone | family) and a required `family_note` shown when it's family. */

@@ -12,12 +12,24 @@
  * - unbalanced braces drop the whole css (a stray `}` would close the scope and leak out)
  */
 
+/** Whether every `}` closes an earlier `{` and none stay open. */
+const bracesBalanced = (css: string): boolean => {
+  let depth = 0
+  for (const char of css) {
+    if (char === '{') depth++
+    if (char === '}') depth--
+    if (depth < 0) return false
+  }
+  return depth === 0
+}
+
 export const scopeCustomCss = (css: string | null | undefined, formId: number): string => {
-  // 1. empty → ''
-  // 2. remove comments (/* … */) so braces inside them don't count
-  // 3. remove every '<'
-  // 4. drop @import statements (up to the next ';')
-  // 5. walk the braces: depth below 0 or not 0 at the end → '' (unbalanced)
-  // 6. `[data-form-id="${formId}"] {\n${css}\n}`
-  throw new Error('not implemented')
+  if (!css?.trim()) return ''
+  const cleaned = css
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/</g, '')
+    .replace(/@import[^;]*;?/gi, '')
+    .trim()
+  if (!cleaned || !bracesBalanced(cleaned)) return ''
+  return `[data-form-id="${formId}"] {\n${cleaned}\n}`
 }
