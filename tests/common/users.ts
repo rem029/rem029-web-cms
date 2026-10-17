@@ -1,7 +1,6 @@
 /**
  * Seeded users as tests use them: loaded with their tenant rows and profiles, and turned into the
- * `req.user` / `req` the Local API expects. Ported from `scripts/verify/lib/verifyKit.ts`, typed
- * against `@/payload-types`, no casts.
+ * `req.user` / `req` the Local API expects. Typed against `@/payload-types`, no casts.
  */
 import type { Payload, PayloadRequest } from 'payload'
 import { createLocalReq } from 'payload'

@@ -23,7 +23,6 @@
     "test:watch": "cross-env NODE_ENV=test NODE_OPTIONS=--no-deprecation vitest",
     "test:db:reset": "cross-env NODE_ENV=test NODE_OPTIONS=--no-deprecation payload run tests/scripts/resetDb.ts",
     "test:db:seed": "cross-env NODE_ENV=test NODE_OPTIONS=--no-deprecation payload run tests/scripts/seedDb.ts",
-    "verify": "for f in scripts/verify/*.ts; do cross-env NODE_OPTIONS=--no-deprecation payload run \"$f\" || exit 1; done",
     "setup:docs": "git clone git@github.com:rem029/rem029-web-cms-docs.git docs || echo docs/ already cloned",
     "postsetup:docs": "node docs/scripts/setup.mjs"
   },

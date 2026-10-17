@@ -29,7 +29,7 @@ const lookup = (payload: Payload, resolved: TenantHost): Promise<number | null> 
 /**
  * The tenant a host serves: the base domain (or every host while `TENANT_BASE_DOMAIN` is unset)
  * → `admin`, `<slug>.<base>` → that tenant, other hosts → `tenants.domains`. `null` (unknown or
- * inactive) → callers 404. Takes the host as an argument so verify scripts can call it.
+ * inactive) → callers 404. Takes the host as an argument so tests can call it.
  */
 export const findFrontendTenantId = async (
   payload: Payload,
