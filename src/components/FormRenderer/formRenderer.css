@@ -20,15 +20,19 @@
     --fb-border: hsl(var(--border));
     --fb-surface: hsl(var(--card));
     --fb-text: var(--foreground);
-    --fb-muted: hsl(var(--muted-foreground));
+    /* text and boundary colours are mixed toward the text colour (or black) so they keep AA on
+       the card whatever the tenant theme: muted text and errors 4.5:1, field edges 3:1
+       (WCAG 1.4.11); the theme's own --border stays for decorative lines */
+    --fb-muted: color-mix(in srgb, hsl(var(--muted-foreground)) 80%, var(--fb-text));
+    --fb-control-border: color-mix(in srgb, var(--fb-text) 75%, var(--fb-surface));
     /* skeleton (critique P1, contrast to AA on --fb-surface and filled fields):
-       1. --fb-muted: mix muted-foreground toward --fb-text until >= 4.5:1 (was 4.33:1)
-       2. --fb-error-color: mix destructive toward --fb-text until >= 4.5:1 (was 3.42:1); the
+       1. done by the signature/contrast commit: --fb-muted 4.61:1 (was 4.33:1)
+       2. done by the signature/contrast commit: --fb-error-color 5.0:1 (was 3.42:1); the
           required star and the error summary follow
        3. empty stars (.fb-choices--star .fb-choice): >= 3:1 non-text contrast (was 1.78:1)
        4. .fb-title (h1 on /forms/<slug>) and .fb-review-heading styles */
     --fb-field-bg: var(--background);
-    --fb-error-color: hsl(var(--destructive));
+    --fb-error-color: color-mix(in srgb, hsl(var(--destructive)) 80%, black);
     --fb-pad: 2rem;
     --fb-control-height: 2.75rem;
     position: relative;
@@ -143,7 +147,7 @@
     color: var(--fb-text);
     font: inherit;
     background: var(--fb-field-bg);
-    border: 1px solid var(--fb-border);
+    border: 1px solid var(--fb-control-border);
     border-radius: var(--fb-radius, 0.5rem);
     transition:
       border-color 120ms ease,
@@ -178,6 +182,7 @@
     /* a tint that shows on the card and on a plain page alike */
     background: color-mix(in srgb, var(--fb-border) 45%, var(--fb-surface));
     border-color: transparent;
+    border-block-end-color: var(--fb-control-border);
   }
 
   .fb-form[data-field-style='filled'] .fb-input:focus-visible {
@@ -319,7 +324,7 @@
     padding-inline: 0.875rem;
     font-weight: 500;
     background: var(--fb-field-bg);
-    border: 1px solid var(--fb-border);
+    border: 1px solid var(--fb-control-border);
     border-radius: var(--fb-radius, 0.5rem);
     transition:
       background-color 120ms ease,
@@ -643,7 +648,7 @@
   .fb-progress {
     block-size: 0.375rem;
     overflow: hidden;
-    background: hsl(var(--muted));
+    background: color-mix(in srgb, var(--fb-control-border) 35%, var(--fb-surface));
     border-radius: 9999px;
   }
 
@@ -806,7 +811,7 @@
     block-size: 10rem;
     touch-action: none;
     background: var(--fb-field-bg);
-    border: 1px dashed var(--fb-border);
+    border: 1px dashed var(--fb-control-border);
     border-radius: var(--fb-radius, 0.5rem);
   }
 

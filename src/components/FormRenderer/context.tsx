@@ -17,6 +17,9 @@ export type FormRendererState = {
   errors: FormErrors
   listCounts: ListCounts
   disabled: boolean
+  /** a file or signature is waiting to upload or uploading: Next, Review and Send wait for it */
+  busy: boolean
+  setBusy: (path: string, busy: boolean) => void
   setValue: (path: string, value: FieldValue | undefined) => void
   setErrors: (errors: FormErrors) => void
   setFieldError: (path: string, message: string | undefined) => void

@@ -39,7 +39,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
   status,
   beforeSubmit,
 }) => {
-  const { values, listCounts, locale } = useFormRenderer()
+  const { values, listCounts, locale, busy } = useFormRenderer()
   const text = formText(locale)
   // skeleton: 1. <h2 className="fb-review-heading">{text.reviewTitle}</h2> above the sections
   //   (the step titles inside become the next level down)
@@ -80,7 +80,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
         {status}
         <button
           className="fb-button fb-button--primary"
-          disabled={submitting}
+          disabled={submitting || busy}
           onClick={onSubmit}
           type="button"
         >

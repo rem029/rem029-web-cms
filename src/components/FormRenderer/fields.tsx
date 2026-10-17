@@ -384,9 +384,18 @@ const UploadInput: React.FC<{
   inputId: string
   path: string
 }> = ({ aria, field, inputId, path }) => {
-  const { formId, values, disabled, setValue, setFieldError, upload, locale } = useFormRenderer()
+  const { formId, values, disabled, setValue, setFieldError, setBusy, upload, locale } =
+    useFormRenderer()
   const [uploading, setUploading] = useState(false)
+  // a drawn signature waiting for its export (signaturePad.tsx, EXPORT_DELAY_MS)
+  const [padPending, setPadPending] = useState(false)
   const text = formText(locale)
+
+  // Next, Review and Send wait while this field's file is on its way (user 2026-10-17)
+  useEffect(() => {
+    setBusy(path, uploading || padPending)
+    return () => setBusy(path, false)
+  }, [path, uploading, padPending, setBusy])
 
   const store = async (file: File | null) => {
     if (!file) {
@@ -427,6 +436,7 @@ const UploadInput: React.FC<{
           id={inputId}
           label={field.label ?? ''}
           onChange={(file) => void store(file)}
+          onPendingChange={setPadPending}
           typedLabel={text.typeSignature}
         />
       ) : (

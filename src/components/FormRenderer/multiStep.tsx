@@ -41,7 +41,7 @@ export const MultiStep: React.FC<MultiStepProps> = ({
   status,
   beforeSubmit,
 }) => {
-  const { values, listCounts, setErrors, locale } = useFormRenderer()
+  const { values, listCounts, setErrors, locale, busy } = useFormRenderer()
   const [current, setCurrent] = useState(0)
   const [reviewing, setReviewing] = useState(false)
   const [returnToReview, setReturnToReview] = useState(false)
@@ -117,7 +117,12 @@ export const MultiStep: React.FC<MultiStepProps> = ({
             {text.back}
           </button>
         )}
-        <button className="fb-button fb-button--primary" onClick={next} type="button">
+        <button
+          className="fb-button fb-button--primary"
+          disabled={busy}
+          onClick={next}
+          type="button"
+        >
           {last || returnToReview ? text.review : text.next}
         </button>
       </div>

@@ -152,6 +152,17 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     setStatus('done')
   }
 
+  // paths of fields whose file or signature is still on its way (see `busy` in context.tsx)
+  const [busyPaths, setBusyPaths] = useState<string[]>([])
+  const setBusy = useCallback(
+    (path: string, busy: boolean) =>
+      setBusyPaths((prev) =>
+        busy ? (prev.includes(path) ? prev : [...prev, path]) : prev.filter((p) => p !== path),
+      ),
+    [],
+  )
+  const busy = busyPaths.length > 0
+
   const { dataAttrs, cssVars } = appearanceToStyle(form.appearance)
   const scopedCss = scopeCustomCss(form.custom_css, form.id)
   const state: FormRendererState = {
@@ -161,6 +172,8 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     errors,
     listCounts,
     disabled: status !== 'idle',
+    busy,
+    setBusy,
     setValue,
     setErrors,
     setFieldError,
@@ -257,7 +270,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
                     {draftNote}
                     <button
                       className="fb-button fb-button--primary"
-                      disabled={status === 'submitting'}
+                      disabled={status === 'submitting' || busy}
                       type="submit"
                     >
                       {status === 'submitting' ? text.submitting : submitLabel}
