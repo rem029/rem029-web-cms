@@ -19,14 +19,20 @@ export const TEST_USERS = {
   superUser: 'super@example.test',
   // tenant admin of test-a
   tenantAdmin: 'admin-a@example.test',
+  // tenant admin of test-a and test-b (the only one of test-b)
+  owner: 'owner-ab@example.test',
   // editor in test-a
   member: 'member-a@example.test',
   // viewer in test-a
   viewer: 'viewer-a@example.test',
+  // the platform `pages-editor` template in test-a
+  templateEditor: 'template-a@example.test',
   // the platform `default` profile in test-a (opens /admin, nothing else)
   defaultProfile: 'default-a@example.test',
   // editor in test-b only
   otherTenant: 'member-b@example.test',
+  // viewer in test-b only
+  otherViewer: 'viewer-b@example.test',
   // editor in test-a and test-b
   multiTenant: 'member-ab@example.test',
   // editor in test-a, viewer in test-b, not in test-c

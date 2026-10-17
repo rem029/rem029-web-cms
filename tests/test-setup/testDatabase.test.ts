@@ -58,10 +58,13 @@ describe('test database', () => {
   it.each([
     ['superUser', TEST_TENANTS.a],
     ['tenantAdmin', TEST_TENANTS.a],
+    ['owner', TEST_TENANTS.b],
     ['member', TEST_TENANTS.a],
     ['viewer', TEST_TENANTS.a],
     ['defaultProfile', TEST_TENANTS.a],
+    ['templateEditor', TEST_TENANTS.a],
     ['otherTenant', TEST_TENANTS.b],
+    ['otherViewer', TEST_TENANTS.b],
     ['multiTenant', TEST_TENANTS.b],
     ['mixed', TEST_TENANTS.b],
     ['disabled', TEST_TENANTS.a],

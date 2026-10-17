@@ -1,6 +1,9 @@
 /** One user per role (`TEST_USERS`); each logs in with their email as the password. */
 import type { Payload } from 'payload'
 
+import { PAGES_EDITOR_TEMPLATE } from '@/collections/UsersAccess/utils/templates'
+import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
+
 import { TEST_USERS, type ProfileIds, type TenantIds } from './fixtures'
 
 type SeedUserSpec = {
@@ -63,11 +66,30 @@ const upsertUser = async (payload: Payload, spec: SeedUserSpec): Promise<void> =
   payload.logger.info(`test seed: created user ${spec.email}`)
 }
 
+/** A platform template (made by the migrations on the `admin` tenant) by slug. */
+const findTemplateId = async (payload: Payload, slug: string): Promise<number> => {
+  const { docs } = await payload.find({
+    collection: 'users-access',
+    where: {
+      and: [
+        { slug: { equals: slug } },
+        { isTemplate: { equals: true } },
+        { 'tenant.slug': { equals: DEFAULT_TENANT_SLUG } },
+      ],
+    },
+    limit: 1,
+    depth: 0,
+  })
+  if (!docs[0]) throw new Error(`test seed: template ${slug} missing, run the migrations`)
+  return docs[0].id
+}
+
 export const seedTestUsers = async (
   payload: Payload,
   tenants: TenantIds,
   profiles: ProfileIds,
 ): Promise<void> => {
+  const pagesEditor = await findTemplateId(payload, PAGES_EDITOR_TEMPLATE)
   const users: SeedUserSpec[] = [
     {
       email: TEST_USERS.superUser,
@@ -84,6 +106,16 @@ export const seedTestUsers = async (
       tenants: [{ tenant: tenants.a, isTenantAdmin: true }],
     },
     {
+      email: TEST_USERS.owner,
+      name: 'Owner of A and B',
+      super_user: false,
+      is_disabled: false,
+      tenants: [
+        { tenant: tenants.a, isTenantAdmin: true },
+        { tenant: tenants.b, isTenantAdmin: true },
+      ],
+    },
+    {
       email: TEST_USERS.member,
       name: 'Tenant A Member',
       super_user: false,
@@ -96,6 +128,13 @@ export const seedTestUsers = async (
       super_user: false,
       is_disabled: false,
       tenants: [{ tenant: tenants.a, access: profiles.viewer.a }],
+    },
+    {
+      email: TEST_USERS.templateEditor,
+      name: 'Tenant A Template Editor',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.a, access: pagesEditor }],
     },
     {
       // no profile on the row: assignDefaultAccess gives it the platform `default`
@@ -111,6 +150,13 @@ export const seedTestUsers = async (
       super_user: false,
       is_disabled: false,
       tenants: [{ tenant: tenants.b, access: profiles.editor.b }],
+    },
+    {
+      email: TEST_USERS.otherViewer,
+      name: 'Tenant B Viewer',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.b, access: profiles.viewer.b }],
     },
     {
       email: TEST_USERS.multiTenant,

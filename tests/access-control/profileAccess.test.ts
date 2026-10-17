@@ -442,6 +442,7 @@ describe('profile access', () => {
           user,
           overrideAccess: false,
           depth: 0,
+          pagination: false,
         })
 
         // assert
