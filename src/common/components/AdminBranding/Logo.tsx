@@ -21,5 +21,7 @@ export async function Logo(props: Partial<ServerProps>) {
     )
   }
 
+  // PLAN(mascot): CHANGE — <PayloadLogo /> → <img src="/admin-branding/mascot.png" alt="" class
+  //   "admin-mascot admin-mascot--logo"> (120px tall on the login card); drop the PayloadLogo import
   return <PayloadLogo />
 }

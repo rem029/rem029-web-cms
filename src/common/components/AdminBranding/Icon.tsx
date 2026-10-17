@@ -22,6 +22,8 @@ export async function Icon(props: Partial<ServerProps>) {
 
   const branding = await getAdminBranding(payload, user, selectedCookie)
 
+  // PLAN(mascot): CHANGE — both <PayloadIcon /> fallbacks → <img src="/admin-branding/mascot.png"
+  //   alt="" class "admin-mascot"> (18px tall, the step nav's home slot); drop the PayloadIcon import
   if (!branding) {
     return <PayloadIcon />
   }

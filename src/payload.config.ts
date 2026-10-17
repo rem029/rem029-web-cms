@@ -37,6 +37,8 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
+    // PLAN(mascot): ADD — meta.icons: favicon-32.png (rel icon, 32x32) and favicon-180.png
+    //   (rel apple-touch-icon), replacing Payload's favicons on /admin only
     // dev only, opt-in (DEV_PREFILL_LOGIN=true): fills the login form, still needs a click
     autoLogin: prefillCredentials ? { ...prefillCredentials, prefillOnly: true } : false,
     components: {
