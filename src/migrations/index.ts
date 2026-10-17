@@ -25,6 +25,7 @@ import * as migration_20261003_102355_tenant_admins from './20261003_102355_tena
 import * as migration_20261003_122558_hidden_documents from './20261003_122558_hidden_documents';
 import * as migration_20261003_160746_access_templates from './20261003_160746_access_templates';
 import * as migration_20261010_121953_created_updated_by from './20261010_121953_created_updated_by';
+import * as migration_20261017_132602_menu_catalog from './20261017_132602_menu_catalog';
 
 export const migrations = [
   {
@@ -160,6 +161,11 @@ export const migrations = [
   {
     up: migration_20261010_121953_created_updated_by.up,
     down: migration_20261010_121953_created_updated_by.down,
-    name: '20261010_121953_created_updated_by'
+    name: '20261010_121953_created_updated_by',
+  },
+  {
+    up: migration_20261017_132602_menu_catalog.up,
+    down: migration_20261017_132602_menu_catalog.down,
+    name: '20261017_132602_menu_catalog'
   },
 ];

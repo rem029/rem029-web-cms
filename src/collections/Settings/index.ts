@@ -7,6 +7,7 @@ import {
 import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 import type { CollectionConfig } from 'payload'
+import { currencyField } from './fields/currency'
 import { validateHomepageTenant } from './hooks/validateHomepageTenant'
 
 export const Settings: CollectionConfig = {
@@ -42,6 +43,7 @@ export const Settings: CollectionConfig = {
       defaultValue: 'CMS Website',
       localized: true,
     },
+    currencyField,
     {
       name: 'homepageNotice',
       type: 'ui',

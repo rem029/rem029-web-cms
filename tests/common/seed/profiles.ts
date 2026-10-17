@@ -1,7 +1,8 @@
 /**
  * The profiles in each test business with members (test-a, test-b, test-inactive; `TEST_PROFILES`):
- * - `editor`: CRUD on pages, posts, media, categories; read/update on header and footer
- * - `viewer`: read on pages, posts, media, categories, header and footer
+ * - `editor`: CRUD on pages, posts, media, categories and the menu catalog; read/update on header and
+ *   footer
+ * - `viewer`: read on pages, posts, media, categories, the menu catalog, header and footer
  * Both open /admin. Every other slug is hidden and denied.
  */
 import type { Payload } from 'payload'
@@ -36,6 +37,10 @@ const EDITOR: ProfileSpec = {
     posts: CRUD,
     media: CRUD,
     categories: CRUD,
+    'menu-categories': CRUD,
+    'menu-allergens': CRUD,
+    'menu-tags': CRUD,
+    'menu-items': CRUD,
     header: READ_UPDATE,
     footer: READ_UPDATE,
     users: OPEN_ADMIN,
@@ -51,6 +56,10 @@ const VIEWER: ProfileSpec = {
     posts: READ,
     media: READ,
     categories: READ,
+    'menu-categories': READ,
+    'menu-allergens': READ,
+    'menu-tags': READ,
+    'menu-items': READ,
     header: READ,
     footer: READ,
     users: OPEN_ADMIN,

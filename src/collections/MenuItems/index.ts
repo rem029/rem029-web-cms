@@ -1,0 +1,194 @@
+import type { CollectionConfig, FilterOptions } from 'payload'
+
+import { availabilityField, menuTitleField } from '@/common/fields/menuFields'
+import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
+import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
+import { extractTenantId } from '@/common/utils/tenantCollections'
+import { slugField } from '@/fields/slug'
+
+import { validateSameTenant } from './hooks/validateSameTenant'
+import { readMenuItems } from './utils/access'
+
+// the admin pickers only offer docs of the item's tenant (validateSameTenant enforces it)
+const sameTenant: FilterOptions = ({ data }) => {
+  const tenantId = extractTenantId(data?.tenant)
+  return tenantId !== null ? { tenant: { equals: tenantId } } : false
+}
+
+/**
+ * Menu items (rem0017): the tenant's catalog. One price and one category per item; menus pick
+ * items (phase 2). No drafts: "Show on menus" (`isActive`) switches an item off everywhere.
+ */
+export const MenuItems: CollectionConfig = {
+  slug: 'menu-items',
+  labels: { singular: 'Item', plural: 'Items' },
+  access: {
+    read: readMenuItems,
+    create: accessCheckResolver('menu-items', 'create'),
+    update: accessCheckResolver('menu-items', 'update'),
+    delete: accessCheckResolver('menu-items', 'delete'),
+  },
+  admin: {
+    group: 'Menu',
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'category', 'price', 'inStock', 'isActive'],
+    listSearchableFields: ['title', 'slug'],
+    hidden: hiddenResolver('menu-items'),
+  },
+  indexes: [{ fields: ['tenant', 'slug'], unique: true }],
+  hooks: {
+    beforeValidate: [validateTenantSlugUniqueness('menu-items', 'item')],
+    beforeChange: [
+      validateSameTenant([
+        { path: 'category', collection: 'menu-categories', label: 'category' },
+        { path: 'allergens', collection: 'menu-allergens', label: 'allergen' },
+        { path: 'tags', collection: 'menu-tags', label: 'tag' },
+      ]),
+    ],
+  },
+  fields: [
+    {
+      type: 'row',
+      fields: [
+        { ...menuTitleField, admin: { width: '60%' } },
+        {
+          name: 'price',
+          type: 'number',
+          label: 'Price',
+          required: true,
+          min: 0,
+          admin: {
+            width: '40%',
+            step: 0.01,
+            description: 'In the currency set in Settings.',
+          },
+        },
+      ],
+    },
+    {
+      name: 'category',
+      type: 'relationship',
+      relationTo: 'menu-categories',
+      label: 'Category',
+      filterOptions: sameTenant,
+      admin: { description: 'Items without a category show under "Other".' },
+    },
+    {
+      name: 'description',
+      type: 'textarea',
+      label: 'Description',
+      localized: true,
+    },
+    {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Photo',
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'allergens',
+          type: 'relationship',
+          relationTo: 'menu-allergens',
+          hasMany: true,
+          label: 'Allergens',
+          filterOptions: sameTenant,
+          admin: { width: '50%' },
+        },
+        {
+          name: 'tags',
+          type: 'relationship',
+          relationTo: 'menu-tags',
+          hasMany: true,
+          label: 'Tags',
+          filterOptions: sameTenant,
+          admin: { width: '50%' },
+        },
+      ],
+    },
+    availabilityField,
+    {
+      name: 'modifierGroups',
+      type: 'array',
+      label: 'Options',
+      labels: { singular: 'Option group', plural: 'Option groups' },
+      admin: {
+        description: 'Choices guests see on the item, e.g. Size (Small, Large) or Milk (Oat, Soy).',
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+              label: 'Group name',
+              required: true,
+              localized: true,
+              admin: { width: '50%' },
+            },
+            {
+              name: 'inputType',
+              type: 'select',
+              label: 'Guests pick',
+              required: true,
+              defaultValue: 'checkbox',
+              options: [
+                { label: 'Any number', value: 'checkbox' },
+                { label: 'Exactly one', value: 'radio' },
+              ],
+              admin: { width: '30%' },
+            },
+            {
+              name: 'required',
+              type: 'checkbox',
+              label: 'Required',
+              defaultValue: false,
+              admin: { width: '20%' },
+            },
+          ],
+        },
+        {
+          name: 'options',
+          type: 'array',
+          label: 'Choices',
+          required: true,
+          minRows: 1,
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+              label: 'Choice',
+              required: true,
+              localized: true,
+            },
+          ],
+        },
+      ],
+    },
+    ...slugField(),
+    {
+      name: 'inStock',
+      type: 'checkbox',
+      label: 'In stock',
+      defaultValue: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Out of stock items stay on the menu, marked as unavailable.',
+      },
+    },
+    {
+      name: 'isActive',
+      type: 'checkbox',
+      label: 'Show on menus',
+      defaultValue: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Untick to hide this item from every menu without deleting it.',
+      },
+    },
+  ],
+}
