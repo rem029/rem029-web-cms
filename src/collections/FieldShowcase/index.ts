@@ -300,5 +300,40 @@ export const FieldShowcase: CollectionConfig = {
       type: 'date',
       admin: { position: 'sidebar' },
     },
+    // enough sidebar fields to overflow the floating sidebar panel, so its own scroll can be checked
+    {
+      name: 'priority',
+      type: 'number',
+      min: 1,
+      max: 5,
+      admin: { position: 'sidebar', description: 'From 1 (low) to 5 (urgent).' },
+    },
+    {
+      name: 'visibility',
+      type: 'radio',
+      defaultValue: 'team',
+      options: [
+        { label: 'Only me', value: 'me' },
+        { label: 'My team', value: 'team' },
+        { label: 'Everyone', value: 'everyone' },
+      ],
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'labels',
+      type: 'select',
+      hasMany: true,
+      options: fruitOptions,
+      admin: { position: 'sidebar', description: 'A long list, to check the menu in the panel.' },
+    },
+    { name: 'reviewer', type: 'relationship', relationTo: 'users', admin: { position: 'sidebar' } },
+    { name: 'owner', type: 'text', admin: { position: 'sidebar' } },
+    { name: 'summary', type: 'textarea', admin: { position: 'sidebar' } },
+    {
+      name: 'remindAt',
+      label: 'Remind at',
+      type: 'date',
+      admin: { position: 'sidebar', date: { pickerAppearance: 'dayAndTime' } },
+    },
   ],
 }

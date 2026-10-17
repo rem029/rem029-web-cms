@@ -104,6 +104,12 @@ const everyField = (tenantId: number, mediaIds: number[]): ShowcaseData => ({
   stage: 'review',
   featured: true,
   reviewedAt: '2026-10-16T12:00:00.000Z',
+  priority: 3,
+  visibility: 'team',
+  labels: ['apple', 'kiwi'],
+  owner: 'Sam Rivera',
+  summary: 'A few lines about this document,\nkept in the sidebar.',
+  remindAt: '2026-10-20T09:30:00.000Z',
 })
 
 const createOnce = async (

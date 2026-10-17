@@ -1774,6 +1774,34 @@ export interface FieldShowcase {
   stage?: ('idea' | 'review' | 'done') | null;
   featured?: boolean | null;
   reviewedAt?: string | null;
+  /**
+   * From 1 (low) to 5 (urgent).
+   */
+  priority?: number | null;
+  visibility?: ('me' | 'team' | 'everyone') | null;
+  /**
+   * A long list, to check the menu in the panel.
+   */
+  labels?:
+    | (
+        | 'apple'
+        | 'banana'
+        | 'cherry'
+        | 'date'
+        | 'elderberry'
+        | 'fig'
+        | 'grape'
+        | 'honeydew'
+        | 'kiwi'
+        | 'lemon'
+        | 'mango'
+        | 'nectarine'
+      )[]
+    | null;
+  reviewer?: (number | null) | User;
+  owner?: string | null;
+  summary?: string | null;
+  remindAt?: string | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -3063,6 +3091,13 @@ export interface FieldShowcaseSelect<T extends boolean = true> {
   stage?: T;
   featured?: T;
   reviewedAt?: T;
+  priority?: T;
+  visibility?: T;
+  labels?: T;
+  reviewer?: T;
+  owner?: T;
+  summary?: T;
+  remindAt?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
