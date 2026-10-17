@@ -86,7 +86,15 @@ export const Menus: CollectionConfig<'menus'> = {
           label: 'Items',
           description: 'Pick the items this menu shows. Guests see them grouped by category.',
           fields: [
-            // step 2 adds the builder (a ui field) over this list and hides the raw picker
+            {
+              name: 'builder',
+              type: 'ui',
+              admin: {
+                components: { Field: '@/collections/Menus/components/MenuBuilder#MenuBuilder' },
+              },
+            },
+            // implementation: `admin.hidden: true` here once the builder works (it edits this
+            // field through useField; the raw picker stays visible until then)
             {
               name: 'items',
               type: 'relationship',
