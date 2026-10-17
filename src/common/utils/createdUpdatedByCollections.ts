@@ -20,6 +20,7 @@ export const createdUpdatedByCollections: CollectionSlug[] = [
   'forms',
   'redirects',
   'users',
+  'field-showcase',
 ]
 
 // deliberately without them

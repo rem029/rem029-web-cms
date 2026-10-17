@@ -10,6 +10,7 @@ export const tenantScopedCollections: CollectionSlug[] = [
   'forms',
   'form-submissions',
   'search',
+  'field-showcase',
 ]
 
 // one doc per tenant (were globals before multi-tenancy)

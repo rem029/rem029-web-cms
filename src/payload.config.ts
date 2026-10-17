@@ -25,6 +25,7 @@ import { Settings } from './collections/Settings'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 import { Analytics } from './collections/Analytics'
 import { Tenants } from './collections/Tenants'
+import { FieldShowcase } from './collections/FieldShowcase'
 import { ar } from '@payloadcms/translations/languages/ar'
 import { en } from '@payloadcms/translations/languages/en'
 import { getSeedAdminCredentials, isLoginPrefillEnabled } from './common/utils/seedAdmin'
@@ -108,6 +109,7 @@ export default buildConfig({
     Footer,
     Theme,
     Settings,
+    FieldShowcase,
   ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [],

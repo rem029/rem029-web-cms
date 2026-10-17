@@ -137,6 +137,7 @@ export interface Config {
     footer: Footer;
     theme: Theme;
     settings: Setting;
+    'field-showcase': FieldShowcase;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -146,7 +147,11 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'field-showcase': {
+      children: 'field-showcase';
+    };
+  };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -160,6 +165,7 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
     theme: ThemeSelect<false> | ThemeSelect<true>;
     settings: SettingsSelect<false> | SettingsSelect<true>;
+    'field-showcase': FieldShowcaseSelect<false> | FieldShowcaseSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -355,6 +361,7 @@ export interface UsersAccess {
           | 'footer'
           | 'theme'
           | 'settings'
+          | 'field-showcase'
           | 'redirects'
           | 'forms'
           | 'form-submissions'
@@ -1591,6 +1598,152 @@ export interface Setting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-showcase".
+ */
+export interface FieldShowcase {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  title: string;
+  /**
+   * A plain text field.
+   */
+  text?: string | null;
+  textMany?: string[] | null;
+  /**
+   * Switch the locale at the top to edit the Arabic value.
+   */
+  textLocalized?: string | null;
+  textReadOnly?: string | null;
+  textarea?: string | null;
+  email?: string | null;
+  /**
+   * Between 0 and 100: try 150 to see the error state.
+   */
+  number?: number | null;
+  numberMany?: number[] | null;
+  code?: string | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  checkbox?: boolean | null;
+  showMore?: boolean | null;
+  conditional?: string | null;
+  selectSingle?: ('small' | 'medium' | 'large') | null;
+  selectMany?: ('red' | 'green' | 'blue')[] | null;
+  selectLong?:
+    | (
+        | 'apple'
+        | 'banana'
+        | 'cherry'
+        | 'date'
+        | 'elderberry'
+        | 'fig'
+        | 'grape'
+        | 'honeydew'
+        | 'kiwi'
+        | 'lemon'
+        | 'mango'
+        | 'nectarine'
+      )
+    | null;
+  radio?: ('morning' | 'afternoon' | 'evening') | null;
+  radioHorizontal?: ('yes' | 'no' | 'maybe') | null;
+  dateTime?: string | null;
+  dateDay?: string | null;
+  dateMonth?: string | null;
+  dateTimeOnly?: string | null;
+  /**
+   * Children of a doc show in its Children list below.
+   */
+  parent?: (number | null) | FieldShowcase;
+  people?: (number | User)[] | null;
+  related?:
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null);
+  image?: (number | null) | Media;
+  gallery?: (number | Media)[] | null;
+  children?: {
+    docs?: (number | FieldShowcase)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  layout?:
+    | (
+        | {
+            tone?: ('info' | 'success' | 'warning' | 'danger') | null;
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'showcaseCallout';
+          }
+        | {
+            quote: string;
+            author?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'showcaseQuote';
+          }
+      )[]
+    | null;
+  items?:
+    | {
+        label: string;
+        done?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  meta?: {
+    note?: string | null;
+    level?: ('low' | 'high') | null;
+    links?:
+      | {
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  firstName?: string | null;
+  lastName?: string | null;
+  openNote?: string | null;
+  closedNote?: string | null;
+  stage?: ('idea' | 'review' | 'done') | null;
+  featured?: boolean | null;
+  reviewedAt?: string | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1813,6 +1966,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'settings';
         value: number | Setting;
+      } | null)
+    | ({
+        relationTo: 'field-showcase';
+        value: number | FieldShowcase;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -2766,6 +2923,94 @@ export interface SettingsSelect<T extends boolean = true> {
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-showcase_select".
+ */
+export interface FieldShowcaseSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  text?: T;
+  textMany?: T;
+  textLocalized?: T;
+  textReadOnly?: T;
+  textarea?: T;
+  email?: T;
+  number?: T;
+  numberMany?: T;
+  code?: T;
+  json?: T;
+  checkbox?: T;
+  showMore?: T;
+  conditional?: T;
+  selectSingle?: T;
+  selectMany?: T;
+  selectLong?: T;
+  radio?: T;
+  radioHorizontal?: T;
+  dateTime?: T;
+  dateDay?: T;
+  dateMonth?: T;
+  dateTimeOnly?: T;
+  parent?: T;
+  people?: T;
+  related?: T;
+  image?: T;
+  gallery?: T;
+  children?: T;
+  richText?: T;
+  layout?:
+    | T
+    | {
+        showcaseCallout?:
+          | T
+          | {
+              tone?: T;
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        showcaseQuote?:
+          | T
+          | {
+              quote?: T;
+              author?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  items?:
+    | T
+    | {
+        label?: T;
+        done?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        note?: T;
+        level?: T;
+        links?:
+          | T
+          | {
+              url?: T;
+              id?: T;
+            };
+      };
+  firstName?: T;
+  lastName?: T;
+  openNote?: T;
+  closedNote?: T;
+  stage?: T;
+  featured?: T;
+  reviewedAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

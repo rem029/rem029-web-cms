@@ -11,9 +11,9 @@ export const TEST_TENANTS = {
 
 /** The profiles each test business has (slugs are unique per tenant, the same in each). */
 export const TEST_PROFILES = {
-  // CRUD on pages, posts, media, categories; read/update on header and footer; opens /admin
+  // CRUD on pages, posts, media, categories, field-showcase; read/update on header and footer; opens /admin
   editor: 'editor',
-  // read on pages, posts, media, categories, header and footer; opens /admin
+  // read on pages, posts, media, categories, field-showcase, header and footer; opens /admin
   viewer: 'viewer',
 } as const
 
