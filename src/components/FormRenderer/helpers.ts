@@ -4,6 +4,7 @@
  * (`tests/form-builder/helpers.test.ts`) and reused by the server action in step 3 to re-check
  * a submission. Content blocks (`message`, `image`) are skipped everywhere.
  */
+import { countryOptions, stateOptions } from './countries'
 import { formText } from './i18n'
 import type {
   FieldOf,
@@ -249,6 +250,10 @@ export const answerText = (
     case 'select':
     case 'radio':
       return field.options?.find((option) => option.value === value)?.label ?? String(value)
+    case 'country':
+      return countryOptions.find((option) => option.value === value)?.label ?? String(value)
+    case 'state':
+      return stateOptions.find((option) => option.value === value)?.label ?? String(value)
     case 'rating':
       return field.labels?.[Number(value) - 1]?.label ?? String(value)
     case 'checkbox':

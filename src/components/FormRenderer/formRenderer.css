@@ -860,3 +860,16 @@
     }
   }
 }
+
+/*
+ * Outside the layer on purpose. The tenant theme css (unlayered, src/utilities/defaults.ts)
+ * styles bare elements (`p, span { width: 100%; font-weight: 400 }`, `p { font-size }`), which
+ * beat every fb-defaults rule: stretched step numbers, oversized help text. Inside a form, hand
+ * those properties back to fb-defaults (the theme's fonts still apply). `:where` keeps this at
+ * one class, so it beats a bare `span` but never a form's Custom CSS (`[data-form-id] …`).
+ */
+.fb-form :where(p, span) {
+  width: revert-layer;
+  font-size: revert-layer;
+  font-weight: revert-layer;
+}

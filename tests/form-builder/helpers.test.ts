@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  answerText,
   listCountsFrom,
   missingRequired,
   toSubmissionData,
@@ -74,5 +75,20 @@ describe('form renderer helpers', () => {
     // assert
     expect(values).toEqual({ agree: true, 'family.1.name': 'Sara' })
     expect(counts).toEqual({ family: 2 })
+  })
+
+  // step 4 walkthrough: the review screen showed the country code ("QA")
+  it.each([
+    ['country', 'QA', 'Qatar'],
+    ['state', 'TX', 'Texas'],
+  ] as const)('shows the %s name on the review screen', (blockType, code, name) => {
+    // arrange
+    const field: RenderField = { blockType, name: 'where', label: 'Where' }
+
+    // act
+    const text = answerText(field, code, 'en')
+
+    // assert
+    expect(text).toBe(name)
   })
 })
