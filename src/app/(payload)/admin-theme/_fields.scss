@@ -1,0 +1,64 @@
+// Field types (rem0005 phase 4). Checked against Payload 3.44.0 (`@payloadcms/ui` fields Tabs,
+// Collapsible, Group, Row, Array, Blocks, DateTime; elements ArrayAction, BlocksDrawer,
+// ThumbnailCard). The plain inputs inside them are `_forms.scss`; drawers and popups `_overlays.scss`
+// / `_volatile.scss`. Rows and panels have no shadow (they stack and nest, user 2026-10-18); only
+// what floats (the calendar) and what's clicked as a card (block picker) gets one.
+@use './motion' as *;
+
+// PLAN(step 1) tabs field (Text / Choice / …): chips like the doc tabs (`_shell.scss` `.doc-tab`)
+// `.tabs-field__tabs`: gap between chips, no rule under the row
+// `.tabs-field__tab-button`: opacity 1 (Payload's 0.5 fails contrast), padding 4px 12px, mono label,
+//   2px border, radius-s, transparent; `::after` underline hidden
+//   hover: --admin-raised; focus-visible: --admin-shadow-xs (phase 3 follow-up: no focus before)
+//   `--active`: sky fill, ink text
+//   `--has-error`: border and text in --admin-danger-text (on the active chip: ink on sky, danger border)
+// `.tabs-field__content-wrap`: top margin so the chips don't touch the first field
+
+// PLAN(step 1) collapsible (also every array / blocks row): bordered panel, no shadow
+// `.collapsible--style-default`: 2px --admin-border, radius-m, hover keeps the border (no colour jump)
+// `.collapsible__toggle-wrap`: --admin-raised, radius matching the panel's top corners, hover a
+//   step darker (--theme-elevation-150); open: 2px rule under it
+// `.collapsible--collapsed .collapsible__toggle-wrap`: no rule, all corners
+// `.collapsible__toggle`: focus-visible --admin-shadow-xs (inset, it fills the header)
+// `.collapsible__content`: --admin-surface, bottom corners
+// `.collapsible--style-error`: border --admin-danger-text; header on --admin-danger with ink text
+// `.collapsible__drag`, `.array-actions__button` (⋮): 24px chips, 2px border, radius-s, surface,
+//   `press(none, var(--admin-shadow-xs), none)`
+
+// PLAN(step 1) group: no box, a rule on the inline start
+// `.group-field--gutter`: border-inline-start 2px --admin-border (Payload's 1px elevation-100)
+// `.group-field--within-group.group-field--gutter`: 1px
+// `.group-field__title`: display font, 600
+
+// PLAN(step 1) row: Payload's layout, nothing to change (listed so phase 6 knows it was checked)
+
+// PLAN(step 1) array / blocks header and rows
+// `.array-field__header`, `.blocks-field__header`: title in the display font; `__header-action`
+//   (Collapse all / Show all): mono, highlighter underline on hover like links
+// `.blocks-field__block-number`, row numbers in `.row-label`: mono, muted
+// `.blocks-field__block-pill .pill`: lilac fill (--admin-secondary), ink text, 2px border
+// `.blocks-field__error-pill`, `.array-field__error-pill`: danger fill, ink (the pill rules in
+//   `_lists.scss` already give the shape)
+
+// PLAN(step 1) block picker drawer
+// `.blocks-drawer__blocks`: gap
+// `.thumbnail-card`: brutal-box(var(--admin-shadow-xs)) with radius-s; `--has-on-click`:
+//   press(var(--admin-shadow-xs), var(--admin-shadow-s), none), hover keeps the 2px border
+// `.thumbnail-card__thumbnail`, `.blocks-drawer__default-image`: --admin-raised, 2px rule under it
+// `.thumbnail-card__label`: mono, 500
+// `.blocks-drawer__block-group-label`: mono, uppercase, muted
+// `.block-search__input`: covered by `$inputs`? if not, add it to the list in `_forms.scss`
+
+// PLAN(step 1) date picker calendar (`.date-time-picker .react-datepicker`, a popper)
+// `.react-datepicker`: brutal-box(var(--admin-shadow-s)) with radius-s, body font weight 400
+// `__header`, `__header--time`: --admin-raised, 2px rule under it; `__header__dropdown`: display font
+// `__day-names`: --admin-raised; `__day-name`: mono, muted
+// `__month-container`: 2px rule on the inline end (next to the time list)
+// `__day`, `__month-text`, `__time-list-item`: no inset box-shadow grid, radius-s, hover --admin-raised
+// `__day--today`: 2px --admin-border inset
+// `__day--selected`, `__day--keyboard-selected`, `__month-text--selected`,
+//   `__time-list-item--selected`: sky fill, ink, also on hover and focus
+// `__day:focus`: --admin-shadow-xs instead of Payload's elevation-400 fill
+// `__day--disabled`, `__day--outside-month`: muted
+// `__navigation--previous/--next`: the arrow borders in --admin-text
+// `.date-time-picker .icon--calendar`, `.icon--x` strokes/fills: --admin-text

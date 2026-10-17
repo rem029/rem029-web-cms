@@ -1,7 +1,7 @@
 // Form controls (rem0005 phase 3). Checked against Payload 3.44.0 (`@payloadcms/ui` fields,
 // elements/ReactSelect, Tooltip). Payload draws every text-like control with one input style, so
-// one list ($inputs) covers them; the field types' own details (array rows, rich text, upload,
-// code) are phase 4.
+// one list ($inputs) covers them; the field types' own details (tabs, rows, calendar, rich text,
+// upload, code) are `_fields.scss` (phase 4).
 @use 'sass:string';
 @use './motion' as *;
 
