@@ -1,5 +1,5 @@
 {
-  "id": "2067cec2-0b04-4635-b80e-ffde1608b68f",
+  "id": "02f1cd22-4f54-4a87-ba77-46367a601fe4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -16466,6 +16466,214 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.form_uploads": {
+      "name": "form_uploads",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "form_id": {
+          "name": "form_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "field_name": {
+          "name": "field_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "url": {
+          "name": "url",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "thumbnail_u_r_l": {
+          "name": "thumbnail_u_r_l",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "filename": {
+          "name": "filename",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mime_type": {
+          "name": "mime_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "filesize": {
+          "name": "filesize",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "width": {
+          "name": "width",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "height": {
+          "name": "height",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "focal_x": {
+          "name": "focal_x",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "focal_y": {
+          "name": "focal_y",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "form_uploads_tenant_idx": {
+          "name": "form_uploads_tenant_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "form_uploads_form_idx": {
+          "name": "form_uploads_form_idx",
+          "columns": [
+            {
+              "expression": "form_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "form_uploads_updated_at_idx": {
+          "name": "form_uploads_updated_at_idx",
+          "columns": [
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "form_uploads_created_at_idx": {
+          "name": "form_uploads_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "form_uploads_filename_idx": {
+          "name": "form_uploads_filename_idx",
+          "columns": [
+            {
+              "expression": "filename",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "form_uploads_tenant_id_tenants_id_fk": {
+          "name": "form_uploads_tenant_id_tenants_id_fk",
+          "tableFrom": "form_uploads",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "form_uploads_form_id_forms_id_fk": {
+          "name": "form_uploads_form_id_forms_id_fk",
+          "tableFrom": "form_uploads",
+          "tableTo": "forms",
+          "columnsFrom": [
+            "form_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.redirects": {
       "name": "redirects",
       "schema": "",
@@ -22130,6 +22338,19 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "subject": {
+          "name": "subject",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'You''ve received a new message.'"
+        },
+        "message": {
+          "name": "message",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -22169,87 +22390,6 @@
           "name": "forms_emails_parent_id_fk",
           "tableFrom": "forms_emails",
           "tableTo": "forms",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.forms_emails_locales": {
-      "name": "forms_emails_locales",
-      "schema": "",
-      "columns": {
-        "subject": {
-          "name": "subject",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'You''ve received a new message.'"
-        },
-        "message": {
-          "name": "message",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "_locale": {
-          "name": "_locale",
-          "type": "_locales",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "_parent_id": {
-          "name": "_parent_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "forms_emails_locales_locale_parent_id_unique": {
-          "name": "forms_emails_locales_locale_parent_id_unique",
-          "columns": [
-            {
-              "expression": "_locale",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "_parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "forms_emails_locales_parent_id_fk": {
-          "name": "forms_emails_locales_parent_id_fk",
-          "tableFrom": "forms_emails_locales",
-          "tableTo": "forms_emails",
           "columnsFrom": [
             "_parent_id"
           ],
@@ -22327,12 +22467,6 @@
           "primaryKey": false,
           "notNull": false,
           "default": false
-        },
-        "title": {
-          "name": "title",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
         },
         "header_image_id": {
           "name": "header_image_id",
@@ -22705,6 +22839,12 @@
       "name": "forms_locales",
       "schema": "",
       "columns": {
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
         "terms_content": {
           "name": "terms_content",
           "type": "jsonb",
@@ -24012,6 +24152,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "form_uploads_id": {
+          "name": "form_uploads_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "redirects_id": {
           "name": "redirects_id",
           "type": "integer",
@@ -24269,6 +24415,21 @@
           "method": "btree",
           "with": {}
         },
+        "payload_locked_documents_rels_form_uploads_id_idx": {
+          "name": "payload_locked_documents_rels_form_uploads_id_idx",
+          "columns": [
+            {
+              "expression": "form_uploads_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "payload_locked_documents_rels_redirects_id_idx": {
           "name": "payload_locked_documents_rels_redirects_id_idx",
           "columns": [
@@ -24508,6 +24669,19 @@
           "tableTo": "settings",
           "columnsFrom": [
             "settings_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "payload_locked_documents_rels_form_uploads_fk": {
+          "name": "payload_locked_documents_rels_form_uploads_fk",
+          "tableFrom": "payload_locked_documents_rels",
+          "tableTo": "form_uploads",
+          "columnsFrom": [
+            "form_uploads_id"
           ],
           "columnsTo": [
             "id"
@@ -25247,6 +25421,7 @@
         "footer",
         "theme",
         "settings",
+        "form-uploads",
         "redirects",
         "forms",
         "form-submissions",

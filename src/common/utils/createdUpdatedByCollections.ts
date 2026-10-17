@@ -27,6 +27,6 @@ export const withoutCreatedUpdatedBy: CollectionSlug[] = [
   // written by visitors or synced by a plugin, never edited by a user
   'analytics',
   'form-submissions',
-  // rem0016 step 2: + 'form-uploads' (written by the submit action for visitors)
   'search',
+  'form-uploads',
 ]

@@ -62,10 +62,12 @@ const isRecord = (val: unknown): val is Record<string, unknown> =>
   typeof val === 'object' && val !== null
 
 // form submissions take their tenant from the form (setFormSubmissionTenant), so anyone,
-// signed in or not, can submit any tenant's public form
-// rem0016 step 2: form-uploads skips the membership check too (written by the submit action)
+// signed in or not, can submit any tenant's public form; form uploads are written by the submit
+// action the same way
 const membershipCheckedCollections: CollectionSlug[] = [
-  ...tenantScopedCollections.filter((slug) => slug !== 'form-submissions'),
+  ...tenantScopedCollections.filter(
+    (slug) => slug !== 'form-submissions' && slug !== 'form-uploads',
+  ),
   ...tenantGlobalCollections,
 ]
 
@@ -280,10 +282,10 @@ export const plugins: Plugin[] = [
   ...(process.env.S3_ENDPOINT
     ? [
         s3Storage({
-          // rem0016 step 2: + 'form-uploads': true (S3 when configured; Payload's file route still
-          // applies read access, so files stay private)
           collections: {
             media: true,
+            // served through Payload's file route (read access applies), never a public bucket url
+            'form-uploads': { prefix: 'form-uploads' },
           },
           bucket: process.env.S3_BUCKET || '',
           config: {

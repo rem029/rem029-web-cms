@@ -12,6 +12,7 @@ import { getPayload } from 'payload'
 
 import { seedAccess, seedTenantAccess } from './access'
 import { seedDefaultAdmin } from './defaultAdmin'
+import { seedForms } from './forms'
 import { seedHiddenDocuments } from './hiddenDocuments'
 import { seedInactiveTenants } from './inactiveTenants'
 import { seedMultiTenancy } from './multiTenancy'
@@ -21,7 +22,6 @@ if (process.env.NODE_ENV === 'production') {
   process.exit(1)
 }
 
-// rem0016 step 2: + { name: 'forms', run: seedForms } after hiddenDocuments
 const seeds = [
   { name: 'defaultAdmin', run: seedDefaultAdmin },
   { name: 'access', run: seedAccess },
@@ -29,6 +29,7 @@ const seeds = [
   { name: 'tenantAccess', run: seedTenantAccess },
   { name: 'inactiveTenants', run: seedInactiveTenants },
   { name: 'hiddenDocuments', run: seedHiddenDocuments },
+  { name: 'forms', run: seedForms },
 ]
 
 const payload = await getPayload({ config })

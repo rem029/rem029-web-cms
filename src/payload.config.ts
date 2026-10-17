@@ -24,6 +24,7 @@ import { Settings } from './collections/Settings'
 
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 import { Analytics } from './collections/Analytics'
+import { FormUploads } from './collections/FormUploads'
 import { Tenants } from './collections/Tenants'
 import { ar } from '@payloadcms/translations/languages/ar'
 import { en } from '@payloadcms/translations/languages/en'
@@ -95,7 +96,6 @@ export default buildConfig({
     // push: false,
     logger: process.env.DB_LOGGER === 'true',
   }),
-  // rem0016 step 2: + FormUploads (src/collections/FormUploads)
   collections: [
     Pages,
     Posts,
@@ -109,6 +109,7 @@ export default buildConfig({
     Footer,
     Theme,
     Settings,
+    FormUploads,
   ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [],

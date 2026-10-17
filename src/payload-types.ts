@@ -137,6 +137,7 @@ export interface Config {
     footer: Footer;
     theme: Theme;
     settings: Setting;
+    'form-uploads': FormUpload;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -160,6 +161,7 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
     theme: ThemeSelect<false> | ThemeSelect<true>;
     settings: SettingsSelect<false> | SettingsSelect<true>;
+    'form-uploads': FormUploadsSelect<false> | FormUploadsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -355,6 +357,7 @@ export interface UsersAccess {
           | 'footer'
           | 'theme'
           | 'settings'
+          | 'form-uploads'
           | 'redirects'
           | 'forms'
           | 'form-submissions'
@@ -2898,6 +2901,32 @@ export interface Setting {
   createdAt: string;
 }
 /**
+ * Files and signatures visitors sent with a form.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-uploads".
+ */
+export interface FormUpload {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  form?: (number | null) | Form;
+  /**
+   * The form field the visitor used.
+   */
+  field_name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
@@ -3121,6 +3150,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'settings';
         value: number | Setting;
+      } | null)
+    | ({
+        relationTo: 'form-uploads';
+        value: number | FormUpload;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -4074,6 +4107,26 @@ export interface SettingsSelect<T extends boolean = true> {
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-uploads_select".
+ */
+export interface FormUploadsSelect<T extends boolean = true> {
+  tenant?: T;
+  form?: T;
+  field_name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

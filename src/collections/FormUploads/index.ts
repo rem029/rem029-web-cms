@@ -4,16 +4,11 @@ import { fileURLToPath } from 'url'
 
 import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
 
+import { FORM_UPLOAD_MIME_TYPES } from './constants'
 import { validateUploadSize } from './hooks/validateUploadSize'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-
-/** What visitors may upload through a form's File and Signature fields. */
-export const FORM_UPLOAD_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
-
-/** 10 MB per file. */
-export const FORM_UPLOAD_MAX_BYTES = 10 * 1024 * 1024
 
 /**
  * Files and signatures visitors attach to form submissions. Kept apart from `media` (editor
@@ -42,7 +37,7 @@ export const FormUploads: CollectionConfig = {
       name: 'form',
       type: 'relationship',
       relationTo: 'forms',
-      required: true,
+      // not required: deleting a form keeps its uploads (form set to empty) instead of failing
       admin: { readOnly: true },
     },
     {
@@ -53,8 +48,8 @@ export const FormUploads: CollectionConfig = {
     },
   ],
   upload: {
-    // outside public/: the files are served only through Payload's file route, which applies
-    // `read` access (Docker: its own volume, see docker-compose.yml)
+    // outside public/: served only through Payload's file route, which applies `read` access
+    // (staging stores them in S3/MinIO, see src/plugins/index.ts)
     staticDir: path.resolve(dirname, '../../../form-uploads'),
     mimeTypes: FORM_UPLOAD_MIME_TYPES,
   },

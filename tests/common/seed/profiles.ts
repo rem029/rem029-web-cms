@@ -1,6 +1,7 @@
 /**
  * The profiles in each test business with members (test-a, test-b, test-inactive; `TEST_PROFILES`):
- * - `editor`: CRUD on pages, posts, media, categories; read/update on header and footer
+ * - `editor`: CRUD on pages, posts, media, categories; read/update on header and footer;
+ *   read/delete on form-uploads
  * - `viewer`: read on pages, posts, media, categories, header and footer
  * Both open /admin. Every other slug is hidden and denied.
  */
@@ -29,7 +30,6 @@ const OPEN_ADMIN: Grant = { hidden: true, admin: true }
 
 const EDITOR: ProfileSpec = {
   name: 'Editor',
-  // rem0016 step 2: editor + read/delete on form-uploads (the uploads tests read as an editor)
   slug: TEST_PROFILES.editor,
   description: 'Edits pages, posts, media and categories of this business.',
   grants: {
@@ -39,6 +39,7 @@ const EDITOR: ProfileSpec = {
     categories: CRUD,
     header: READ_UPDATE,
     footer: READ_UPDATE,
+    'form-uploads': { hidden: false, read: true, delete: true },
     users: OPEN_ADMIN,
   },
 }

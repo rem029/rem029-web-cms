@@ -28,6 +28,25 @@ const FORM_TAB_FIELDS = ['title', 'fields', 'submitButtonLabel']
 
 const fieldName = (field: Field): string | undefined => ('name' in field ? field.name : undefined)
 
+// only text visitors see is translated: the title is, the emails (sent in one language) aren't
+const EMAIL_TEXT_FIELDS = ['subject', 'message']
+
+const withLocalization = (field: Field): Field => {
+  if (fieldName(field) === 'title' && field.type === 'text') return { ...field, localized: true }
+  if (fieldName(field) === 'emails' && field.type === 'array') {
+    return {
+      ...field,
+      fields: field.fields.map((emailField) =>
+        (emailField.type === 'text' || emailField.type === 'richText') &&
+        EMAIL_TEXT_FIELDS.includes(emailField.name)
+          ? { ...emailField, localized: false }
+          : emailField,
+      ),
+    }
+  }
+  return field
+}
+
 /**
  * The plugin's fields in unnamed tabs (the data shape stays the same): the form itself, what
  * happens after submit, and the appearance; settings in the sidebar.
@@ -70,9 +89,8 @@ export const formBuilder = formBuilderPlugin({
       beforeValidate: [validateTenantSlugUniqueness('forms', 'form')],
       beforeChange: [validateMultiStep],
     },
-    // rem0016 step 2: + a map that sets `localized: true` on `title` and `localized: false` on
-    // `emails[].subject` / `emails[].message` (only visitor-facing text is translated)
-    fields: ({ defaultFields }) => formLayout(defaultFields.map(withRichConfirmation)),
+    fields: ({ defaultFields }) =>
+      formLayout(defaultFields.map(withRichConfirmation).map(withLocalization)),
   },
   formSubmissionOverrides: {
     hooks: {
