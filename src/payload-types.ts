@@ -878,7 +878,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'country';
@@ -897,7 +898,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'email';
@@ -941,7 +943,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'number';
@@ -969,7 +972,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'select';
@@ -988,7 +992,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'state';
@@ -1008,7 +1013,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'text';
@@ -1335,7 +1341,8 @@ export interface FormGroupBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'text';
@@ -1369,7 +1376,8 @@ export interface FormGroupBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'email';
@@ -1389,7 +1397,8 @@ export interface FormGroupBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'number';
@@ -1417,7 +1426,8 @@ export interface FormGroupBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'select';
@@ -1489,7 +1499,8 @@ export interface FormGroupBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'country';
@@ -1508,7 +1519,8 @@ export interface FormGroupBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'state';
@@ -1585,7 +1597,8 @@ export interface FormListBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'text';
@@ -1619,7 +1632,8 @@ export interface FormListBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'email';
@@ -1639,7 +1653,8 @@ export interface FormListBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'number';
@@ -1667,7 +1682,8 @@ export interface FormListBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'select';
@@ -1739,7 +1755,8 @@ export interface FormListBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'country';
@@ -1758,7 +1775,8 @@ export interface FormListBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'state';
@@ -1832,7 +1850,8 @@ export interface FormConditionalBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'text';
@@ -1866,7 +1885,8 @@ export interface FormConditionalBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'email';
@@ -1886,7 +1906,8 @@ export interface FormConditionalBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'number';
@@ -1914,7 +1935,8 @@ export interface FormConditionalBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'select';
@@ -1986,7 +2008,8 @@ export interface FormConditionalBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'country';
@@ -2005,7 +2028,8 @@ export interface FormConditionalBlock {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'state';
