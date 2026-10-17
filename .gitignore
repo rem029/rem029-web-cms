@@ -26,3 +26,5 @@ pnpm-workspace.yaml
 # typescript incremental build cache
 *.tsbuildinfo
 .temp
+# impeccable design tool's local state (live server, critique snapshots); the skill lives in docs/
+/.impeccable/
