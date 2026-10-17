@@ -3,16 +3,17 @@ import { getAccessSlugs } from './accessSlugs'
 
 /**
  * Payload plugin that sets the options of the `users-access` collection's
- * `access` array `slug` select field to `getAccessSlugs(config.collections)`.
+ * `access` array `slug` select field to `getAccessSlugs(config.collections, config.globals)`.
  *
  * Why a plugin:
  * Select options in Payload are static and defined at build/config time.
  * Registering this plugin LAST ensures that all collections added by other plugins
  * (such as forms, form-submissions, redirects, search, etc.) are already present
- * in `config.collections` when computing the allowed access slugs.
+ * in `config.collections` (and every global in `config.globals`) when computing the access slugs.
  */
 export const withAccessSlugOptions: Plugin = (config: Config): Config => {
   const collections = config.collections || []
+  const globals = config.globals || []
   const usersAccess = collections.find((c) => c.slug === 'users-access')
 
   if (!usersAccess) {
@@ -41,7 +42,7 @@ export const withAccessSlugOptions: Plugin = (config: Config): Config => {
     )
   }
 
-  const validSlugs = getAccessSlugs(collections)
+  const validSlugs = getAccessSlugs(collections, globals)
   slugField.options = validSlugs.map((slug) => ({
     label: slug,
     value: slug,

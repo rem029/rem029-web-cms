@@ -163,7 +163,7 @@ const upsertProfile = async (
 }
 
 export const seedAccess = async (payload: Payload): Promise<void> => {
-  const slugs = getAccessSlugs(payload.config.collections)
+  const slugs = getAccessSlugs(payload.config.collections, payload.config.globals)
   const { docs: defaultTenants } = await payload.find({
     collection: 'tenants',
     where: { slug: { equals: DEFAULT_TENANT_SLUG } },
@@ -313,7 +313,7 @@ export const seedTenantAccess = async (payload: Payload): Promise<void> => {
     return
   }
 
-  const slugs = getAccessSlugs(payload.config.collections)
+  const slugs = getAccessSlugs(payload.config.collections, payload.config.globals)
   const { docs: defaultTenants } = await payload.find({
     collection: 'tenants',
     where: { slug: { equals: DEFAULT_TENANT_SLUG } },

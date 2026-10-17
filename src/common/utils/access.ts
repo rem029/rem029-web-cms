@@ -13,6 +13,7 @@ import type {
   ClientUser,
   CollectionSlug,
   FieldAccess,
+  GlobalSlug,
   PayloadRequest,
   Where,
 } from 'payload'
@@ -27,6 +28,9 @@ import {
 import { getSelectedTenant } from '@/common/utils/getSelectedTenant'
 
 export type AccessOperation = 'read' | 'create' | 'update' | 'delete' | 'admin' | 'access'
+
+/** A profile row is for a collection or a global (globals since rem0005 phase 3 step 3). */
+export type AccessSlug = CollectionSlug | GlobalSlug
 
 export function isDisabledUser(
   user: User | ClientUser | Partial<User> | null | undefined,
@@ -51,7 +55,7 @@ export const NOT_SUPER_USER: Where = {
 /** Pure: true only when the record has a row for the slug with the checkbox ticked. */
 export const hasPermission = (
   record: UsersAccess | null | undefined,
-  slug: CollectionSlug,
+  slug: AccessSlug,
   op: AccessOperation,
 ): boolean => {
   const row = record?.access?.find((r) => r.slug === slug)
@@ -59,7 +63,7 @@ export const hasPermission = (
 }
 
 /** Pure: no record or no row for the slug means hidden (deny by default). */
-export const isHidden = (record: UsersAccess | null | undefined, slug: CollectionSlug): boolean => {
+export const isHidden = (record: UsersAccess | null | undefined, slug: AccessSlug): boolean => {
   const row = record?.access?.find((r) => r.slug === slug)
   if (!row) return true
   return row.hidden === true
@@ -169,14 +173,14 @@ export const isAnyTenantAdmin = (user: User | ClientUser | null | undefined): bo
  * - users -> admin only
  * - everything else and access op -> false
  */
-export const tenantAdminAllows = (slug: CollectionSlug, op: AccessOperation): boolean => {
+export const tenantAdminAllows = (slug: AccessSlug, op: AccessOperation): boolean => {
   if (op === 'access') return false
 
-  if (tenantScopedCollections.includes(slug)) {
+  if (tenantScopedCollections.some((s) => s === slug)) {
     return op === 'read' || op === 'create' || op === 'update' || op === 'delete'
   }
 
-  if (tenantGlobalCollections.includes(slug) || slug === 'tenants') {
+  if (tenantGlobalCollections.some((s) => s === slug) || slug === 'tenants') {
     return op === 'read' || op === 'update'
   }
 
@@ -191,9 +195,9 @@ export const tenantAdminAllows = (slug: CollectionSlug, op: AccessOperation): bo
  * Collections visible in the admin UI to a tenant admin:
  * tenant-scoped, tenant-global, tenants, users, users-access.
  */
-export const tenantAdminShows = (slug: CollectionSlug): boolean => {
-  if (tenantScopedCollections.includes(slug)) return true
-  if (tenantGlobalCollections.includes(slug)) return true
+export const tenantAdminShows = (slug: AccessSlug): boolean => {
+  if (tenantScopedCollections.some((s) => s === slug)) return true
+  if (tenantGlobalCollections.some((s) => s === slug)) return true
   if (slug === 'tenants' || slug === 'users' || slug === 'users-access') return true
   return false
 }
@@ -203,7 +207,7 @@ export const tenantAdminShows = (slug: CollectionSlug): boolean => {
  * Uses hardcoded grants for tenant admins; otherwise checks the profile record.
  * `audit-logs` is the exception: tenant admins get it only from their row's profile (rem0002).
  */
-export const rowAllows = (row: TenantRow, slug: CollectionSlug, op: AccessOperation): boolean => {
+export const rowAllows = (row: TenantRow, slug: AccessSlug, op: AccessOperation): boolean => {
   if (slug === 'audit-logs') return hasPermission(row.record, slug, op)
   return row.isTenantAdmin ? tenantAdminAllows(slug, op) : hasPermission(row.record, slug, op)
 }
@@ -213,7 +217,7 @@ export const rowAllows = (row: TenantRow, slug: CollectionSlug, op: AccessOperat
  * Uses hardcoded visibility for tenant admins; otherwise checks the profile record.
  * `audit-logs`: from the row's profile for tenant admins too (rem0002).
  */
-export const rowShows = (row: TenantRow, slug: CollectionSlug): boolean => {
+export const rowShows = (row: TenantRow, slug: AccessSlug): boolean => {
   if (slug === 'audit-logs') return !isHidden(row.record, slug)
   return row.isTenantAdmin ? tenantAdminShows(slug) : !isHidden(row.record, slug)
 }
@@ -263,11 +267,7 @@ export const allowedTenantIds = (
  * Shared rules for non-tenant checks: no user → deny, disabled → deny, super user → allow,
  * else true if ANY tenant row profile allows `op` on `slug`.
  */
-export const hasAccess = (
-  req: PayloadRequest,
-  slug: CollectionSlug,
-  op: AccessOperation,
-): boolean => {
+export const hasAccess = (req: PayloadRequest, slug: AccessSlug, op: AccessOperation): boolean => {
   const { user } = req
   if (!user) return false
   if (isDisabledUser(user)) return false
@@ -280,6 +280,28 @@ export const hasAccess = (
   req.payload.logger.debug({ msg: 'access: denied', slug, op, userId: user.id })
   return false
 }
+
+/**
+ * Access for a platform-wide global that profiles can grant (rem0005 phase 3 step 3), used for
+ * `read`, `readDrafts` and `readVersions` (op 'read') and `update`. A global has no tenant, so any
+ * of the user's tenant rows may grant it, as for non-tenant collections. Tenant admins get no
+ * hardcoded grant (`rowAllows`: a global isn't in their list). Inactive tenants are read-only: their
+ * rows never grant `update`.
+ */
+export const globalAccessResolver =
+  (slug: GlobalSlug, op: 'read' | 'update'): Access =>
+  ({ req }) => {
+    const { user } = req
+    if (!user || isDisabledUser(user)) return false
+    if (isActiveSuperUser(user)) return true
+
+    const rows = getTenantRows(user, req.payload.logger)
+    const allowed = rows.some((row) => rowAllows(row, slug, op) && (op === 'read' || row.isActive))
+    if (allowed) return true
+
+    req.payload.logger.debug({ msg: 'access: denied', slug, op, userId: user.id })
+    return false
+  }
 
 const combineWhere = (
   base: boolean | Where,
@@ -512,9 +534,9 @@ export const adminAccess = ({ req }: { req: PayloadRequest }): boolean =>
 export const hasApiAccess = (req: PayloadRequest, slug: CollectionSlug): boolean =>
   hasAccess(req, slug, 'access')
 
-/** `admin.hidden` for a collection: super users see everything; shown if any row's record shows it. */
+/** `admin.hidden` for a collection or global: super users see everything; shown if any row's record shows it. */
 export const hiddenResolver =
-  (slug: CollectionSlug) =>
+  (slug: AccessSlug) =>
   ({ user }: { user: ClientUser | User | null }): boolean => {
     if (!user) return true
     if (isDisabledUser(user)) return true

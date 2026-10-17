@@ -7,7 +7,8 @@ export const defaultAccessRows: CollectionBeforeValidateHook = ({ data, req, ope
     (!data?.access || !Array.isArray(data.access) || data.access.length === 0)
   ) {
     const collections = req?.payload?.config?.collections || []
-    const slugs = getAccessSlugs(collections)
+    const globals = req?.payload?.config?.globals || []
+    const slugs = getAccessSlugs(collections, globals)
     const rows = slugs.map((slug) => ({
       slug,
       hidden: true,

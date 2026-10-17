@@ -32,6 +32,7 @@ import { en } from '@payloadcms/translations/languages/en'
 import { isNextBuild } from 'payload/shared'
 import { getSeedAdminCredentials, isLoginPrefillEnabled } from './common/utils/seedAdmin'
 import { AuditLogsSettings } from './globals/AuditLogsSettings/config'
+import { FieldShowcaseGlobal } from './globals/FieldShowcase/config'
 import { canRunJobs, jobsCollectionAccess } from './common/utils/jobsAccess'
 import {
   ensurePruneJobQueued,
@@ -128,7 +129,7 @@ export default buildConfig({
     FieldShowcase,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [AuditLogsSettings],
+  globals: [AuditLogsSettings, FieldShowcaseGlobal],
 
   plugins: [...plugins, withAccessSlugOptions],
   secret: process.env.PAYLOAD_SECRET,

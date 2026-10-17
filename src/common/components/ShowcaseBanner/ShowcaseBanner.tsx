@@ -1,4 +1,4 @@
-// The `ui` field at the top of the Field showcase. Styled by `admin-theme/_fields.scss` only.
+// The `ui` field at the top of the field showcase (collection and global). Styled by `admin-theme/_fields.scss` only.
 export function ShowcaseBanner() {
   return (
     <div className="showcase-banner">

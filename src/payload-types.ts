@@ -182,9 +182,11 @@ export interface Config {
   };
   globals: {
     'audit-logs-settings': AuditLogsSetting;
+    'field-showcase-global': FieldShowcaseGlobal;
   };
   globalsSelect: {
     'audit-logs-settings': AuditLogsSettingsSelect<false> | AuditLogsSettingsSelect<true>;
+    'field-showcase-global': FieldShowcaseGlobalSelect<false> | FieldShowcaseGlobalSelect<true>;
   };
   locale: 'en' | 'ar';
   user: User & {
@@ -373,7 +375,8 @@ export interface UsersAccess {
           | 'redirects'
           | 'forms'
           | 'form-submissions'
-          | 'search';
+          | 'search'
+          | 'field-showcase-global';
         hidden?: boolean | null;
         read?: boolean | null;
         create?: boolean | null;
@@ -1717,6 +1720,11 @@ export interface FieldShowcase {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  /**
+   * Picks from a list in a side drawer.
+   */
+  pageDrawer?: (number | null) | Page;
+  pagesDrawer?: (number | Page)[] | null;
   richText?: {
     root: {
       type: string;
@@ -1771,6 +1779,12 @@ export interface FieldShowcase {
   lastName?: string | null;
   openNote?: string | null;
   closedNote?: string | null;
+  namedTab?: {
+    /**
+     * Saved as namedTab.note: a tab with a name works like a group.
+     */
+    note?: string | null;
+  };
   stage?: ('idea' | 'review' | 'done') | null;
   featured?: boolean | null;
   reviewedAt?: string | null;
@@ -3044,6 +3058,8 @@ export interface FieldShowcaseSelect<T extends boolean = true> {
   image?: T;
   gallery?: T;
   children?: T;
+  pageDrawer?: T;
+  pagesDrawer?: T;
   richText?: T;
   layout?:
     | T
@@ -3088,6 +3104,11 @@ export interface FieldShowcaseSelect<T extends boolean = true> {
   lastName?: T;
   openNote?: T;
   closedNote?: T;
+  namedTab?:
+    | T
+    | {
+        note?: T;
+      };
   stage?: T;
   featured?: T;
   reviewedAt?: T;
@@ -3387,10 +3408,281 @@ export interface AuditLogsSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-showcase-global".
+ */
+export interface FieldShowcaseGlobal {
+  id: number;
+  title: string;
+  /**
+   * A plain text field.
+   */
+  text?: string | null;
+  textMany?: string[] | null;
+  /**
+   * Switch the locale at the top to edit the Arabic value.
+   */
+  textLocalized?: string | null;
+  textReadOnly?: string | null;
+  textarea?: string | null;
+  email?: string | null;
+  /**
+   * Between 0 and 100: try 150 to see the error state.
+   */
+  number?: number | null;
+  numberMany?: number[] | null;
+  code?: string | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  checkbox?: boolean | null;
+  showMore?: boolean | null;
+  conditional?: string | null;
+  selectSingle?: ('small' | 'medium' | 'large') | null;
+  selectMany?: ('red' | 'green' | 'blue')[] | null;
+  selectLong?:
+    | (
+        | 'apple'
+        | 'banana'
+        | 'cherry'
+        | 'date'
+        | 'elderberry'
+        | 'fig'
+        | 'grape'
+        | 'honeydew'
+        | 'kiwi'
+        | 'lemon'
+        | 'mango'
+        | 'nectarine'
+      )
+    | null;
+  radio?: ('morning' | 'afternoon' | 'evening') | null;
+  radioHorizontal?: ('yes' | 'no' | 'maybe') | null;
+  dateTime?: string | null;
+  dateDay?: string | null;
+  dateMonth?: string | null;
+  dateTimeOnly?: string | null;
+  people?: (number | User)[] | null;
+  related?:
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null);
+  image?: (number | null) | Media;
+  gallery?: (number | Media)[] | null;
+  /**
+   * Picks from a list in a side drawer.
+   */
+  pageDrawer?: (number | null) | Page;
+  pagesDrawer?: (number | Page)[] | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  layout?:
+    | (
+        | {
+            tone?: ('info' | 'success' | 'warning' | 'danger') | null;
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'showcaseCallout';
+          }
+        | {
+            quote: string;
+            author?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'showcaseQuote';
+          }
+      )[]
+    | null;
+  items?:
+    | {
+        label: string;
+        done?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  meta?: {
+    note?: string | null;
+    level?: ('low' | 'high') | null;
+    links?:
+      | {
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  firstName?: string | null;
+  lastName?: string | null;
+  openNote?: string | null;
+  closedNote?: string | null;
+  namedTab?: {
+    /**
+     * Saved as namedTab.note: a tab with a name works like a group.
+     */
+    note?: string | null;
+  };
+  stage?: ('idea' | 'review' | 'done') | null;
+  featured?: boolean | null;
+  reviewedAt?: string | null;
+  /**
+   * From 1 (low) to 5 (urgent).
+   */
+  priority?: number | null;
+  visibility?: ('me' | 'team' | 'everyone') | null;
+  /**
+   * A long list, to check the menu in the panel.
+   */
+  labels?:
+    | (
+        | 'apple'
+        | 'banana'
+        | 'cherry'
+        | 'date'
+        | 'elderberry'
+        | 'fig'
+        | 'grape'
+        | 'honeydew'
+        | 'kiwi'
+        | 'lemon'
+        | 'mango'
+        | 'nectarine'
+      )[]
+    | null;
+  reviewer?: (number | null) | User;
+  owner?: string | null;
+  summary?: string | null;
+  remindAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "audit-logs-settings_select".
  */
 export interface AuditLogsSettingsSelect<T extends boolean = true> {
   retentionMonths?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-showcase-global_select".
+ */
+export interface FieldShowcaseGlobalSelect<T extends boolean = true> {
+  title?: T;
+  text?: T;
+  textMany?: T;
+  textLocalized?: T;
+  textReadOnly?: T;
+  textarea?: T;
+  email?: T;
+  number?: T;
+  numberMany?: T;
+  code?: T;
+  json?: T;
+  checkbox?: T;
+  showMore?: T;
+  conditional?: T;
+  selectSingle?: T;
+  selectMany?: T;
+  selectLong?: T;
+  radio?: T;
+  radioHorizontal?: T;
+  dateTime?: T;
+  dateDay?: T;
+  dateMonth?: T;
+  dateTimeOnly?: T;
+  people?: T;
+  related?: T;
+  image?: T;
+  gallery?: T;
+  pageDrawer?: T;
+  pagesDrawer?: T;
+  richText?: T;
+  layout?:
+    | T
+    | {
+        showcaseCallout?:
+          | T
+          | {
+              tone?: T;
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        showcaseQuote?:
+          | T
+          | {
+              quote?: T;
+              author?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  items?:
+    | T
+    | {
+        label?: T;
+        done?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        note?: T;
+        level?: T;
+        links?:
+          | T
+          | {
+              url?: T;
+              id?: T;
+            };
+      };
+  firstName?: T;
+  lastName?: T;
+  openNote?: T;
+  closedNote?: T;
+  namedTab?:
+    | T
+    | {
+        note?: T;
+      };
+  stage?: T;
+  featured?: T;
+  reviewedAt?: T;
+  priority?: T;
+  visibility?: T;
+  labels?: T;
+  reviewer?: T;
+  owner?: T;
+  summary?: T;
+  remindAt?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

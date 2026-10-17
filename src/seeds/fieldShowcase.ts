@@ -6,6 +6,7 @@
  *   the tenant already has media
  * - `Draft example`: a draft, for the draft/published pills and the versions list
  * - `Child one`, `Child two`: `parent` = `Every field`, so its Children (join) list has rows
+ * - the `field-showcase-global` global, filled with `Every field`'s values
  *
  *   pnpm seed
  *
@@ -176,4 +177,46 @@ export const seedFieldShowcase = async (payload: Payload): Promise<void> => {
       items: [{ label: title }],
     })
   }
+
+  await seedShowcaseGlobal(payload, tenantId, mediaIds)
+}
+
+/**
+ * The `field-showcase-global` global (rem0005 phase 3 step 3): the same values as `Every field`
+ * (no tenant, no parent), published. Idempotent: filled only while its title is empty.
+ */
+const seedShowcaseGlobal = async (
+  payload: Payload,
+  tenantId: number,
+  mediaIds: number[],
+): Promise<void> => {
+  const existing = await payload.findGlobal({
+    slug: 'field-showcase-global',
+    draft: true,
+    depth: 0,
+  })
+  if (existing.title) {
+    payload.logger.info({ msg: 'seed fieldShowcase: global skipped (filled)' })
+    return
+  }
+
+  const {
+    tenant: _tenant,
+    parent: _parent,
+    children: _children,
+    createdBy: _createdBy,
+    updatedBy: _updatedBy,
+    ...values
+  } = everyField(tenantId, mediaIds)
+
+  await payload.updateGlobal({
+    slug: 'field-showcase-global',
+    data: values,
+  })
+  await payload.updateGlobal({
+    slug: 'field-showcase-global',
+    locale: 'ar',
+    data: { textLocalized: 'مرحبا' },
+  })
+  payload.logger.info({ msg: 'seed fieldShowcase: global filled' })
 }

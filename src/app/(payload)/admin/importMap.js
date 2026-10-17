@@ -26,7 +26,7 @@ import { WatchTenantCollection as WatchTenantCollection_1d0591e3cf4f332c83a86da1
 import { RowLabel as RowLabel_ba1355e46507ebf8162dc3396bc8d138 } from '@/collections/Header/RowLabel'
 import { RowLabel as RowLabel_3478630308bdf5be7efe3c9e4153b49d } from '@/collections/Footer/RowLabel'
 import { HomepageNotice as HomepageNotice_a591d5178c11f3a0f9b5a43c2b241599 } from '@/collections/Settings/components/HomepageNotice'
-import { ShowcaseBanner as ShowcaseBanner_58bdf0b6df5e4aba83fdc925e2157854 } from '@/collections/FieldShowcase/components/ShowcaseBanner'
+import { ShowcaseBanner as ShowcaseBanner_ff3381454f74bb637fe497e0c393f186 } from '@/common/components/ShowcaseBanner/ShowcaseBanner'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { InactiveTenantNotice as InactiveTenantNotice_ef18b90de477fae44c273195e3f857c9 } from '@/common/components/InactiveTenantNotice'
@@ -68,7 +68,7 @@ export const importMap = {
   "@/collections/Header/RowLabel#RowLabel": RowLabel_ba1355e46507ebf8162dc3396bc8d138,
   "@/collections/Footer/RowLabel#RowLabel": RowLabel_3478630308bdf5be7efe3c9e4153b49d,
   "@/collections/Settings/components/HomepageNotice#HomepageNotice": HomepageNotice_a591d5178c11f3a0f9b5a43c2b241599,
-  "@/collections/FieldShowcase/components/ShowcaseBanner#ShowcaseBanner": ShowcaseBanner_58bdf0b6df5e4aba83fdc925e2157854,
+  "@/common/components/ShowcaseBanner/ShowcaseBanner#ShowcaseBanner": ShowcaseBanner_ff3381454f74bb637fe497e0c393f186,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
   "@/common/components/InactiveTenantNotice#InactiveTenantNotice": InactiveTenantNotice_ef18b90de477fae44c273195e3f857c9,
