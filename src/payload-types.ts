@@ -804,7 +804,38 @@ export interface FormBlock {
 export interface Form {
   id: number;
   tenant?: (number | null) | Tenant;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  isActive?: boolean | null;
+  activeFrom?: string | null;
+  activeTo?: string | null;
+  available_languages?: ('en' | 'ar')[] | null;
+  /**
+   * Only signed-in members of this business can fill it in.
+   */
+  requires_auth?: boolean | null;
+  show_sequence_number?: boolean | null;
   title: string;
+  /**
+   * Shown above the form. 16:9 works best.
+   */
+  header_image?: (number | null) | Media;
+  has_terms?: boolean | null;
+  terms_content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   fields?:
     | (
         | {
@@ -1098,6 +1129,27 @@ export interface Form {
         id?: string | null;
       }[]
     | null;
+  appearance?: {
+    width?: ('narrow' | 'medium' | 'wide' | 'full') | null;
+    card?: ('plain' | 'card') | null;
+    density?: ('comfortable' | 'compact') | null;
+    field_style?: ('outlined' | 'filled' | 'underlined') | null;
+    label_position?: ('above' | 'floating' | 'inline') | null;
+    radius?: ('none' | 'small' | 'medium' | 'large' | 'pill') | null;
+    button_style?: ('solid' | 'outline') | null;
+    button_full_width?: boolean | null;
+    step_indicator?: ('progress' | 'numbered' | 'dots' | 'none') | null;
+    /**
+     * Optional, e.g. #0f766e. Empty uses the site theme's primary colour.
+     */
+    accent_color?: string | null;
+    background_image?: (number | null) | Media;
+    background_overlay?: ('none' | 'light' | 'dark') | null;
+  };
+  /**
+   * Applies to this form only. Target its parts with: fb-form, fb-header, fb-steps, fb-step, fb-step--active, fb-progress, fb-field, fb-field--<type>, fb-field--error, fb-label, fb-input, fb-help, fb-error, fb-group, fb-list, fb-list-row, fb-review, fb-actions, fb-button, fb-button--primary, fb-confirmation, a field's "CSS class", or [data-field="<name>"].
+   */
+  custom_css?: string | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -4048,7 +4100,18 @@ export interface RedirectsSelect<T extends boolean = true> {
  */
 export interface FormsSelect<T extends boolean = true> {
   tenant?: T;
+  slug?: T;
+  slugLock?: T;
+  isActive?: T;
+  activeFrom?: T;
+  activeTo?: T;
+  available_languages?: T;
+  requires_auth?: T;
+  show_sequence_number?: T;
   title?: T;
+  header_image?: T;
+  has_terms?: T;
+  terms_content?: T;
   fields?:
     | T
     | {
@@ -4241,6 +4304,23 @@ export interface FormsSelect<T extends boolean = true> {
         message?: T;
         id?: T;
       };
+  appearance?:
+    | T
+    | {
+        width?: T;
+        card?: T;
+        density?: T;
+        field_style?: T;
+        label_position?: T;
+        radius?: T;
+        button_style?: T;
+        button_full_width?: T;
+        step_indicator?: T;
+        accent_color?: T;
+        background_image?: T;
+        background_overlay?: T;
+      };
+  custom_css?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

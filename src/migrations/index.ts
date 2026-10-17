@@ -26,6 +26,7 @@ import * as migration_20261003_122558_hidden_documents from './20261003_122558_h
 import * as migration_20261003_160746_access_templates from './20261003_160746_access_templates';
 import * as migration_20261010_121953_created_updated_by from './20261010_121953_created_updated_by';
 import * as migration_20261017_134822_form_builder_blocks from './20261017_134822_form_builder_blocks';
+import * as migration_20261017_135517_form_builder_settings_and_appearance from './20261017_135517_form_builder_settings_and_appearance';
 
 export const migrations = [
   {
@@ -166,6 +167,11 @@ export const migrations = [
   {
     up: migration_20261017_134822_form_builder_blocks.up,
     down: migration_20261017_134822_form_builder_blocks.down,
-    name: '20261017_134822_form_builder_blocks'
+    name: '20261017_134822_form_builder_blocks',
+  },
+  {
+    up: migration_20261017_135517_form_builder_settings_and_appearance.up,
+    down: migration_20261017_135517_form_builder_settings_and_appearance.down,
+    name: '20261017_135517_form_builder_settings_and_appearance'
   },
 ];

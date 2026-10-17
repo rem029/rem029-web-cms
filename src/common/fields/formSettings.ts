@@ -35,7 +35,10 @@ export const formSidebarFields: Field[] = [
       date: { pickerAppearance: 'dayAndTime' },
       condition: (data) => Boolean(data?.isActive),
     },
-    // validate: activeTo after activeFrom (validateActiveWindow)
+    validate: (
+      value: unknown,
+      { siblingData }: { siblingData: Partial<{ activeFrom: unknown }> },
+    ) => validateActiveWindow(value, siblingData.activeFrom),
   },
   {
     name: 'available_languages',
@@ -43,7 +46,6 @@ export const formSidebarFields: Field[] = [
     label: 'Languages',
     hasMany: true,
     defaultValue: ['en'],
-    required: true,
     options: [
       { label: 'English', value: 'en' },
       { label: 'Arabic', value: 'ar' },
@@ -101,14 +103,10 @@ export const formHeaderFields: Field[] = [
 ]
 
 /** `activeTo` must be after `activeFrom` when both are set. */
-export const validateActiveWindow = (
-  value: unknown,
-  { siblingData }: { siblingData: Partial<{ activeFrom: string | null }> },
-): true | string => {
-  // 1. no value or no siblingData.activeFrom → true
-  // 2. new Date(value) <= new Date(activeFrom) → 'The end date must be after the start date.'
-  // 3. else true
-  void value
-  void siblingData
-  throw new Error('validateActiveWindow: not implemented')
+export const validateActiveWindow = (activeTo: unknown, activeFrom: unknown): true | string => {
+  if (typeof activeTo !== 'string' || typeof activeFrom !== 'string') return true
+  if (!activeTo || !activeFrom) return true
+  return new Date(activeTo) > new Date(activeFrom)
+    ? true
+    : 'The end date must be after the start date.'
 }

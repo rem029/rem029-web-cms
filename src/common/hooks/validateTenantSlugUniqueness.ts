@@ -1,8 +1,7 @@
 import type { CollectionBeforeValidateHook, Where } from 'payload'
 import { parseCookies, ValidationError } from 'payload'
 
-// rem0016 step 1: + 'forms'
-type TenantSlugCollection = 'pages' | 'posts' | 'categories'
+type TenantSlugCollection = 'pages' | 'posts' | 'categories' | 'forms'
 
 type TenantValue = number | string | { id: number | string } | null | undefined
 

@@ -6,10 +6,9 @@ export const RESERVED_PAGE_SLUGS = ['admin', 'api', 'next', 'forms', 'posts', 's
 
 /** Payload `validate` for the Pages slug: refuses a reserved slug. */
 export const validatePageSlug = (value: unknown): true | string => {
-  // 1. not a string or empty → true (the slug field's own rules apply)
-  // 2. RESERVED_PAGE_SLUGS includes value.toLowerCase() →
-  //    `"<value>" is used by the site itself (/<value>/…). Pick another slug.`
-  // 3. else true
-  void value
-  throw new Error('validatePageSlug: not implemented')
+  if (typeof value !== 'string' || !value) return true
+  const slug = value.toLowerCase()
+  return RESERVED_PAGE_SLUGS.some((reserved) => reserved === slug)
+    ? `"${value}" is used by the site itself (/${slug}/…). Pick another slug.`
+    : true
 }

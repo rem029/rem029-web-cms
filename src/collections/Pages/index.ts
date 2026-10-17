@@ -11,6 +11,7 @@ import { syncHiddenToDoc } from '@/common/hooks/syncHiddenToDoc'
 
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
+import { validatePageSlug } from '@/common/utils/reservedSlugs'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { previewURL } from '@/common/utils/preview'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
@@ -143,9 +144,7 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
-    // rem0016 step 1: slugField('title', { slugOverrides: { validate: validatePageSlug } })
-    // (src/common/utils/reservedSlugs.ts): refuses forms, admin, api, next, posts, search
-    ...slugField(),
+    ...slugField('title', { slugOverrides: { validate: validatePageSlug } }),
     {
       name: 'isHomepage',
       type: 'checkbox',

@@ -35,7 +35,6 @@ const select = (
   type: 'select',
   label,
   defaultValue,
-  required: true,
   options: options.map(([value, optionLabel]) => ({ value, label: optionLabel })),
 })
 
@@ -120,7 +119,7 @@ export const appearanceField: Field = {
           admin: {
             description: "Optional, e.g. #0f766e. Empty uses the site theme's primary colour.",
           },
-          // validate: validateHexColor (phase 1 implementation: #rgb / #rrggbb only)
+          validate: (value: unknown) => validateHexColor(value),
         },
         {
           name: 'background_image',
@@ -151,11 +150,9 @@ export const customCssField: Field = {
 
 /** Hex colour (#rgb or #rrggbb) or empty. */
 export const validateHexColor = (value: unknown): true | string => {
-  // 1. empty / null / undefined → true
-  // 2. string matching /^#([0-9a-f]{3}|[0-9a-f]{6})$/i → true
-  // 3. else 'Use a hex colour like #0f766e.'
-  void value
-  throw new Error('validateHexColor: not implemented')
+  if (value === null || value === undefined || value === '') return true
+  if (typeof value === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)) return true
+  return 'Use a hex colour like #0f766e.'
 }
 
 /** The Appearance tab on forms. */
