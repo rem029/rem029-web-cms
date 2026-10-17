@@ -20,6 +20,7 @@ export type BuilderScope = {
 export type BuilderItem = {
   id: number
   title: string
+  slug: string
   price: number
   categoryId: number | null
   categoryTitle: string | null

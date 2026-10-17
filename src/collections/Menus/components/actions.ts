@@ -28,17 +28,20 @@ type Result<F extends (...args: never[]) => unknown> = Awaited<ReturnType<F>>
 
 /** Signs the caller in from the request cookies, then runs the builder function as them. */
 const signedIn = async <R extends BuilderResult>(
-  _run: (payload: Payload, user: TypedUser) => Promise<R>,
+  run: (payload: Payload, user: TypedUser) => Promise<R>,
 ): Promise<R | BuilderRefusal> => {
-  // 1. payload = await getPayload({ config: configPromise })
-  // 2. { user } = await payload.auth({ headers: await headers() })
-  // 3. no user → logger.warn, { ok: false, error: 'Your session has ended. Sign in again.' }
-  // 4. else return run(payload, user); a throw → logger.error, { ok: false, error: 'Something
-  //    went wrong. Try again.' }
-  void configPromise
-  void headers
-  void getPayload
-  throw new Error('not implemented')
+  const payload = await getPayload({ config: configPromise })
+  const { user } = await payload.auth({ headers: await headers() })
+  if (!user) {
+    payload.logger.warn('menu builder: action without a signed-in user')
+    return { ok: false, error: 'Your session has ended. Sign in again.' }
+  }
+  try {
+    return await run(payload, user)
+  } catch (err) {
+    payload.logger.error({ err, userId: user.id }, 'menu builder: action failed')
+    return { ok: false, error: 'Something went wrong. Try again.' }
+  }
 }
 
 export const listBuilderItemsAction = async (
@@ -89,13 +92,16 @@ export const listLookupsAction = async (
 export const uploadItemImageAction = async (
   form: FormData,
 ): Promise<Result<typeof uploadItemImage>> => {
-  // 1. file = form.get('file') as a File (else refuse), tenantId = Number(form.get('tenantId'))
-  // 2. signedIn → uploadItemImage(payload, user, { tenantId, file: { data: Buffer, name, … } })
-  void form
+  const file = form.get('file')
+  const tenantId = Number(form.get('tenantId'))
+  if (!(file instanceof File) || !Number.isInteger(tenantId)) {
+    return { ok: false, error: 'Pick an image file to upload.' }
+  }
+  const data = Buffer.from(await file.arrayBuffer())
   return signedIn((payload, user) =>
     uploadItemImage(payload, user, {
-      tenantId: 0,
-      file: { data: Buffer.alloc(0), name: '', mimetype: '', size: 0 },
+      tenantId,
+      file: { data, name: file.name, mimetype: file.type, size: file.size },
     }),
   )
 }

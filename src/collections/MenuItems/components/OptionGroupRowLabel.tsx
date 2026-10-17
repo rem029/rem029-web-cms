@@ -1,11 +1,20 @@
 'use client'
 
-import type { RowLabelProps } from '@payloadcms/ui'
+import { useRowLabel, type RowLabelProps } from '@payloadcms/ui'
 import React from 'react'
 
-// option groups show their name ("Size") instead of "Option group 01"
+import type { MenuItem } from '@/payload-types'
+
+type OptionGroup = NonNullable<MenuItem['modifierGroups']>[number]
+
+// option groups show their name ("Size · 2 choices") instead of "Option group 01"
 export const OptionGroupRowLabel: React.FC<RowLabelProps> = () => {
-  // 1. { data, rowNumber } = useRowLabel<NonNullable<MenuItem['modifierGroups']>[number]>()
-  // 2. data.name → `${name} (n choices)`, else `Option group ${rowNumber + 1}`
-  return null
+  const { data, rowNumber } = useRowLabel<OptionGroup>()
+  const choices = data?.options?.length ?? 0
+  if (!data?.name) return <span>Option group {(rowNumber ?? 0) + 1}</span>
+  return (
+    <span>
+      {data.name} · {choices} {choices === 1 ? 'choice' : 'choices'}
+    </span>
+  )
 }

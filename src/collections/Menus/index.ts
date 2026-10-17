@@ -93,8 +93,7 @@ export const Menus: CollectionConfig<'menus'> = {
                 components: { Field: '@/collections/Menus/components/MenuBuilder#MenuBuilder' },
               },
             },
-            // implementation: `admin.hidden: true` here once the builder works (it edits this
-            // field through useField; the raw picker stays visible until then)
+            // edited through the builder above (useField), so the raw picker is hidden
             {
               name: 'items',
               type: 'relationship',
@@ -102,6 +101,7 @@ export const Menus: CollectionConfig<'menus'> = {
               hasMany: true,
               label: 'Items on this menu',
               filterOptions: sameTenantFilter,
+              admin: { hidden: true },
             },
           ],
         },

@@ -25,6 +25,9 @@ import { WatchTenantCollection as WatchTenantCollection_1d0591e3cf4f332c83a86da1
 import { RowLabel as RowLabel_ba1355e46507ebf8162dc3396bc8d138 } from '@/collections/Header/RowLabel'
 import { RowLabel as RowLabel_3478630308bdf5be7efe3c9e4153b49d } from '@/collections/Footer/RowLabel'
 import { HomepageNotice as HomepageNotice_a591d5178c11f3a0f9b5a43c2b241599 } from '@/collections/Settings/components/HomepageNotice'
+import { PriceCell as PriceCell_be512c21be1eb48a52eff84f026c17a3 } from '@/collections/MenuItems/components/PriceCell'
+import { OptionGroupRowLabel as OptionGroupRowLabel_d3e67d512bb85b3510c88a1e35d35607 } from '@/collections/MenuItems/components/OptionGroupRowLabel'
+import { YesNoCell as YesNoCell_c28151462987b3ff419b0dfcbd1b0fe9 } from '@/collections/MenuItems/components/YesNoCell'
 import { MenuBuilder as MenuBuilder_41b5687db8722a79c5ad98e00176daa7 } from '@/collections/Menus/components/MenuBuilder'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
@@ -64,6 +67,9 @@ export const importMap = {
   "@/collections/Header/RowLabel#RowLabel": RowLabel_ba1355e46507ebf8162dc3396bc8d138,
   "@/collections/Footer/RowLabel#RowLabel": RowLabel_3478630308bdf5be7efe3c9e4153b49d,
   "@/collections/Settings/components/HomepageNotice#HomepageNotice": HomepageNotice_a591d5178c11f3a0f9b5a43c2b241599,
+  "@/collections/MenuItems/components/PriceCell#PriceCell": PriceCell_be512c21be1eb48a52eff84f026c17a3,
+  "@/collections/MenuItems/components/OptionGroupRowLabel#OptionGroupRowLabel": OptionGroupRowLabel_d3e67d512bb85b3510c88a1e35d35607,
+  "@/collections/MenuItems/components/YesNoCell#YesNoCell": YesNoCell_c28151462987b3ff419b0dfcbd1b0fe9,
   "@/collections/Menus/components/MenuBuilder#MenuBuilder": MenuBuilder_41b5687db8722a79c5ad98e00176daa7,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,

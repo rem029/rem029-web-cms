@@ -449,9 +449,6 @@ const upsertMenu = async (
         context,
       })
     : await payload.create({ collection: 'menus', data, draft, locale: 'en', context })
-  // implementation (admin showed "Status: Changed" on the published Breakfast menu): find why the
-  // admin sees a newer draft than the published version (likely the ar save, or autosave on open
-  // filling defaults the seed left out) and save so both locales end published with no newer draft
   await payload.update({
     collection: 'menus',
     id: doc.id,

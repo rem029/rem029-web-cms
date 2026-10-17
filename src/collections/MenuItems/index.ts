@@ -55,7 +55,7 @@ export const MenuItems: CollectionConfig = {
           required: true,
           min: 0,
           admin: {
-            // implementation: components: { Cell: '@/collections/MenuItems/components/PriceCell#PriceCell' }
+            components: { Cell: '@/collections/MenuItems/components/PriceCell#PriceCell' },
             width: '40%',
             step: 0.01,
             description: 'In the currency set in Settings.',
@@ -113,7 +113,9 @@ export const MenuItems: CollectionConfig = {
       label: 'Options',
       labels: { singular: 'Option group', plural: 'Option groups' },
       admin: {
-        // implementation: components: { RowLabel: '@/collections/MenuItems/components/OptionGroupRowLabel#OptionGroupRowLabel' }
+        components: {
+          RowLabel: '@/collections/MenuItems/components/OptionGroupRowLabel#OptionGroupRowLabel',
+        },
         description: 'Choices guests see on the item, e.g. Size (Small, Large) or Milk (Oat, Soy).',
         initCollapsed: true,
       },
@@ -175,7 +177,7 @@ export const MenuItems: CollectionConfig = {
       label: 'In stock',
       defaultValue: true,
       admin: {
-        // implementation: components: { Cell: '@/collections/MenuItems/components/YesNoCell#YesNoCell' }
+        components: { Cell: '@/collections/MenuItems/components/YesNoCell#YesNoCell' },
         position: 'sidebar',
         description: 'Out of stock items stay on the menu, marked as unavailable.',
       },
@@ -186,7 +188,7 @@ export const MenuItems: CollectionConfig = {
       label: 'Show on menus',
       defaultValue: true,
       admin: {
-        // implementation: components: { Cell: '@/collections/MenuItems/components/YesNoCell#YesNoCell' }
+        components: { Cell: '@/collections/MenuItems/components/YesNoCell#YesNoCell' },
         position: 'sidebar',
         description: 'Untick to hide this item from every menu without deleting it.',
       },
