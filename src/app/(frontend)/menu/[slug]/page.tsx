@@ -28,9 +28,12 @@ type Args = {
 
 // the page's searchParams as URLSearchParams (repeated params: the first wins)
 const toSearchParams = (raw: Record<string, string | string[] | undefined>): URLSearchParams => {
-  // 1. for each key: string → set; array → set first; undefined → skip
-  void raw
-  return new URLSearchParams()
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(raw)) {
+    const first = Array.isArray(value) ? value[0] : value
+    if (first !== undefined) params.set(key, first)
+  }
+  return params
 }
 
 // shared by the page and its metadata (react cache: primitives only, compared by identity)
@@ -41,12 +44,12 @@ const loadMenuPage = cache(async (slug: string, locale: TypedLocale) => {
 })
 
 // the carousel's populated images, large size when there is one
-const carouselImages = (menu: MenuDoc): { url: string; alt: string }[] => {
-  // 1. menu.carousel rows → mediaOf(row.image), drop nulls
-  // 2. url = sizes.large?.url ?? url, alt = media.alt ?? ''; drop rows without a url
-  void menu
-  return []
-}
+const carouselImages = (menu: MenuDoc): { url: string; alt: string }[] =>
+  (menu.carousel ?? []).flatMap((row) => {
+    const media = mediaOf(row.image)
+    const url = media?.sizes?.large?.url ?? media?.url
+    return media && url ? [{ url, alt: media.alt ?? '' }] : []
+  })
 
 /**
  * A menu's guest page, `/menu/<slug>` on its tenant's host (rem0017 phase 3). Rendered per

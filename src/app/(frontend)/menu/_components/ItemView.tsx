@@ -83,7 +83,9 @@ export const ItemView: React.FC<ItemViewProps> = ({ item, currency, locale, onCl
           <p className="mt-1 flex flex-wrap items-center gap-2 text-lg">
             <bdi dir="ltr">{formatPrice(item.price, currency, locale)}</bdi>
             {!item.inStock && (
-              <span className="rounded bg-menu-border px-2 py-0.5 text-sm">{t.outOfStock}</span>
+              <span className="w-auto rounded bg-menu-border px-2 py-0.5 text-sm">
+                {t.outOfStock}
+              </span>
             )}
           </p>
           {item.description && <p className="mt-3 text-menu-muted">{item.description}</p>}

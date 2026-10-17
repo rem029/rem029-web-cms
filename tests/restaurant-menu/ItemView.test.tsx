@@ -22,8 +22,8 @@ describe('ItemView', () => {
     // act
     view(item)
 
-    // assert
-    expect(screen.getByText(formatPrice(12.5, 'QAR', 'en'))).toBeTruthy()
+    // assert (Testing Library collapses the rendered non-breaking space, so the expected text too)
+    expect(screen.getByText(formatPrice(12.5, 'QAR', 'en').replace(/\s+/g, ' '))).toBeTruthy()
   })
 
   it('lists options read only', () => {

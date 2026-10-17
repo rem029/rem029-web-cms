@@ -14,6 +14,7 @@
  * by tenant + slug, allergens and tags by tenant + English title.
  */
 import type { Payload, Where } from 'payload'
+import sharp from 'sharp'
 
 import type { MenuItem } from '@/payload-types'
 
@@ -34,6 +35,21 @@ const CATEGORIES: { slug: string; title: Titles }[] = [
   { slug: 'desserts', title: { en: 'Desserts', ar: 'الحلويات' } },
   { slug: 'drinks', title: { en: 'Drinks', ar: 'المشروبات' } },
 ]
+
+// placeholder photo colours per category, and the two carousel images
+const CATEGORY_COLORS: Record<string, string> = {
+  breakfast: '#d97706',
+  starters: '#65a30d',
+  mains: '#b91c1c',
+  desserts: '#9d174d',
+  drinks: '#0e7490',
+}
+const CAROUSEL = [
+  { name: 'carousel-1', label: 'Welcome', color: '#1e3a8a' },
+  { name: 'carousel-2', label: 'Fresh every day', color: '#14532d' },
+]
+// one item per business without a photo, to show a card without one
+const NO_PHOTO = 'fresh-lemon-mint'
 
 const ALLERGENS: Titles[] = [
   { en: 'Gluten', ar: 'الغلوتين' },
@@ -340,6 +356,8 @@ const upsertItem = async (
     categories: Map<string, number>
     allergens: Map<string, number>
     tags: Map<string, number>
+    /** the category photos, by category slug */
+    photos: Map<string, number>
   },
 ): Promise<{ id: number; status: 'created' | 'updated' }> => {
   const { docs } = await payload.find({
@@ -354,6 +372,7 @@ const upsertItem = async (
     description: spec.description,
     price: spec.price,
     category: lookups.categories.get(spec.category) ?? null,
+    image: spec.slug === NO_PHOTO ? null : (lookups.photos.get(spec.category) ?? null),
     allergens: pick(lookups.allergens, spec.allergens),
     tags: pick(lookups.tags, spec.tags),
     availability: spec.availability ?? ['all_day'],
@@ -388,6 +407,7 @@ const upsertItem = async (
 type MenuSpec = {
   slug: string
   title: Titles
+  subheading: Titles
   status: 'draft' | 'published'
   items: (item: ItemSpec) => boolean
   filters?: { showSearch: boolean; showAllergens: boolean; showAvailability: boolean }
@@ -397,12 +417,14 @@ const MENUS: MenuSpec[] = [
   {
     slug: 'all-day',
     title: { en: 'All day', ar: 'طوال اليوم' },
+    subheading: { en: 'Everything we serve, all day long.', ar: 'كل ما نقدمه، طوال اليوم.' },
     status: 'published',
     items: () => true,
   },
   {
     slug: 'breakfast',
     title: { en: 'Breakfast', ar: 'الفطور' },
+    subheading: { en: 'Served until 11:30.', ar: 'يقدم حتى الساعة 11:30 صباحًا.' },
     status: 'published',
     items: (item) => item.category === 'breakfast' || item.category === 'drinks',
     filters: { showSearch: true, showAllergens: true, showAvailability: true },
@@ -410,37 +432,60 @@ const MENUS: MenuSpec[] = [
   {
     slug: 'drinks',
     title: { en: 'Drinks', ar: 'المشروبات' },
+    subheading: { en: 'Hot and cold drinks.', ar: 'مشروبات ساخنة وباردة.' },
     status: 'draft',
     items: (item) => item.category === 'drinks',
   },
 ]
 
 /**
- * A plain coloured image with a label (sharp renders an svg to webp), uploaded once per name and
- * found again by filename on later runs: placeholder photos, no network or binary files in git.
+ * A plain coloured image with a label (sharp renders an svg to webp), uploaded once per tenant and
+ * name and found again by filename on later runs: placeholder photos, no network or binary files
+ * in git. Media is tenant-scoped (and a menu item may only link its own tenant's media), so each
+ * business gets its own copy.
  */
 const upsertPlaceholderImage = async (
   payload: Payload,
+  tenantId: number,
   name: string,
   label: string,
   color: string,
+  size = { width: 1200, height: 675 },
 ): Promise<number> => {
-  // 1. find media where filename equals `menu-<name>.webp` → its id
-  // 2. else svg 1200x675 (fill color, centred label, system sans) → sharp(svg).webp().toBuffer()
-  // 3. payload.create media { alt: label } with file { data, mimetype 'image/webp',
-  //    name: `menu-<name>.webp`, size }, context
-  void payload
-  void name
-  void label
-  void color
-  throw new Error('not implemented')
+  const filename = `menu-${tenantId}-${name}.webp`
+  const { docs } = await payload.find({
+    collection: 'media',
+    where: inTenant(tenantId, { filename: { equals: filename } }),
+    limit: 1,
+    depth: 0,
+  })
+  if (docs[0]) return docs[0].id
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size.width}" height="${size.height}">
+    <rect width="100%" height="100%" fill="${color}"/>
+    <text x="50%" y="50%" fill="#ffffff" font-family="sans-serif" font-size="72" font-weight="600"
+      text-anchor="middle" dominant-baseline="middle">${escapeXml(label)}</text>
+  </svg>`
+  const data = await sharp(Buffer.from(svg)).webp().toBuffer()
+  const doc = await payload.create({
+    collection: 'media',
+    data: { alt: label, tenant: tenantId },
+    file: { data, mimetype: 'image/webp', name: filename, size: data.length },
+    context,
+  })
+  payload.logger.info({ msg: 'seed: menu: placeholder image created', tenantId, filename })
+  return doc.id
 }
+
+const escapeXml = (value: string): string =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&apos;')
 
 const upsertMenu = async (
   payload: Payload,
   tenantId: number,
   spec: MenuSpec,
   itemIds: Map<string, number>,
+  carousel: number[],
 ): Promise<void> => {
   const { docs } = await payload.find({
     collection: 'menus',
@@ -455,7 +500,8 @@ const upsertMenu = async (
     items: ITEMS.filter(spec.items)
       .map((item) => itemIds.get(item.slug))
       .filter((id): id is number => id !== undefined),
-    intro: { heading: spec.title.en },
+    intro: { heading: spec.title.en, subheading: spec.subheading.en },
+    carousel: spec.status === 'published' ? carousel.map((image) => ({ image })) : [],
     ...(spec.filters ? { filters: spec.filters } : {}),
     tenant: tenantId,
     _status: spec.status,
@@ -474,7 +520,11 @@ const upsertMenu = async (
   await payload.update({
     collection: 'menus',
     id: doc.id,
-    data: { title: spec.title.ar, intro: { heading: spec.title.ar }, _status: spec.status },
+    data: {
+      title: spec.title.ar,
+      intro: { heading: spec.title.ar, subheading: spec.subheading.ar },
+      _status: spec.status,
+    },
     draft,
     locale: 'ar',
     context,
@@ -534,11 +584,28 @@ export const seedMenu = async (payload: Payload): Promise<void> => {
       tags.set(tag.en, await upsertNamed(payload, 'menu-tags', tenant.id, tag))
     }
 
-    // step 3: photos. per category: upsertPlaceholderImage(payload, category.slug,
-    // category.title.en, CATEGORY_COLORS[slug]); upsertItem sets image to its category's photo
-    // (except one item per business, to show a card without a photo); two carousel images
-    // ('carousel-1', 'carousel-2') go on the published menus, and each menu gets an
-    // intro.subheading in en and ar (MenuSpec.subheading)
+    const photos = new Map<string, number>()
+    for (const category of CATEGORIES) {
+      photos.set(
+        category.slug,
+        await upsertPlaceholderImage(
+          payload,
+          tenant.id,
+          category.slug,
+          category.title.en,
+          CATEGORY_COLORS[category.slug] ?? '#475569',
+        ),
+      )
+    }
+    const carousel: number[] = []
+    for (const image of CAROUSEL) {
+      carousel.push(
+        await upsertPlaceholderImage(payload, tenant.id, image.name, image.label, image.color, {
+          width: 1600,
+          height: 700,
+        }),
+      )
+    }
 
     const counts = { created: 0, updated: 0 }
     const itemIds = new Map<string, number>()
@@ -547,12 +614,13 @@ export const seedMenu = async (payload: Payload): Promise<void> => {
         categories,
         allergens,
         tags,
+        photos,
       })
       itemIds.set(item.slug, id)
       counts[status] += 1
     }
     for (const menu of MENUS) {
-      await upsertMenu(payload, tenant.id, menu, itemIds)
+      await upsertMenu(payload, tenant.id, menu, itemIds, carousel)
     }
     await setCurrency(payload, tenant.id, business.currency)
 

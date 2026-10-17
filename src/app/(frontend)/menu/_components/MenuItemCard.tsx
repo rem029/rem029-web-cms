@@ -42,7 +42,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, currency, loca
             {formatPrice(item.price, currency, locale)}
           </bdi>
           {!item.inStock && (
-            <span className="rounded bg-menu-border px-2 py-0.5 text-xs font-medium">
+            <span className="w-auto rounded bg-menu-border px-2 py-0.5 text-xs font-medium">
               {t.outOfStock}
             </span>
           )}
