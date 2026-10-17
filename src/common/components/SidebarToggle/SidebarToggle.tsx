@@ -57,8 +57,21 @@ export function SidebarToggle() {
         // keep in-page state when storage is unavailable
       }
     }
+    // the page is locked (CSS): the wheel over the dimmed form scrolls the panel instead
+    const onWheel = (event: WheelEvent) => {
+      const panel = document.querySelector('.document-fields__sidebar')
+      if (!panel || !(event.target instanceof Element) || panel.contains(event.target)) return
+      // drawers, modals and popups opened from the panel keep their own scroll
+      if (event.target.closest('.payload__modal-container, .popup__content')) return
+      event.preventDefault()
+      panel.scrollBy({ top: event.deltaY })
+    }
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
+    document.addEventListener('wheel', onWheel, { passive: false })
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('wheel', onWheel)
+    }
   }, [open])
 
   const toggle = () => {
