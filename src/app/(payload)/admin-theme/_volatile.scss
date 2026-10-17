@@ -59,9 +59,16 @@
   margin-bottom: 24px;
 }
 
-// the mascot (Logo/Icon fallbacks when the tenant has no logo)
-// 1. .admin-mascot: height 18px, width auto, display block
-// 2. .admin-mascot--logo: height 120px
+// the platform mascot (AdminBranding): the breadcrumb home icon, and the logo on the login card
+.admin-mascot {
+  display: block;
+  width: auto;
+  height: 18px;
+}
+
+.admin-mascot--logo {
+  height: 120px;
+}
 
 // step 2's LoginIntro
 .login-intro {

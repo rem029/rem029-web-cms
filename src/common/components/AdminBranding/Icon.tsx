@@ -4,8 +4,8 @@ import type { User } from '@/payload-types'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { cookies, headers } from 'next/headers'
-import { PayloadIcon } from '@payloadcms/ui'
 import { getAdminBranding } from '@/common/utils/tenantBranding'
+import { MASCOT_URL } from './mascot'
 
 // the step nav's home slot is 18x18 and clips overflow
 export async function Icon(props: Partial<ServerProps>) {
@@ -22,10 +22,10 @@ export async function Icon(props: Partial<ServerProps>) {
 
   const branding = await getAdminBranding(payload, user, selectedCookie)
 
-  // PLAN(mascot): CHANGE — both <PayloadIcon /> fallbacks → <img src="/admin-branding/mascot.png"
-  //   alt="" class "admin-mascot"> (18px tall, the step nav's home slot); drop the PayloadIcon import
+  const mascot = <img src={MASCOT_URL} alt="" className="admin-mascot" />
+
   if (!branding) {
-    return <PayloadIcon />
+    return mascot
   }
 
   if (branding.logo?.url) {
@@ -38,9 +38,10 @@ export async function Icon(props: Partial<ServerProps>) {
     )
   }
 
+  // the platform's own tenant shows the mascot; other businesses without a logo, their initial
   const initial = branding.tenantName.trim().charAt(0).toUpperCase()
-  if (!initial) {
-    return <PayloadIcon />
+  if (branding.isPlatform || !initial) {
+    return mascot
   }
 
   return (

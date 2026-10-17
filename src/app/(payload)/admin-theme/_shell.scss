@@ -92,7 +92,8 @@
   font-family: var(--admin-font-mono);
   font-size: 0.8125rem;
 
-  a {
+  // the home link is the icon only: no underline
+  a:not(.step-nav__home) {
     font-weight: 500;
     text-decoration: none;
     background-image: linear-gradient(var(--admin-secondary), var(--admin-secondary));
