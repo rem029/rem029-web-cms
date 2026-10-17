@@ -21,7 +21,8 @@ export default async function FormPage(_args: Args) {
   //    reason → <div className={css('page')}> header image + title + <p role="status">
   //    refusalMessage(reason, formText(locale))</p>
   // 6. else: {draft && <LivePreviewListener />} (refreshes on every autosave)
-  //    <PublicForm form locale saveDraft={!draft} /> inside the page container
+  //    <FormRenderer form locale submit={submitFormAction} upload={uploadFileAction}
+  //    saveDraft={!draft} /> inside the page container (server actions pass as props)
   return <div />
 }
 

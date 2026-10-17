@@ -4,7 +4,8 @@ import React from 'react'
 import type { FormBlock as FormBlockProps } from '@/payload-types'
 
 /**
- * The Form block on a page: the optional intro, then the form through `PublicForm`. Renders
+ * The Form block on a page: the optional intro, then `FormRenderer` with the server actions
+ * (analytics are recorded by the submit action). Renders
  * nothing when the form isn't the host tenant's active form (`isFormForTenant`), never a form
  * that would only refuse.
  */
@@ -13,6 +14,7 @@ export const FormBlock = async (_props: FormBlockProps & { locale?: TypedLocale 
   // 2. locale: the prop, else the LOCALE_STORAGE_KEY cookie ('ar' | 'en')
   // 3. draft = await isPreviewing()
   // 4. <div className={css('form')}> {enableIntro && introContent && <RichText />}
-  //    <PublicForm form locale saveDraft={!draft} /></div>
+  //    <FormRenderer form locale submit={submitFormAction} upload={uploadFileAction}
+  //    saveDraft={!draft} /></div>
   return <div />
 }

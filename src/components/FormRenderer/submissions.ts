@@ -28,7 +28,41 @@ export type SubmissionContext = {
   user: User | null
   /** For the rate limit; `null` (no trusted proxy header) skips it. */
   ip: string | null
+  /**
+   * step 3b: ADD — the visitor as the request shows it, for logs and analytics only (never for
+   * the rate limit): `ip` the trusted ip, else the first `x-forwarded-for` / `x-real-ip` value
+   * (can be spoofed without a trusted proxy), `deviceType` from the user agent, `pagePath` from
+   * the referer (the page the form is on)
+   */
+  visitor?: VisitorInfo
   now?: Date
+}
+
+export type VisitorInfo = {
+  ip: string | null
+  deviceType: 'desktop' | 'mobile' | 'tablet'
+  pagePath: string | null
+}
+
+/**
+ * step 3b: ADD — one `analytics` row per submit attempt that reached a form: eventType
+ * `form_submission` (saved) or `error` (refused or failed), tenant = the form's, ip and
+ * deviceType from `visitor`, pagePath (else `/forms/<slug>`), email and phone from the answers
+ * when the form has them (the first `email` block, else a field named `email`; the first `phone`
+ * block, else a field named `phone`), payload { formID, formName, success | errorMessage }.
+ * overrideAccess (visitors can't create analytics); never throws: a failed record is logged
+ * (`error`) and the visitor's result stays as it was.
+ */
+export const recordFormAnalytics = async (
+  _context: SubmissionContext,
+  _event: {
+    form: Pick<Form, 'id' | 'title' | 'slug' | 'fields'>
+    tenantId: number
+    submissionData: SubmissionRow[]
+    result: SubmitResult
+  },
+): Promise<void> => {
+  throw new Error('not implemented')
 }
 
 export type SubmitInput = {
@@ -129,6 +163,8 @@ const errorCount = (err: ValidationError): number => {
   return Array.isArray(errors) && errors.length ? errors.length : 1
 }
 
+// step 3b: CHANGE — every log line of submitForm and uploadFile also carries the visitor's ip
+// (`context.visitor?.ip ?? context.ip`), not only the rate-limit ones
 export const submitForm = async (
   context: SubmissionContext,
   input: SubmitInput,
@@ -150,6 +186,10 @@ export const submitForm = async (
   const found = await findOpenForm(context, formId, text, 'submit')
   if ('ok' in found) return found
   const { form, tenantId } = found
+  // step 3b: ADD — from here on every return goes through recordFormAnalytics (refusals for
+  // terms, rate limit and invalid answers as `error`, a save as `form_submission`); refusals
+  // before the form is found (unknown host, other tenant, closed) record nothing: no tenant to
+  // file them under, and the honeypot never records (bots)
 
   if (form.has_terms && !input.termsAccepted) {
     payload.logger.warn({ msg: 'form submit refused: terms not accepted', tenantId, formId })

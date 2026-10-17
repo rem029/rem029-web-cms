@@ -190,4 +190,20 @@ describe('submitForm', () => {
     expect(without).toEqual({ ok: false, error: text.termsRequired })
     expect(accepted).toEqual({ ok: true })
   })
+
+  it('records the submission in analytics with ip, email and phone', async () => {
+    // arrange: an open form in test-a with an email block `email` and a phone block `phone`;
+    //          context.visitor { ip: '203.0.113.9', deviceType: 'mobile', pagePath: '/contact' }
+    // act: submitForm with name, email and phone answers
+    // assert: one analytics row for the form (payload.formID): eventType form_submission,
+    //         tenant test-a, ip, email, phone, deviceType, pagePath as given
+    expect.fail('not implemented')
+  })
+
+  it('records a refused submission in analytics with the ip', async () => {
+    // arrange: a form with has_terms; context.visitor with an ip
+    // act: submitForm without termsAccepted
+    // assert: one analytics row for the form: eventType error, the ip, no email or phone
+    expect.fail('not implemented')
+  })
 })

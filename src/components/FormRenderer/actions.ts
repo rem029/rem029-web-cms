@@ -39,5 +39,8 @@ const requestContext = async (payload: Payload): Promise<SubmissionContext> => {
     tenantId: await getFrontendTenantId(),
     user: user?.collection === 'users' ? user : null,
     ip: clientIpFromHeaders(headerList),
+    // step 3b: ADD — visitor: { ip: clientIpFromHeaders ?? first x-forwarded-for ?? x-real-ip,
+    // deviceType from user-agent (tablet / mobile / desktop, as src/utilities/analytics.ts),
+    // pagePath: the referer's pathname when it is this host, else null }
   }
 }
