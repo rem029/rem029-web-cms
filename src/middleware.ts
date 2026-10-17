@@ -21,13 +21,25 @@ const redirectAdminToServerURL = (request: NextRequest): NextResponse => {
 export const ADMIN_THEME_COOKIE = 'payload-theme'
 export const ADMIN_THEME_DEFAULT_MARKER = 'admin-theme-default'
 
+const ONE_YEAR = 60 * 60 * 24 * 365
+
 const defaultAdminTheme = (request: NextRequest, response: NextResponse): NextResponse => {
-  // 1. a redirect (admin on another host) → return it untouched
-  // 2. marker cookie present → return response (the user's choice, or Automatic, stands)
-  // 3. no `payload-theme` → set it to `dark` (path /, 1 year, lax, not httpOnly: Payload's client reads it)
-  // 4. set the marker (same options) and return
-  void request
-  return response
+  // a redirect to the admin's own host: the theme is set there
+  if (response.headers.has('location')) return response
+  if (request.cookies.has(ADMIN_THEME_DEFAULT_MARKER)) return response
+
+  // not httpOnly: Payload's client reads and rewrites the theme cookie
+  const options = { path: '/', maxAge: ONE_YEAR, httpOnly: false, sameSite: 'lax' as const }
+  let result = response
+  if (!request.cookies.has(ADMIN_THEME_COOKIE)) {
+    // Payload's server picks the theme from the request's cookies: hand it `dark` now too, so the
+    // first page doesn't render light and then flip
+    request.cookies.set(ADMIN_THEME_COOKIE, 'dark')
+    result = NextResponse.next({ request: { headers: request.headers } })
+    result.cookies.set({ name: ADMIN_THEME_COOKIE, value: 'dark', ...options })
+  }
+  result.cookies.set({ name: ADMIN_THEME_DEFAULT_MARKER, value: '1', ...options })
+  return result
 }
 
 export function middleware(request: NextRequest) {

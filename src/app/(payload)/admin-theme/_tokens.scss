@@ -66,15 +66,92 @@ html[data-theme='dark'] {
   --admin-warning-text: var(--admin-warning);
 }
 
-// Payload's own variables, so its stock UI picks the tokens up before phases 2–4 restyle it
+// Payload's own variables, so its stock UI picks the tokens up before phases 2–4 restyle it.
+// Payload flips these between themes itself; ours flip through the role tokens, so one block
+// serves both.
+$elevation-steps: (
+  0,
+  50,
+  100,
+  150,
+  200,
+  250,
+  300,
+  350,
+  400,
+  450,
+  500,
+  550,
+  600,
+  650,
+  700,
+  750,
+  800,
+  850,
+  900,
+  950,
+  1000
+);
+$status-steps: (
+  50,
+  100,
+  150,
+  200,
+  250,
+  300,
+  350,
+  400,
+  450,
+  500,
+  550,
+  600,
+  650,
+  700,
+  750,
+  800,
+  850,
+  900,
+  950
+);
+
+// low steps sit near the background, 500 is the fill, high steps head to the readable text colour
+@mixin status-scale($name, $fill, $text) {
+  @each $step in $status-steps {
+    @if $step <= 500 {
+      --theme-#{$name}-#{$step}: color-mix(in srgb, var(#{$fill}) #{$step * 0.2%}, var(--admin-bg));
+    } @else {
+      --theme-#{$name}-#{$step}: color-mix(
+        in srgb,
+        var(#{$text}) #{($step - 500) * 0.2222%},
+        var(#{$fill})
+      );
+    }
+  }
+}
+
 html[data-theme='light'],
 html[data-theme='dark'] {
-  // 1. --theme-bg / --theme-input-bg → --admin-bg / --admin-surface; --theme-text → --admin-text
-  // 2. --theme-elevation-0 … -1000 (21 steps): bg → text, each step a color-mix of the two
-  //    (0 = bg, 50 = surface, 100 = raised, 150 = a light border, …, 800 = text, 1000 = text)
-  // 3. --theme-success/warning/error-50 … 950: color-mix of the status fill with bg (low steps)
-  //    and with --admin-*-text (high steps), so Payload's toasts and pills keep readable pairs
-  // 4. --theme-border-color → --admin-border
-  // 5. --style-radius-s/m/l → --admin-radius-s / -m / -m
-  // 6. --font-body → --admin-font-body, --font-mono → --admin-font-mono
+  --theme-bg: var(--admin-bg);
+  --theme-input-bg: var(--admin-surface);
+  --theme-text: var(--admin-text);
+  --theme-border-color: var(--admin-border);
+
+  // 0 is the background, 1000 the text, each step a mix of the two
+  @each $step in $elevation-steps {
+    --theme-elevation-#{$step}: color-mix(
+      in srgb,
+      var(--admin-text) #{$step * 0.1%},
+      var(--admin-bg)
+    );
+  }
+
+  @include status-scale('success', '--admin-success', '--admin-success-text');
+  @include status-scale('warning', '--admin-warning', '--admin-warning-text');
+  @include status-scale('error', '--admin-danger', '--admin-danger-text');
+
+  --style-radius-s: var(--admin-radius-s);
+  --style-radius-m: var(--admin-radius-m);
+  --style-radius-l: var(--admin-radius-m);
+  --font-body: var(--admin-font-body);
+  --font-mono: var(--admin-font-mono);
 }

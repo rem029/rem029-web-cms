@@ -1,9 +1,61 @@
 // Base admin styles (rem0005): type, focus, links, motion. Checked against Payload 3.44.0.
 
-// 1. headings (h1–h4, .doc-header__title, .list-header h1) in --admin-font-display, weight 700
-// 2. :focus-visible on links, buttons and inputs: 2px solid --admin-accent-text, offset 2px
-// 3. ::selection: --admin-primary background, --admin-ink text
-// 4. links in rich text and descriptions: highlighter underline (background-size 0 → 100%,
-//    --admin-duration-slow, --admin-ease), colour inherited
-// 5. theme switch: background-color/color transition on body, --admin-duration-slow
-// 6. @media (prefers-reduced-motion: reduce): every animation and transition off
+body {
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-family: var(--admin-font-body);
+  transition:
+    background-color var(--admin-duration-slow) var(--admin-ease),
+    color var(--admin-duration-slow) var(--admin-ease);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--admin-font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+code,
+kbd,
+pre {
+  font-family: var(--admin-font-mono);
+}
+
+:focus-visible {
+  outline: 2px solid var(--admin-accent-text);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--admin-primary);
+  color: var(--admin-ink);
+}
+
+// highlighter underline on links inside descriptions and rich text
+.field-description a,
+.rich-text-lexical a {
+  color: inherit;
+  text-decoration: none;
+  background-image: linear-gradient(var(--admin-secondary), var(--admin-secondary));
+  background-position: 0 90%;
+  background-repeat: no-repeat;
+  background-size: 100% 2px;
+  transition: background-size var(--admin-duration-slow) var(--admin-ease);
+
+  &:hover {
+    background-size: 100% 40%;
+    color: var(--admin-ink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

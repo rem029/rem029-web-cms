@@ -11,13 +11,19 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
+// built once at module load; the values are next/font's own family names, never user input
+const fontVariables = `:root{--admin-font-space-grotesk:${spaceGrotesk.style.fontFamily};--admin-font-geist:${geist.style.fontFamily};--admin-font-jetbrains-mono:${jetbrainsMono.style.fontFamily}}`
+
 /**
  * Admin `providers` slot: wraps the whole admin (login included) and hands the theme its fonts.
  * Phase 7 adds the selected tenant's colours here.
  */
 export function AdminTheme({ children }: { children?: ReactNode }) {
-  // 1. <style> :root { --admin-font-space-grotesk: <spaceGrotesk.style.fontFamily>; …geist; …mono }
-  // 2. then children
-  void [spaceGrotesk, geist, jetbrainsMono]
-  return <>{children}</>
+  return (
+    <>
+      {/* raw text: React would escape the quotes in the family names inside <style> */}
+      <style dangerouslySetInnerHTML={{ __html: fontVariables }} />
+      {children}
+    </>
+  )
 }
