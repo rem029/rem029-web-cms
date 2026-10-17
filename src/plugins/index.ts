@@ -1,19 +1,17 @@
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
 import { s3Storage } from '@payloadcms/storage-s3'
-import { formBuilderPlugin, fields } from '@payloadcms/plugin-form-builder'
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
-import type { Block, CollectionSlug, Field, Plugin, Where } from 'payload'
+import type { CollectionSlug, Plugin, Where } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
-import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 
 import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
-import { setFormSubmissionTenant } from '@/plugins/hooks/setFormSubmissionTenant'
+import { formBuilder } from '@/plugins/formBuilder'
 import { enforceTenantMembership } from '@/common/hooks/enforceTenantMembership'
 import {
   accessCheckResolver,
@@ -35,7 +33,6 @@ import { createdUpdatedByCollections } from '@/common/utils/createdUpdatedByColl
 
 import { Config, Page, Post } from '@/payload-types'
 import { getServerSideURL, getTenantURL } from '@/utilities/getURL'
-import { iconField } from '@/fields/icon'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | CMS Website` : 'CMS Website'
@@ -63,10 +60,6 @@ const generateURL: GenerateURL<Post | Page> = async ({ doc, req }) => {
 
 const isRecord = (val: unknown): val is Record<string, unknown> =>
   typeof val === 'object' && val !== null
-
-const addFormmBuilderField = (fieldName: string, newFields: Field[]) => {
-  return { ...fields[fieldName], fields: [...(fields[fieldName] as Block).fields, ...newFields] }
-}
 
 // form submissions take their tenant from the form (setFormSubmissionTenant), so anyone,
 // signed in or not, can submit any tenant's public form
@@ -196,43 +189,7 @@ export const plugins: Plugin[] = [
     generateTitle,
     generateURL,
   }),
-  formBuilderPlugin({
-    fields: {
-      payment: false,
-      text: addFormmBuilderField('text', [iconField]),
-      select: addFormmBuilderField('select', [iconField]),
-      email: addFormmBuilderField('email', [iconField]),
-      number: addFormmBuilderField('number', [iconField]),
-      country: addFormmBuilderField('country', [iconField]),
-      state: addFormmBuilderField('state', [iconField]),
-    },
-    formOverrides: {
-      fields: ({ defaultFields }) => {
-        return defaultFields.map((field) => {
-          if ('name' in field && field.name === 'confirmationMessage') {
-            return {
-              ...field,
-              editor: lexicalEditor({
-                features: ({ rootFeatures }) => {
-                  return [
-                    ...rootFeatures,
-                    FixedToolbarFeature(),
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-                  ]
-                },
-              }),
-            }
-          }
-          return field
-        })
-      },
-    },
-    formSubmissionOverrides: {
-      hooks: {
-        beforeValidate: [setFormSubmissionTenant],
-      },
-    },
-  }),
+  formBuilder,
   searchPlugin({
     collections: ['posts'],
     beforeSync: beforeSyncWithSearch,
