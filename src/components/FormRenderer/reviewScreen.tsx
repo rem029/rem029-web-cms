@@ -41,6 +41,8 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
 }) => {
   const { values, listCounts, locale } = useFormRenderer()
   const text = formText(locale)
+  // skeleton: 1. <h2 className="fb-review-heading">{text.reviewTitle}</h2> above the sections
+  //   (the step titles inside become the next level down)
 
   return (
     <div className="fb-review-list">

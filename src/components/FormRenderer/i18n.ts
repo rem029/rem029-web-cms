@@ -18,8 +18,11 @@ export type FormText = {
   addRow: (label: string) => string
   removeRow: (label: string, row: number) => string
   row: (label: string, row: number) => string
-  required: string
+  /** a required field left empty; names the field so the message stands alone (screen readers) */
+  required: (label: string) => string
   fixErrors: (count: number) => string
+  /** the review screen's heading */
+  reviewTitle: string
   uploading: string
   uploadHint: string
   tooLarge: string
@@ -55,11 +58,14 @@ const en: FormText = {
   addRow: (label) => `Add ${label}`,
   removeRow: (label, row) => `Remove ${label} ${row}`,
   row: (label, row) => `${label} ${row}`,
-  required: 'This field is required.',
+  // skeleton: becomes `${label} is required.`
+  required: () => 'This field is required.',
   fixErrors: (count) =>
     count === 1
       ? 'Please fix the highlighted field.'
       : `Please fix the ${count} highlighted fields.`,
+  // skeleton: 'Review your answers'
+  reviewTitle: '',
   uploading: 'Uploading…',
   uploadHint: 'Images or PDF, up to 10 MB.',
   tooLarge: 'Files can be up to 10 MB.',
@@ -93,9 +99,13 @@ const ar: FormText = {
   addRow: (label) => `إضافة ${label}`,
   removeRow: (label, row) => `حذف ${label} ${row}`,
   row: (label, row) => `${label} ${row}`,
-  required: 'هذا الحقل مطلوب.',
+  // skeleton: becomes `حقل «${label}» مطلوب.`
+  // skeleton: becomes `حقل «${label}» مطلوب.`
+  required: () => 'هذا الحقل مطلوب.',
   fixErrors: (count) =>
     count === 1 ? 'يرجى تصحيح الحقل المحدد.' : `يرجى تصحيح الحقول المحددة (${count}).`,
+  // skeleton: 'راجع إجاباتك'
+  reviewTitle: '',
   uploading: 'جارٍ الرفع…',
   uploadHint: 'صور أو PDF، حتى 10 ميغابايت.',
   tooLarge: 'يمكن أن يصل حجم الملف إلى 10 ميغابايت.',

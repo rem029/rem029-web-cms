@@ -74,6 +74,7 @@ export default async function FormPage({ params }: Args) {
               locale={locale}
               saveDraft={!draft}
               submit={submitFormAction}
+              title={form.title}
               upload={uploadFileAction}
             />
           </div>

@@ -21,6 +21,12 @@
     --fb-surface: hsl(var(--card));
     --fb-text: var(--foreground);
     --fb-muted: hsl(var(--muted-foreground));
+    /* skeleton (critique P1, contrast to AA on --fb-surface and filled fields):
+       1. --fb-muted: mix muted-foreground toward --fb-text until >= 4.5:1 (was 4.33:1)
+       2. --fb-error-color: mix destructive toward --fb-text until >= 4.5:1 (was 3.42:1); the
+          required star and the error summary follow
+       3. empty stars (.fb-choices--star .fb-choice): >= 3:1 non-text contrast (was 1.78:1)
+       4. .fb-title (h1 on /forms/<slug>) and .fb-review-heading styles */
     --fb-field-bg: var(--background);
     --fb-error-color: hsl(var(--destructive));
     --fb-pad: 2rem;

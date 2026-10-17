@@ -40,6 +40,8 @@ export type FormRendererProps = {
   upload: UploadHandler
   /** Off in live preview and the admin, so an editor's test answers aren't kept. */
   saveDraft?: boolean
+  /** The page heading (`/forms/<slug>`); the Form block leaves it out, its page has headings. */
+  title?: string
 }
 
 type Status = 'idle' | 'submitting' | 'done'
@@ -53,6 +55,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   submit,
   upload,
   saveDraft = true,
+  title: _title,
 }) => {
   const { draft, updateDraft, clearDraft, savedAt } = useDraft(form.id, saveDraft)
   const { values, listCounts } = draft
@@ -114,9 +117,9 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   }, [status])
 
   const send = async () => {
-    const missing = missingRequired(fields, values, listCounts).map(({ path }) => [
+    const missing = missingRequired(fields, values, listCounts).map(({ path, label }) => [
       path,
-      text.required,
+      text.required(label),
     ])
     if (form.has_terms && !termsAccepted) missing.push([TERMS_PATH, text.termsRequired])
     if (missing.length) {
@@ -210,6 +213,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
       >
         {scopedCss && <style>{scopedCss}</style>}
         <div className="fb-body">
+          {/* skeleton: 1. title → <h1 className="fb-title">{title}</h1>, above the header image */}
           {headerImage && (
             <figure className="fb-header">
               <Media resource={headerImage} />

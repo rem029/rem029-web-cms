@@ -134,7 +134,7 @@ export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => 
 
   // leaving an empty required field says so straight away; typing clears it (setValue)
   const onBlur = () => {
-    if (field.required && !isFilled(value)) setFieldError(path, text.required)
+    if (field.required && !isFilled(value)) setFieldError(path, text.required(field.label || path))
   }
 
   const shell = (children: React.ReactNode, group = false) => (

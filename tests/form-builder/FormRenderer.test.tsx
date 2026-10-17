@@ -83,7 +83,7 @@ describe('FormRenderer', () => {
 
     // assert
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(1))
-    expect(screen.queryByText('This field is required.')).toBeNull()
+    expect(screen.queryByText(/is required\./)).toBeNull()
   })
 
   it('adds list rows up to max_items', () => {
@@ -104,7 +104,7 @@ describe('FormRenderer', () => {
 
     // act
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
-    const requiredShown = screen.queryByText('This field is required.')
+    const requiredShown = screen.queryByText('Full name is required.')
     const stayed = screen.queryByLabelText(/Full name/)
     fireEvent.change(screen.getByLabelText(/Full name/), { target: { value: 'Sara' } })
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
@@ -228,7 +228,7 @@ describe('FormRenderer', () => {
     fireEvent.blur(input)
 
     // assert
-    expect(screen.getByText('This field is required.')).toBeTruthy()
+    expect(screen.getByText('Full name is required.')).toBeTruthy()
   })
 
   // proposed addition (step 3a)
@@ -273,5 +273,34 @@ describe('FormRenderer', () => {
         expect.objectContaining({ locale: 'ar', honeypot: 'https://spam.example' }),
       ),
     )
+  })
+
+  // step 4a (critique P1)
+  it('names the missing field in arabic', () => {
+    // arrange
+    // act
+    // assert
+    expect.fail('not implemented')
+  })
+
+  it('shows the title as the page heading when given', () => {
+    // arrange
+    // act
+    // assert
+    expect.fail('not implemented')
+  })
+
+  it('shows no page heading without a title', () => {
+    // arrange
+    // act
+    // assert
+    expect.fail('not implemented')
+  })
+
+  it('heads the review screen with review your answers', () => {
+    // arrange
+    // act
+    // assert
+    expect.fail('not implemented')
   })
 })

@@ -62,7 +62,7 @@ export const MultiStep: React.FC<MultiStepProps> = ({
   const next = () => {
     const missing = missingRequired(step.fields ?? [], values, listCounts)
     if (missing.length) {
-      setErrors(Object.fromEntries(missing.map(({ path }) => [path, text.required])))
+      setErrors(Object.fromEntries(missing.map(({ path, label }) => [path, text.required(label)])))
       focusFirstError(topRef.current, missing[0]?.path)
       return
     }
