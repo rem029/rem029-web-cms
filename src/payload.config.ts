@@ -55,6 +55,7 @@ export default buildConfig({
       ],
     },
     components: {
+      actions: ['@/common/components/ThemeToggle/ThemeToggle#ThemeToggle'],
       beforeLogin: ['@/common/components/LoginIntro/LoginIntro#LoginIntro'],
       header: ['@/common/components/InactiveTenantNotice#InactiveTenantNotice'],
       providers: ['@/common/components/AdminTheme/AdminTheme#AdminTheme'],

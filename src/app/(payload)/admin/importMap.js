@@ -31,6 +31,7 @@ import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from 
 import { InactiveTenantNotice as InactiveTenantNotice_ef18b90de477fae44c273195e3f857c9 } from '@/common/components/InactiveTenantNotice'
 import { Icon as Icon_ba83ac33c2002e103ddfa8223cb12f71 } from '@/common/components/AdminBranding/Icon'
 import { Logo as Logo_c65206fe508f7826b225872c8c331616 } from '@/common/components/AdminBranding/Logo'
+import { ThemeToggle as ThemeToggle_0b7bd9a651b3678ad215c5ba9f7cb5be } from '@/common/components/ThemeToggle/ThemeToggle'
 import { GlobalViewRedirect as GlobalViewRedirect_d6d5f193a167989e2ee7d14202901e62 } from '@payloadcms/plugin-multi-tenant/rsc'
 import { LoginIntro as LoginIntro_b592b38f3240797085934b0ab00f4c01 } from '@/common/components/LoginIntro/LoginIntro'
 import { TenantSelector as TenantSelector_1d0591e3cf4f332c83a86da13a0de59a } from '@payloadcms/plugin-multi-tenant/client'
@@ -71,6 +72,7 @@ export const importMap = {
   "@/common/components/InactiveTenantNotice#InactiveTenantNotice": InactiveTenantNotice_ef18b90de477fae44c273195e3f857c9,
   "@/common/components/AdminBranding/Icon#Icon": Icon_ba83ac33c2002e103ddfa8223cb12f71,
   "@/common/components/AdminBranding/Logo#Logo": Logo_c65206fe508f7826b225872c8c331616,
+  "@/common/components/ThemeToggle/ThemeToggle#ThemeToggle": ThemeToggle_0b7bd9a651b3678ad215c5ba9f7cb5be,
   "@payloadcms/plugin-multi-tenant/rsc#GlobalViewRedirect": GlobalViewRedirect_d6d5f193a167989e2ee7d14202901e62,
   "@/common/components/LoginIntro/LoginIntro#LoginIntro": LoginIntro_b592b38f3240797085934b0ab00f4c01,
   "@payloadcms/plugin-multi-tenant/client#TenantSelector": TenantSelector_1d0591e3cf4f332c83a86da13a0de59a,

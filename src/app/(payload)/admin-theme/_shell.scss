@@ -133,6 +133,35 @@
   padding: 2px;
 }
 
+// header dark/light switch (ThemeToggle): a bordered chip like the account, square, icon only
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 2px;
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--admin-raised);
+  }
+
+  @media (pointer: coarse) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  svg {
+    display: block;
+  }
+}
+
 .hamburger {
   border: var(--admin-border-width) solid var(--admin-border);
   border-radius: var(--admin-radius-s);
