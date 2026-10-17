@@ -245,6 +245,18 @@ $collapsible-inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width
     border-bottom: var(--admin-border-width) solid var(--admin-border);
   }
 
+  // Payload's placeholder picture has literal greys (a light block in dark): token fills instead
+  .blocks-drawer__default-image svg {
+    rect:first-child {
+      fill: var(--admin-raised);
+    }
+
+    rect:not(:first-child),
+    circle {
+      fill: var(--theme-elevation-200);
+    }
+  }
+
   .thumbnail-card__label {
     font-family: var(--admin-font-mono);
     font-weight: 500;
