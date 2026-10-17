@@ -119,10 +119,8 @@ const ItemRow: React.FC<{
       <td>
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- small admin thumbnail
-          <img className="menu-builder__thumb" src={item.imageUrl} alt="" />
-        ) : (
-          <span className="menu-builder__thumb menu-builder__thumb--empty" />
-        )}
+          <img className="menu-builder__thumb" src={item.imageUrl} alt="" loading="lazy" />
+        ) : null}
       </td>
       <td>
         <span className="menu-builder__title">{item.title}</span>

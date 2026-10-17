@@ -2,7 +2,27 @@
 // (light/dark, per-tenant admin styling) applies here too.
 .menu-builder {
   display: grid;
+  // minmax(0, …): the items table scrolls inside its panel instead of widening the page
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--base);
+
+  // a visible ring for keyboard users on every builder control
+  button,
+  input,
+  select,
+  textarea,
+  h3[tabindex] {
+    &:focus-visible {
+      outline: 2px solid var(--theme-text);
+      outline-offset: 2px;
+    }
+  }
+
+  input[type='checkbox'] {
+    width: calc(var(--base) * 0.9);
+    height: calc(var(--base) * 0.9);
+    cursor: pointer;
+  }
 
   &__panel {
     border: 1px solid var(--theme-elevation-150);
@@ -10,6 +30,9 @@
     padding: var(--base);
     min-width: 0;
     overflow-x: auto;
+    // the containing block of the visually hidden labels, so they scroll with the table instead
+    // of widening the page
+    position: relative;
 
     h4 {
       margin: 0 0 calc(var(--base) * 0.5);
@@ -74,6 +97,8 @@
     border-radius: var(--style-radius-s);
     color: var(--theme-text);
     cursor: pointer;
+    min-width: calc(var(--base) * 1.6);
+    min-height: calc(var(--base) * 1.6);
     padding: 0 calc(var(--base) * 0.3);
 
     &:disabled {
@@ -88,10 +113,6 @@
     height: 2.5rem;
     object-fit: cover;
     border-radius: var(--style-radius-s);
-
-    &--empty {
-      background: var(--theme-elevation-100);
-    }
   }
 
   &__price {
@@ -171,7 +192,7 @@
     justify-content: center;
     align-items: flex-start;
     padding: calc(var(--base) * 2) var(--base);
-    background: rgb(0 0 0 / 0.4);
+    background: color-mix(in srgb, var(--theme-elevation-1000) 40%, transparent);
     overflow-y: auto;
   }
 
@@ -180,7 +201,7 @@
     background: var(--theme-bg);
     border-radius: var(--style-radius-m);
     padding: calc(var(--base) * 1.5);
-    box-shadow: 0 10px 40px rgb(0 0 0 / 0.25);
+    box-shadow: 0 10px 40px color-mix(in srgb, var(--theme-elevation-1000) 25%, transparent);
 
     h3 {
       margin-top: 0;

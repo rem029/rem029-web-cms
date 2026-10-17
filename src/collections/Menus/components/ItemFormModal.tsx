@@ -6,7 +6,7 @@
  * and tag choices with `listLookupsAction`, and saves with `saveItemAction` (photo upload with
  * `uploadItemImageAction`). A plain dialog over the builder; what was typed stays on an error.
  */
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import type { Availability } from '@/common/fields/menuFields'
 
@@ -53,6 +53,29 @@ const newItem = (category: number | null): ItemFormData => ({
   modifierGroups: [],
 })
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+/** Tab and Shift+Tab stay inside the dialog: from the last control back to the first. */
+const keepFocusInside = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  if (event.key !== 'Tab') return
+  const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(FOCUSABLE))
+  const first = controls[0]
+  const last = controls[controls.length - 1]
+  if (!first || !last) return
+  // the title holds focus on open but isn't in the tab order: Shift+Tab from it goes to the last
+  const atStart =
+    document.activeElement === first ||
+    !controls.some((control) => control === document.activeElement)
+  if (event.shiftKey && atStart) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
+}
+
 const toggleId = <T,>(list: T[], value: T): T[] =>
   list.includes(value) ? list.filter((entry) => entry !== value) : [...list, value]
 
@@ -88,6 +111,26 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = (props) => {
   const [tags, setTags] = useState<BuilderLookup[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const titleRef = useRef<HTMLHeadingElement>(null)
+  // the latest onClose without re-running the focus effect (the parent passes a new function
+  // on every render)
+  const onCloseRef = useRef(props.onClose)
+  onCloseRef.current = props.onClose
+
+  // focus moves into the dialog on open and back to what opened it (the Edit / New item button)
+  // on close; Escape closes it from anywhere on the page
+  useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    titleRef.current?.focus()
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onCloseRef.current()
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape)
+      opener?.focus()
+    }
+  }, [])
 
   useEffect(() => {
     let current = true
@@ -155,12 +198,12 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = (props) => {
         className="menu-builder__dialog"
         role="dialog"
         aria-modal="true"
-        aria-label={itemId === 'new' ? 'New item' : 'Edit item'}
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') props.onClose()
-        }}
+        aria-labelledby="menu-builder-dialog-title"
+        onKeyDown={keepFocusInside}
       >
-        <h3>{itemId === 'new' ? 'New item' : 'Edit item'}</h3>
+        <h3 id="menu-builder-dialog-title" ref={titleRef} tabIndex={-1}>
+          {itemId === 'new' ? 'New item' : 'Edit item'}
+        </h3>
         {error && (
           <p className="menu-builder__error" role="alert">
             {error}
@@ -220,7 +263,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = (props) => {
               <div className="menu-builder__toolbar">
                 {imageUrl && (
                   // eslint-disable-next-line @next/next/no-img-element -- small admin preview
-                  <img className="menu-builder__thumb" src={imageUrl} alt="" />
+                  <img className="menu-builder__thumb" src={imageUrl} alt="Item photo" />
                 )}
                 <input
                   type="file"

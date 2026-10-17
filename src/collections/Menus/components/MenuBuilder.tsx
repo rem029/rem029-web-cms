@@ -25,6 +25,7 @@ import { ItemsPanel, type RowStatus } from './ItemsPanel'
 import './MenuBuilder.scss'
 
 const SEARCH_DELAY_MS = 250
+const SAVED_VISIBLE_MS = 3000
 
 // the field holds ids, or populated docs right after a load with depth
 const toIds = (value: unknown): number[] =>
@@ -165,6 +166,15 @@ export const MenuBuilder: React.FC = () => {
     }
     setRows((current) => current.map((row) => (row.id === itemId ? result.item : row)))
     setRowStatus((status) => ({ ...status, [itemId]: { saved: true } }))
+    // "Saved" is a confirmation, not a state: it goes after a few seconds
+    setTimeout(
+      () =>
+        setRowStatus((status) => {
+          const { [itemId]: current, ...rest } = status
+          return current && 'saved' in current ? rest : status
+        }),
+      SAVED_VISIBLE_MS,
+    )
   }
 
   const itemSaved = (item: BuilderItem, created: boolean) => {
