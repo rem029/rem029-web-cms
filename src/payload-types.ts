@@ -137,6 +137,7 @@ export interface Config {
     footer: Footer;
     theme: Theme;
     settings: Setting;
+    'audit-logs': AuditLog;
     'field-showcase': FieldShowcase;
     redirects: Redirect;
     forms: Form;
@@ -165,6 +166,7 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
     theme: ThemeSelect<false> | ThemeSelect<true>;
     settings: SettingsSelect<false> | SettingsSelect<true>;
+    'audit-logs': AuditLogsSelect<false> | AuditLogsSelect<true>;
     'field-showcase': FieldShowcaseSelect<false> | FieldShowcaseSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -178,14 +180,19 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'audit-logs-settings': AuditLogsSetting;
+  };
+  globalsSelect: {
+    'audit-logs-settings': AuditLogsSettingsSelect<false> | AuditLogsSettingsSelect<true>;
+  };
   locale: 'en' | 'ar';
   user: User & {
     collection: 'users';
   };
   jobs: {
     tasks: {
+      pruneAuditLogs: TaskPruneAuditLogs;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -307,7 +314,7 @@ export interface User {
          */
         isTenantAdmin?: boolean | null;
         /**
-         * What this user can see and do in this business. Tenant admins and super users bypass it.
+         * What this user can see and do in this business. Tenant admins: only its Audit Logs access counts. Super users bypass it.
          */
         access?: (number | null) | UsersAccess;
         id?: string | null;
@@ -361,6 +368,7 @@ export interface UsersAccess {
           | 'footer'
           | 'theme'
           | 'settings'
+          | 'audit-logs'
           | 'field-showcase'
           | 'redirects'
           | 'forms'
@@ -1598,6 +1606,36 @@ export interface Setting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-logs".
+ */
+export interface AuditLog {
+  id: number;
+  /**
+   * Empty for seeds, migrations and jobs.
+   */
+  user?: (number | null) | User;
+  operation: 'create' | 'update' | 'delete' | 'login' | 'logout' | 'login_failed';
+  collectionSlug: string;
+  docId: string;
+  tenant?: (number | null) | Tenant;
+  ip?: string | null;
+  /**
+   * Create and delete: the document. Update: the changed fields, from → to ("changed" for rich text, blocks and lists).
+   */
+  changes?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "field-showcase".
  */
 export interface FieldShowcase {
@@ -1872,7 +1910,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
+        taskSlug: 'inline' | 'pruneAuditLogs' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1905,7 +1943,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'pruneAuditLogs' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -1966,6 +2004,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'settings';
         value: number | Setting;
+      } | null)
+    | ({
+        relationTo: 'audit-logs';
+        value: number | AuditLog;
       } | null)
     | ({
         relationTo: 'field-showcase';
@@ -2926,6 +2968,21 @@ export interface SettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-logs_select".
+ */
+export interface AuditLogsSelect<T extends boolean = true> {
+  user?: T;
+  operation?: T;
+  collectionSlug?: T;
+  docId?: T;
+  tenant?: T;
+  ip?: T;
+  changes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "field-showcase_select".
  */
 export interface FieldShowcaseSelect<T extends boolean = true> {
@@ -3279,6 +3336,40 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-logs-settings".
+ */
+export interface AuditLogsSetting {
+  id: number;
+  /**
+   * Logs older than this are deleted every night.
+   */
+  retentionMonths: number;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-logs-settings_select".
+ */
+export interface AuditLogsSettingsSelect<T extends boolean = true> {
+  retentionMonths?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskPruneAuditLogs".
+ */
+export interface TaskPruneAuditLogs {
+  input?: unknown;
+  output: {
+    deleted: number;
+    remaining: number;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

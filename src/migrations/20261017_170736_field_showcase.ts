@@ -425,7 +425,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DELETE FROM "users_access_access" WHERE "slug" = 'field-showcase';
   ALTER TABLE "users_access_access" ALTER COLUMN "slug" SET DATA TYPE text;
   DROP TYPE "public"."enum_users_access_access_slug";
-  CREATE TYPE "public"."enum_users_access_access_slug" AS ENUM('pages', 'posts', 'media', 'categories', 'users', 'users-access', 'analytics', 'tenants', 'header', 'footer', 'theme', 'settings', 'redirects', 'forms', 'form-submissions', 'search');
+  CREATE TYPE "public"."enum_users_access_access_slug" AS ENUM('pages', 'posts', 'media', 'categories', 'users', 'users-access', 'analytics', 'tenants', 'header', 'footer', 'theme', 'settings', 'audit-logs', 'redirects', 'forms', 'form-submissions', 'search');
   ALTER TABLE "users_access_access" ALTER COLUMN "slug" SET DATA TYPE "public"."enum_users_access_access_slug" USING "slug"::"public"."enum_users_access_access_slug";
   DROP INDEX "payload_locked_documents_rels_field_showcase_id_idx";
   ALTER TABLE "payload_locked_documents_rels" DROP COLUMN "field_showcase_id";

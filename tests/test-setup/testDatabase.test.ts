@@ -70,6 +70,8 @@ describe('test database', () => {
     ['disabled', TEST_TENANTS.a],
     ['inactiveMember', TEST_TENANTS.inactive],
     ['inactiveAdmin', TEST_TENANTS.inactive],
+    ['logReader', TEST_TENANTS.b],
+    ['logReaderAdmin', TEST_TENANTS.a],
   ] as const)('has the %s user', async (role, tenantSlug) => {
     // arrange
     const email = TEST_USERS[role]

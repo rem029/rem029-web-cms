@@ -2,7 +2,8 @@
  * The profiles in each test business with members (test-a, test-b, test-inactive; `TEST_PROFILES`):
  * - `editor`: CRUD on pages, posts, media, categories, field-showcase; read/update on header and footer
  * - `viewer`: read on pages, posts, media, categories, field-showcase, header and footer
- * Both open /admin. Every other slug is hidden and denied.
+ * - `log-reader`: every box on audit-logs (only read and the nav count there)
+ * Editor and viewer open /admin. Every other slug is hidden and denied.
  */
 import type { Payload } from 'payload'
 
@@ -56,6 +57,23 @@ const VIEWER: ProfileSpec = {
     header: READ,
     footer: READ,
     users: OPEN_ADMIN,
+  },
+}
+
+const LOG_READER: ProfileSpec = {
+  name: 'Log reader',
+  slug: TEST_PROFILES.logReader,
+  description: 'Reads the audit logs of this business.',
+  grants: {
+    'audit-logs': {
+      hidden: false,
+      read: true,
+      create: true,
+      update: true,
+      delete: true,
+      admin: true,
+      access: true,
+    },
   },
 }
 
@@ -114,7 +132,7 @@ const upsertProfile = async (
   return created.id
 }
 
-/** The editor and viewer profile ids per business. */
+/** The editor, viewer and log reader profile ids per business. */
 export const seedTestProfiles = async (
   payload: Payload,
   tenants: TenantIds,
@@ -140,6 +158,17 @@ export const seedTestProfiles = async (
         tenants.inactive,
         TEST_TENANTS.inactive,
         VIEWER,
+        slugs,
+      ),
+    },
+    logReader: {
+      a: await upsertProfile(payload, tenants.a, TEST_TENANTS.a, LOG_READER, slugs),
+      b: await upsertProfile(payload, tenants.b, TEST_TENANTS.b, LOG_READER, slugs),
+      inactive: await upsertProfile(
+        payload,
+        tenants.inactive,
+        TEST_TENANTS.inactive,
+        LOG_READER,
         slugs,
       ),
     },

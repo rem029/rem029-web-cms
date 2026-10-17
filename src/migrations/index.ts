@@ -25,7 +25,10 @@ import * as migration_20261003_102355_tenant_admins from './20261003_102355_tena
 import * as migration_20261003_122558_hidden_documents from './20261003_122558_hidden_documents';
 import * as migration_20261003_160746_access_templates from './20261003_160746_access_templates';
 import * as migration_20261010_121953_created_updated_by from './20261010_121953_created_updated_by';
-import * as migration_20261017_132508_field_showcase from './20261017_132508_field_showcase';
+import * as migration_20261010_170458_audit_logs from './20261010_170458_audit_logs';
+import * as migration_20261010_201646_audit_logs_retention from './20261010_201646_audit_logs_retention';
+import * as migration_20261015_193545_audit_logs_login_failed from './20261015_193545_audit_logs_login_failed';
+import * as migration_20261017_170736_field_showcase from './20261017_170736_field_showcase';
 
 export const migrations = [
   {
@@ -164,8 +167,23 @@ export const migrations = [
     name: '20261010_121953_created_updated_by',
   },
   {
-    up: migration_20261017_132508_field_showcase.up,
-    down: migration_20261017_132508_field_showcase.down,
-    name: '20261017_132508_field_showcase'
+    up: migration_20261010_170458_audit_logs.up,
+    down: migration_20261010_170458_audit_logs.down,
+    name: '20261010_170458_audit_logs',
+  },
+  {
+    up: migration_20261010_201646_audit_logs_retention.up,
+    down: migration_20261010_201646_audit_logs_retention.down,
+    name: '20261010_201646_audit_logs_retention',
+  },
+  {
+    up: migration_20261015_193545_audit_logs_login_failed.up,
+    down: migration_20261015_193545_audit_logs_login_failed.down,
+    name: '20261015_193545_audit_logs_login_failed',
+  },
+  {
+    up: migration_20261017_170736_field_showcase.up,
+    down: migration_20261017_170736_field_showcase.down,
+    name: '20261017_170736_field_showcase'
   },
 ];
