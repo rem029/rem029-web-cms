@@ -5,60 +5,383 @@
 // what floats (the calendar) and what's clicked as a card (block picker) gets one.
 @use './motion' as *;
 
-// PLAN(step 1) tabs field (Text / Choice / …): chips like the doc tabs (`_shell.scss` `.doc-tab`)
-// `.tabs-field__tabs`: gap between chips, no rule under the row
-// `.tabs-field__tab-button`: opacity 1 (Payload's 0.5 fails contrast), padding 4px 12px, mono label,
-//   2px border, radius-s, transparent; `::after` underline hidden
-//   hover: --admin-raised; focus-visible: --admin-shadow-xs (phase 3 follow-up: no focus before)
-//   `--active`: sky fill, ink text
-//   `--has-error`: border and text in --admin-danger-text (on the active chip: ink on sky, danger border)
-// `.tabs-field__content-wrap`: top margin so the chips don't touch the first field
+$collapsible-inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width));
 
-// PLAN(step 1) collapsible (also every array / blocks row): bordered panel, no shadow
-// `.collapsible--style-default`: 2px --admin-border, radius-m, hover keeps the border (no colour jump)
-// `.collapsible__toggle-wrap`: --admin-raised, radius matching the panel's top corners, hover a
-//   step darker (--theme-elevation-150); open: 2px rule under it
-// `.collapsible--collapsed .collapsible__toggle-wrap`: no rule, all corners
-// `.collapsible__toggle`: focus-visible --admin-shadow-xs (inset, it fills the header)
-// `.collapsible__content`: --admin-surface, bottom corners
-// `.collapsible--style-error`: border --admin-danger-text; header on --admin-danger with ink text
-// `.collapsible__drag`, `.array-actions__button` (⋮): 24px chips, 2px border, radius-s, surface,
-//   `press(none, var(--admin-shadow-xs), none)`
+// tabs field (Text / Choice / …): chips like the doc tabs (`_shell.scss` `.doc-tab`)
+.tabs-field {
+  .tabs-field__tabs {
+    gap: 8px;
+    border-bottom: 0;
+  }
 
-// PLAN(step 1) group: no box, a rule on the inline start
-// `.group-field--gutter`: border-inline-start 2px --admin-border (Payload's 1px elevation-100)
-// `.group-field--within-group.group-field--gutter`: 1px
-// `.group-field__title`: display font, 600
+  .tabs-field__tab-button {
+    opacity: 1;
+    margin-inline-end: 0;
+    padding: 4px 12px;
+    background: transparent;
+    color: var(--admin-text);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    font-family: var(--admin-font-mono);
 
-// PLAN(step 1) row: Payload's layout, nothing to change (listed so phase 6 knows it was checked)
+    &::after {
+      display: none;
+    }
 
-// PLAN(step 1) array / blocks header and rows
-// `.array-field__header`, `.blocks-field__header`: title in the display font; `__header-action`
-//   (Collapse all / Show all): mono, highlighter underline on hover like links
-// `.blocks-field__block-number`, row numbers in `.row-label`: mono, muted
-// `.blocks-field__block-pill .pill`: lilac fill (--admin-secondary), ink text, 2px border
-// `.blocks-field__error-pill`, `.array-field__error-pill`: danger fill, ink (the pill rules in
-//   `_lists.scss` already give the shape)
+    &:hover {
+      opacity: 1;
+      background: var(--admin-raised);
+    }
 
-// PLAN(step 1) block picker drawer
-// `.blocks-drawer__blocks`: gap
-// `.thumbnail-card`: brutal-box(var(--admin-shadow-xs)) with radius-s; `--has-on-click`:
-//   press(var(--admin-shadow-xs), var(--admin-shadow-s), none), hover keeps the 2px border
-// `.thumbnail-card__thumbnail`, `.blocks-drawer__default-image`: --admin-raised, 2px rule under it
-// `.thumbnail-card__label`: mono, 500
-// `.blocks-drawer__block-group-label`: mono, uppercase, muted
-// `.block-search__input`: covered by `$inputs`? if not, add it to the list in `_forms.scss`
+    &:focus-visible {
+      box-shadow: var(--admin-shadow-xs);
+    }
 
-// PLAN(step 1) date picker calendar (`.date-time-picker .react-datepicker`, a popper)
-// `.react-datepicker`: brutal-box(var(--admin-shadow-s)) with radius-s, body font weight 400
-// `__header`, `__header--time`: --admin-raised, 2px rule under it; `__header__dropdown`: display font
-// `__day-names`: --admin-raised; `__day-name`: mono, muted
-// `__month-container`: 2px rule on the inline end (next to the time list)
-// `__day`, `__month-text`, `__time-list-item`: no inset box-shadow grid, radius-s, hover --admin-raised
-// `__day--today`: 2px --admin-border inset
-// `__day--selected`, `__day--keyboard-selected`, `__month-text--selected`,
-//   `__time-list-item--selected`: sky fill, ink, also on hover and focus
-// `__day:focus`: --admin-shadow-xs instead of Payload's elevation-400 fill
-// `__day--disabled`, `__day--outside-month`: muted
-// `__navigation--previous/--next`: the arrow borders in --admin-text
-// `.date-time-picker .icon--calendar`, `.icon--x` strokes/fills: --admin-text
+    &--active,
+    &--active:hover {
+      background: var(--admin-primary);
+      color: var(--admin-ink);
+    }
+
+    &--has-error {
+      border-color: var(--admin-danger-text);
+      color: var(--admin-danger-text);
+
+      &.tabs-field__tab-button--active,
+      &.tabs-field__tab-button--active:hover {
+        background: var(--admin-primary);
+        color: var(--admin-ink);
+        border-color: var(--admin-danger-text);
+      }
+    }
+  }
+
+  .tabs-field__content-wrap {
+    margin-top: 16px;
+  }
+}
+
+// collapsible (also every array / blocks row): bordered panel, no shadow
+.collapsible {
+  border-radius: var(--admin-radius-m);
+  box-shadow: none;
+
+  &--style-default {
+    border: var(--admin-border-width) solid var(--admin-border);
+
+    &:hover {
+      border: var(--admin-border-width) solid var(--admin-border);
+    }
+  }
+
+  .collapsible__toggle-wrap {
+    background: var(--admin-raised);
+    border-top-left-radius: $collapsible-inner-radius;
+    border-top-right-radius: $collapsible-inner-radius;
+    border-bottom: var(--admin-border-width) solid var(--admin-border);
+
+    &:hover {
+      background: var(--theme-elevation-150);
+    }
+  }
+
+  &--collapsed .collapsible__toggle-wrap {
+    border-bottom: 0;
+    border-radius: $collapsible-inner-radius;
+  }
+
+  .collapsible__toggle {
+    border-radius: inherit;
+
+    &:focus-visible {
+      box-shadow: inset var(--admin-shadow-xs);
+    }
+  }
+
+  .collapsible__content {
+    background: var(--admin-surface);
+    border-bottom-left-radius: $collapsible-inner-radius;
+    border-bottom-right-radius: $collapsible-inner-radius;
+  }
+
+  &--style-error {
+    border: var(--admin-border-width) solid var(--admin-danger-text);
+
+    > .collapsible__toggle-wrap {
+      background: var(--admin-danger);
+      color: var(--admin-ink);
+      border-bottom-color: var(--admin-danger-text);
+
+      &:hover {
+        background: var(--admin-danger);
+      }
+
+      .row-label {
+        color: var(--admin-ink);
+      }
+    }
+  }
+
+  .collapsible__drag {
+    opacity: 1;
+  }
+}
+
+.collapsible__drag,
+.array-actions__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  @include press(none, var(--admin-shadow-xs), none);
+
+  &:hover {
+    background: var(--admin-surface);
+  }
+}
+
+// group: no box, a rule on the inline start
+.group-field {
+  &--gutter {
+    border-inline-start: var(--admin-border-width) solid var(--admin-border);
+  }
+
+  &--within-group.group-field--gutter {
+    border-inline-start-width: 1px;
+  }
+
+  .group-field__title {
+    font-family: var(--admin-font-display);
+    font-weight: 600;
+  }
+}
+
+// row: Payload's layout, nothing to change (listed so phase 6 knows it was checked)
+
+// array / blocks header and rows
+.array-field__header,
+.blocks-field__header {
+  .array-field__title,
+  h3,
+  .field-label {
+    font-family: var(--admin-font-display);
+  }
+}
+
+.array-field__header-action,
+.blocks-field__header-action {
+  font-family: var(--admin-font-mono);
+  color: var(--admin-text);
+  text-decoration: none;
+  border-bottom: var(--admin-border-width) solid var(--admin-secondary);
+  transition: background-color var(--admin-duration) var(--admin-ease);
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: none;
+    background-color: var(--admin-secondary);
+    color: var(--admin-ink);
+  }
+}
+
+.blocks-field__block-number,
+.array-field__row-header .row-label {
+  font-family: var(--admin-font-mono);
+  color: var(--admin-muted);
+}
+
+.blocks-field__block-pill.pill,
+.blocks-field__block-pill .pill {
+  background: var(--admin-secondary);
+  color: var(--admin-ink);
+  border: var(--admin-border-width) solid var(--admin-border);
+}
+
+.blocks-field__error-pill,
+.error-pill {
+  background: var(--admin-danger);
+  color: var(--admin-ink);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  font-family: var(--admin-font-mono);
+}
+
+// block picker drawer
+.blocks-drawer {
+  .blocks-drawer__blocks {
+    gap: 16px;
+  }
+
+  .blocks-drawer__block-group-label {
+    font-family: var(--admin-font-mono);
+    text-transform: uppercase;
+    color: var(--admin-muted);
+  }
+}
+
+.thumbnail-card {
+  @include brutal-box(var(--admin-shadow-xs));
+  border-radius: var(--admin-radius-s);
+
+  &--has-on-click {
+    @include press(var(--admin-shadow-xs), var(--admin-shadow-s), none);
+
+    &:hover,
+    &:focus,
+    &:active {
+      border: var(--admin-border-width) solid var(--admin-border);
+    }
+  }
+
+  .thumbnail-card__thumbnail,
+  .blocks-drawer__default-image {
+    background: var(--admin-raised);
+    border-bottom: var(--admin-border-width) solid var(--admin-border);
+  }
+
+  .thumbnail-card__label {
+    font-family: var(--admin-font-mono);
+    font-weight: 500;
+  }
+}
+
+.block-search__input {
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  box-shadow: none;
+  transition: box-shadow var(--admin-duration) var(--admin-ease);
+
+  &::placeholder {
+    color: var(--admin-muted);
+  }
+
+  &:hover,
+  &:not(:disabled):hover {
+    border-color: var(--admin-border);
+    box-shadow: none;
+  }
+
+  &:focus,
+  &:focus-within,
+  &:active {
+    border-color: var(--admin-border);
+    box-shadow: var(--admin-shadow-s);
+    outline: none;
+  }
+}
+
+// date picker calendar (`.date-time-picker .react-datepicker`, a popper)
+.date-time-picker {
+  .icon--calendar,
+  .icon--x {
+    .stroke {
+      stroke: var(--admin-text);
+    }
+
+    .fill {
+      fill: var(--admin-text);
+    }
+  }
+
+  .react-datepicker {
+    @include brutal-box(var(--admin-shadow-s));
+    border-radius: var(--admin-radius-s);
+    font-weight: 400;
+
+    &__header,
+    &__header--time {
+      background: var(--admin-raised);
+      border-bottom: var(--admin-border-width) solid var(--admin-border);
+    }
+
+    &__header__dropdown {
+      font-family: var(--admin-font-display);
+    }
+
+    &__day-names {
+      background: var(--admin-raised);
+    }
+
+    &__day-name {
+      font-family: var(--admin-font-mono);
+      color: var(--admin-muted);
+    }
+
+    &__month-container {
+      border-inline-end: var(--admin-border-width) solid var(--admin-border);
+    }
+
+    &__day,
+    &__month-text,
+    .react-datepicker__time-list-item,
+    &__time-container
+      .react-datepicker__time
+      .react-datepicker__time-box
+      ul.react-datepicker__time-list
+      li.react-datepicker__time-list-item {
+      box-shadow: none;
+      border-radius: var(--admin-radius-s);
+
+      &:hover {
+        background: var(--admin-raised);
+        border-radius: var(--admin-radius-s);
+      }
+    }
+
+    &__day:focus {
+      background: var(--admin-surface);
+      box-shadow: var(--admin-shadow-xs);
+    }
+
+    &__day--today {
+      box-shadow: inset 0 0 0 var(--admin-border-width) var(--admin-border);
+    }
+
+    &__day--selected,
+    &__day--keyboard-selected,
+    &__month-text--selected,
+    &__month-text--keyboard-selected,
+    .react-datepicker__time-list-item--selected,
+    &__time-container
+      .react-datepicker__time
+      .react-datepicker__time-box
+      ul.react-datepicker__time-list
+      li.react-datepicker__time-list-item--selected {
+      &,
+      &:hover,
+      &:focus {
+        background: var(--admin-primary);
+        color: var(--admin-ink);
+        border-radius: var(--admin-radius-s);
+        box-shadow: none;
+      }
+    }
+
+    &__day--disabled,
+    &__day--outside-month {
+      color: var(--admin-muted);
+    }
+
+    &__navigation--previous {
+      &,
+      &:focus {
+        border-right-color: var(--admin-text);
+      }
+    }
+
+    &__navigation--next {
+      &,
+      &:focus {
+        border-left-color: var(--admin-text);
+      }
+    }
+  }
+}
