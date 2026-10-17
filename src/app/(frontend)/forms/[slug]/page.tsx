@@ -59,7 +59,7 @@ export default async function FormPage({ params }: Args) {
         {draft && <LivePreviewListener />}
         {reason ? (
           <section
-            className="mx-auto max-w-xl py-16 text-center"
+            className="mx-auto max-w-xl px-6 py-16 text-center"
             dir={locale === 'ar' ? 'rtl' : 'ltr'}
           >
             <h1 className="text-2xl font-semibold">{form.title}</h1>
@@ -68,7 +68,7 @@ export default async function FormPage({ params }: Args) {
             </p>
           </section>
         ) : (
-          <div className="py-10 md:py-16">
+          <div className="w-full px-6 py-10 md:py-16">
             <FormRenderer
               form={form}
               locale={locale}

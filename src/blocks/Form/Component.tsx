@@ -11,7 +11,6 @@ import { submitFormAction, uploadFileAction } from '@/components/FormRenderer/ac
 import RichText from '@/components/RichText'
 import type { FormBlock as FormBlockProps } from '@/payload-types'
 import { LOCALE_STORAGE_KEY } from '@/utilities/constant'
-import { css } from '@/utilities/constants'
 
 /**
  * The Form block on a page: the optional intro, then `FormRenderer` with the server actions
@@ -35,7 +34,9 @@ export const FormBlock = async ({ form, enableIntro, introContent }: FormBlockPr
   const draft = await isPreviewing()
 
   return (
-    <div className={css('form')}>
+    // not css('form'): the theme's legacy `.cms-form` rules are unlayered and would strip the
+    // renderer's fields (`border: 0`, transparent background)
+    <div className="w-full">
       {enableIntro && introContent && (
         <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
       )}
