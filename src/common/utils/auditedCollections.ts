@@ -3,7 +3,7 @@ import type { CollectionSlug } from 'payload'
 /**
  * Collections whose creates, updates and deletes are written to `audit-logs` by the `addAuditLog`
  * plugin (`auditLogAfterChange` / `auditLogAfterDelete`). Every collection is in exactly one of
- * these two lists (checked by `scripts/verify/auditLogs.ts`), so a new collection can't be
+ * these two lists (checked by `tests/audit-logs/coverage.test.ts`), so a new collection can't be
  * forgotten: add it here.
  */
 export const auditedCollections: CollectionSlug[] = [
