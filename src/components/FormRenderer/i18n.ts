@@ -27,6 +27,10 @@ export type FormText = {
   fileAttached: string
   signed: string
   clearSignature: string
+  /** the drawing area's accessible name, after the field label */
+  drawSignature: string
+  /** the typed fallback's label */
+  typeSignature: string
   yes: string
   no: string
   stepOf: (current: number, total: number) => string
@@ -63,6 +67,8 @@ const en: FormText = {
   fileAttached: 'File attached',
   signed: 'Signed',
   clearSignature: 'Clear',
+  drawSignature: 'draw your signature',
+  typeSignature: 'Or type your full name',
   yes: 'Yes',
   no: 'No',
   stepOf: (current, total) => `Step ${current} of ${total}`,
@@ -97,6 +103,8 @@ const ar: FormText = {
   fileAttached: 'تم إرفاق ملف',
   signed: 'تم التوقيع',
   clearSignature: 'مسح',
+  drawSignature: 'ارسم توقيعك',
+  typeSignature: 'أو اكتب اسمك الكامل',
   yes: 'نعم',
   no: 'لا',
   stepOf: (current, total) => `الخطوة ${current} من ${total}`,

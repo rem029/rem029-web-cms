@@ -421,9 +421,13 @@ const UploadInput: React.FC<{
       {field.blockType === 'signature' ? (
         <SignaturePad
           clearLabel={text.clearSignature}
+          describedBy={aria['aria-describedby']}
           disabled={disabled || uploading}
+          drawLabel={text.drawSignature}
           id={inputId}
+          label={field.label ?? ''}
           onChange={(file) => void store(file)}
+          typedLabel={text.typeSignature}
         />
       ) : (
         <input

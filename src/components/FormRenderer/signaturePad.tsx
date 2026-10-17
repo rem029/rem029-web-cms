@@ -4,6 +4,14 @@
  * and hands it to `onChange` as a `File`; `FieldControl` uploads it like any file. "Clear"
  * empties it. Resizes with its container (devicePixelRatio), touch and mouse. Rendered by
  * `FieldControl`.
+ *
+ * step 5 (skeleton, critique P0), to build:
+ * 1. the canvas is `role="img"` named "<label>, <drawLabel>", with the field's `describedBy`
+ * 2. a typed fallback under it (`fb-input fb-signature-typed`, labelled `typedLabel`): on blur
+ *    with text → clear the pad, draw the name (italic, the form's font, centred), export once;
+ *    a new stroke clears the typed text
+ * 3. export a drawn signature once, `EXPORT_DELAY_MS` after the last stroke (a new stroke
+ *    restarts the wait), not on every stroke; Clear cancels a pending export and empties both
  */
 import React, { useEffect, useRef } from 'react'
 import SignaturePadLib from 'signature_pad'
@@ -12,10 +20,19 @@ import { Button } from '@/components/ui/button'
 
 export type SignaturePadProps = {
   id: string
+  /** the field's label, part of the drawing area's accessible name */
+  label: string
+  /** the field's help / error ids (`aria-describedby`) */
+  describedBy?: string
   disabled?: boolean
   clearLabel: string
+  drawLabel: string
+  typedLabel: string
   onChange: (file: File | null) => void
 }
+
+/** How long after the last stroke a drawn signature is exported (one upload per signature). */
+export const EXPORT_DELAY_MS = 800
 
 export const SignaturePad: React.FC<SignaturePadProps> = ({
   id,
@@ -23,6 +40,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
   clearLabel,
   onChange,
 }) => {
+  // step 5: label, describedBy, drawLabel and typedLabel are used once built (see the file comment)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const padRef = useRef<SignaturePadLib | null>(null)
   // the latest onChange without re-creating the pad on every render
