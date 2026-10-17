@@ -2,7 +2,8 @@
  * Restaurant menu catalog (rem0017 phase 1): per seeded business (tenant1, tenant2), 5 categories,
  * the 14 common allergens, 4 tags and 15 items with prices, options on a few (Size, Milk), one item
  * switched off ("Show on menus" unticked) and one out of stock. tenant2 prices in QAR (Settings →
- * Currency), tenant1 keeps USD. Photos are left empty.
+ * Currency), tenant1 keeps USD. Photos (phase 3 step 3): a generated
+ * placeholder image per category, set on its items, and two carousel images on the published menus.
  *
  *   pnpm seed
  *
@@ -414,6 +415,27 @@ const MENUS: MenuSpec[] = [
   },
 ]
 
+/**
+ * A plain coloured image with a label (sharp renders an svg to webp), uploaded once per name and
+ * found again by filename on later runs: placeholder photos, no network or binary files in git.
+ */
+const upsertPlaceholderImage = async (
+  payload: Payload,
+  name: string,
+  label: string,
+  color: string,
+): Promise<number> => {
+  // 1. find media where filename equals `menu-<name>.webp` → its id
+  // 2. else svg 1200x675 (fill color, centred label, system sans) → sharp(svg).webp().toBuffer()
+  // 3. payload.create media { alt: label } with file { data, mimetype 'image/webp',
+  //    name: `menu-<name>.webp`, size }, context
+  void payload
+  void name
+  void label
+  void color
+  throw new Error('not implemented')
+}
+
 const upsertMenu = async (
   payload: Payload,
   tenantId: number,
@@ -511,6 +533,12 @@ export const seedMenu = async (payload: Payload): Promise<void> => {
     for (const tag of TAGS) {
       tags.set(tag.en, await upsertNamed(payload, 'menu-tags', tenant.id, tag))
     }
+
+    // step 3: photos. per category: upsertPlaceholderImage(payload, category.slug,
+    // category.title.en, CATEGORY_COLORS[slug]); upsertItem sets image to its category's photo
+    // (except one item per business, to show a card without a photo); two carousel images
+    // ('carousel-1', 'carousel-2') go on the published menus, and each menu gets an
+    // intro.subheading in en and ar (MenuSpec.subheading)
 
     const counts = { created: 0, updated: 0 }
     const itemIds = new Map<string, number>()

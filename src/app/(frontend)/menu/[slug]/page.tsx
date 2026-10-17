@@ -4,20 +4,21 @@ import { notFound } from 'next/navigation'
 import { getPayload, type TypedLocale } from 'payload'
 import React, { cache } from 'react'
 
-import { formatPrice } from '@/common/utils/formatPrice'
 import { getFrontendTenantId } from '@/common/utils/frontendTenant'
 import { getTenantDoc } from '@/common/utils/getTenantDoc'
 import { isPreviewing } from '@/common/utils/isPreviewing'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import type { Menu as MenuDoc } from '@/payload-types'
 import { generateMeta } from '@/utilities/generateMeta'
 
+import { Menu } from '../_components/Menu'
+import { MenuCarousel } from '../_components/MenuCarousel'
 import { MenuFooter } from '../_components/MenuFooter'
 import { MenuHeader } from '../_components/MenuHeader'
 import { readMenuLocale } from '../_data/locale'
 import { mediaOf } from '../_data/media'
 import { menuColorVars } from '../_data/menuColors'
 import { getMenuPage } from '../_data/menuData'
-import { menuStrings } from '../_i18n'
 
 type Args = {
   params: Promise<{ slug: string }>
@@ -29,6 +30,14 @@ const loadMenuPage = cache(async (slug: string, locale: TypedLocale) => {
   const tenantId = await getFrontendTenantId()
   return getMenuPage(payload, tenantId, slug, { draft: await isPreviewing(), locale })
 })
+
+// the carousel's populated images, large size when there is one
+const carouselImages = (menu: MenuDoc): { url: string; alt: string }[] => {
+  // 1. menu.carousel rows → mediaOf(row.image), drop nulls
+  // 2. url = sizes.large?.url ?? url, alt = media.alt ?? ''; drop rows without a url
+  void menu
+  return []
+}
 
 /**
  * A menu's guest page, `/menu/<slug>` on its tenant's host (rem0017 phase 3). Rendered per
@@ -47,7 +56,6 @@ export default async function MenuPage({ params }: Args) {
 
   const { menu, sections, currency } = data
   const settings = await getTenantDoc('settings', tenantId, { depth: 1, locale })
-  const t = menuStrings(locale)
 
   return (
     <div style={menuColorVars(menu.colors)} className="menu-theme flex min-h-dvh flex-col">
@@ -59,28 +67,17 @@ export default async function MenuPage({ params }: Args) {
         showLanguageSwitch={menu.header?.showLanguageSwitch !== false}
         locale={locale}
       />
-      {/* step 3 replaces this list with the interactive <Menu /> */}
+      <MenuCarousel images={carouselImages(menu)} />
       <main className="container flex-1 py-6">
         {menu.intro?.heading && <h1 className="text-3xl font-semibold">{menu.intro.heading}</h1>}
         {menu.intro?.subheading && <p className="mt-1 text-menu-muted">{menu.intro.subheading}</p>}
-        {sections.map((section) => (
-          <section key={section.category?.id ?? 'other'} className="mt-8">
-            <h2 className="text-xl font-semibold">{section.category?.title ?? t.other}</h2>
-            <ul className="mt-3 grid gap-3">
-              {section.items.map((item) => (
-                <li key={item.id} className="flex justify-between gap-4 rounded bg-menu-card p-3">
-                  <span className="grid">
-                    <span>{item.title}</span>
-                    {!item.inStock && (
-                      <span className="text-sm text-menu-muted">{t.outOfStock}</span>
-                    )}
-                  </span>
-                  <bdi className="shrink-0">{formatPrice(item.price, currency, locale)}</bdi>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+        <Menu
+          menuId={menu.id}
+          sections={sections}
+          currency={currency}
+          locale={locale}
+          filters={menu.filters}
+        />
       </main>
       <MenuFooter settings={settings} locale={locale} />
     </div>
