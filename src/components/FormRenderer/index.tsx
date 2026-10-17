@@ -118,6 +118,9 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 
     setStatus('submitting')
     setSummary(null)
+    // step 3a: CHANGE — also send locale, honeypot (the hidden input's value) and termsAccepted;
+    // before sending, a form with has_terms and the box unticked → field error on the terms
+    // checkbox (text.termsRequired) + summary, like a missing required field
     const result = await submit({
       formId: form.id,
       submissionData: toSubmissionData(fields, values, listCounts),
@@ -175,6 +178,8 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
       >
         {scopedCss && <style>{scopedCss}</style>}
         <div className="fb-body">
+          {/* step 3a: ADD — header_image (populated media) as <figure className="fb-header"> above
+              the form, alt from the media */}
           {status === 'done' ? (
             <div className="fb-confirmation" ref={confirmationRef} role="status" tabIndex={-1}>
               {form.confirmationMessage && (
@@ -207,6 +212,10 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
                   }}
                 >
                   <RecursiveFields fields={fields} />
+                  {/* step 3a: ADD — <Terms /> (terms_content RichText + a required checkbox,
+                      fb-terms) when has_terms, here and on the review screen before submit;
+                      <Honeypot /> (input name fb_website, visually hidden, tabIndex -1,
+                      autoComplete off, aria-hidden wrapper), its value kept in a ref */}
                   <div className="fb-actions">
                     {draftNote}
                     <button

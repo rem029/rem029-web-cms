@@ -19,6 +19,7 @@ export type ReviewScreenProps = {
   submitting: boolean
   /** Shown beside the submit button (the "draft saved" note). */
   status?: React.ReactNode
+  // step 3a: ADD — terms?: React.ReactNode, rendered above the submit button
 }
 
 /** `family.1.name` → ' 2': the row number of the innermost list, for the answer's label. */

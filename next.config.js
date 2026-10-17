@@ -28,6 +28,8 @@ const nextConfig = {
   },
   // next lint checks src/ by default; tests/ is linted like app code
   eslint: { dirs: ['src', 'tests'] },
+  // step 3a: ADD — experimental.serverActions.bodySizeLimit '11mb': uploadFileAction takes files
+  // up to FORM_UPLOAD_MAX_BYTES (10 MB); Next's default is 1 MB
   reactStrictMode: true,
   redirects,
   output: process.env.NODE_ENV && 'standalone',

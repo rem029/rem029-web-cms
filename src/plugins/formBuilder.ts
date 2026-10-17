@@ -94,6 +94,8 @@ export const formBuilder = formBuilderPlugin({
   },
   formSubmissionOverrides: {
     hooks: {
+      // step 3a: ADD — validateSubmission first (form open, members only, submissionData
+      // rebuilt from the form's fields), then setFormSubmissionTenant
       beforeValidate: [setFormSubmissionTenant],
     },
   },

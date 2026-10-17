@@ -227,4 +227,20 @@ describe('FormRenderer', () => {
     // assert
     expect(screen.getByText('This field is required.')).toBeTruthy()
   })
+
+  // proposed addition (step 3a)
+  it('asks to accept the terms before submitting', async () => {
+    // arrange: formDoc(stockFields()) with has_terms and terms_content; required fields filled
+    // act: submit without ticking the terms, then tick it and submit
+    // assert: first a terms error and no submit call; then submit called with termsAccepted true
+    expect.fail('not implemented')
+  })
+
+  // proposed addition (step 3a)
+  it('sends the locale and the honeypot with the answers', async () => {
+    // arrange: an arabic form; the hidden fb_website input filled (as a bot would)
+    // act: submit
+    // assert: submit called with locale 'ar' and honeypot set
+    expect.fail('not implemented')
+  })
 })

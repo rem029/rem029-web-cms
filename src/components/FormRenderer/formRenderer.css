@@ -814,3 +814,8 @@
     }
   }
 }
+
+/* step 3a: ADD — inside the layer: .fb-header (image above the card, radius from --fb-radius,
+   16:9 cover), .fb-terms (bordered box, scrollable past ~12rem, checkbox row like .fb-choice),
+   .fb-honeypot (off-screen: position absolute, inline-start -9999px, never display none so
+   bots still see it) */

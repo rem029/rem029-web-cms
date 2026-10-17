@@ -28,6 +28,8 @@ export type MultiStepProps = {
   onSubmit: () => void
   /** Shown beside the actions (the "draft saved" note). */
   status?: React.ReactNode
+  // step 3a: ADD — terms?: React.ReactNode (the terms checkbox and the honeypot), passed to
+  // ReviewScreen and shown above its submit button
 }
 
 export const MultiStep: React.FC<MultiStepProps> = ({

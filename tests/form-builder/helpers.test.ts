@@ -53,4 +53,12 @@ describe('form renderer helpers', () => {
     expect(rows).toEqual([{ field: 'party', value: 'alone' }])
     expect(missing).toEqual([])
   })
+
+  // proposed addition (step 3a)
+  it('reads submission rows back into values and list counts', () => {
+    // arrange: rows [{ field: 'agree', value: 'true' }, { field: 'family.1.name', value: 'Sara' }]
+    // act: valuesFromSubmission(rows), then listCountsFrom(values)
+    // assert: { agree: true, 'family.1.name': 'Sara' } and { family: 2 }
+    expect.fail('not implemented')
+  })
 })

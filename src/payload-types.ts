@@ -1158,7 +1158,7 @@ export interface Form {
     background_overlay?: ('none' | 'light' | 'dark') | null;
   };
   /**
-   * Applies to this form only. Target its parts with: fb-form, fb-header, fb-steps, fb-step, fb-step--active, fb-progress, fb-field, fb-field--<type>, fb-field--error, fb-label, fb-input, fb-help, fb-error, fb-group, fb-list, fb-list-row, fb-review, fb-actions, fb-button, fb-button--primary, fb-confirmation, a field's "CSS class", or [data-field="<name>"].
+   * Applies to this form only. Target its parts with: fb-form, fb-body, fb-header, fb-steps, fb-step, fb-step--active, fb-progress, fb-field, fb-field--<type>, fb-field--error, fb-label, fb-input, fb-help, fb-error, fb-error-summary, fb-choice, fb-group, fb-list, fb-list-row, fb-conditional, fb-content, fb-review, fb-actions, fb-button, fb-button--primary, fb-confirmation, a field's "CSS class", or [data-field="<name>"].
    */
   custom_css?: string | null;
   createdBy?: (number | null) | User;

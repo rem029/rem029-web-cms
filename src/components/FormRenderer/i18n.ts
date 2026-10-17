@@ -30,6 +30,8 @@ export type FormText = {
   stepOf: (current: number, total: number) => string
   somethingWrong: string
   draftSaved: string
+  // step 3a: ADD — formClosed, notOpenYet, membersOnly, tooMany, acceptTerms (label of the
+  // terms checkbox) and termsRequired: the server's refusals and the terms, in both languages
 }
 
 const en: FormText = {
