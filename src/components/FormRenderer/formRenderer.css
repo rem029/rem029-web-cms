@@ -237,7 +237,8 @@
   .fb-form[data-label-position='floating'] .fb-field--floatable > .fb-label {
     position: absolute;
     inset-inline-start: 0.875rem;
-    inset-block-start: calc(var(--fb-control-height) / 2);
+    /* centred on the floating field's taller box (min-block-size below) */
+    inset-block-start: calc((var(--fb-control-height) + 0.75rem) / 2);
     translate: 0 -50%;
     color: var(--fb-muted);
     font-weight: 500;
