@@ -16,6 +16,7 @@ export const HiddenBanner: React.FC = () => {
   const isPublished = status === 'published'
 
   return (
+    // PLAN(step 2): CHANGE — inline style → className="admin-notice" (styled in _shell.scss); same text
     <div
       role="status"
       style={{

@@ -151,3 +151,8 @@
     box-shadow: none;
   }
 }
+
+// notices: inactive business, hidden document (step 2 moves both off inline styles)
+// 1. .admin-notice: --admin-surface, --admin-text, 2px --admin-border, a 6px inline-start bar in
+//    --admin-warning, radius --admin-radius-s, padding 8px 12px, margin-bottom 12px, 0.875rem/1.5
+// 2. no shadow: it's information, not something to click

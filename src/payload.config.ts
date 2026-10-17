@@ -40,8 +40,8 @@ export default buildConfig({
     // dev only, opt-in (DEV_PREFILL_LOGIN=true): fills the login form, still needs a click
     autoLogin: prefillCredentials ? { ...prefillCredentials, prefillOnly: true } : false,
     components: {
-      // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
+      // PLAN(step 2): CHANGE — '@/components/BeforeLogin' → '@/common/components/LoginIntro/LoginIntro#LoginIntro',
+      //   drop the template comment, delete src/components/BeforeLogin, regenerate the importmap
       beforeLogin: ['@/components/BeforeLogin'],
       header: ['@/common/components/InactiveTenantNotice#InactiveTenantNotice'],
       providers: ['@/common/components/AdminTheme/AdminTheme#AdminTheme'],
