@@ -11,7 +11,10 @@
   --menu-primary: var(--primary);
   --menu-primary-text: var(--primary-foreground);
   --menu-card: color-mix(in srgb, var(--menu-text) 5%, var(--menu-bg));
-  --menu-muted: color-mix(in srgb, var(--menu-text) 72%, var(--menu-bg));
+  /* secondary text: close to the text colour, since themes already ship soft body text (#5d5d5d
+     on cream is 6.4:1); 90% keeps it AA on the seeded themes (about 5:1 on the page, 4.6:1 on
+     cards; 88% gave 4.47:1 on cards) */
+  --menu-muted: color-mix(in srgb, var(--menu-text) 90%, var(--menu-bg));
   --menu-border: color-mix(in srgb, var(--menu-text) 15%, var(--menu-bg));
   background: var(--menu-bg);
   color: var(--menu-text);

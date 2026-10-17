@@ -2,11 +2,12 @@
 
 import { X } from 'lucide-react'
 import type { TypedLocale } from 'payload'
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 
 import { formatPrice } from '@/common/utils/formatPrice'
 
 import type { GuestMenuItem } from '../_data/menuData'
+import { useModalDialog } from '../_hooks/useModalDialog'
 import { menuStrings } from '../_i18n'
 
 export type ItemViewProps = {
@@ -34,22 +35,13 @@ const List: React.FC<{ title: string; values: string[] }> = ({ title, values }) 
  * An item's details (sdq `view-item.tsx` + `modal.tsx`), read only until rem0018 adds ordering:
  * photo, title, price, description, out of stock, allergens, tags, what it's served for, and its
  * options as plain lists (group name, "Choose one" / "Choose any", "Required", the options).
- * A native <dialog> opened with showModal() (focus trap, Escape and the backdrop close it); a
- * bottom sheet on phones, centred on wider screens.
+ * A native <dialog> opened with showModal() (`useModalDialog`: focus kept inside, Escape and the
+ * backdrop close it, focus goes back to the card); a bottom sheet on phones, centred on wider
+ * screens.
  */
 export const ItemView: React.FC<ItemViewProps> = ({ item, currency, locale, onClose }) => {
   const t = menuStrings(locale)
-  const ref = useRef<HTMLDialogElement>(null)
-
-  useEffect(() => {
-    const dialog = ref.current
-    if (!dialog) return
-    // jsdom has no showModal
-    if (typeof dialog.showModal === 'function') dialog.showModal()
-    else dialog.setAttribute('open', '')
-    dialog.addEventListener('close', onClose)
-    return () => dialog.removeEventListener('close', onClose)
-  }, [onClose])
+  const { ref, close } = useModalDialog(onClose)
 
   const served = item.availability.filter((period) => period !== 'all_day')
 
@@ -58,7 +50,7 @@ export const ItemView: React.FC<ItemViewProps> = ({ item, currency, locale, onCl
       ref={ref}
       aria-labelledby="item-view-title"
       // a click on the backdrop lands on the dialog itself
-      onClick={(event) => event.target === event.currentTarget && onClose()}
+      onClick={(event) => event.target === event.currentTarget && close()}
       className="menu-theme m-0 mt-auto w-full max-w-none rounded-t-lg bg-menu-bg p-0 text-menu-text backdrop:bg-black/50 sm:m-auto sm:max-w-lg sm:rounded-lg"
     >
       <div className="max-h-[85dvh] overflow-y-auto">
@@ -74,7 +66,7 @@ export const ItemView: React.FC<ItemViewProps> = ({ item, currency, locale, onCl
             <button
               type="button"
               aria-label={t.close}
-              onClick={onClose}
+              onClick={close}
               className="rounded-full p-1.5 hover:bg-menu-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
             >
               <X className="size-5" aria-hidden />

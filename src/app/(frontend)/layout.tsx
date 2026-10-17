@@ -49,7 +49,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       className={cn(GeistSans.variable, GeistMono.variable)}
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
       data-theme="light"
       dir={locale === 'ar' ? 'rtl' : 'ltr'}

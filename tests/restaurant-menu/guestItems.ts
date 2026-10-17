@@ -12,6 +12,7 @@ export const guestItem = (data: Partial<GuestMenuItem> = {}): GuestMenuItem => {
     description: null,
     price: 10,
     imageUrl: null,
+    thumbnailUrl: null,
     inStock: true,
     allergens: [],
     tags: [],

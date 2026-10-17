@@ -5,6 +5,7 @@ import type { TypedLocale } from 'payload'
 import React, { useCallback, useMemo } from 'react'
 
 import type { Menu as MenuDoc } from '@/payload-types'
+import { cn } from '@/utilities/ui'
 
 import { allergensOf, filterSections } from '../_data/filterItems'
 import type { GuestMenuItem, MenuSection } from '../_data/menuData'
@@ -13,6 +14,7 @@ import { useMenuUrl } from '../_hooks/useMenuUrl'
 import { menuStrings } from '../_i18n'
 import { MenuStoreProvider, useMenuStore, type MenuState } from '../_store/store'
 import { CategoryNav, sectionId } from './CategoryNav'
+import { touchTarget } from './chip'
 import { FilterAllergens } from './FilterAllergens'
 import { FilterAvailability } from './FilterAvailability'
 import { ItemView } from './ItemView'
@@ -44,8 +46,11 @@ export const Menu: React.FC<MenuProps> = ({ initial, ...props }) => (
   </MenuStoreProvider>
 )
 
-const barButtonClass =
-  'flex shrink-0 items-center gap-1.5 rounded-full border border-menu-border px-3 py-1.5 text-sm font-medium text-menu-text hover:bg-menu-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary aria-expanded:border-menu-primary'
+const barButtonClass = cn(
+  touchTarget,
+  '[@media(pointer:coarse)]:min-w-11 justify-center',
+  'flex shrink-0 items-center gap-1.5 rounded-full border border-menu-border px-3 py-1.5 text-sm font-medium text-menu-text hover:bg-menu-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary aria-expanded:border-menu-primary',
+)
 
 // inside the provider, so it can use the store
 const MenuBody: React.FC<Omit<MenuProps, 'initial'>> = ({

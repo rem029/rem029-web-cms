@@ -5,6 +5,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import type { TypedLocale } from 'payload'
 import React from 'react'
 
+import { touchTarget } from './chip'
+
 const LANGUAGES: { locale: TypedLocale; label: string; name: string }[] = [
   { locale: 'en', label: 'EN', name: 'English' },
   { locale: 'ar', label: 'AR', name: 'العربية' },
@@ -36,7 +38,7 @@ export const LanguageSwitch: React.FC<{ locale?: TypedLocale }> = ({ locale }) =
           title={language.name}
           aria-current={language.locale === locale ? 'true' : undefined}
           onClick={(event) => switchTo(language.locale, event)}
-          className="rounded px-2 py-1 font-medium text-menu-muted hover:text-menu-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary aria-[current=true]:bg-menu-primary aria-[current=true]:text-menu-primary-text"
+          className={`${touchTarget} [@media(pointer:coarse)]:min-w-11 inline-flex items-center justify-center rounded px-2 py-1 font-medium text-menu-muted hover:text-menu-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary aria-[current=true]:bg-menu-primary aria-[current=true]:text-menu-primary-text`}
         >
           {language.label}
         </Link>

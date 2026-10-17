@@ -8,6 +8,7 @@ import { cn } from '@/utilities/ui'
 import type { MenuSection } from '../_data/menuData'
 import { menuStrings } from '../_i18n'
 import { useMenuStore } from '../_store/store'
+import { touchTarget } from './chip'
 
 export type CategoryNavProps = {
   sections: MenuSection[]
@@ -34,10 +35,17 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ sections, locale }) =>
   const listRef = useRef<HTMLUListElement>(null)
   const active = category ?? (sections[0] ? sectionId(sections[0]) : null)
 
+  // keep the active chip in view by scrolling the row itself: scrollIntoView would also move the
+  // browser's focus starting point, so the first Tab on the page skipped the header
   useEffect(() => {
-    listRef.current
-      ?.querySelector('[aria-current="true"]')
-      ?.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+    const list = listRef.current
+    const chip = list?.querySelector('[aria-current="true"]')
+    if (!list || !chip) return
+    const row = list.getBoundingClientRect()
+    const box = chip.getBoundingClientRect()
+    // relative scroll: the same in left-to-right and right-to-left rows
+    if (box.left < row.left) list.scrollBy({ left: box.left - row.left })
+    else if (box.right > row.right) list.scrollBy({ left: box.right - row.right })
   }, [active])
 
   const pick = (id: string) => {
@@ -59,6 +67,7 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ sections, locale }) =>
                 aria-current={id === active ? 'true' : undefined}
                 onClick={() => pick(id)}
                 className={cn(
+                  touchTarget,
                   'rounded-full border border-menu-border px-3 py-1.5 text-sm font-medium text-menu-text',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary',
                   'aria-[current=true]:border-menu-primary aria-[current=true]:bg-menu-primary aria-[current=true]:text-menu-primary-text',

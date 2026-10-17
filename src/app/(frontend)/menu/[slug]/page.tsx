@@ -12,7 +12,7 @@ import type { Menu as MenuDoc } from '@/payload-types'
 import { generateMeta } from '@/utilities/generateMeta'
 
 import { Menu } from '../_components/Menu'
-import { MenuCarousel } from '../_components/MenuCarousel'
+import { MenuCarousel, type CarouselImage } from '../_components/MenuCarousel'
 import { MenuFooter } from '../_components/MenuFooter'
 import { MenuHeader } from '../_components/MenuHeader'
 import { readMenuLocale } from '../_data/locale'
@@ -43,12 +43,21 @@ const loadMenuPage = cache(async (slug: string, locale: TypedLocale) => {
   return getMenuPage(payload, tenantId, slug, { draft: await isPreviewing(), locale })
 })
 
-// the carousel's populated images, large size when there is one
-const carouselImages = (menu: MenuDoc): { url: string; alt: string }[] =>
+// the resized copies a full-width slide can use, smallest first (phones load the 600px one)
+const SLIDE_SIZES = ['small', 'medium', 'large', 'xlarge'] as const
+
+// the carousel's populated images: the large size as the fallback src, every resized copy in
+// srcSet (with the original only when there are none)
+const carouselImages = (menu: MenuDoc): CarouselImage[] =>
   (menu.carousel ?? []).flatMap((row) => {
     const media = mediaOf(row.image)
     const url = media?.sizes?.large?.url ?? media?.url
-    return media && url ? [{ url, alt: media.alt ?? '' }] : []
+    if (!media || !url) return []
+    const srcSet = SLIDE_SIZES.flatMap((size) => {
+      const copy = media.sizes?.[size]
+      return copy?.url && copy.width ? [`${copy.url} ${copy.width}w`] : []
+    }).join(', ')
+    return [{ url, srcSet: srcSet || undefined, alt: media.alt ?? '' }]
   })
 
 /**
@@ -80,18 +89,22 @@ export default async function MenuPage({ params, searchParams }: Args) {
         showLanguageSwitch={menu.header?.showLanguageSwitch !== false}
         locale={locale}
       />
-      <MenuCarousel images={carouselImages(menu)} />
-      <main className="container flex-1 py-6">
-        {menu.intro?.heading && <h1 className="text-3xl font-semibold">{menu.intro.heading}</h1>}
-        {menu.intro?.subheading && <p className="mt-1 text-menu-muted">{menu.intro.subheading}</p>}
-        <Menu
-          menuId={menu.id}
-          sections={sections}
-          currency={currency}
-          locale={locale}
-          filters={menu.filters}
-          initial={parseMenuUrl(toSearchParams(await searchParams))}
-        />
+      <main className="flex-1">
+        <MenuCarousel images={carouselImages(menu)} />
+        <div className="container py-6">
+          {menu.intro?.heading && <h1 className="text-3xl font-semibold">{menu.intro.heading}</h1>}
+          {menu.intro?.subheading && (
+            <p className="mt-1 text-menu-muted">{menu.intro.subheading}</p>
+          )}
+          <Menu
+            menuId={menu.id}
+            sections={sections}
+            currency={currency}
+            locale={locale}
+            filters={menu.filters}
+            initial={parseMenuUrl(toSearchParams(await searchParams))}
+          />
+        </div>
       </main>
       <MenuFooter settings={settings} locale={locale} />
     </div>

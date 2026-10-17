@@ -6,9 +6,19 @@ import { Swiper, SwiperSlide, type SwiperRef } from 'swiper/react'
 import 'swiper/css'
 import 'swiper/css/pagination'
 
-export type MenuCarouselProps = {
-  images: { url: string; alt: string }[]
+export type CarouselImage = {
+  url: string
+  /** the resized copies (`<url> <width>w, …`), so phones don't load the 1400px image */
+  srcSet?: string
+  alt: string
 }
+
+export type MenuCarouselProps = {
+  images: CarouselImage[]
+}
+
+// slides are as wide as the page
+const SIZES = '100vw'
 
 const IMAGE_CLASS = 'aspect-[16/7] max-h-80 w-full object-cover'
 const AUTOPLAY_DELAY = 5000
@@ -30,8 +40,17 @@ export const MenuCarousel: React.FC<MenuCarouselProps> = ({ images }) => {
 
   if (images.length === 0) return null
   if (images.length === 1) {
-    // eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size
-    return <img src={images[0]!.url} alt={images[0]!.alt} className={IMAGE_CLASS} />
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size
+      <img
+        src={images[0]!.url}
+        srcSet={images[0]!.srcSet}
+        sizes={SIZES}
+        alt={images[0]!.alt}
+        fetchPriority="high"
+        className={IMAGE_CLASS}
+      />
+    )
   }
 
   return (
@@ -48,8 +67,11 @@ export const MenuCarousel: React.FC<MenuCarouselProps> = ({ images }) => {
           {/* eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size */}
           <img
             src={image.url}
+            srcSet={image.srcSet}
+            sizes={SIZES}
             alt={image.alt}
             loading={index === 0 ? 'eager' : 'lazy'}
+            fetchPriority={index === 0 ? 'high' : undefined}
             className={IMAGE_CLASS}
           />
         </SwiperSlide>

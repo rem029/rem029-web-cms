@@ -24,7 +24,10 @@ export type GuestMenuItem = {
   title: string
   description: string | null
   price: number
+  /** the item view's photo (600px wide) */
   imageUrl: string | null
+  /** the card's photo (300px wide: the card shows it at 96–112px) */
+  thumbnailUrl: string | null
   inStock: boolean
   allergens: { id: number; title: string }[]
   tags: { id: number; title: string }[]
@@ -58,10 +61,10 @@ const MAX_QUERY_LENGTH = 100
 const isDoc = <T extends { id: number }>(value: number | T | null | undefined): value is T =>
   typeof value === 'object' && value !== null
 
-// 600px wide: sharp on a phone card without sending the original
-const imageUrlOf = (image: MenuItem['image']): string | null => {
+// a resized copy (small 600px, thumbnail 300px), else the original
+const imageUrlOf = (image: MenuItem['image'], size: 'small' | 'thumbnail'): string | null => {
   if (!isDoc(image)) return null
-  return image.sizes?.small?.url ?? image.url ?? null
+  return image.sizes?.[size]?.url ?? image.url ?? null
 }
 
 const lookups = (values: (number | MenuAllergen | MenuTag)[] | null | undefined) =>
@@ -73,7 +76,8 @@ const toGuestItem = (item: MenuItem): GuestMenuItem => ({
   title: item.title,
   description: item.description ?? null,
   price: item.price,
-  imageUrl: imageUrlOf(item.image),
+  imageUrl: imageUrlOf(item.image, 'small'),
+  thumbnailUrl: imageUrlOf(item.image, 'thumbnail'),
   inStock: item.inStock !== false,
   allergens: lookups(item.allergens),
   tags: lookups(item.tags),

@@ -5,6 +5,7 @@ import type { TypedLocale } from 'payload'
 
 import type { Media } from '@/payload-types'
 
+import { touchTarget } from './chip'
 import { LanguageSwitch } from './LanguageSwitch'
 
 export type MenuHeaderProps = {
@@ -35,7 +36,7 @@ export const MenuHeader: React.FC<MenuHeaderProps> = ({
     <div className="container flex items-center justify-between gap-4 py-3">
       <Link
         href={homeHref}
-        className="flex min-w-0 items-center gap-3 rounded text-menu-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
+        className={`${touchTarget} flex min-w-0 items-center gap-3 rounded text-menu-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary`}
       >
         {logo?.url && (
           // eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size

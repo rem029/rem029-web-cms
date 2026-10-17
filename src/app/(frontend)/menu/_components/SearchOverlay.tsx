@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { searchMenuItemsAction } from '../_actions'
 import type { GuestMenuItem } from '../_data/menuData'
 import { useDebounce } from '../_hooks/useDebounce'
+import { useModalDialog } from '../_hooks/useModalDialog'
 import { menuStrings, type MenuStrings } from '../_i18n'
 import { MenuItemCard } from './MenuItemCard'
 import { MenuItemCardSkeleton } from './MenuItemCardSkeleton'
@@ -27,7 +28,8 @@ const isStringKey = (strings: MenuStrings, key: string): key is keyof MenuString
  * Full screen search over the menu (sdq `search-overlay.tsx`): a search box focused on open,
  * results from `searchMenuItemsAction` 300ms after the guest stops typing, shown as item cards.
  * Skeleton cards while searching, "No results", or the search error in the guest's language.
- * Answers to an older query are dropped. Escape or the close button closes it.
+ * Answers to an older query are dropped. A native modal <dialog> (`useModalDialog`): focus stays
+ * in it, Escape or the close button closes it, and focus goes back to the search button.
  */
 export const SearchOverlay: React.FC<SearchOverlayProps> = ({
   menuId,
@@ -37,6 +39,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
   onClose,
 }) => {
   const t = menuStrings(locale)
+  const { ref, close } = useModalDialog(onClose)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<GuestMenuItem[] | null>(null)
   const [loading, setLoading] = useState(false)
@@ -69,25 +72,18 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
       })
   }, [debounced, menuId, locale, t])
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
-
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      ref={ref}
       aria-label={t.search}
-      className="menu-theme fixed inset-0 z-50 overflow-y-auto bg-menu-bg text-menu-text"
+      className="menu-theme m-0 h-dvh max-h-none w-full max-w-none overflow-y-auto bg-menu-bg p-0 text-menu-text"
     >
       <div className="container py-4">
         <div className="flex items-center gap-2">
           <input
             type="search"
             aria-label={t.search}
-            placeholder={t.search}
+            placeholder={t.searchHint}
             autoFocus
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -96,7 +92,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
           <button
             type="button"
             aria-label={t.close}
-            onClick={onClose}
+            onClick={close}
             className="rounded-full p-2 hover:bg-menu-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
           >
             <X className="size-5" aria-hidden />
@@ -119,13 +115,15 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
                 currency={currency}
                 locale={locale}
                 onOpen={(picked) => {
+                  // close first, so the item view opens on top and gives focus back to the
+                  // search button when it closes
+                  close()
                   onOpenItem(picked)
-                  onClose()
                 }}
               />
             ))}
         </div>
       </div>
-    </div>
+    </dialog>
   )
 }

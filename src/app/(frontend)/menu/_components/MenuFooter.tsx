@@ -29,7 +29,7 @@ export const MenuFooter: React.FC<MenuFooterProps> = ({ settings, locale }) => {
         {phone && (
           <a
             href={`tel:${phone}`}
-            className="w-fit text-menu-text underline-offset-4 hover:underline"
+            className="inline-flex min-h-6 w-fit items-center text-menu-text underline-offset-4 hover:underline [@media(pointer:coarse)]:min-h-11"
             dir="ltr"
           >
             {phone}
@@ -41,7 +41,10 @@ export const MenuFooter: React.FC<MenuFooterProps> = ({ settings, locale }) => {
           classNameItem="text-lg hover:text-menu-primary"
           socialMedia={settings?.socialMedia}
         />
-        <Link href="/menu" className="w-fit text-menu-text underline-offset-4 hover:underline">
+        <Link
+          href="/menu"
+          className="inline-flex min-h-6 w-fit items-center text-menu-text underline-offset-4 hover:underline [@media(pointer:coarse)]:min-h-11"
+        >
           {t.allMenus}
         </Link>
       </div>

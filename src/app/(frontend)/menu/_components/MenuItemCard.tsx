@@ -17,7 +17,8 @@ export type MenuItemCardProps = {
 /**
  * One item on the guest menu (sdq `cards.tsx`): photo (when it has one), title, a two-line
  * description, the price and an "Out of stock" badge, the whole card a button that opens the
- * item view. Out of stock items stay visible, dimmed. The price is `<bdi dir="ltr">`, so Arabic
+ * item view. Out of stock items stay visible and readable: the badge says so and only the photo
+ * is greyed (fading the whole card took the price below AA contrast). The price is `<bdi dir="ltr">`, so Arabic
  * reads "9.00 US$" instead of the bidi-scrambled "$US 9.00".
  */
 export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, currency, locale, onOpen }) => {
@@ -29,7 +30,6 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, currency, loca
       className={cn(
         'flex w-full gap-3 overflow-hidden rounded border border-menu-border bg-menu-card p-3 text-start text-menu-text',
         'transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary motion-reduce:transition-none',
-        !item.inStock && 'opacity-70',
       )}
     >
       <span className="flex min-w-0 flex-1 flex-col gap-1">
@@ -48,13 +48,16 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, currency, loca
           )}
         </span>
       </span>
-      {item.imageUrl && (
+      {item.thumbnailUrl && (
         // eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size
         <img
-          src={item.imageUrl}
+          src={item.thumbnailUrl}
           alt=""
           loading="lazy"
-          className="size-24 shrink-0 rounded object-cover sm:size-28"
+          className={cn(
+            'size-24 shrink-0 rounded object-cover sm:size-28',
+            !item.inStock && 'opacity-60 grayscale',
+          )}
         />
       )}
     </button>
