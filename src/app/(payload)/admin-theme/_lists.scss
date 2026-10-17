@@ -3,69 +3,231 @@
 // controls (search, Columns, Filters) change by 3.91 and live in _volatile.scss.
 @use './motion' as *;
 
-// TODO(step 1) list header
-.list-header {
-  // 1. .list-header__title in the display font (h1 already is, via _base.scss): check only
-  // 2. .list-header__create-new-button: a pill button from phase 2, nothing new expected
-}
+// list header: title uses h1 from _base.scss, create button uses phase 2 pill button
 
-// TODO(step 1) table: a bordered panel, no shadow (tables are large; user 2026-10-17: Claude's call)
+// table: a bordered panel, no shadow. The panel is the <table>: Payload's `.table` wrapper is the
+// horizontal scroll box and reaches into the gutters, so it keeps its own overflow and padding.
+$inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width));
+
 .table {
-  // 1. the wrapper: 2px --admin-border, radius -m, overflow hidden (keeps Payload's own scroll
-  //    on the table element)
-  // 2. thead: --admin-raised fill, --admin-muted text, mono uppercase 12px, 0.04em tracking;
-  //    2px --admin-border under it
-  // 3. rows: 1px --theme-elevation-150 between them, none after the last
-  // 4. tbody tr:hover → --admin-raised
-  // 5. a selected row (its .cell-_select checkbox checked, :has()) → --admin-primary mixed 25%
-  //    into --admin-surface
-  // 6. links in the first column: --admin-text, highlighter underline on hover like _base.scss
+  table {
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-m);
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--admin-surface);
+  }
+
+  thead th {
+    background: var(--admin-raised);
+    border-bottom: var(--admin-border-width) solid var(--admin-border);
+    color: var(--admin-muted);
+    font-family: var(--admin-font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+    &:first-child {
+      border-top-left-radius: $inner-radius;
+    }
+
+    &:last-child {
+      border-top-right-radius: $inner-radius;
+    }
+  }
+
+  // Payload stripes odd rows; here only hover and selection tint a row
+  tbody tr,
+  tbody tr:nth-child(odd) {
+    background: transparent;
+
+    &:not(:last-child) td {
+      border-bottom: 1px solid var(--theme-elevation-150);
+    }
+
+    &:last-child td:first-child {
+      border-bottom-left-radius: $inner-radius;
+    }
+
+    &:last-child td:last-child {
+      border-bottom-right-radius: $inner-radius;
+    }
+
+    &:hover {
+      background: var(--admin-raised);
+    }
+
+    &:has(td.cell-_select .checkbox-input--checked) {
+      background: color-mix(in srgb, var(--admin-primary) 25%, var(--admin-surface));
+    }
+  }
+
+  tbody td:first-of-type a,
+  tbody td.cell-_select + td a {
+    color: var(--admin-text);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: none;
+      background-image: linear-gradient(var(--admin-secondary), var(--admin-secondary));
+      background-position: 0 90%;
+      background-repeat: no-repeat;
+      background-size: 100% 40%;
+      color: var(--admin-ink);
+    }
+  }
 }
 
-// TODO(step 1) list selection bar ("3 selected · Edit · Delete")
-.list-selection {
-  // mono count, its buttons as phase 2 buttons (nothing new expected: check)
-}
+// list selection bar: uses phase 2 buttons, nothing new needed
 
-// TODO(step 1) pills and badges
+// pills and badges
 .pill {
-  // 1. 2px --admin-border, radius -s, mono 12px, no soft shadow
-  // 2. --style-light / -light-gray / -white → --admin-raised fill, --admin-text
-  // 3. --style-success / -warning / -error → the status fill, --admin-ink text
-  // 4. --style-dark → --admin-text fill, --admin-bg text
-  // 5. .pill--has-action (a button) → press(var(--admin-shadow-xs), var(--admin-shadow-s), none)
+  background: var(--admin-raised);
+  color: var(--admin-text);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  font-family: var(--admin-font-mono);
+  font-size: 0.75rem;
+  box-shadow: none;
+
+  &--style-light,
+  &--style-light-gray,
+  &--style-white,
+  &--style-always-white {
+    &,
+    &.pill--has-action:hover,
+    &.pill--has-action:active {
+      background: var(--admin-raised);
+      color: var(--admin-text);
+    }
+  }
+
+  &--style-success {
+    background: var(--admin-success);
+    color: var(--admin-ink);
+  }
+
+  &--style-warning {
+    background: var(--admin-warning);
+    color: var(--admin-ink);
+  }
+
+  &--style-error {
+    background: var(--admin-danger);
+    color: var(--admin-ink);
+  }
+
+  &--style-dark {
+    &,
+    &.pill--has-action:hover,
+    &.pill--has-action:active {
+      background: var(--admin-text);
+      color: var(--admin-bg);
+    }
+
+    svg .stroke {
+      stroke: var(--admin-bg);
+    }
+
+    svg .fill {
+      fill: var(--admin-bg);
+    }
+  }
+
+  &--has-action {
+    @include press(var(--admin-shadow-xs), var(--admin-shadow-s), none);
+  }
 }
 
-// TODO(step 1) pagination
+// pagination
 .paginator {
-  // 1. .paginator__page and .clickable-arrow: 32px square chips, 2px border, radius -s, surface
-  // 2. hover → press with -xs (not the current page, not a disabled arrow)
-  // 3. .paginator__page--is-current → --admin-primary fill, --admin-ink, --admin-shadow-xs
-  // 4. .clickable-arrow--is-disabled → --admin-muted, no shadow, no motion
-  // 5. .paginator__separator: mono, --admin-muted
+  .paginator__page,
+  .clickable-arrow {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    background: var(--admin-surface);
+    color: var(--admin-text);
+  }
+
+  .paginator__page:not(.paginator__page--is-current),
+  .clickable-arrow:not(.clickable-arrow--is-disabled) {
+    @include press(none, var(--admin-shadow-xs), none);
+  }
+
+  .paginator__page--is-current {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+    box-shadow: var(--admin-shadow-xs);
+  }
+
+  .clickable-arrow--is-disabled {
+    background: var(--admin-raised);
+    color: var(--admin-muted);
+    box-shadow: none;
+    transform: none;
+    transition: none;
+  }
+
+  .paginator__separator {
+    font-family: var(--admin-font-mono);
+    color: var(--admin-muted);
+  }
 }
 
-// TODO(step 1) per page ("Per page: 10")
+// per page selector
 .per-page {
-  // 1. the trigger: mono, --admin-muted label, --admin-text value
-  // 2. .per-page__button-active → --admin-primary fill, --admin-ink (the list itself is a popup,
-  //    styled in step 2)
+  font-family: var(--admin-font-mono);
+  color: var(--admin-muted);
+
+  .per-page__base-button {
+    font-family: var(--admin-font-mono);
+    color: var(--admin-text);
+  }
+
+  .per-page__button-active {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+  }
 }
 
-// TODO(step 1) empty state
+// empty state
 .no-results {
-  // dashed 2px --admin-border (Payload: 1px), radius -m, surface fill;
-  // its first line in the display font
+  border: var(--admin-border-width) dashed var(--admin-border);
+  border-radius: var(--admin-radius-m);
+  background: var(--admin-surface);
+
+  p:first-child {
+    font-family: var(--admin-font-display);
+  }
 }
 
-// TODO(step 1) loading
+// loading shimmer and overlay
 .shimmer-effect {
-  // --admin-raised base, 2px border; the shine (.shimmer-effect__shine) a lighter band of
-  // --admin-surface; _base.scss already stops it under reduced motion
+  background: var(--admin-raised);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+
+  .shimmer-effect__shine {
+    background: linear-gradient(90deg, transparent, var(--admin-surface), transparent);
+  }
 }
 
 .loading-overlay {
-  // 1. --admin-bg at 85% (color-mix), no blur
-  // 2. .loading-overlay__bar → --admin-primary with a 2px --admin-border
-  // 3. .loading-overlay__text → mono, --admin-text
+  background: color-mix(in srgb, var(--admin-bg) 85%, transparent);
+  backdrop-filter: none;
+
+  .loading-overlay__bar {
+    background: var(--admin-primary);
+    border: var(--admin-border-width) solid var(--admin-border);
+  }
+
+  .loading-overlay__text {
+    font-family: var(--admin-font-mono);
+    color: var(--admin-text);
+  }
 }

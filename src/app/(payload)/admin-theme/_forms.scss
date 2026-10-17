@@ -2,75 +2,252 @@
 // elements/ReactSelect, Tooltip). Payload draws every text-like control with one input style, so
 // one list ($inputs) covers them; the field types' own details (array rows, rich text, upload,
 // code) are phase 4.
+@use 'sass:string';
 @use './motion' as *;
 
 // Payload's input style is shared by these (read from its styles.css); the checkbox box and the
 // popup-trigger buttons that also use it are styled on their own below / in phase 4
-$inputs: '.field-type.text:not(.has-many) input, .field-type.email input, .field-type.number:not(.has-many) input, .field-type.password input, .field-type.confirm-password input, .field-type.api-key input, .field-type.textarea textarea, .date-time-picker .react-datepicker__input-container input, .point input, .search-filter__input, .condition-value-text, .condition-value-number, .react-select .rs__control';
+$inputs: '.field-type.text:not(.has-many) input, .field-type.email input, .field-type.number:not(.has-many) input, .field-type.password input, .field-type.confirm-password input, .field-type.api-key input, .field-type.textarea textarea, .date-time-picker .react-datepicker__input-container input, .point input, .condition-value-text, .condition-value-number, .react-select .rs__control';
 
-// TODO(step 1) inputs at rest
+$error-inputs: '.field-type.text.error input, .field-type.email.error input, .field-type.number.error input, .field-type.password.error input, .field-type.textarea.error textarea, .field-type.select.error .rs__control, .relationship.error > .relationship__wrap .rs__control, .date-time-field--has-error .react-datepicker__input-container input, .react-select--error div.rs__control, .checkbox.error .checkbox-input__input, .radio-group.error .radio-input__styled-radio';
+
+// inputs at rest: surface fill, 2px border, no soft shadow, shadow-only transition
 #{$inputs} {
-  // 1. surface fill, --admin-text, 2px --admin-border, --admin-radius-s
-  // 2. Payload's soft drop shadow off (box-shadow: none)
-  // 3. transition box-shadow only, --admin-duration --admin-ease (no `all`)
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  box-shadow: none;
+  transition: box-shadow var(--admin-duration) var(--admin-ease);
 }
 
-// TODO(step 1) focus: the hard shadow is the indicator (user, 2026-10-17: Claude's call)
-// - :focus / :focus-within → box-shadow --admin-shadow-s, border stays --admin-border
-// - outline: none here only (the global ring in _base.scss stays for everything else)
-// - react-select: .rs__control--is-focused and .rs__control--menu-is-open get the same
+// focus: the hard shadow is the indicator, border stays --admin-border
+@each $sel in string.split($inputs, ', ') {
+  #{$sel}:focus,
+  #{$sel}:focus-within,
+  #{$sel}:active {
+    border-color: var(--admin-border);
+    box-shadow: var(--admin-shadow-s);
+    outline: none;
+  }
+}
 
-// TODO(step 1) placeholder: ::placeholder and .rs__placeholder → --admin-muted
+.react-select .rs__control.rs__control--is-focused,
+.react-select .rs__control.rs__control--menu-is-open {
+  border-color: var(--admin-border);
+  box-shadow: var(--admin-shadow-s);
+  outline: none;
+}
 
-// TODO(step 1) error: Payload's `.error` / `.react-select--error` selectors (both themes, not
-// only html[data-theme=light] as Payload does)
-// - border --admin-danger-text, fill stays surface; focus shadow in --admin-danger-text
+// placeholder text in muted colour
+@each $sel in string.split($inputs, ', ') {
+  #{$sel}::placeholder {
+    color: var(--admin-muted);
+  }
+}
 
-// TODO(step 1) disabled / read-only (user, 2026-10-17: Claude's call)
-// - Payload's :disabled, .read-only and .rs--is-disabled selectors
-// - --admin-raised fill, --admin-muted text, 2px dashed --admin-border, no shadow, no motion
+.react-select .rs__placeholder {
+  color: var(--admin-muted);
+}
 
-// TODO(step 1) react-select menu
+// error state in both themes (Payload: light only): danger border on the surface fill; the focus
+// shadow stays the usual one, the field error sticker carries the message
+html[data-theme] {
+  #{$error-inputs} {
+    background: var(--admin-surface);
+    border-color: var(--admin-danger-text);
+
+    &:focus,
+    &:focus-within,
+    &.rs__control--is-focused,
+    &.rs__control--menu-is-open {
+      border-color: var(--admin-danger-text);
+      box-shadow: var(--admin-shadow-s);
+    }
+  }
+}
+
+// disabled and read-only controls: raised fill, muted text, dashed border, no shadow or motion
+@each $sel in string.split($inputs, ', ') {
+  #{$sel}:disabled {
+    background: var(--admin-raised);
+    color: var(--admin-muted);
+    border: var(--admin-border-width) dashed var(--admin-border);
+    box-shadow: none;
+    transition: none;
+    cursor: not-allowed;
+  }
+}
+
+.react-select.rs--is-disabled .rs__control,
+.field-type.textarea.read-only .textarea-outer,
+.checkbox-input--read-only .checkbox-input__input,
+.radio-input__styled-radio--disabled {
+  background: var(--admin-raised);
+  color: var(--admin-muted);
+  border: var(--admin-border-width) dashed var(--admin-border);
+  box-shadow: none;
+  transition: none;
+  cursor: not-allowed;
+}
+
+// react-select menu, options, multi-value chips, and indicators
 .react-select {
-  // 1. .rs__menu: brutal-box(var(--admin-shadow-s)), radius -s, a 4px gap under the control
-  // 2. .rs__option: hover / .rs__option--is-focused → --admin-raised
-  // 3. .rs__option--is-selected → --admin-primary fill, --admin-ink text
-  // 4. .rs__multi-value: chip like a pill (raised fill, 2px border, radius -s); its remove
-  //    button turns --admin-danger + ink on hover
-  // 5. .rs__indicator / .rs__indicator-separator: --admin-text, separator 2px --admin-border
-  // 6. .rs__group-heading and .rs__menu-notice: mono, --admin-muted
+  .rs__menu {
+    @include brutal-box(var(--admin-shadow-s));
+    border-radius: var(--admin-radius-s);
+    margin-top: 4px;
+  }
+
+  .rs__option {
+    &:hover,
+    &--is-focused {
+      background: var(--admin-raised);
+      color: var(--admin-text);
+    }
+
+    &--is-selected {
+      background: var(--admin-primary);
+      color: var(--admin-ink);
+    }
+  }
+
+  .rs__multi-value {
+    background: var(--admin-raised);
+    color: var(--admin-text);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+  }
+
+  .rs__multi-value__remove {
+    &:hover,
+    &:focus-visible {
+      background: var(--admin-danger);
+      color: var(--admin-ink);
+    }
+  }
+
+  .rs__indicator {
+    color: var(--admin-text);
+  }
+
+  .rs__indicator-separator {
+    width: var(--admin-border-width);
+    background: var(--admin-border);
+  }
+
+  .rs__group-heading,
+  .rs__menu-notice {
+    font-family: var(--admin-font-mono);
+    color: var(--admin-muted);
+  }
 }
 
-// TODO(step 1) checkbox (also the list's row selection)
+// checkbox (also the list's row selection)
 .checkbox-input {
-  // 1. .checkbox-input__input: 20px square, 2px border, radius -s, surface, no soft shadow
-  // 2. hover (not read-only) → --admin-shadow-xs
-  // 3. .checkbox-input--checked .checkbox-input__input (and the partial state) → --admin-primary
-  //    fill; .checkbox-input__icon stroke --admin-ink
-  // 4. .checkbox-input--read-only → dashed border, raised fill (as disabled above)
+  .checkbox-input__input {
+    width: 20px;
+    height: 20px;
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    background: var(--admin-surface);
+    box-shadow: none;
+    transition: box-shadow var(--admin-duration) var(--admin-ease);
+  }
+
+  &:not(.checkbox-input--read-only):hover .checkbox-input__input {
+    box-shadow: var(--admin-shadow-xs);
+  }
+
+  // the icon is always there (hidden unless checked); only the partial one marks a state
+  &.checkbox-input--checked .checkbox-input__input,
+  .checkbox-input__input:has(.checkbox-input__icon.partial) {
+    background: var(--admin-primary);
+  }
+
+  .checkbox-input__icon,
+  .checkbox-input__icon path,
+  .checkbox-input__icon .stroke {
+    stroke: var(--admin-ink);
+    color: var(--admin-ink);
+  }
+
+  &.checkbox-input--read-only .checkbox-input__input {
+    background: var(--admin-raised);
+    border-style: dashed;
+    box-shadow: none;
+  }
 }
 
-// TODO(step 1) radio
+// radio button
 .radio-input {
-  // 1. .radio-input__styled-radio: 20px circle, 2px border, surface, no soft shadow
-  // 2. hover → --admin-shadow-xs
-  // 3. .radio-input--is-selected .radio-input__styled-radio → --admin-primary fill, the dot
-  //    (its ::before) --admin-ink
-  // 4. .radio-input__styled-radio--disabled → dashed, raised
+  .radio-input__styled-radio {
+    width: 20px;
+    height: 20px;
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: 50%;
+    background: var(--admin-surface);
+    box-shadow: none;
+    transition: box-shadow var(--admin-duration) var(--admin-ease);
+  }
+
+  &:hover .radio-input__styled-radio:not(.radio-input__styled-radio--disabled) {
+    box-shadow: var(--admin-shadow-xs);
+  }
+
+  &.radio-input--is-selected .radio-input__styled-radio {
+    background: var(--admin-primary);
+
+    &::before {
+      background: var(--admin-ink);
+    }
+  }
+
+  .radio-input__styled-radio--disabled {
+    background: var(--admin-raised);
+    border-style: dashed;
+    box-shadow: none;
+  }
 }
 
-// TODO(step 1) labels and descriptions
+// labels and descriptions
 .field-label {
-  // 1. Geist 600, --admin-text
-  // 2. .required (the *) → --admin-danger-text
+  font-family: var(--admin-font-body);
+  font-weight: 600;
+  color: var(--admin-text);
+
+  .required {
+    color: var(--admin-danger-text);
+  }
 }
 
-// TODO(step 1) tooltips and field errors
+.field-description {
+  color: var(--admin-muted);
+}
+
+// tooltips and field errors
 .tooltip {
-  // 1. --admin-text fill, --admin-bg text, 2px --admin-border, radius -s, mono 12px
-  // 2. caret in the same fill (Payload's ::after border colour)
+  background-color: var(--admin-text);
+  color: var(--admin-bg);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  font-family: var(--admin-font-mono);
+  font-size: 0.75rem;
+  box-shadow: none;
+
+  &::after {
+    border-top-color: var(--admin-text);
+  }
 }
 
 .field-error {
-  // a sticker like .admin-notice: --admin-danger fill, --admin-ink text, 2px border
+  background-color: var(--admin-danger);
+  color: var(--admin-ink);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  box-shadow: none;
+
+  &::after {
+    border-top-color: var(--admin-danger);
+  }
 }

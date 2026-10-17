@@ -82,13 +82,74 @@
   }
 }
 
-// TODO(phase 3 step 1) list controls: search, Columns, Filters
+// list controls: search, Columns, Filters
 .list-controls {
-  // 1. .search-filter: the input style from _forms.scss already applies (.search-filter__input);
-  //    the search icon --admin-muted
-  // 2. .list-controls__buttons toggles (Columns / Filters): phase 2 pill buttons; the open one
-  //    (aria-expanded / .list-controls__modified) → --admin-primary fill, --admin-ink
-  // 3. the open panel (.where-builder, the columns .pill-selector): surface, 2px --admin-border,
-  //    radius -m, no shadow (it sits in the page, not on top)
-  // 4. .pill-selector__pill: a pill (see _lists.scss); --selected → --admin-primary fill, ink
+  // the bar around the search is the input; the field inside stays bare
+  .list-controls__wrap {
+    background: var(--admin-surface);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    transition: box-shadow var(--admin-duration) var(--admin-ease);
+
+    &:has(.search-filter__input:focus) {
+      box-shadow: var(--admin-shadow-s);
+    }
+  }
+
+  .search-filter__input,
+  .search-filter__input:focus {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .search-filter .icon--search {
+    color: var(--admin-muted);
+  }
+
+  .list-controls__toggle-columns,
+  .list-controls__toggle-where,
+  .list-controls__toggle-sort {
+    &[aria-expanded='true'] {
+      --bg-color: var(--admin-primary);
+      --hover-bg: var(--admin-primary);
+      --color: var(--admin-ink);
+      --hover-color: var(--admin-ink);
+      background: var(--admin-primary);
+      color: var(--admin-ink);
+    }
+  }
+
+  .list-controls__modified {
+    color: var(--admin-ink);
+  }
+
+  .where-builder,
+  .pill-selector,
+  .sort-complex {
+    background: var(--admin-surface);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-m);
+    box-shadow: none;
+  }
+
+  .pill-selector__pill {
+    background: var(--admin-raised);
+    color: var(--admin-text);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    box-shadow: none;
+
+    &:hover {
+      background: var(--admin-surface);
+    }
+
+    &.pill-selector__pill--selected,
+    &.pill-selector__pill--selected:hover {
+      background: var(--admin-primary);
+      color: var(--admin-ink);
+      box-shadow: none;
+    }
+  }
 }
