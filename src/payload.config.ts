@@ -3,7 +3,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 
 import sharp from 'sharp' // sharp-import
 import path from 'path'
-import { buildConfig, PayloadRequest } from 'payload'
+import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
@@ -24,10 +24,18 @@ import { Settings } from './collections/Settings'
 
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 import { Analytics } from './collections/Analytics'
+import { AuditLogs } from './collections/AuditLogs'
 import { Tenants } from './collections/Tenants'
 import { ar } from '@payloadcms/translations/languages/ar'
 import { en } from '@payloadcms/translations/languages/en'
+import { isNextBuild } from 'payload/shared'
 import { getSeedAdminCredentials, isLoginPrefillEnabled } from './common/utils/seedAdmin'
+import { AuditLogsSettings } from './globals/AuditLogsSettings/config'
+import { canRunJobs, jobsCollectionAccess } from './common/utils/jobsAccess'
+import {
+  ensurePruneJobQueued,
+  pruneAuditLogsTask,
+} from './collections/AuditLogs/jobs/pruneAuditLogs'
 
 const prefillCredentials = isLoginPrefillEnabled() ? getSeedAdminCredentials() : null
 
@@ -108,9 +116,10 @@ export default buildConfig({
     Footer,
     Theme,
     Settings,
+    AuditLogs,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [],
+  globals: [AuditLogsSettings],
 
   plugins: [...plugins, withAccessSlugOptions],
   secret: process.env.PAYLOAD_SECRET,
@@ -143,18 +152,28 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   jobs: {
-    access: {
-      run: ({ req }: { req: PayloadRequest }): boolean => {
-        // Allow logged in users to execute this endpoint (default)
-        if (req.user) return true
-
-        // If there is no logged in user, then check
-        // for the Vercel Cron secret to be present as an
-        // Authorization header:
-        const authHeader = req.headers.get('authorization')
-        return authHeader === `Bearer ${process.env.CRON_SECRET}`
+    access: { run: canRunJobs },
+    // Payload's queue collection is open to every signed-in user by default
+    jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
+      ...defaultJobsCollection,
+      access: {
+        read: jobsCollectionAccess,
+        create: jobsCollectionAccess,
+        update: jobsCollectionAccess,
+        delete: jobsCollectionAccess,
       },
-    },
-    tasks: [],
+    }),
+    tasks: [pruneAuditLogsTask],
+    autoRun: [
+      {
+        cron: '0 */10 * * * *',
+        queue: 'maintenance',
+        limit: 1,
+      },
+    ],
+  },
+  onInit: async (payload) => {
+    if (process.env.NODE_ENV === 'test' || isNextBuild()) return
+    await ensurePruneJobQueued(payload)
   },
 })

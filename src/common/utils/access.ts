@@ -201,16 +201,22 @@ export const tenantAdminShows = (slug: CollectionSlug): boolean => {
 /**
  * Checks whether a tenant row allows an operation on a collection slug.
  * Uses hardcoded grants for tenant admins; otherwise checks the profile record.
+ * `audit-logs` is the exception: tenant admins get it only from their row's profile (rem0002).
  */
-export const rowAllows = (row: TenantRow, slug: CollectionSlug, op: AccessOperation): boolean =>
-  row.isTenantAdmin ? tenantAdminAllows(slug, op) : hasPermission(row.record, slug, op)
+export const rowAllows = (row: TenantRow, slug: CollectionSlug, op: AccessOperation): boolean => {
+  if (slug === 'audit-logs') return hasPermission(row.record, slug, op)
+  return row.isTenantAdmin ? tenantAdminAllows(slug, op) : hasPermission(row.record, slug, op)
+}
 
 /**
  * Checks whether a collection slug is visible in the admin UI for a tenant row.
  * Uses hardcoded visibility for tenant admins; otherwise checks the profile record.
+ * `audit-logs`: from the row's profile for tenant admins too (rem0002).
  */
-export const rowShows = (row: TenantRow, slug: CollectionSlug): boolean =>
-  row.isTenantAdmin ? tenantAdminShows(slug) : !isHidden(row.record, slug)
+export const rowShows = (row: TenantRow, slug: CollectionSlug): boolean => {
+  if (slug === 'audit-logs') return !isHidden(row.record, slug)
+  return row.isTenantAdmin ? tenantAdminShows(slug) : !isHidden(row.record, slug)
+}
 
 /**
  * Returns tenant ids where the user's row profile allows `op` on `slug`.
