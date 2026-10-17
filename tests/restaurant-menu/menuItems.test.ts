@@ -14,6 +14,9 @@ import { findTenant } from '../common/tenants'
 import { uniqueName } from '../common/unique'
 import { loadUser, type SessionUser } from '../common/users'
 
+// outside Next.js: skip the menus cache revalidation
+const context = { disableRevalidate: true }
+
 type ItemData = Omit<MenuItem, 'id' | 'createdAt' | 'updatedAt' | 'tenant' | 'title' | 'price'> & {
   title?: string
   price?: number
@@ -54,6 +57,7 @@ describe('menu items', () => {
       user,
       overrideAccess: false,
       depth: 0,
+      context,
     })
 
   beforeAll(async () => {

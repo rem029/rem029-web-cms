@@ -33,19 +33,19 @@ import { createdUpdatedByFields } from '@/common/fields/createdUpdatedBy'
 import { setCreatedUpdatedBy } from '@/common/hooks/setCreatedUpdatedBy'
 import { createdUpdatedByCollections } from '@/common/utils/createdUpdatedByCollections'
 
-import { Config, Page, Post } from '@/payload-types'
+import { Config, Menu, Page, Post } from '@/payload-types'
 import { getServerSideURL, getTenantURL } from '@/utilities/getURL'
 import { iconField } from '@/fields/icon'
 
-const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
+const generateTitle: GenerateTitle<Post | Page | Menu> = ({ doc }) => {
   return doc?.title ? `${doc.title} | CMS Website` : 'CMS Website'
 }
 
 // the doc's own tenant url, so previews and canonical urls point at the tenant's site
-// rem0017 step 1 implementation: menus → `/menu/<slug>` (collectionConfig.slug === 'menus'),
-// GenerateURL/GenerateTitle typed for Post | Page | Menu
-const generateURL: GenerateURL<Post | Page> = async ({ doc, req }) => {
-  const path = !doc?.slug || doc.slug === 'home' ? '' : doc.slug
+const generateURL: GenerateURL<Post | Page | Menu> = async ({ doc, req, collectionConfig }) => {
+  const slugPath = !doc?.slug || doc.slug === 'home' ? '' : doc.slug
+  // menus live under /menu/<slug> (src/app/(frontend)/menu)
+  const path = collectionConfig?.slug === 'menus' ? `menu/${doc?.slug ?? ''}` : slugPath
   const tenantId = extractTenantId(doc?.tenant)
   const { docs } = tenantId
     ? await req.payload.find({

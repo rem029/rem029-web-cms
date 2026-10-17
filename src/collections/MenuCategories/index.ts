@@ -4,6 +4,7 @@ import { anyone } from '@/access/anyone'
 import { menuTitleField } from '@/common/fields/menuFields'
 import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
+import { revalidateMenus, revalidateMenusDelete } from '@/common/hooks/revalidateMenus'
 import { slugField } from '@/fields/slug'
 
 /**
@@ -29,6 +30,8 @@ export const MenuCategories: CollectionConfig = {
   indexes: [{ fields: ['tenant', 'slug'], unique: true }],
   hooks: {
     beforeValidate: [validateTenantSlugUniqueness('menu-categories', 'category')],
+    afterChange: [revalidateMenus],
+    afterDelete: [revalidateMenusDelete],
   },
   fields: [
     menuTitleField,

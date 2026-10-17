@@ -4,6 +4,7 @@ import { availabilityField, menuTitleField, sameTenantFilter } from '@/common/fi
 import { validateSameTenant } from '@/common/hooks/validateSameTenant'
 import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
+import { revalidateMenus, revalidateMenusDelete } from '@/common/hooks/revalidateMenus'
 import { slugField } from '@/fields/slug'
 
 import { readMenuItems } from './utils/access'
@@ -30,8 +31,9 @@ export const MenuItems: CollectionConfig = {
   },
   indexes: [{ fields: ['tenant', 'slug'], unique: true }],
   hooks: {
-    // rem0017 step 1 implementation: afterChange/afterDelete revalidateMenus(Delete) here and on
-    // menu-categories, menu-allergens, menu-tags (a menu shows them)
+    // a menu shows its items: their changes revalidate the tenant's menu pages
+    afterChange: [revalidateMenus],
+    afterDelete: [revalidateMenusDelete],
     beforeValidate: [
       validateTenantSlugUniqueness('menu-items', 'item'),
       validateSameTenant([

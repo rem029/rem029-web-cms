@@ -12,6 +12,9 @@ import { findTenant } from '../common/tenants'
 import { uniqueName } from '../common/unique'
 import { loadUser, type SessionUser } from '../common/users'
 
+// outside Next.js: skip the menus cache revalidation
+const context = { disableRevalidate: true }
+
 describe('menu categories', () => {
   let payload: Payload
   let tenantA: Tenant
@@ -29,6 +32,7 @@ describe('menu categories', () => {
       user,
       overrideAccess: false,
       depth: 0,
+      context,
     })
 
   beforeAll(async () => {

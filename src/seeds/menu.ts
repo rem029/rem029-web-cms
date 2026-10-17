@@ -6,16 +6,18 @@
  *
  *   pnpm seed
  *
- * Runs after `multiTenancy` (needs the tenants). Idempotent: upserts categories and items by
- * tenant + slug, allergens and tags by tenant + English title. Phase 2 adds menus here.
+ * Menus (phase 2) per business: "All day" (every item, published), "Breakfast" (breakfast items,
+ * published, allergen and availability filters on) and "Drinks" (a draft).
  *
- * rem0017 phase 2 step 1 implementation: per business, menus "All day" (every active item,
- * published), "Breakfast" (breakfast items, published, allergen + availability filters on) and
- * "Drinks (draft)" (drafts), upserted by tenant + slug, context disableRevalidate.
+ * Runs after `multiTenancy` (needs the tenants). Idempotent: upserts categories, items and menus
+ * by tenant + slug, allergens and tags by tenant + English title.
  */
 import type { Payload, Where } from 'payload'
 
 import type { MenuItem } from '@/payload-types'
+
+// outside Next.js: skip the menus cache revalidation
+const context = { disableRevalidate: true }
 
 type Titles = { en: string; ar: string }
 
@@ -281,13 +283,20 @@ const upsertCategory = async (
   })
   const data = { title: title.en, slug, sortOrder, tenant: tenantId }
   const doc = docs[0]
-    ? await payload.update({ collection: 'menu-categories', id: docs[0].id, data, locale: 'en' })
-    : await payload.create({ collection: 'menu-categories', data, locale: 'en' })
+    ? await payload.update({
+        collection: 'menu-categories',
+        id: docs[0].id,
+        data,
+        locale: 'en',
+        context,
+      })
+    : await payload.create({ collection: 'menu-categories', data, locale: 'en', context })
   await payload.update({
     collection: 'menu-categories',
     id: doc.id,
     data: { title: title.ar },
     locale: 'ar',
+    context,
   })
   return doc.id
 }
@@ -303,6 +312,7 @@ const upsertNamed = async (
     collection,
     where: inTenant(tenantId, { title: { equals: title.en } }),
     locale: 'en',
+    context,
     limit: 1,
     depth: 0,
   })
@@ -312,8 +322,9 @@ const upsertNamed = async (
       collection,
       data: { title: title.en, tenant: tenantId },
       locale: 'en',
+      context,
     }))
-  await payload.update({ collection, id: doc.id, data: { title: title.ar }, locale: 'ar' })
+  await payload.update({ collection, id: doc.id, data: { title: title.ar }, locale: 'ar', context })
   return doc.id
 }
 
@@ -329,7 +340,7 @@ const upsertItem = async (
     allergens: Map<string, number>
     tags: Map<string, number>
   },
-): Promise<'created' | 'updated'> => {
+): Promise<{ id: number; status: 'created' | 'updated' }> => {
   const { docs } = await payload.find({
     collection: 'menu-items',
     where: inTenant(tenantId, { slug: { equals: spec.slug } }),
@@ -351,8 +362,14 @@ const upsertItem = async (
     tenant: tenantId,
   }
   const doc = docs[0]
-    ? await payload.update({ collection: 'menu-items', id: docs[0].id, data, locale: 'en' })
-    : await payload.create({ collection: 'menu-items', data, locale: 'en' })
+    ? await payload.update({
+        collection: 'menu-items',
+        id: docs[0].id,
+        data,
+        locale: 'en',
+        context,
+      })
+    : await payload.create({ collection: 'menu-items', data, locale: 'en', context })
   // the description falls back to english
   await payload.update({
     collection: 'menu-items',
@@ -362,8 +379,84 @@ const upsertItem = async (
       modifierGroups: arabicGroups(doc.modifierGroups ?? [], spec.modifierGroups ?? []),
     },
     locale: 'ar',
+    context,
   })
-  return docs[0] ? 'updated' : 'created'
+  return { id: doc.id, status: docs[0] ? 'updated' : 'created' }
+}
+
+type MenuSpec = {
+  slug: string
+  title: Titles
+  status: 'draft' | 'published'
+  items: (item: ItemSpec) => boolean
+  filters?: { showSearch: boolean; showAllergens: boolean; showAvailability: boolean }
+}
+
+const MENUS: MenuSpec[] = [
+  {
+    slug: 'all-day',
+    title: { en: 'All day', ar: 'طوال اليوم' },
+    status: 'published',
+    items: () => true,
+  },
+  {
+    slug: 'breakfast',
+    title: { en: 'Breakfast', ar: 'الفطور' },
+    status: 'published',
+    items: (item) => item.category === 'breakfast' || item.category === 'drinks',
+    filters: { showSearch: true, showAllergens: true, showAvailability: true },
+  },
+  {
+    slug: 'drinks',
+    title: { en: 'Drinks', ar: 'المشروبات' },
+    status: 'draft',
+    items: (item) => item.category === 'drinks',
+  },
+]
+
+const upsertMenu = async (
+  payload: Payload,
+  tenantId: number,
+  spec: MenuSpec,
+  itemIds: Map<string, number>,
+): Promise<void> => {
+  const { docs } = await payload.find({
+    collection: 'menus',
+    where: inTenant(tenantId, { slug: { equals: spec.slug } }),
+    draft: true,
+    limit: 1,
+    depth: 0,
+  })
+  const data = {
+    title: spec.title.en,
+    slug: spec.slug,
+    items: ITEMS.filter(spec.items)
+      .map((item) => itemIds.get(item.slug))
+      .filter((id): id is number => id !== undefined),
+    intro: { heading: spec.title.en },
+    ...(spec.filters ? { filters: spec.filters } : {}),
+    tenant: tenantId,
+    _status: spec.status,
+  }
+  const draft = spec.status === 'draft'
+  const doc = docs[0]
+    ? await payload.update({
+        collection: 'menus',
+        id: docs[0].id,
+        data,
+        draft,
+        locale: 'en',
+        context,
+      })
+    : await payload.create({ collection: 'menus', data, draft, locale: 'en', context })
+  await payload.update({
+    collection: 'menus',
+    id: doc.id,
+    data: { title: spec.title.ar, intro: { heading: spec.title.ar }, _status: spec.status },
+    draft,
+    locale: 'ar',
+    context,
+  })
 }
 
 const setCurrency = async (
@@ -420,11 +513,26 @@ export const seedMenu = async (payload: Payload): Promise<void> => {
     }
 
     const counts = { created: 0, updated: 0 }
+    const itemIds = new Map<string, number>()
     for (const item of ITEMS) {
-      counts[await upsertItem(payload, tenant.id, item, { categories, allergens, tags })] += 1
+      const { id, status } = await upsertItem(payload, tenant.id, item, {
+        categories,
+        allergens,
+        tags,
+      })
+      itemIds.set(item.slug, id)
+      counts[status] += 1
+    }
+    for (const menu of MENUS) {
+      await upsertMenu(payload, tenant.id, menu, itemIds)
     }
     await setCurrency(payload, tenant.id, business.currency)
 
-    payload.logger.info({ msg: 'seed: menu', tenant: business.slug, items: counts })
+    payload.logger.info({
+      msg: 'seed: menu',
+      tenant: business.slug,
+      items: counts,
+      menus: MENUS.length,
+    })
   }
 }

@@ -16,6 +16,9 @@ import { loadUser, type SessionUser } from '../common/users'
 const CATALOG = ['menu-categories', 'menu-allergens', 'menu-tags', 'menu-items'] as const
 const LOOKUPS = ['menu-categories', 'menu-allergens', 'menu-tags'] as const
 
+// outside Next.js: skip the menus cache revalidation
+const context = { disableRevalidate: true }
+
 type CatalogSlug = (typeof CATALOG)[number]
 
 describe('menu catalog access', () => {
@@ -27,7 +30,7 @@ describe('menu catalog access', () => {
   // the smallest valid doc of each collection, created as `user` in `tenantId`
   const createAs = (slug: CatalogSlug, tenantId: number, user: SessionUser) => {
     const title = uniqueName('catalog-access')
-    const base = { user, overrideAccess: false } as const
+    const base = { user, overrideAccess: false, context } as const
     const creates = {
       'menu-categories': () =>
         payload.create({

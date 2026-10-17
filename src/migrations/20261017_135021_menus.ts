@@ -199,6 +199,9 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   ALTER TABLE "_menus_v" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "_menus_v_locales" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "_menus_v_rels" DISABLE ROW LEVEL SECURITY;
+  -- drop the foreign key first: DROP TABLE … CASCADE below already removes it, and the
+  -- DROP CONSTRAINT Payload generates after it then fails (known generator bug, see CLAUDE.md)
+  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_menus_fk";
   DROP TABLE "menus_carousel" CASCADE;
   DROP TABLE "menus" CASCADE;
   DROP TABLE "menus_locales" CASCADE;
@@ -207,9 +210,9 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "_menus_v" CASCADE;
   DROP TABLE "_menus_v_locales" CASCADE;
   DROP TABLE "_menus_v_rels" CASCADE;
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_menus_fk";
-  
   ALTER TABLE "users_access_access" ALTER COLUMN "slug" SET DATA TYPE text;
+  -- profile rows for menus: the old enum has no value for them
+  DELETE FROM "users_access_access" WHERE "slug" = 'menus';
   DROP TYPE "public"."enum_users_access_access_slug";
   CREATE TYPE "public"."enum_users_access_access_slug" AS ENUM('pages', 'posts', 'media', 'categories', 'users', 'users-access', 'analytics', 'tenants', 'header', 'footer', 'theme', 'settings', 'menu-categories', 'menu-allergens', 'menu-tags', 'menu-items', 'redirects', 'forms', 'form-submissions', 'search');
   ALTER TABLE "users_access_access" ALTER COLUMN "slug" SET DATA TYPE "public"."enum_users_access_access_slug" USING "slug"::"public"."enum_users_access_access_slug";

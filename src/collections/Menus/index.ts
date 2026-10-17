@@ -10,11 +10,7 @@ import {
 import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
 import { menuTitleField, sameTenantFilter } from '@/common/fields/menuFields'
 import { syncHiddenToDoc } from '@/common/hooks/syncHiddenToDoc'
-import {
-  validateSameTenant,
-  validateSameTenantOnChange,
-  type SameTenantField,
-} from '@/common/hooks/validateSameTenant'
+import { validateSameTenant, type SameTenantField } from '@/common/hooks/validateSameTenant'
 import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 import {
   accessCheckResolver,
@@ -26,7 +22,7 @@ import { previewURL } from '@/common/utils/preview'
 import { slugField } from '@/fields/slug'
 
 import { pageFields } from './fields/pageFields'
-import { revalidateMenus, revalidateMenusDelete } from './hooks/revalidateMenu'
+import { revalidateMenus, revalidateMenusDelete } from '@/common/hooks/revalidateMenus'
 
 const SAME_TENANT: SameTenantField[] = [{ path: 'items', collection: 'menu-items', label: 'item' }]
 
@@ -71,7 +67,6 @@ export const Menus: CollectionConfig<'menus'> = {
       validateTenantSlugUniqueness('menus', 'menu'),
       validateSameTenant(SAME_TENANT),
     ],
-    beforeChange: [validateSameTenantOnChange(SAME_TENANT)],
     afterChange: [syncHiddenToDoc, revalidateMenus],
     afterDelete: [revalidateMenusDelete],
   },

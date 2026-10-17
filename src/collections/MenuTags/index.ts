@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { anyone } from '@/access/anyone'
 import { menuTitleField } from '@/common/fields/menuFields'
 import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
+import { revalidateMenus, revalidateMenusDelete } from '@/common/hooks/revalidateMenus'
 
 /**
  * Item tags (rem0017): short labels on items ("Vegan", "Spicy", "New"), shown on the menu.
@@ -17,6 +18,7 @@ export const MenuTags: CollectionConfig = {
     update: accessCheckResolver('menu-tags', 'update'),
     delete: accessCheckResolver('menu-tags', 'delete'),
   },
+  hooks: { afterChange: [revalidateMenus], afterDelete: [revalidateMenusDelete] },
   admin: {
     group: 'Menu',
     useAsTitle: 'title',

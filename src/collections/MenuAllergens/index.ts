@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { anyone } from '@/access/anyone'
 import { menuTitleField } from '@/common/fields/menuFields'
 import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
+import { revalidateMenus, revalidateMenusDelete } from '@/common/hooks/revalidateMenus'
 
 /**
  * Allergens (rem0017): picked on items, shown on the item view, used by the allergen filter.
@@ -17,6 +18,7 @@ export const MenuAllergens: CollectionConfig = {
     update: accessCheckResolver('menu-allergens', 'update'),
     delete: accessCheckResolver('menu-allergens', 'delete'),
   },
+  hooks: { afterChange: [revalidateMenus], afterDelete: [revalidateMenusDelete] },
   admin: {
     group: 'Menu',
     useAsTitle: 'title',

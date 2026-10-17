@@ -32,6 +32,7 @@ import { CSSNameWithCustomFiled } from '@/fields/css'
 import { populateFullSlug } from './hooks/populateFullSlug'
 import { isHomepage } from './hooks/isHomepage'
 import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
+import { validatePageSlug } from '@/common/utils/reservedSlugs'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -143,9 +144,8 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
-    // rem0017 step 1 implementation (same line as rem0016's): slugField('title', { slugOverrides:
-    // { validate: validatePageSlug } }) (src/common/utils/reservedSlugs.ts): refuses menu, forms, …
-    ...slugField(),
+    // refuses slugs whose url belongs to a route of its own (/menu, /forms, …)
+    ...slugField('title', { slugOverrides: { validate: validatePageSlug } }),
     {
       name: 'isHomepage',
       type: 'checkbox',
