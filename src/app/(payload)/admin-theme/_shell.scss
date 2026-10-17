@@ -1,0 +1,21 @@
+// The admin shell (rem0005 phase 2): sidebar, topbar, breadcrumbs. Checked against Payload 3.44.0.
+@use './motion' as *;
+
+// sidebar
+// 1. .nav: background --admin-bg, border-inline-end 2px --admin-border
+// 2. .nav__link: block row, radius --admin-radius-s, padding 8px 12px, color --admin-text;
+//    hover → --admin-raised; .nav__link-indicator hidden (the fill shows the current page)
+// 3. current page (.nav__link with aria-current / the active class Payload sets): --admin-primary
+//    fill, --admin-ink text, 2px border, --admin-shadow-s (user, 2026-10-17: sky fill)
+// 4. .nav-group__toggle / .nav__label: --admin-font-mono, 0.75rem, uppercase, letter-spacing
+//    0.08em, --admin-muted, a 2px rule above each group
+// 5. .nav__log-out, .nav__controls: secondary-button look
+
+// topbar
+// 6. .app-header: background --admin-bg, border-bottom 2px --admin-border
+// 7. .step-nav (breadcrumbs): --admin-font-mono, 0.8125rem; links with the highlighter underline
+// 8. .localizer button, .app-header__account: bordered chips (2px, --admin-radius-s), no shadow
+// 9. .hamburger: square bordered icon button
+
+// multi-tenant plugin
+// 10. .tenant-selector: label in mono uppercase like the nav labels, control with a 2px border

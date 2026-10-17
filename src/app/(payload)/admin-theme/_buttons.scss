@@ -1,0 +1,14 @@
+// Buttons (rem0005 phase 2). Checked against Payload 3.44.0 (`@payloadcms/ui` elements/Button).
+@use './motion' as *;
+
+// 1. .btn: font --admin-font-body 600, radius --admin-radius-s, border-width --admin-border-width
+// 2. .btn--style-primary: background --admin-primary, color + icon --admin-ink, border --admin-border;
+//    press(--admin-shadow-s, 6px 6px 0, 0 0 0); hover keeps the fill (no colour change)
+// 3. .btn--style-secondary: background --admin-surface, color --admin-text, border --admin-border;
+//    same press
+// 4. .btn--style-pill, .btn--style-subtle, .btn--style-icon-label: border, no shadow, hover --admin-raised
+// 5. .btn--style-error / confirm-delete buttons (`.btn--style-primary` inside a delete modal):
+//    background --admin-danger, color --admin-ink
+// 6. .btn--disabled, [disabled]: --admin-raised fill, --admin-muted text, no shadow
+// 7. .btn--size-*: keep Payload's paddings; small/xsmall use 2px 2px 0 at rest
+// 8. .popup-button (the ⋮ and caret triggers next to Publish): same as secondary, square

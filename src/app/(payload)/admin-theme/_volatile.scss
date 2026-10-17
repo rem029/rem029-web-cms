@@ -1,0 +1,15 @@
+// Areas Payload changes by 3.91 (rem0005): re-check this whole file in rem0013.
+// Checked against Payload 3.44.0: dashboard (`@payloadcms/next` views/Dashboard), login (views/Login).
+@use './motion' as *;
+
+// dashboard
+// 1. .dashboard__label: like the nav group labels (mono, uppercase, --admin-muted)
+// 2. .dashboard__card-list .card: brutal-box(--admin-shadow-m); .card--has-onclick gets
+//    press(--admin-shadow-m, 8px 8px 0, 2px 2px 0)
+// 3. .card__title: --admin-font-display 700
+// 4. .card__actions .btn (the "+" create button, kept: user 2026-10-17): secondary look, small
+
+// login
+// 5. .login form: brutal-box(--admin-shadow-m), padding 32px, max-width 420px, centred
+// 6. .login__brand: logo kept (AdminBranding), margin below
+// 7. .login-intro (step 2's LoginIntro): heading in --admin-font-display, line in --admin-muted
