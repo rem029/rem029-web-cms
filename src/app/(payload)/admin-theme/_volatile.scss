@@ -16,11 +16,7 @@
   @include brutal-box(var(--admin-shadow-m));
 
   &.card--has-onclick {
-    @include press(
-      var(--admin-shadow-m),
-      8px 8px 0 var(--admin-shadow),
-      2px 2px 0 var(--admin-shadow)
-    );
+    @include press(var(--admin-shadow-m), var(--admin-shadow-l), var(--admin-shadow-xs));
 
     &:hover {
       background: var(--admin-surface);

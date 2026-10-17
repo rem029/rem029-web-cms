@@ -153,17 +153,46 @@
   }
 }
 
-// notices: the inactive business and hidden document banners. information, not a control, so
-// no shadow
+// small shell controls get a 24px target (WCAG 2.5.8), 44px on touch screens; the icons stay
+// their size, centred in the bigger box
+.nav-group__toggle,
+.nav__log-out,
+.step-nav .step-nav__home {
+  min-width: 24px;
+  min-height: 24px;
+  align-items: center;
+
+  @media (pointer: coarse) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+.nav__log-out,
+.step-nav .step-nav__home {
+  display: flex;
+  justify-content: center;
+}
+
+.step-nav .step-nav__home {
+  width: auto;
+  height: auto;
+}
+
+// Payload nudges the chevron up for its top-aligned toggle; ours is centred
+.nav-group__toggle svg {
+  margin-top: 0;
+}
+
+// notices: the inactive business and hidden document banners, a warning sticker. information,
+// not a control, so no shadow
 .admin-notice {
   margin-block-end: 12px;
   padding: 8px 12px;
   border: var(--admin-border-width) solid var(--admin-border);
-  border-inline-start-width: 6px;
-  border-inline-start-color: var(--admin-warning);
   border-radius: var(--admin-radius-s);
-  background: var(--admin-surface);
-  color: var(--admin-text);
+  background: var(--admin-warning);
+  color: var(--admin-ink);
   font-size: 0.875rem;
   line-height: 1.5;
 }

@@ -4,7 +4,7 @@
 @use './motion' as *;
 
 $border: inset 0 0 0 var(--admin-border-width) var(--admin-border);
-$lifted: 6px 6px 0 var(--admin-shadow);
+$lifted: var(--admin-shadow-m);
 
 .btn {
   font-family: var(--admin-font-body);
@@ -86,12 +86,12 @@ $lifted: 6px 6px 0 var(--admin-shadow);
   &.btn--style-secondary.btn--withoutPopup:not(.btn--disabled) {
     box-shadow:
       #{$border},
-      2px 2px 0 var(--admin-shadow);
+      var(--admin-shadow-xs);
 
     &:hover {
       box-shadow:
         #{$border},
-        4px 4px 0 var(--admin-shadow);
+        var(--admin-shadow-s);
     }
 
     &:active {

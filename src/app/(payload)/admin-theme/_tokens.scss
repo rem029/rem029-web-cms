@@ -17,8 +17,10 @@
   --admin-border-width: 2px;
   --admin-radius-s: 4px;
   --admin-radius-m: 6px;
+  --admin-shadow-xs: 2px 2px 0 var(--admin-shadow);
   --admin-shadow-s: 4px 4px 0 var(--admin-shadow);
   --admin-shadow-m: 6px 6px 0 var(--admin-shadow);
+  --admin-shadow-l: 8px 8px 0 var(--admin-shadow);
 
   // motion: transform/opacity/shadow offset only, see _base.scss for reduced motion
   --admin-ease: cubic-bezier(0.2, 0, 0, 1);

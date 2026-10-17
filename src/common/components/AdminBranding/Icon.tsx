@@ -7,7 +7,8 @@ import { cookies, headers } from 'next/headers'
 import { getAdminBranding } from '@/common/utils/tenantBranding'
 import { MASCOT_URL } from './mascot'
 
-// the step nav's home slot is 18x18 and clips overflow
+// the step nav's home slot is 18x18 and clips overflow; the icon is the home link's only content,
+// so every variant names it "Dashboard" (the link's purpose)
 export async function Icon(props: Partial<ServerProps>) {
   const payload = props.payload ?? (await getPayload({ config: configPromise }))
 
@@ -22,7 +23,7 @@ export async function Icon(props: Partial<ServerProps>) {
 
   const branding = await getAdminBranding(payload, user, selectedCookie)
 
-  const mascot = <img src={MASCOT_URL} alt="" className="admin-mascot" />
+  const mascot = <img src={MASCOT_URL} alt="Dashboard" className="admin-mascot" />
 
   if (!branding) {
     return mascot
@@ -32,7 +33,7 @@ export async function Icon(props: Partial<ServerProps>) {
     return (
       <img
         src={branding.logo.url}
-        alt={branding.logo.alt}
+        alt="Dashboard"
         style={{ maxHeight: '18px', width: 'auto', objectFit: 'contain' }}
       />
     )
@@ -46,6 +47,8 @@ export async function Icon(props: Partial<ServerProps>) {
 
   return (
     <div
+      role="img"
+      aria-label="Dashboard"
       style={{
         display: 'flex',
         alignItems: 'center',

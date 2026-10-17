@@ -3,11 +3,11 @@ import type { ReactNode } from 'react'
 
 // Self-hosted at build time (no request to Google from the browser). next/font hashes the family
 // names, so the admin theme reads them from these variables.
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['500', '700'], display: 'swap' })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], weight: ['700'], display: 'swap' })
 const geist = Geist({ subsets: ['latin'], weight: ['400', '500', '600'], display: 'swap' })
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
-  weight: ['400', '500', '700'],
+  weight: ['400', '500'],
   display: 'swap',
 })
 
