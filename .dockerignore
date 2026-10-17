@@ -1,0 +1,5 @@
+# kept out of the image build context (local test and planning files only)
+.env.test
+.temp
+docs
+tests

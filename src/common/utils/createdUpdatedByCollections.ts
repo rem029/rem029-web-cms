@@ -3,7 +3,8 @@ import type { CollectionSlug } from 'payload'
 /**
  * Collections that get `createdBy` / `updatedBy` (fields + hook) from the `addCreatedUpdatedBy`
  * plugin. Every collection is in exactly one of these two lists (checked by
- * `scripts/verify/createdUpdatedBy.ts`), so a new collection can't be forgotten: add it here.
+ * `tests/created-updated-by/coverage.test.ts`), so a new collection can't be forgotten: add it
+ * here.
  */
 export const createdUpdatedByCollections: CollectionSlug[] = [
   'pages',

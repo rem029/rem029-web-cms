@@ -1,0 +1,79 @@
+# Lint, test and build every pull request, the way staging installs and builds (Dockerfile:
+# node 22.12.0, yarn --frozen-lockfile, migrate before build).
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# a new push to the same pull request cancels the run it replaces
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # Postgres 16, as on staging; the database exists only for this run
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cms_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # throwaway values for the runner's own database: no real secrets in CI
+    env:
+      DATABASE_URI: postgres://postgres:postgres@127.0.0.1:5432/cms_test
+      PAYLOAD_SECRET: ci-only-not-a-secret
+      CRON_SECRET: ci-only-not-a-secret
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+      TENANT_BASE_DOMAIN: ''
+      TRUST_PROXY: 'false'
+      DB_LOGGER: 'false'
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: yarn
+
+      # staging installs from yarn.lock, so a stale lockfile fails here first
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Types
+        run: npx tsc --noEmit
+
+      # vitest.config.ts requires .env.test; the test run resets cms_test (empty → migrations → seed)
+      - name: Test
+        run: |
+          printf 'DATABASE_URI=%s\nTENANT_BASE_DOMAIN=\nTRUST_PROXY=false\nDB_LOGGER=false\n' "$DATABASE_URI" > .env.test
+          yarn test
+
+      # as the Dockerfile: importmap and migrations, then the production build
+      - name: Build
+        run: |
+          yarn payload generate:importmap
+          yarn payload migrate
+          yarn build
