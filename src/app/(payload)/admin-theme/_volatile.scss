@@ -153,3 +153,48 @@
     }
   }
 }
+
+// popups (the ⋮ document menu, per page, locale, Publish ▾, column sort)
+.popup {
+  .popup__content,
+  &.popup--size-xsmall .popup__content,
+  &.popup--size-small .popup__content {
+    @include brutal-box(var(--admin-shadow-s));
+    border-radius: var(--admin-radius-s);
+  }
+
+  // the box's border and shadow carry the popup without a caret
+  .popup__caret {
+    display: none;
+  }
+}
+
+.popup-button-list__button {
+  color: var(--admin-text);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--admin-raised);
+    color: var(--admin-text);
+  }
+
+  &.popup-button-list__button--selected,
+  &.popup-button-list__button--selected:hover,
+  &.popup-button-list__button--selected:focus-visible {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+  }
+
+  &.popup-button-list__button--disabled,
+  &:disabled {
+    color: var(--admin-muted);
+    background: transparent;
+    cursor: not-allowed;
+  }
+}
+
+.popup-divider {
+  height: var(--admin-border-width);
+  background: var(--admin-border);
+  border: 0;
+}

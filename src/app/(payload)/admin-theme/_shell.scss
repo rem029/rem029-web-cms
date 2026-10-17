@@ -230,3 +230,141 @@
 .admin-notice--page {
   margin: 12px var(--gutter-h) 0;
 }
+
+// document tabs (Edit / Versions / API): `.doc-tab`, `.doc-tab--active`, `.doc-tab__label`,
+// version count `.pill-version-count`
+.doc-tab {
+  background: transparent;
+  color: var(--admin-text);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  font-family: var(--admin-font-mono);
+
+  .doc-tab__label {
+    font-family: var(--admin-font-mono);
+    color: inherit;
+  }
+
+  &:hover {
+    background: var(--admin-raised);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--admin-shadow-xs);
+  }
+
+  &.doc-tab--active,
+  &.doc-tab--active:hover {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+  }
+
+  .pill-version-count {
+    background: var(--admin-raised);
+    color: var(--admin-text);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    font-family: var(--admin-font-mono);
+  }
+
+  &.doc-tab--active .pill-version-count {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+  }
+}
+
+// document status (Status: Published — Unpublish, Last Modified, Created)
+.status {
+  .status__label {
+    font-family: var(--admin-font-mono);
+    color: var(--admin-muted);
+  }
+
+  .status__value {
+    font-family: var(--admin-font-display);
+    font-weight: 600;
+    color: var(--admin-text);
+  }
+}
+
+// floating nav, tablet and phone only (user, 2026-10-17): at and below 1024px the open nav lies
+// over the page on the left (420px, full width at and below 768px, where Payload makes it 100vw),
+// the page under it dims and takes no clicks or scrolling; the topbar and the hamburger (outside the
+// wrap) stay usable. Above 1024px Payload's own nav is untouched: it pushes the page and everything
+// keeps scrolling (user: "on desktop I'd like the default Payload UI").
+// Payload 3.44: `.template-default` is a grid whose first column is the nav width when open
+// (`--nav-open`, and `--nav-hydrated` below 1441px); `.nav` is sticky with `--nav-width` 275px and
+// has no backdrop of its own, so closing stays the hamburger (and opening a page at 768px and below).
+// Pointer and wheel only: Tab can still reach the page (blocking it needs `inert`, i.e. JS).
+@media (max-width: 1024px) {
+  // the page scrolls on the root, which pointer-events can't stop: lock it while the nav is open
+  html:has(.template-default--nav-open) {
+    overflow: hidden;
+  }
+
+  .template-default--nav-open .template-default__wrap {
+    > :not(.app-header) {
+      pointer-events: none;
+    }
+
+    &::after {
+      content: '';
+      position: fixed;
+      inset: var(--app-header-height) 0 0 0;
+      z-index: calc(var(--z-nav) - 1);
+      background: var(--admin-bg);
+      opacity: 0.8;
+    }
+  }
+
+  // the fixed nav leaves the grid's flow, so the content is its first item: one full-width track
+  // in every state (Payload's `0 auto` would put the content in the 0 column)
+  .template-default {
+    &,
+    &.template-default--nav-open,
+    &.template-default--nav-hydrated,
+    &.template-default--nav-hydrated.template-default--nav-open {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .nav {
+    // fixed below the topbar so the hamburger stays reachable; hidden when closed so it never
+    // catches clicks over the page
+    position: fixed;
+    top: var(--app-header-height);
+    inset-inline-start: 0;
+    width: min(420px, 100vw);
+    height: calc(100vh - var(--app-header-height));
+    z-index: var(--z-nav);
+    background: var(--admin-bg);
+    border-top: var(--admin-border-width) solid var(--admin-border);
+    border-inline-end: var(--admin-border-width) solid var(--admin-border);
+    box-shadow: none;
+    visibility: hidden;
+    pointer-events: none;
+
+    &.nav--nav-open {
+      visibility: visible;
+      pointer-events: auto;
+      box-shadow: var(--admin-shadow-l);
+    }
+
+    // the nav keeps its own scroll, contained so it never hands the scroll on to the page
+    .nav__scroll {
+      overscroll-behavior: contain;
+      // Payload pads it by the topbar's height (its nav starts at the top); this one starts below
+      padding-top: 24px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .nav {
+    width: 100vw;
+
+    &.nav--nav-open {
+      box-shadow: none;
+    }
+  }
+}

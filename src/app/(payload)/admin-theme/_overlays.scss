@@ -1,0 +1,154 @@
+// What opens on top (rem0005 phase 3 step 2): modals, drawers, toasts, and every blurred backdrop.
+// Checked against Payload 3.44.0 (`@payloadcms/ui` elements/Drawer, ConfirmationModal, Toasts;
+// `@payloadcms/next` toasts and modal container). Popups change by 3.91 and live in _volatile.scss.
+@use './motion' as *;
+
+// backdrops: Payload blurs (`backdrop-filter: blur(8px)` on `:after`) behind ~10 surfaces, with a
+// 75% `--theme-bg` `:before`. Plan rule: no blur, a plain 80% `--admin-bg`.
+// Payload 3.44 list: drawer__blur-bg, confirmation-modal, delete-document, document-take-over,
+// document-locked, doc-controls (the sticky document bar), edit-many__document-actions,
+// edit-many-bulk-uploads__document-actions, file-selections__mobileBlur,
+// file-selections__filesContainer
+.drawer__blur-bg,
+.confirmation-modal,
+.delete-document,
+.document-take-over,
+.document-locked {
+  &::after {
+    backdrop-filter: none;
+  }
+
+  &::before {
+    background: var(--admin-bg);
+    opacity: 0.8;
+  }
+}
+
+// the sticky document bar (Save / Publish) and the bulk-edit action bars: same blur, but they sit
+// over the form, so a solid --admin-bg instead of a see-through one
+.doc-controls,
+.edit-many__document-actions,
+.edit-many-bulk-uploads__document-actions,
+.file-selections__mobileBlur,
+.file-selections__filesContainer {
+  &::after {
+    backdrop-filter: none;
+  }
+
+  &::before {
+    background: var(--admin-bg);
+    opacity: 1;
+  }
+}
+
+// modals (delete, unpublish, leave without saving, take-over, locked)
+.confirmation-modal__wrapper,
+.delete-document__wrapper,
+.document-take-over__wrapper,
+.document-locked__wrapper {
+  @include brutal-box(var(--admin-shadow-l));
+
+  h1 {
+    font-family: var(--admin-font-display);
+  }
+}
+
+// drawers (relationship create/edit, list drawer, upload, block picker)
+.drawer {
+  .drawer__content {
+    background: var(--admin-bg);
+    border-radius: 0;
+    // drawers open from the inline end
+    border-inline-start: var(--admin-border-width) solid var(--admin-border);
+  }
+
+  .drawer__header {
+    border-bottom: var(--admin-border-width) solid var(--admin-border);
+
+    .drawer__header__title {
+      font-family: var(--admin-font-display);
+    }
+  }
+
+  // the 10% opacity strip left of the drawer stays as the click-outside target
+  .drawer__close {
+    &,
+    html[data-theme] & {
+      background: var(--admin-bg);
+    }
+  }
+
+  // the × of the generic drawer, the list drawer (pick from existing) and the doc drawer (create /
+  // edit a related doc)
+  .drawer__header__close,
+  .list-drawer__header-close,
+  .doc-drawer__header-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    @include press(none, var(--admin-shadow-xs), none);
+  }
+}
+
+// toasts (Sonner: success, error, warning, info)
+.payload-toast-container .payload-toast-item {
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  box-shadow: var(--admin-shadow-s);
+
+  &.toast-success,
+  &.toast-error,
+  &.toast-warning,
+  &.toast-info {
+    color: var(--admin-ink);
+    border-color: var(--admin-border);
+  }
+
+  &.toast-success {
+    background: var(--admin-success);
+  }
+
+  &.toast-error {
+    background: var(--admin-danger);
+  }
+
+  &.toast-warning {
+    background: var(--admin-warning);
+  }
+
+  &.toast-info {
+    background: var(--admin-primary);
+  }
+
+  // Sonner puts the × as a badge on the toast's corner, half over the page: a chip of its own, not
+  // the toast's colours. Payload sets a colour per type at `.item.toast-x .close`, so match that
+  // specificity
+  .payload-toast-close-button,
+  &[class*='toast-'] .payload-toast-close-button {
+    width: 24px;
+    height: 24px;
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    background: var(--admin-surface);
+    color: var(--admin-text);
+
+    &:hover {
+      background: var(--admin-raised);
+      color: var(--admin-text);
+    }
+
+    &:focus-visible {
+      outline: var(--admin-border-width) solid var(--admin-border);
+      outline-offset: 2px;
+    }
+  }
+}
