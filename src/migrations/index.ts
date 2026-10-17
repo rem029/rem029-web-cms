@@ -25,8 +25,10 @@ import * as migration_20261003_102355_tenant_admins from './20261003_102355_tena
 import * as migration_20261003_122558_hidden_documents from './20261003_122558_hidden_documents';
 import * as migration_20261003_160746_access_templates from './20261003_160746_access_templates';
 import * as migration_20261010_121953_created_updated_by from './20261010_121953_created_updated_by';
-import * as migration_20261017_133416_menu_catalog from './20261017_133416_menu_catalog';
-import * as migration_20261017_135021_menus from './20261017_135021_menus';
+import * as migration_20261010_170458_audit_logs from './20261010_170458_audit_logs';
+import * as migration_20261010_201646_audit_logs_retention from './20261010_201646_audit_logs_retention';
+import * as migration_20261015_193545_audit_logs_login_failed from './20261015_193545_audit_logs_login_failed';
+import * as migration_20261017_171237_restaurant_menu from './20261017_171237_restaurant_menu';
 
 export const migrations = [
   {
@@ -165,13 +167,23 @@ export const migrations = [
     name: '20261010_121953_created_updated_by',
   },
   {
-    up: migration_20261017_133416_menu_catalog.up,
-    down: migration_20261017_133416_menu_catalog.down,
-    name: '20261017_133416_menu_catalog',
+    up: migration_20261010_170458_audit_logs.up,
+    down: migration_20261010_170458_audit_logs.down,
+    name: '20261010_170458_audit_logs',
   },
   {
-    up: migration_20261017_135021_menus.up,
-    down: migration_20261017_135021_menus.down,
-    name: '20261017_135021_menus'
+    up: migration_20261010_201646_audit_logs_retention.up,
+    down: migration_20261010_201646_audit_logs_retention.down,
+    name: '20261010_201646_audit_logs_retention',
+  },
+  {
+    up: migration_20261015_193545_audit_logs_login_failed.up,
+    down: migration_20261015_193545_audit_logs_login_failed.down,
+    name: '20261015_193545_audit_logs_login_failed',
+  },
+  {
+    up: migration_20261017_171237_restaurant_menu.up,
+    down: migration_20261017_171237_restaurant_menu.down,
+    name: '20261017_171237_restaurant_menu'
   },
 ];

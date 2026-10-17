@@ -16,6 +16,9 @@ export const TEST_PROFILES = {
   editor: 'editor',
   // read on pages, posts, media, categories, the menu catalog, header and footer; opens /admin
   viewer: 'viewer',
+  // every box ticked on audit-logs (only read and the nav count there); every other slug hidden
+  // and denied. seeded without a user: only super users may set that row
+  logReader: 'log-reader',
 } as const
 
 export const TEST_USERS = {
@@ -46,6 +49,10 @@ export const TEST_USERS = {
   inactiveMember: 'member-inactive@example.test',
   // tenant admin of test-inactive only
   inactiveAdmin: 'admin-inactive@example.test',
+  // log reader in test-b only: a member who reads test-b's audit logs
+  logReader: 'log-reader-b@example.test',
+  // tenant admin of test-a with the log reader profile (tenant admins read logs only through it)
+  logReaderAdmin: 'log-admin-a@example.test',
 } as const
 
 /** Ids of what one seed creates, by fixture key, for the seeds that run after it. */

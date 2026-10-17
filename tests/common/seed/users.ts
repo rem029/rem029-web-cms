@@ -199,6 +199,20 @@ export const seedTestUsers = async (
       is_disabled: false,
       tenants: [{ tenant: tenants.inactive, isTenantAdmin: true }],
     },
+    {
+      email: TEST_USERS.logReader,
+      name: 'Log Reader B',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.b, access: profiles.logReader.b }],
+    },
+    {
+      email: TEST_USERS.logReaderAdmin,
+      name: 'Log Admin A',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.a, isTenantAdmin: true, access: profiles.logReader.a }],
+    },
   ]
 
   for (const user of users) {

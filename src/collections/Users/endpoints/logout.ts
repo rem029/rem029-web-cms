@@ -39,9 +39,6 @@ export const logoutEndpoint: Endpoint = {
     if (!user) throw new APIError('No User', 400)
 
     const collection = payload.collections.users.config
-    for (const hook of collection.hooks?.afterLogout ?? []) {
-      await hook({ collection, context: req.context, req })
-    }
 
     const allSessions = req.searchParams.get('allSessions') === 'true'
     const shouldCommit = await initTransaction(req)
@@ -52,6 +49,10 @@ export const logoutEndpoint: Endpoint = {
       const session = transactionID !== undefined ? db.sessions?.[transactionID]?.db : undefined
       if (!isExecutor(session)) throw new APIError('logout: no database transaction', 500)
       await session.execute(sql`SELECT "id" FROM "users" WHERE "id" = ${user.id} FOR UPDATE`)
+
+      for (const hook of collection.hooks?.afterLogout ?? []) {
+        await hook({ collection, context: req.context, req })
+      }
 
       const stored = await db.findOne<User>({
         collection: 'users',
