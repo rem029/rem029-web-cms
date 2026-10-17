@@ -8,6 +8,7 @@ import { formHeaderFields, formSidebarFields } from '@/common/fields/formSetting
 import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 import { validateMultiStep } from '@/plugins/hooks/validateMultiStep'
 import { setFormSubmissionTenant } from '@/plugins/hooks/setFormSubmissionTenant'
+import { validateSubmission } from '@/plugins/hooks/validateSubmission'
 
 const withRichConfirmation = (field: Field): Field =>
   'name' in field && field.name === 'confirmationMessage' && field.type === 'richText'
@@ -94,9 +95,8 @@ export const formBuilder = formBuilderPlugin({
   },
   formSubmissionOverrides: {
     hooks: {
-      // step 3a: ADD — validateSubmission first (form open, members only, submissionData
-      // rebuilt from the form's fields), then setFormSubmissionTenant
-      beforeValidate: [setFormSubmissionTenant],
+      // the form's rules first (open, members only, answers rebuilt), then the tenant
+      beforeValidate: [validateSubmission, setFormSubmissionTenant],
     },
   },
 })

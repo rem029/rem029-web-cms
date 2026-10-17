@@ -30,8 +30,12 @@ export type FormText = {
   stepOf: (current: number, total: number) => string
   somethingWrong: string
   draftSaved: string
-  // step 3a: ADD — formClosed, notOpenYet, membersOnly, tooMany, acceptTerms (label of the
-  // terms checkbox) and termsRequired: the server's refusals and the terms, in both languages
+  formClosed: string
+  notOpenYet: string
+  membersOnly: string
+  tooMany: string
+  acceptTerms: string
+  termsRequired: string
 }
 
 const en: FormText = {
@@ -62,6 +66,12 @@ const en: FormText = {
   stepOf: (current, total) => `Step ${current} of ${total}`,
   somethingWrong: 'Something went wrong. Please try again.',
   draftSaved: 'Draft saved on this device',
+  formClosed: "This form isn't taking answers right now.",
+  notOpenYet: "This form isn't open yet. Please come back later.",
+  membersOnly: 'Please sign in as a member to fill in this form.',
+  tooMany: 'Too many attempts. Please wait a few minutes and try again.',
+  acceptTerms: 'I accept the terms and conditions',
+  termsRequired: 'Please accept the terms to continue.',
 }
 
 const ar: FormText = {
@@ -90,6 +100,12 @@ const ar: FormText = {
   stepOf: (current, total) => `الخطوة ${current} من ${total}`,
   somethingWrong: 'حدث خطأ. يرجى المحاولة مرة أخرى.',
   draftSaved: 'تم حفظ المسودة على هذا الجهاز',
+  formClosed: 'هذا النموذج لا يستقبل إجابات حاليًا.',
+  notOpenYet: 'هذا النموذج غير متاح بعد. يرجى العودة لاحقًا.',
+  membersOnly: 'يرجى تسجيل الدخول كعضو لتعبئة هذا النموذج.',
+  tooMany: 'محاولات كثيرة. يرجى الانتظار بضع دقائق ثم المحاولة مرة أخرى.',
+  acceptTerms: 'أوافق على الشروط والأحكام',
+  termsRequired: 'يرجى الموافقة على الشروط للمتابعة.',
 }
 
 export const formText = (locale: RendererLocale): FormText => (locale === 'ar' ? ar : en)

@@ -28,8 +28,8 @@ export type MultiStepProps = {
   onSubmit: () => void
   /** Shown beside the actions (the "draft saved" note). */
   status?: React.ReactNode
-  // step 3a: ADD — terms?: React.ReactNode (the terms checkbox and the honeypot), passed to
-  // ReviewScreen and shown above its submit button
+  /** The terms checkbox and the honeypot, shown on the review screen above Submit. */
+  beforeSubmit?: React.ReactNode
 }
 
 export const MultiStep: React.FC<MultiStepProps> = ({
@@ -39,6 +39,7 @@ export const MultiStep: React.FC<MultiStepProps> = ({
   stepIndicator,
   onSubmit,
   status,
+  beforeSubmit,
 }) => {
   const { values, listCounts, setErrors, locale } = useFormRenderer()
   const [current, setCurrent] = useState(0)
@@ -74,6 +75,7 @@ export const MultiStep: React.FC<MultiStepProps> = ({
     return (
       <div className="fb-steps-flow" ref={topRef}>
         <ReviewScreen
+          beforeSubmit={beforeSubmit}
           onEdit={(index) => {
             setReturnToReview(true)
             show(index)

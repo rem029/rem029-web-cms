@@ -6,20 +6,26 @@
  * reads tenant rows through `access.ts`.
  */
 import type { Form, User } from '@/payload-types'
+import { getTenantRows, isActiveSuperUser, isDisabledUser } from '@/common/utils/access'
+import { extractTenantId } from '@/common/utils/tenantCollections'
 
 export type FormRefusal = 'inactive' | 'not_open_yet' | 'closed' | 'members_only'
 
 /** `null` when `user` (or an anonymous visitor) may answer `form` at `now`. */
 export const formRefusal = (
-  _form: Pick<Form, 'isActive' | 'activeFrom' | 'activeTo' | 'requires_auth' | 'tenant'>,
-  _user: User | null | undefined,
-  _now: Date,
+  form: Pick<Form, 'isActive' | 'activeFrom' | 'activeTo' | 'requires_auth' | 'tenant'>,
+  user: User | null | undefined,
+  now: Date,
 ): FormRefusal | null => {
-  // 1. isActive false → 'inactive'
-  // 2. activeFrom set and now < activeFrom → 'not_open_yet'
-  // 3. activeTo set and now > activeTo → 'closed'
-  // 4. requires_auth and not (active super user, or a non-disabled user with a row in the
-  //    form's tenant: getTenantRows + extractTenantId) → 'members_only'
-  // 5. else null
-  throw new Error('not implemented')
+  if (form.isActive === false) return 'inactive'
+  if (form.activeFrom && now < new Date(form.activeFrom)) return 'not_open_yet'
+  if (form.activeTo && now > new Date(form.activeTo)) return 'closed'
+  if (form.requires_auth && !isMemberOf(user, extractTenantId(form.tenant))) return 'members_only'
+  return null
+}
+
+const isMemberOf = (user: User | null | undefined, tenantId: number | null): boolean => {
+  if (!user || isDisabledUser(user)) return false
+  if (isActiveSuperUser(user)) return true
+  return tenantId !== null && getTenantRows(user).some((row) => row.tenantId === tenantId)
 }

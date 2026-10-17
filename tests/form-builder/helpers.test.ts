@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { missingRequired, toSubmissionData } from '@/components/FormRenderer/helpers'
+import {
+  listCountsFrom,
+  missingRequired,
+  toSubmissionData,
+  valuesFromSubmission,
+} from '@/components/FormRenderer/helpers'
 import type { RenderField } from '@/components/FormRenderer/types'
 
 describe('form renderer helpers', () => {
@@ -56,9 +61,18 @@ describe('form renderer helpers', () => {
 
   // proposed addition (step 3a)
   it('reads submission rows back into values and list counts', () => {
-    // arrange: rows [{ field: 'agree', value: 'true' }, { field: 'family.1.name', value: 'Sara' }]
-    // act: valuesFromSubmission(rows), then listCountsFrom(values)
-    // assert: { agree: true, 'family.1.name': 'Sara' } and { family: 2 }
-    expect.fail('not implemented')
+    // arrange
+    const rows = [
+      { field: 'agree', value: 'true' },
+      { field: 'family.1.name', value: 'Sara' },
+    ]
+
+    // act
+    const values = valuesFromSubmission(rows)
+    const counts = listCountsFrom(values)
+
+    // assert
+    expect(values).toEqual({ agree: true, 'family.1.name': 'Sara' })
+    expect(counts).toEqual({ family: 2 })
   })
 })

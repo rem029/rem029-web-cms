@@ -800,6 +800,45 @@
     align-self: flex-start;
   }
 
+  /* 12. header image, terms, honeypot */
+  .fb-header {
+    margin: 0 0 var(--fb-gap, 1.25rem);
+    overflow: hidden;
+    border-radius: var(--fb-radius, 0.5rem);
+  }
+
+  .fb-header img {
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .fb-terms {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .fb-terms-content {
+    max-block-size: 12rem;
+    overflow-y: auto;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    background: var(--fb-field-bg);
+    border: 1px solid var(--fb-border);
+    border-radius: var(--fb-radius, 0.5rem);
+  }
+
+  /* never display: none, so bots still fill it */
+  .fb-honeypot {
+    position: absolute;
+    inset-inline-start: -9999px;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .fb-form *,
     .fb-form *::before,
@@ -814,8 +853,3 @@
     }
   }
 }
-
-/* step 3a: ADD — inside the layer: .fb-header (image above the card, radius from --fb-radius,
-   16:9 cover), .fb-terms (bordered box, scrollable past ~12rem, checkbox row like .fb-choice),
-   .fb-honeypot (off-screen: position absolute, inline-start -9999px, never display none so
-   bots still see it) */

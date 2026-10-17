@@ -182,29 +182,48 @@ export const toSubmissionData = (
  * unticked is still missing.
  */
 export const valuesFromSubmission = (
-  _rows: ReadonlyArray<{ field: string; value: string }> | null | undefined,
+  rows: ReadonlyArray<{ field: string; value: string }> | null | undefined,
 ): FormValues => {
-  // 1. no rows → {}
-  // 2. each row: 'true' → true, 'false' → false, else the string; later duplicates win
-  throw new Error('not implemented')
+  const values: FormValues = {}
+  for (const { field, value } of rows ?? []) {
+    if (value === 'true') values[field] = true
+    else if (value === 'false') values[field] = false
+    else values[field] = value
+  }
+  return values
 }
 
 /** Rows per list as the values show them (`family.2.name` → `family: 3`), for the server. */
-export const listCountsFrom = (_values: FormValues): ListCounts => {
-  // 1. every path segment that is a number after a prefix: count[prefix] = max(index + 1)
-  //    (nested lists too: `a.0.b.1.c` → a: 1, a.0.b: 2)
-  throw new Error('not implemented')
+export const listCountsFrom = (values: FormValues): ListCounts => {
+  const counts: ListCounts = {}
+  for (const path of Object.keys(values)) {
+    const segments = path.split('.')
+    // nested lists too: `a.0.b.1.c` → a: 1, a.0.b: 2
+    for (let i = 1; i < segments.length; i++) {
+      const segment = segments[i] ?? ''
+      if (!/^\d+$/.test(segment)) continue
+      const prefix = segments.slice(0, i).join('.')
+      counts[prefix] = Math.max(counts[prefix] ?? 0, Number(segment) + 1)
+    }
+  }
+  return counts
 }
 
 /** The input field at a dotted path (`family.0.receipt`), or undefined; skips content blocks. */
 export const fieldAtPath = (
-  _fields: RenderField[],
-  _path: string,
+  fields: RenderField[],
+  path: string,
 ): Exclude<RenderField, FieldOf<'message' | 'image'>> | undefined => {
-  // 1. walk(fields, {}, listCountsFrom of the path itself, '', visit) and return the field
-  //    whose path equals `path` (hidden branches included: an upload can come before the
-  //    condition is re-checked)
-  throw new Error('not implemented')
+  let found: Exclude<RenderField, FieldOf<'message' | 'image'>> | undefined
+  const visit: Visit = (field, fieldPathHere) => {
+    if (!found && fieldPathHere === path && !isContentBlock(field)) found = field
+  }
+  // hidden branches included: an upload can come before the condition is re-checked
+  const visitHidden = (inner: RenderField[], prefix: string): void =>
+    walk(inner, {}, listCounts, prefix, visit, visitHidden)
+  const listCounts = listCountsFrom({ [path]: '' })
+  walk(fields, {}, listCounts, '', visit, visitHidden)
+  return found
 }
 
 /** The label each visible answer path shows, for the review screen. */

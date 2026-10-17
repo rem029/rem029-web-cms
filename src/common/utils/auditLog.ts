@@ -203,9 +203,12 @@ export const tenantOf = (slug: CollectionSlug, doc: Record<string, unknown>): nu
 /**
  * Client IP from the first entry of `x-forwarded-for` when `TRUST_PROXY=true`.
  */
-export const clientIp = (req: PayloadRequest): string | null => {
+export const clientIp = (req: PayloadRequest): string | null => clientIpFromHeaders(req.headers)
+
+/** As `clientIp`, from bare headers (server actions read them through `next/headers`). */
+export const clientIpFromHeaders = (headers: Pick<Headers, 'get'>): string | null => {
   if (process.env.TRUST_PROXY === 'true') {
-    const forwarded = req.headers.get('x-forwarded-for')
+    const forwarded = headers.get('x-forwarded-for')
     if (forwarded) {
       const first = forwarded.split(',')[0]?.trim()
       if (first) return first.slice(0, 64)

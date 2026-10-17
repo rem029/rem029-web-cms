@@ -42,20 +42,24 @@ export type SubmissionRow = { field: string; value: string }
 
 export type SubmitResult = { ok: true } | { ok: false; error: string }
 
-/** Sends the answers; step 3 passes `submitFormAction`, tests pass a fake. */
+/** Sends the answers; step 3b passes `submitFormAction`, tests pass a fake. */
 export type SubmitHandler = (input: {
   formId: number
-  // step 3a: ADD — locale (the server answers in the visitor's language), honeypot (the hidden
-  // fb_website input), termsAccepted (the terms checkbox when the form has terms)
+  /** The server answers in the visitor's language. */
+  locale: RendererLocale
   submissionData: SubmissionRow[]
+  /** The hidden `fb_website` input: people leave it empty, bots fill it. */
+  honeypot?: string
+  /** The terms checkbox, when the form has terms. */
+  termsAccepted?: boolean
 }) => Promise<SubmitResult>
 
 export type UploadResult = { ok: true; id: number } | { ok: false; error: string }
 
-/** Stores a file or a signature png; step 3 passes `uploadFileAction`, tests pass a fake. */
+/** Stores a file or a signature png; step 3b passes `uploadFileAction`, tests pass a fake. */
 export type UploadHandler = (input: {
   formId: number
-  // step 3a: ADD — locale, as on SubmitHandler
+  locale: RendererLocale
   fieldName: string
   file: File
 }) => Promise<UploadResult>

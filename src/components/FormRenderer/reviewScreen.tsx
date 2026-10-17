@@ -19,7 +19,8 @@ export type ReviewScreenProps = {
   submitting: boolean
   /** Shown beside the submit button (the "draft saved" note). */
   status?: React.ReactNode
-  // step 3a: ADD — terms?: React.ReactNode, rendered above the submit button
+  /** The terms checkbox and the honeypot, above the submit button. */
+  beforeSubmit?: React.ReactNode
 }
 
 /** `family.1.name` → ' 2': the row number of the innermost list, for the answer's label. */
@@ -36,6 +37,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
   submitLabel,
   submitting,
   status,
+  beforeSubmit,
 }) => {
   const { values, listCounts, locale } = useFormRenderer()
   const text = formText(locale)
@@ -71,6 +73,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
           </section>
         )
       })}
+      {beforeSubmit}
       <div className="fb-actions">
         {status}
         <button

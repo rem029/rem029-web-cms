@@ -398,7 +398,7 @@ const UploadInput: React.FC<{
     if (file.size > FORM_UPLOAD_MAX_BYTES) return setFieldError(path, text.tooLarge)
 
     setUploading(true)
-    const result = await upload({ formId, fieldName: path, file }).catch(() => null)
+    const result = await upload({ formId, locale, fieldName: path, file }).catch(() => null)
     setUploading(false)
     if (result?.ok) {
       setValue(path, result.id)

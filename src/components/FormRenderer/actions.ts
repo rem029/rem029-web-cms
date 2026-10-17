@@ -4,22 +4,40 @@
  * and `/forms/<slug>`): no `/api` call from the browser. Each reads the request (host → tenant,
  * session → user, trusted proxy → ip) and hands over to `submissions.ts`, where the checks live.
  */
-import type { SubmitInput, UploadInput } from './submissions'
+import configPromise from '@payload-config'
+import { headers } from 'next/headers'
+import { getPayload, type Payload } from 'payload'
+
+import { clientIpFromHeaders } from '@/common/utils/auditLog'
+import { getFrontendTenantId } from '@/common/utils/frontendTenant'
+
+import {
+  type SubmissionContext,
+  type SubmitInput,
+  type UploadInput,
+  submitForm,
+  uploadFile,
+} from './submissions'
 import type { SubmitResult, UploadResult } from './types'
 
-export const submitFormAction = async (_input: SubmitInput): Promise<SubmitResult> => {
-  // 1. payload = getPayload({ config }); context = await requestContext(payload)
-  // 2. return submitForm(context, input)
-  throw new Error('not implemented')
+export const submitFormAction = async (input: SubmitInput): Promise<SubmitResult> => {
+  const payload = await getPayload({ config: configPromise })
+  return submitForm(await requestContext(payload), input)
 }
 
-export const uploadFileAction = async (_input: UploadInput): Promise<UploadResult> => {
-  // 1. as submitFormAction, with uploadFile
-  throw new Error('not implemented')
+export const uploadFileAction = async (input: UploadInput): Promise<UploadResult> => {
+  const payload = await getPayload({ config: configPromise })
+  return uploadFile(await requestContext(payload), input)
 }
 
 // not exported: a 'use server' file exports only actions
-// const requestContext = async (payload): Promise<SubmissionContext> =>
-//   tenantId: await getFrontendTenantId()
-//   user: (await payload.auth({ headers: await headers() })).user, if from `users`
-//   ip: TRUST_PROXY === 'true' ? first x-forwarded-for entry : null
+const requestContext = async (payload: Payload): Promise<SubmissionContext> => {
+  const headerList = await headers()
+  const { user } = await payload.auth({ headers: headerList })
+  return {
+    payload,
+    tenantId: await getFrontendTenantId(),
+    user: user?.collection === 'users' ? user : null,
+    ip: clientIpFromHeaders(headerList),
+  }
+}

@@ -1,6 +1,26 @@
 import type { CollectionBeforeValidateHook } from 'payload'
+import { APIError, ValidationError } from 'payload'
 
-import type { FormSubmission } from '@/payload-types'
+import { formRefusal } from '@/common/utils/formAvailability'
+import { extractTenantId } from '@/common/utils/tenantCollections'
+import {
+  fieldAtPath,
+  listCountsFrom,
+  missingRequired,
+  toSubmissionData,
+  valuesFromSubmission,
+} from '@/components/FormRenderer/helpers'
+import type { FormSubmission, User } from '@/payload-types'
+
+const REFUSALS = {
+  inactive: "This form isn't taking answers.",
+  not_open_yet: "This form isn't taking answers.",
+  closed: "This form isn't taking answers.",
+  members_only: 'Only members can fill in this form.',
+} as const
+
+const isUser = (user: unknown): user is User =>
+  typeof user === 'object' && user !== null && 'collection' in user && user.collection === 'users'
 
 /**
  * The form's own rules for every new submission, the submit action's and `POST
@@ -12,16 +32,82 @@ import type { FormSubmission } from '@/payload-types'
 export const validateSubmission: CollectionBeforeValidateHook<FormSubmission> = async ({
   data,
   operation,
-  req: _req,
+  req,
 }) => {
   if (operation !== 'create' || !data) return data
-  // 1. load the form (depth 0, req); missing → APIError 400 (as setFormSubmissionTenant)
-  // 2. formRefusal(form, req.user, new Date()) → log warn (form, tenant, reason), APIError 403
-  //    "This form isn't taking answers." / "Only members can fill in this form."
-  // 3. values = valuesFromSubmission(data.submissionData); listCounts = listCountsFrom(values)
-  // 4. missingRequired(fields, values, listCounts) → ValidationError on submissionData naming
-  //    the missing labels; log warn
-  // 5. file / signature values must be ids of form-uploads with this form → else ValidationError
-  // 6. data.submissionData = toSubmissionData(fields, values, listCounts); return data
-  throw new Error('not implemented')
+  const { payload } = req
+
+  // extractTenantId reads any relationship's id (number, string or populated doc)
+  const formId = extractTenantId(data.form)
+  const form =
+    formId === null
+      ? null
+      : await payload
+          .findByID({ collection: 'forms', id: formId, depth: 0, req, overrideAccess: true })
+          .catch(() => null)
+  if (!form) {
+    throw new APIError('The form associated with this submission could not be found.', 400)
+  }
+  const tenantId = extractTenantId(form.tenant)
+
+  const reason = formRefusal(form, isUser(req.user) ? req.user : null, new Date())
+  if (reason) {
+    payload.logger.warn({ msg: `form submission refused: ${reason}`, tenantId, formId })
+    throw new APIError(REFUSALS[reason], 403)
+  }
+
+  const fields = form.fields ?? []
+  const values = valuesFromSubmission(data.submissionData)
+  const listCounts = listCountsFrom(values)
+
+  const missing = missingRequired(fields, values, listCounts)
+  if (missing.length) {
+    payload.logger.warn({ msg: 'form submission refused: missing answers', tenantId, formId })
+    throw new ValidationError({
+      collection: 'form-submissions',
+      errors: missing.map(({ label }) => ({
+        message: `${label} is required.`,
+        path: 'submissionData',
+      })),
+    })
+  }
+
+  const rows = toSubmissionData(fields, values, listCounts)
+  const uploadIds = rows
+    .filter((row) => {
+      const type = fieldAtPath(fields, row.field)?.blockType
+      return type === 'file' || type === 'signature'
+    })
+    .map((row) => ({ field: row.field, id: Number(row.value) }))
+  if (uploadIds.length) {
+    const { docs } = await payload.find({
+      collection: 'form-uploads',
+      where: {
+        and: [
+          { id: { in: uploadIds.map(({ id }) => id).filter(Number.isInteger) } },
+          { form: { equals: form.id } },
+        ],
+      },
+      depth: 0,
+      limit: uploadIds.length,
+      pagination: false,
+      overrideAccess: true,
+      req,
+    })
+    const ownIds = new Set(docs.map((doc) => doc.id))
+    const foreign = uploadIds.filter(({ id }) => !ownIds.has(id))
+    if (foreign.length) {
+      payload.logger.warn({ msg: 'form submission refused: foreign upload', tenantId, formId })
+      throw new ValidationError({
+        collection: 'form-submissions',
+        errors: foreign.map(({ field }) => ({
+          message: `The file for ${field} is not one of this form's uploads.`,
+          path: 'submissionData',
+        })),
+      })
+    }
+  }
+
+  data.submissionData = rows
+  return data
 }

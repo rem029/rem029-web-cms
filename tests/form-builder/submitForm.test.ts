@@ -1,64 +1,193 @@
-import { describe, expect, it } from 'vitest'
+import type { Payload } from 'payload'
+import { beforeAll, describe, expect, it } from 'vitest'
+
+import { formText } from '@/components/FormRenderer/i18n'
+import {
+  SUBMIT_LIMIT,
+  type SubmissionContext,
+  submitForm,
+} from '@/components/FormRenderer/submissions'
+import type { Tenant } from '@/payload-types'
+
+import { getTestPayload } from '../common/payload'
+import { TEST_TENANTS, TEST_USERS } from '../common/seed'
+import { findTenant } from '../common/tenants'
+import { uniqueName } from '../common/unique'
+import { loadUser, type SessionUser } from '../common/users'
+import { createForm, type FormData, formData } from './forms'
+
+const DAY_MS = 24 * 60 * 60 * 1000
+const text = formText('en')
 
 // submitForm (src/components/FormRenderer/submissions.ts): what submitFormAction does once the
 // request is read. context = { payload, tenantId: the host's tenant, user, ip: a unique one per
 // test (the rate limit is per ip and form) }; forms built with ./forms (createForm, formData).
 describe('submitForm', () => {
+  let payload: Payload
+  let superUser: SessionUser
+  let otherTenant: SessionUser
+  let tenantA: Tenant
+  let tenantB: Tenant
+
+  beforeAll(async () => {
+    payload = await getTestPayload()
+    superUser = await loadUser(payload, TEST_USERS.superUser)
+    otherTenant = await loadUser(payload, TEST_USERS.otherTenant)
+    tenantA = await findTenant(payload, TEST_TENANTS.a)
+    tenantB = await findTenant(payload, TEST_TENANTS.b)
+  })
+
+  /** A form in test-a with a required text field `name`, plus `extra` settings. */
+  const openForm = (extra: Partial<FormData> = {}) =>
+    createForm(payload, superUser, {
+      ...formData(tenantA.id, uniqueName('submit'), [
+        { blockType: 'text', name: 'name', label: 'Name', required: true },
+      ]),
+      ...extra,
+    })
+
+  const contextFor = (
+    tenant: Tenant,
+    options: { user?: SessionUser | null; ip?: string } = {},
+  ): SubmissionContext => ({
+    payload,
+    tenantId: tenant.id,
+    user: options.user ?? null,
+    ip: options.ip ?? uniqueName('ip'),
+  })
+
+  const answers = (formId: number) => ({
+    formId,
+    locale: 'en' as const,
+    submissionData: [{ field: 'name', value: 'Sara' }],
+  })
+
+  const savedFor = async (formId: number) => {
+    const { docs } = await payload.find({
+      collection: 'form-submissions',
+      where: { form: { equals: formId } },
+      depth: 0,
+    })
+    return docs
+  }
+
   it('saves a submission under the form tenant', async () => {
-    // arrange: an open form in test-a with a required text field `name`; context tenantId test-a
-    // act: submitForm(context, { formId, locale: 'en', submissionData: [{ field: 'name', value }] })
-    // assert: { ok: true }; one form-submissions doc for the form, tenant test-a, data as sent
-    expect.fail('not implemented')
+    // arrange
+    const form = await openForm()
+
+    // act
+    const result = await submitForm(contextFor(tenantA), answers(form.id))
+
+    // assert
+    expect(result).toEqual({ ok: true })
+    const saved = await savedFor(form.id)
+    expect(saved).toHaveLength(1)
+    expect(saved[0]).toMatchObject({
+      tenant: tenantA.id,
+      submissionData: [{ field: 'name', value: 'Sara' }],
+    })
   })
 
   it('refuses a form of another tenant host', async () => {
-    // arrange: a form in test-a; context tenantId test-b
-    // act: submitForm
-    // assert: { ok: false } with somethingWrong; no submission saved for the form
-    expect.fail('not implemented')
+    // arrange
+    const form = await openForm()
+
+    // act
+    const result = await submitForm(contextFor(tenantB), answers(form.id))
+
+    // assert
+    expect(result).toEqual({ ok: false, error: text.somethingWrong })
+    expect(await savedFor(form.id)).toEqual([])
   })
 
   it('refuses an inactive form', async () => {
-    // arrange: a form in test-a with isActive false
-    // act: submitForm
-    // assert: { ok: false, error: formText('en').formClosed }; nothing saved
-    expect.fail('not implemented')
+    // arrange
+    const form = await openForm({ isActive: false })
+
+    // act
+    const result = await submitForm(contextFor(tenantA), answers(form.id))
+
+    // assert
+    expect(result).toEqual({ ok: false, error: text.formClosed })
+    expect(await savedFor(form.id)).toEqual([])
   })
 
-  it('refuses outside the active window', async () => {
-    // arrange: a form with activeFrom tomorrow and one with activeTo yesterday (it.each)
-    // act: submitForm with now = today
-    // assert: notOpenYet / formClosed; nothing saved
-    expect.fail('not implemented')
+  it.each([
+    { window: 'not open yet', field: 'activeFrom', shift: DAY_MS, error: text.notOpenYet },
+    { window: 'closed', field: 'activeTo', shift: -DAY_MS, error: text.formClosed },
+  ])('refuses outside the active window ($window)', async ({ field, shift, error }) => {
+    // arrange
+    const form = await openForm({ [field]: new Date(Date.now() + shift).toISOString() })
+
+    // act
+    const result = await submitForm(contextFor(tenantA), answers(form.id))
+
+    // assert
+    expect(result).toEqual({ ok: false, error })
+    expect(await savedFor(form.id)).toEqual([])
   })
 
-  it('refuses an auth form without a member session', async () => {
-    // arrange: a requires_auth form in test-a; users: none, otherTenant (test-b only) (it.each)
-    // act: submitForm
-    // assert: { ok: false, error: membersOnly }; nothing saved
-    expect.fail('not implemented')
-  })
+  it.each([{ who: 'anonymous' }, { who: 'otherTenant' }])(
+    'refuses an auth form without a member session ($who)',
+    async ({ who }) => {
+      // arrange
+      const form = await openForm({ requires_auth: true })
+      const user = who === 'otherTenant' ? otherTenant : null
+
+      // act
+      const result = await submitForm(contextFor(tenantA, { user }), answers(form.id))
+
+      // assert
+      expect(result).toEqual({ ok: false, error: text.membersOnly })
+      expect(await savedFor(form.id)).toEqual([])
+    },
+  )
 
   it('drops a submission that fills the honeypot', async () => {
-    // arrange: an open form in test-a
-    // act: submitForm with honeypot 'https://spam.example'
-    // assert: { ok: true } (the bot sees success); no submission saved
-    expect.fail('not implemented')
+    // arrange
+    const form = await openForm()
+
+    // act
+    const result = await submitForm(contextFor(tenantA), {
+      ...answers(form.id),
+      honeypot: 'https://spam.example',
+    })
+
+    // assert
+    expect(result).toEqual({ ok: true })
+    expect(await savedFor(form.id)).toEqual([])
   })
 
   it('rate limits repeated submissions', async () => {
-    // arrange: an open form; one ip
-    // act: SUBMIT_LIMIT + 1 submissions from that ip, then one from another ip
-    // assert: the last over-limit one { ok: false, error: tooMany }; the other ip { ok: true };
-    //         SUBMIT_LIMIT submissions saved from the first ip
-    expect.fail('not implemented')
+    // arrange
+    const form = await openForm()
+    const context = contextFor(tenantA)
+    const allowed = await Promise.all(
+      Array.from({ length: SUBMIT_LIMIT }, () => submitForm(context, answers(form.id))),
+    )
+
+    // act
+    const overLimit = await submitForm(context, answers(form.id))
+    const otherIp = await submitForm(contextFor(tenantA), answers(form.id))
+
+    // assert
+    expect(allowed.every((result) => result.ok)).toBe(true)
+    expect(overLimit).toEqual({ ok: false, error: text.tooMany })
+    expect(otherIp).toEqual({ ok: true })
+    expect(await savedFor(form.id)).toHaveLength(SUBMIT_LIMIT + 1)
   })
 
-  // proposed addition
   it('refuses without accepting the terms', async () => {
-    // arrange: a form with has_terms true
-    // act: submitForm without termsAccepted, then with termsAccepted true
-    // assert: first { ok: false, error: termsRequired }, second { ok: true }
-    expect.fail('not implemented')
+    // arrange
+    const form = await openForm({ has_terms: true })
+    const context = contextFor(tenantA)
+
+    // act
+    const without = await submitForm(context, answers(form.id))
+    const accepted = await submitForm(context, { ...answers(form.id), termsAccepted: true })
+
+    // assert
+    expect(without).toEqual({ ok: false, error: text.termsRequired })
+    expect(accepted).toEqual({ ok: true })
   })
 })

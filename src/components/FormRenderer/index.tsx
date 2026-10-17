@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Form } from '@/payload-types'
 
+import { Media } from '@/components/Media'
 import RichText from '@/components/RichText'
 
 import { APPEARANCE_DEFAULTS, appearanceToStyle } from './appearance'
@@ -43,6 +44,9 @@ export type FormRendererProps = {
 
 type Status = 'idle' | 'submitting' | 'done'
 
+/** The error key of the terms checkbox (not an answer, so never in `submissionData`). */
+const TERMS_PATH = 'fb_terms'
+
 export const FormRenderer: React.FC<FormRendererProps> = ({
   form,
   locale,
@@ -55,6 +59,8 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   const [errors, setErrors] = useState<FormErrors>({})
   const [summary, setSummary] = useState<string | null>(null)
   const [status, setStatus] = useState<Status>('idle')
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  const honeypotRef = useRef<HTMLInputElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const confirmationRef = useRef<HTMLDivElement>(null)
   const text = formText(locale)
@@ -108,22 +114,26 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   }, [status])
 
   const send = async () => {
-    const missing = missingRequired(fields, values, listCounts)
+    const missing = missingRequired(fields, values, listCounts).map(({ path }) => [
+      path,
+      text.required,
+    ])
+    if (form.has_terms && !termsAccepted) missing.push([TERMS_PATH, text.termsRequired])
     if (missing.length) {
-      setErrors(Object.fromEntries(missing.map(({ path }) => [path, text.required])))
+      setErrors(Object.fromEntries(missing))
       setSummary(text.fixErrors(missing.length))
-      focusFirstError(rootRef.current, missing[0]?.path)
+      focusFirstError(rootRef.current, missing[0]?.[0])
       return
     }
 
     setStatus('submitting')
     setSummary(null)
-    // step 3a: CHANGE — also send locale, honeypot (the hidden input's value) and termsAccepted;
-    // before sending, a form with has_terms and the box unticked → field error on the terms
-    // checkbox (text.termsRequired) + summary, like a missing required field
     const result = await submit({
       formId: form.id,
+      locale,
       submissionData: toSubmissionData(fields, values, listCounts),
+      honeypot: honeypotRef.current?.value || undefined,
+      termsAccepted: form.has_terms ? termsAccepted : undefined,
     }).catch(() => null)
 
     if (!result?.ok) {
@@ -164,6 +174,28 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   const draftNote =
     savedAt && status === 'idle' ? <p className="fb-draft-status">{text.draftSaved}</p> : null
 
+  // shown before the submit button, on one page or the review screen
+  const beforeSubmit = (
+    <>
+      {form.has_terms && (
+        <Terms
+          accepted={termsAccepted}
+          content={form.terms_content}
+          disabled={status !== 'idle'}
+          error={errors[TERMS_PATH]}
+          id={`fb-${form.id}-terms`}
+          label={text.acceptTerms}
+          onChange={(accepted) => {
+            setTermsAccepted(accepted)
+            setFieldError(TERMS_PATH, undefined)
+          }}
+        />
+      )}
+      <Honeypot id={`fb-${form.id}-website`} inputRef={honeypotRef} />
+    </>
+  )
+  const headerImage = typeof form.header_image === 'object' ? form.header_image : null
+
   return (
     <FormRendererContext.Provider value={state}>
       <div
@@ -178,8 +210,11 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
       >
         {scopedCss && <style>{scopedCss}</style>}
         <div className="fb-body">
-          {/* step 3a: ADD — header_image (populated media) as <figure className="fb-header"> above
-              the form, alt from the media */}
+          {headerImage && (
+            <figure className="fb-header">
+              <Media resource={headerImage} />
+            </figure>
+          )}
           {status === 'done' ? (
             <div className="fb-confirmation" ref={confirmationRef} role="status" tabIndex={-1}>
               {form.confirmationMessage && (
@@ -199,6 +234,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
                   onSubmit={() => void send()}
                   status={draftNote}
                   stepIndicator={appearanceStepIndicator(form)}
+                  beforeSubmit={beforeSubmit}
                   submitLabel={submitLabel}
                   submitting={status === 'submitting'}
                 />
@@ -212,10 +248,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
                   }}
                 >
                   <RecursiveFields fields={fields} />
-                  {/* step 3a: ADD — <Terms /> (terms_content RichText + a required checkbox,
-                      fb-terms) when has_terms, here and on the review screen before submit;
-                      <Honeypot /> (input name fb_website, visually hidden, tabIndex -1,
-                      autoComplete off, aria-hidden wrapper), its value kept in a ref */}
+                  {beforeSubmit}
                   <div className="fb-actions">
                     {draftNote}
                     <button
@@ -238,3 +271,69 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 
 const appearanceStepIndicator = (form: Form) =>
   form.appearance?.step_indicator ?? APPEARANCE_DEFAULTS.step_indicator
+
+type TermsProps = {
+  id: string
+  label: string
+  content: Form['terms_content']
+  accepted: boolean
+  disabled: boolean
+  error?: string
+  onChange: (accepted: boolean) => void
+}
+
+/** The form's terms and the box to accept them (`fb-terms`, `data-field="fb_terms"`). */
+const Terms: React.FC<TermsProps> = ({
+  id,
+  label,
+  content,
+  accepted,
+  disabled,
+  error,
+  onChange,
+}) => (
+  <div className={`fb-terms${error ? ' fb-field--error' : ''}`} data-field={TERMS_PATH}>
+    {content && (
+      <div className="fb-terms-content">
+        <RichText data={content} enableGutter={false} />
+      </div>
+    )}
+    <label className="fb-check" htmlFor={id}>
+      <input
+        aria-describedby={error ? `${id}-error` : undefined}
+        aria-invalid={error ? true : undefined}
+        checked={accepted}
+        className="fb-checkbox"
+        disabled={disabled}
+        id={id}
+        onChange={(event) => onChange(event.target.checked)}
+        type="checkbox"
+      />
+      <span className="fb-label">
+        {label}
+        <span aria-hidden="true" className="fb-required">
+          *
+        </span>
+      </span>
+    </label>
+    {error && (
+      <p className="fb-error" id={`${id}-error`} role="alert">
+        {error}
+      </p>
+    )}
+  </div>
+)
+
+/**
+ * A field people never see and bots fill in (`fb_website`): off-screen, not `display: none`,
+ * so bots still find it; out of the tab order and hidden from screen readers.
+ */
+const Honeypot: React.FC<{ id: string; inputRef: React.RefObject<HTMLInputElement | null> }> = ({
+  id,
+  inputRef,
+}) => (
+  <div aria-hidden="true" className="fb-honeypot">
+    <label htmlFor={id}>Website</label>
+    <input autoComplete="off" id={id} name="fb_website" ref={inputRef} tabIndex={-1} type="text" />
+  </div>
+)

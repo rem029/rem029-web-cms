@@ -146,6 +146,7 @@ describe('FormRenderer', () => {
     await waitFor(() => expect(screen.getByText('Thanks!')).toBeTruthy())
     expect(submit).toHaveBeenCalledWith({
       formId: 1,
+      locale: 'en',
       submissionData: [{ field: 'family.0.name', value: 'Sara' }],
     })
   })
@@ -195,7 +196,9 @@ describe('FormRenderer', () => {
     // assert
     expect(container.querySelector('.fb-content--message')?.textContent).toContain('Welcome')
     expect(screen.queryByRole('textbox')).toBeNull()
-    await waitFor(() => expect(submit).toHaveBeenCalledWith({ formId: 1, submissionData: [] }))
+    await waitFor(() =>
+      expect(submit).toHaveBeenCalledWith({ formId: 1, locale: 'en', submissionData: [] }),
+    )
   })
 
   it('applies appearance and scoped custom css to the root', () => {
@@ -230,17 +233,45 @@ describe('FormRenderer', () => {
 
   // proposed addition (step 3a)
   it('asks to accept the terms before submitting', async () => {
-    // arrange: formDoc(stockFields()) with has_terms and terms_content; required fields filled
-    // act: submit without ticking the terms, then tick it and submit
-    // assert: first a terms error and no submit call; then submit called with termsAccepted true
-    expect.fail('not implemented')
+    // arrange
+    const form = formDoc(stockFields(), {
+      has_terms: true,
+      terms_content: richText('Be kind to the staff.'),
+    })
+    const { submit } = renderForm(form)
+
+    // act
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+    const termsError = screen.queryByText('Please accept the terms to continue.')
+    const calledBefore = submit.mock.calls.length
+    fireEvent.click(screen.getByLabelText(/I accept the terms and conditions/))
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+
+    // assert
+    expect(screen.getByText('Be kind to the staff.')).toBeTruthy()
+    expect(termsError).toBeTruthy()
+    expect(calledBefore).toBe(0)
+    await waitFor(() =>
+      expect(submit).toHaveBeenCalledWith(expect.objectContaining({ termsAccepted: true })),
+    )
   })
 
   // proposed addition (step 3a)
   it('sends the locale and the honeypot with the answers', async () => {
-    // arrange: an arabic form; the hidden fb_website input filled (as a bot would)
-    // act: submit
-    // assert: submit called with locale 'ar' and honeypot set
-    expect.fail('not implemented')
+    // arrange
+    const { submit, container } = renderForm(formDoc(listFields()), 'ar')
+    const honeypot = container.querySelector<HTMLInputElement>('input[name="fb_website"]')
+    if (!honeypot) throw new Error('tests: no honeypot input')
+    fireEvent.change(honeypot, { target: { value: 'https://spam.example' } })
+
+    // act
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+
+    // assert
+    await waitFor(() =>
+      expect(submit).toHaveBeenCalledWith(
+        expect.objectContaining({ locale: 'ar', honeypot: 'https://spam.example' }),
+      ),
+    )
   })
 })
