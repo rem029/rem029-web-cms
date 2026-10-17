@@ -77,3 +77,14 @@ jobs:
           yarn payload generate:importmap
           yarn payload migrate
           yarn build
+
+      # a schema change without a migration: migrate:create would write one (rem0020)
+      - name: Migrations match the config
+        run: |
+          yarn payload migrate:create drift_check --skip-empty
+          drift="$(git status --porcelain src/migrations)"
+          if [[ -n "$drift" ]]; then
+            echo "::error::the config has schema changes without a migration: run pnpm payload migrate:create"
+            echo "$drift"
+            exit 1
+          fi
