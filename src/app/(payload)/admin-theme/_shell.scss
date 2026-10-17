@@ -368,3 +368,34 @@
     }
   }
 }
+
+// SKELETON (phase 3 step 4): the floating document sidebar. Payload 3.44: `.document-fields` (with
+// `--has-sidebar`), `.document-fields__main`, `.document-fields__sidebar-wrap` (sticky, a third of
+// the width), `.document-fields__sidebar`; below 1024px Payload stacks the sidebar under the form.
+// Declarations come in the implementation.
+.document-fields--has-sidebar {
+  .document-fields__main {
+    // 1. always the full width (the sidebar never takes a column)
+  }
+
+  .document-fields__sidebar-wrap {
+    // 2. closed (no `html[data-doc-sidebar='open']`): display none
+    // 3. open: position fixed, inset-inline-end 0, top below the topbar and the document bar
+    //    (var(--app-header-height) + var(--doc-controls-height)), height the rest of the viewport,
+    //    width min(420px, 100vw), z-index above the dim, solid --admin-bg, 2px --admin-border on the
+    //    inline start and top, --admin-shadow-l, overflow-y auto, overscroll-behavior contain
+    // 4. ≤768px: full width, no shadow
+  }
+}
+
+html[data-doc-sidebar='open'] {
+  // 5. overflow hidden (the page scrolls on the root)
+  // 6. .document-fields__main: pointer-events none; an ::after dim (80% --admin-bg) over the form
+  //    below the topbar and the document bar, under the panel
+}
+
+// the toggle button in the document bar: the ⋮ chip's look (32px, 2px border, radius-s); pressed
+// (aria-pressed=true): --admin-primary fill, --admin-ink icon; focus-visible --admin-shadow-xs
+.sidebar-toggle {
+  // 7. as above
+}
