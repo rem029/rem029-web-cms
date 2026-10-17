@@ -1,68 +1,165 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from 'vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { FormRenderer } from '@/components/FormRenderer'
+import type { RendererLocale } from '@/components/FormRenderer/types'
+import type { Form } from '@/payload-types'
+
+import {
+  conditionalFields,
+  fakeSubmit,
+  fakeUpload,
+  formDoc,
+  listFields,
+  stockFields,
+  twoStepFields,
+} from './renderForms'
+
+// the site's RichText reaches the Code block's copy button, which imports the admin UI (scss)
+vi.mock('@payloadcms/ui/icons/Copy', () => ({ CopyIcon: () => null }))
+
+const renderForm = (form: Form, locale: RendererLocale = 'en', submit = fakeSubmit()) => {
+  const view = render(
+    <FormRenderer form={form} locale={locale} submit={submit} upload={fakeUpload()} />,
+  )
+  return { ...view, submit }
+}
 
 describe('FormRenderer', () => {
   afterEach(() => {
     cleanup()
-    // and localStorage.clear()
+    localStorage.clear()
   })
 
   it('renders every stock field', () => {
-    // arrange: formDoc(stockFields())
-    // act: render <FormRenderer form locale="en" submit upload />
-    // assert: a labelled control per field (getByLabelText), the message text, a "Send" button
-    expect.fail('not implemented')
+    // arrange
+    const form = formDoc(stockFields())
+
+    // act
+    renderForm(form)
+
+    // assert
+    const labels = [
+      'Full name',
+      'About you',
+      'Email',
+      'Guests',
+      'Topic',
+      'Inside',
+      'Outside',
+      'Newsletter',
+      'Visit date',
+      'Country',
+      'State',
+    ]
+    expect(labels.filter((label) => !screen.queryByLabelText(label))).toEqual([])
+    expect(screen.getByText('Fields marked * are required.')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Send' })).toBeTruthy()
   })
 
-  it('shows a conditional field only when matched', async () => {
-    // arrange: formDoc(conditionalFields()), rendered
-    // act: pick "Alone", then "Family"
-    // assert: no "Family note" after Alone; "Family note" shows after Family
-    expect.fail('not implemented')
+  it('shows a conditional field only when matched', () => {
+    // arrange
+    renderForm(formDoc(conditionalFields()))
+
+    // act
+    fireEvent.click(screen.getByLabelText('Alone'))
+    const afterAlone = screen.queryByLabelText(/Family note/)
+    fireEvent.click(screen.getByLabelText('Family'))
+
+    // assert
+    expect(afterAlone).toBeNull()
+    expect(screen.getByLabelText(/Family note/)).toBeTruthy()
   })
 
   it('skips required checks on hidden fields', async () => {
-    // arrange: formDoc(conditionalFields()), rendered, "Alone" picked (family_note hidden)
-    // act: click "Send"
-    // assert: submit called once, no "required" error
-    expect.fail('not implemented')
+    // arrange
+    const { submit } = renderForm(formDoc(conditionalFields()))
+    fireEvent.click(screen.getByLabelText('Alone'))
+
+    // act
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+
+    // assert
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(1))
+    expect(screen.queryByText('This field is required.')).toBeNull()
   })
 
-  it('adds list rows up to max_items', async () => {
-    // arrange: formDoc(listFields()), rendered (one row)
-    // act: click "Add Family" once
-    // assert: two "Name" inputs; the add button is disabled
-    expect.fail('not implemented')
+  it('adds list rows up to max_items', () => {
+    // arrange
+    renderForm(formDoc(listFields()))
+
+    // act
+    fireEvent.click(screen.getByRole('button', { name: 'Add Family' }))
+
+    // assert
+    expect(screen.getAllByLabelText('Name')).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Add Family' }).hasAttribute('disabled')).toBe(true)
   })
 
-  it('walks a multi-step form to the review screen', async () => {
-    // arrange: formDoc(twoStepFields()), rendered
-    // act: Next with full_name empty; fill it, Next; Review
-    // assert: required error on step 1 and still on it; then step 2; then the review lists
-    //         "Full name" with the typed value and an Edit per step
-    expect.fail('not implemented')
+  it('walks a multi-step form to the review screen', () => {
+    // arrange
+    renderForm(formDoc(twoStepFields()))
+
+    // act
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+    const requiredShown = screen.queryByText('This field is required.')
+    const stayed = screen.queryByLabelText(/Full name/)
+    fireEvent.change(screen.getByLabelText(/Full name/), { target: { value: 'Sara' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+    const onVisit = screen.queryByLabelText('Visit date')
+    fireEvent.click(screen.getByRole('button', { name: 'Review' }))
+
+    // assert
+    expect(requiredShown).toBeTruthy()
+    expect(stayed).toBeTruthy()
+    expect(onVisit).toBeTruthy()
+    expect(screen.getByText('Full name')).toBeTruthy()
+    expect(screen.getByText('Sara')).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: /^Edit/ })).toHaveLength(2)
   })
 
   it('renders right-to-left in arabic', () => {
-    // arrange: formDoc(twoStepFields())
-    // act: render with locale="ar"
-    // assert: the .fb-form root has dir="rtl" and lang="ar"; the Next button reads "التالي"
-    expect.fail('not implemented')
+    // arrange
+    const form = formDoc(twoStepFields())
+
+    // act
+    const { container } = renderForm(form, 'ar')
+
+    // assert
+    const root = container.querySelector('.fb-form')
+    expect(root?.getAttribute('dir')).toBe('rtl')
+    expect(root?.getAttribute('lang')).toBe('ar')
+    expect(screen.getByRole('button', { name: 'التالي' })).toBeTruthy()
   })
 
-  // proposed additions (raised at the skeleton review; dropped if not agreed)
   it('submits flattened answers and shows the confirmation', async () => {
-    // arrange: formDoc(listFields()), rendered
-    // act: type "Sara" in the first Name, click "Send"
-    // assert: submit called with [{ field: 'family.0.name', value: 'Sara' }]; "Thanks!" shows
-    expect.fail('not implemented')
+    // arrange
+    const { submit } = renderForm(formDoc(listFields()))
+
+    // act
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Sara' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }))
+
+    // assert
+    await waitFor(() => expect(screen.getByText('Thanks!')).toBeTruthy())
+    expect(submit).toHaveBeenCalledWith({
+      formId: 1,
+      submissionData: [{ field: 'family.0.name', value: 'Sara' }],
+    })
   })
 
-  it('restores a saved draft', async () => {
-    // arrange: render, type "Sara", unmount
-    // act: render the same form again
-    // assert: the Name input holds "Sara"
-    expect.fail('not implemented')
+  it('restores a saved draft', () => {
+    // arrange
+    const form = formDoc(listFields())
+    const first = renderForm(form)
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Sara' } })
+    first.unmount()
+
+    // act
+    renderForm(form)
+
+    // assert
+    expect(screen.getByLabelText<HTMLInputElement>('Name').value).toBe('Sara')
   })
 })

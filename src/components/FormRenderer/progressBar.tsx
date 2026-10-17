@@ -5,6 +5,7 @@
  */
 import React from 'react'
 
+import { formText } from './i18n'
 import type { RendererLocale } from './types'
 
 export type ProgressBarProps = {
@@ -14,10 +15,25 @@ export type ProgressBarProps = {
   locale: RendererLocale
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = () => {
-  // 1. <div className="fb-progress" role="progressbar" aria-valuemin=1 aria-valuemax=total
-  //      aria-valuenow=current+1 aria-valuetext={labels[current]}>
-  // 2. text formText(locale).stepOf(current + 1, total) · labels[current]
-  // 3. bar width (current + 1) / total; logical properties so it fills from the right in rtl
-  return <div />
-}
+export const ProgressBar: React.FC<ProgressBarProps> = ({ current, total, labels, locale }) => (
+  <div className="fb-progress flex flex-col gap-2">
+    <p className="text-sm text-muted-foreground">
+      {formText(locale).stepOf(current + 1, total)}
+      {labels[current] && ` · ${labels[current]}`}
+    </p>
+    <div
+      aria-valuemax={total}
+      aria-valuemin={1}
+      aria-valuenow={current + 1}
+      aria-valuetext={labels[current]}
+      className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+      role="progressbar"
+    >
+      {/* a block-level child fills from the inline start, so it grows from the right in rtl */}
+      <div
+        className="h-full rounded-full bg-primary transition-[width] motion-reduce:transition-none"
+        style={{ width: `${((current + 1) / total) * 100}%` }}
+      />
+    </div>
+  </div>
+)

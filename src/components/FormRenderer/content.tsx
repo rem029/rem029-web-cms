@@ -6,17 +6,38 @@
  */
 import React from 'react'
 
+import { Media } from '@/components/Media'
+import RichText from '@/components/RichText'
+import { cn } from '@/utilities/ui'
+
 import type { FieldOf } from './types'
 
-export const MessageContent: React.FC<{ block: FieldOf<'message'> }> = () => {
-  // 1. <div className={cn('fb-content fb-content--message', css_class)}>
-  // 2.   <RichText data={message} enableGutter={false} />
-  return <div />
+const IMAGE_SIZES = { small: 'max-w-xs', medium: 'max-w-md', full: 'w-full' } as const
+
+export const MessageContent: React.FC<{ block: FieldOf<'message'> }> = ({ block }) => {
+  if (!block.message) return null
+  return (
+    <div className={cn('fb-content fb-content--message basis-full', block.css_class)}>
+      <RichText data={block.message} enableGutter={false} />
+    </div>
+  )
 }
 
-export const ImageContent: React.FC<{ block: FieldOf<'image'> }> = () => {
-  // 1. media not populated (an id) → null (the page loads forms with depth ≥ 1)
-  // 2. <figure className={cn('fb-content fb-content--image', `fb-image--${size}`, css_class)}>
-  // 3.   <Media resource={media} /> + <figcaption> caption
-  return <figure />
+export const ImageContent: React.FC<{ block: FieldOf<'image'> }> = ({ block }) => {
+  // an unpopulated id means the page loaded the form too shallow: nothing to show
+  if (typeof block.media !== 'object') return null
+  return (
+    <figure
+      className={cn(
+        'fb-content fb-content--image basis-full',
+        IMAGE_SIZES[block.size ?? 'full'],
+        block.css_class,
+      )}
+    >
+      <Media imgClassName="h-auto w-full rounded" resource={block.media} />
+      {block.caption && (
+        <figcaption className="mt-2 text-sm text-muted-foreground">{block.caption}</figcaption>
+      )}
+    </figure>
+  )
 }

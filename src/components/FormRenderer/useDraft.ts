@@ -5,30 +5,75 @@
  * successful submit. Storage can throw (private mode, blocked site data): every read and write
  * is in try/catch and the form still works without it.
  */
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { FormValues, ListCounts } from './types'
 
 export type Draft = { values: FormValues; listCounts: ListCounts }
 
+const EMPTY: Draft = { values: {}, listCounts: {} }
+
 export const draftKey = (formId: number): string => `form-draft-${formId}`
+
+const isDraft = (value: unknown): value is Draft =>
+  typeof value === 'object' &&
+  value !== null &&
+  'values' in value &&
+  'listCounts' in value &&
+  typeof value.values === 'object' &&
+  typeof value.listCounts === 'object'
+
+const readDraft = (formId: number): Draft | null => {
+  try {
+    const stored: unknown = JSON.parse(localStorage.getItem(draftKey(formId)) ?? 'null')
+    return isDraft(stored) ? stored : null
+  } catch {
+    return null
+  }
+}
 
 export const useDraft = (
   formId: number,
   enabled: boolean,
 ): {
   draft: Draft
-  setDraft: (next: Draft) => void
+  updateDraft: (update: (prev: Draft) => Draft) => void
   clearDraft: () => void
-  savedAt: Date | null
 } => {
-  // 1. initial state: enabled → JSON.parse(localStorage[draftKey]) in try/catch, else empty
-  // 2. setDraft: set state; enabled → write to localStorage (try/catch), set savedAt
-  // 3. clearDraft: remove the key (try/catch), reset to empty
-  const [draft, setDraftState] = useState<Draft>({ values: {}, listCounts: {} })
-  const setDraft = useCallback((next: Draft) => setDraftState(next), [])
-  const clearDraft = useCallback(() => setDraftState({ values: {}, listCounts: {} }), [])
-  void formId
-  void enabled
-  return { draft, setDraft, clearDraft, savedAt: null }
+  const [draft, setDraft] = useState<Draft>(EMPTY)
+  // only the visitor's own changes are written, never the empty first render
+  const changed = useRef(false)
+
+  // read after mount: the server render has no storage, so the first render stays empty
+  useEffect(() => {
+    if (!enabled) return
+    const stored = readDraft(formId)
+    if (stored) setDraft(stored)
+  }, [formId, enabled])
+
+  useEffect(() => {
+    if (!enabled || !changed.current) return
+    try {
+      localStorage.setItem(draftKey(formId), JSON.stringify(draft))
+    } catch {
+      // storage full or blocked: the form keeps working without a draft
+    }
+  }, [draft, formId, enabled])
+
+  const updateDraft = useCallback((update: (prev: Draft) => Draft) => {
+    changed.current = true
+    setDraft(update)
+  }, [])
+
+  const clearDraft = useCallback(() => {
+    changed.current = false
+    setDraft(EMPTY)
+    try {
+      localStorage.removeItem(draftKey(formId))
+    } catch {
+      // nothing stored to clear
+    }
+  }, [formId])
+
+  return { draft, updateDraft, clearDraft }
 }

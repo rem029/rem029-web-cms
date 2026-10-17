@@ -10,28 +10,120 @@
  */
 import React from 'react'
 
-import type { RenderField } from './types'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/utilities/ui'
+
+import { ImageContent, MessageContent } from './content'
+import { useFormRenderer } from './context'
+import { FieldControl } from './fields'
+import { evaluateCondition, fieldPath } from './helpers'
+import { formText } from './i18n'
+import type { FieldOf, RenderField } from './types'
 
 export type RecursiveFieldsProps = {
   fields: RenderField[]
   /** Dotted path prefix: '' at the top, `address.` in a group, `family.0.` in a list row. */
   prefix?: string
-  /** Sequence numbers by block id, when the form has `show_sequence_number`. */
-  indices?: Record<string, number>
 }
 
-export const RecursiveFields: React.FC<RecursiveFieldsProps> = () => {
-  // 1. const { values, listCounts, setListCount, locale } = useFormRenderer()
-  // 2. <div className="fb-fields"> (flex-wrap; widths come from each field)
-  // 3. per field, by blockType:
-  //    message → <MessageContent>; image → <ImageContent>
-  //    group → fieldset.fb-group + legend label → <RecursiveFields prefix={`${prefix}${name}.`}>
-  //    list → count = listCounts[path] ?? 1; rows 0..count-1 → div.fb-list-row with
-  //           "row n" heading + <RecursiveFields prefix={`${path}.${i}.`}>;
-  //           "add <label>" (disabled at max_items) → setListCount(path, count + 1);
-  //           "remove" on the last row (hidden at 1) → setListCount(path, count - 1)
-  //    conditional → evaluateCondition ? <div className={cn('fb-conditional', css_class)}>
-  //                  <RecursiveFields same prefix> : null
-  //    else → <FieldControl field prefix index>
-  return <div />
+export const RecursiveFields: React.FC<RecursiveFieldsProps> = ({ fields, prefix = '' }) => (
+  <div className="fb-fields flex flex-wrap gap-4">
+    {fields.map((field, i) => (
+      <FieldNode field={field} key={field.id ?? i} prefix={prefix} />
+    ))}
+  </div>
+)
+
+const FieldNode: React.FC<{ field: RenderField; prefix: string }> = ({ field, prefix }) => {
+  const { values } = useFormRenderer()
+
+  switch (field.blockType) {
+    case 'message':
+      return <MessageContent block={field} />
+    case 'image':
+      return <ImageContent block={field} />
+    case 'group':
+      return (
+        <fieldset
+          className={cn('fb-group basis-full rounded border border-border p-4', field.css_class)}
+          data-field={fieldPath(prefix, field.name)}
+        >
+          {field.label && (
+            <legend className="fb-group-label px-1 text-base font-semibold">{field.label}</legend>
+          )}
+          {field.help_text && (
+            <p className="fb-help mb-3 text-sm text-muted-foreground">{field.help_text}</p>
+          )}
+          <RecursiveFields fields={field.fields ?? []} prefix={`${prefix}${field.name}.`} />
+        </fieldset>
+      )
+    case 'list':
+      return <ListField field={field} prefix={prefix} />
+    case 'conditional':
+      if (!evaluateCondition(field, values, prefix)) return null
+      return (
+        <div className={cn('fb-conditional basis-full', field.css_class)}>
+          <RecursiveFields fields={field.fields ?? []} prefix={prefix} />
+        </div>
+      )
+    case 'multi-step':
+      // only valid as the form's top field, which FormRenderer hands to MultiStep
+      return null
+    default:
+      return <FieldControl field={field} prefix={prefix} />
+  }
+}
+
+const ListField: React.FC<{ field: FieldOf<'list'>; prefix: string }> = ({ field, prefix }) => {
+  const { listCounts, addListRow, removeListRow, disabled, locale } = useFormRenderer()
+  const text = formText(locale)
+  const path = fieldPath(prefix, field.name)
+  const rows = listCounts[path] ?? 1
+  const label = field.label || field.name
+  const full = Boolean(field.max_items && rows >= field.max_items)
+
+  return (
+    <fieldset
+      className={cn('fb-list basis-full rounded border border-border p-4', field.css_class)}
+      data-field={path}
+    >
+      <legend className="fb-group-label px-1 text-base font-semibold">{label}</legend>
+      {field.help_text && (
+        <p className="fb-help mb-3 text-sm text-muted-foreground">{field.help_text}</p>
+      )}
+      <div className="flex flex-col gap-6">
+        {Array.from({ length: rows }, (_, row) => (
+          <div className="fb-list-row flex flex-col gap-3" key={row}>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                {text.row(label, row + 1)}
+              </p>
+              {rows > 1 && (
+                <Button
+                  className="fb-button"
+                  disabled={disabled}
+                  onClick={() => removeListRow(path, row)}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  {text.removeRow(label, row + 1)}
+                </Button>
+              )}
+            </div>
+            <RecursiveFields fields={field.fields ?? []} prefix={`${path}.${row}.`} />
+          </div>
+        ))}
+      </div>
+      <Button
+        className="fb-button mt-4"
+        disabled={disabled || full}
+        onClick={() => addListRow(path)}
+        type="button"
+        variant="outline"
+      >
+        {text.addRow(label)}
+      </Button>
+    </fieldset>
+  )
 }
