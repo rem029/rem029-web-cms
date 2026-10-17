@@ -1,0 +1,126 @@
+# Rehearse a pull request's migrations on a fresh copy of staging (rem0020), before the Dockerfile's
+# `payload migrate` runs them on staging itself. Runs only when migrations (or this rehearsal) change.
+# The staging secret is a read-only user and reaches only the dump step; staging's data never
+# reaches the log (public on this repo).
+name: Migration rehearsal
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# one rehearsal at a time across pull requests: the staging user allows few connections
+concurrency:
+  group: migration-rehearsal
+  cancel-in-progress: false
+
+jobs:
+  changes:
+    name: Migration changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      rehearse: ${{ steps.diff.outputs.rehearse }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # branch names reach the script through env, never ${{ }} inside run (attacker-controlled)
+      - id: diff
+        env:
+          BASE_REF: ${{ github.base_ref || 'staging' }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          # a manual run always rehearses (e.g. to check the current staging)
+          if [[ "$EVENT" == "workflow_dispatch" ]] || [[ -n "$(git diff --name-only "origin/$BASE_REF...HEAD" -- src/migrations .github/workflows/migration-rehearsal.yml .github/scripts/rehearse-migrations.sh)" ]]; then
+            echo "rehearse=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "rehearse=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  rehearse:
+    name: Rehearse on staging copy
+    needs: changes
+    if: needs.changes.outputs.rehearse == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # Postgres 16, as on staging; holds the two copies for this run only
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # throwaway values for the runner's own database
+    env:
+      PG_URL: postgres://postgres:postgres@127.0.0.1:5432
+      PGPASSWORD: postgres
+      PAYLOAD_SECRET: ci-only-not-a-secret
+      CRON_SECRET: ci-only-not-a-secret
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+      DB_LOGGER: 'false'
+      BASE_REF: ${{ github.base_ref || 'staging' }}
+
+    steps:
+      # fork pull requests don't get the secret: a migration change without a rehearsal must not pass
+      - name: Staging secret available
+        env:
+          HAS_SECRET: ${{ secrets.STAGING_DB_URL_READONLY != '' }}
+        run: |
+          if [[ "$HAS_SECRET" != "true" ]]; then
+            echo "::error::no staging secret (fork pull request?): a maintainer must rehearse these migrations"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # before any install or pull request code that isn't the script itself sees the secret
+      - name: Dump staging
+        env:
+          STAGING_DB_URL: ${{ secrets.STAGING_DB_URL_READONLY }}
+        run: bash .github/scripts/rehearse-migrations.sh dump
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: yarn
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      - name: Rehearse
+        run: bash .github/scripts/rehearse-migrations.sh rehearse
+
+      # the runner is thrown away anyway; the dump is never uploaded or cached
+      - name: Delete the dump
+        if: always()
+        run: rm -f "$RUNNER_TEMP/staging.dump"
+
+  # the check to require: green when the rehearsal passed or wasn't needed
+  gate:
+    name: Staging migration rehearsal
+    needs: [changes, rehearse]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - env:
+          CHANGES: ${{ needs.changes.result }}
+          REHEARSE: ${{ needs.rehearse.result }}
+        run: |
+          [[ "$CHANGES" == "success" ]] || exit 1
+          [[ "$REHEARSE" == "success" || "$REHEARSE" == "skipped" ]] || exit 1
