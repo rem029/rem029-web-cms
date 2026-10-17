@@ -40,9 +40,7 @@ export default buildConfig({
     // dev only, opt-in (DEV_PREFILL_LOGIN=true): fills the login form, still needs a click
     autoLogin: prefillCredentials ? { ...prefillCredentials, prefillOnly: true } : false,
     components: {
-      // PLAN(step 2): CHANGE — '@/components/BeforeLogin' → '@/common/components/LoginIntro/LoginIntro#LoginIntro',
-      //   drop the template comment, delete src/components/BeforeLogin, regenerate the importmap
-      beforeLogin: ['@/components/BeforeLogin'],
+      beforeLogin: ['@/common/components/LoginIntro/LoginIntro#LoginIntro'],
       header: ['@/common/components/InactiveTenantNotice#InactiveTenantNotice'],
       providers: ['@/common/components/AdminTheme/AdminTheme#AdminTheme'],
       graphics: {
