@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Rehearse this branch's migrations on a copy of staging (rem0020), as before every deploy by hand:
+#   rehearse-migrations.sh open-firewall / close-firewall   allow this runner's ip on the Hetzner
+#                                     firewall for the dump, then remove the rule
 #   rehearse-migrations.sh dump       staging → $DUMP_FILE (the only step given STAGING_DB_URL)
 #   rehearse-migrations.sh rehearse   restore twice, migrate up, drift check, migrate down, compare
 # Staging's data never reaches the log (public on this repo): only migration names, table names and
@@ -51,6 +53,49 @@ payload_on() {
   DATABASE_URI="$PG_URL/$db" NODE_ENV=test yarn -s payload "$@" </dev/null >"$WORK_DIR/$log" 2>&1
 }
 
+# Hetzner Cloud firewall in front of staging: the runner has no fixed ip, so each run allows its own
+# ip on the db port and removes the rule afterwards (rules tagged by description, replaced as a set).
+#   HCLOUD_TOKEN, HCLOUD_FIREWALL_ID (secrets), DB_PORT (default 6003)
+FW_TAG='ci-rehearsal'
+
+hcloud() {
+  local method=$1 path=$2 body=${3:-}
+  curl -fsS -X "$method" "https://api.hetzner.cloud/v1$path" \
+    -H "Authorization: Bearer $HCLOUD_TOKEN" -H 'Content-Type: application/json' \
+    ${body:+--data "$body"}
+}
+
+# the firewall's rules without any left by this job (an earlier run that died before closing)
+fw_rules_without_ci() {
+  hcloud GET "/firewalls/$HCLOUD_FIREWALL_ID" \
+    | jq --arg tag "$FW_TAG" '[.firewall.rules[] | select((.description // "") | startswith($tag) | not)]'
+}
+
+fw_set_rules() {
+  hcloud POST "/firewalls/$HCLOUD_FIREWALL_ID/actions/set_rules" "{\"rules\": $1}" >/dev/null
+}
+
+open_firewall() {
+  [[ -n "${HCLOUD_TOKEN:-}" && -n "${HCLOUD_FIREWALL_ID:-}" ]] || fail "no HCLOUD_TOKEN or HCLOUD_FIREWALL_ID"
+  local ip rules
+  ip="$(curl -fsS https://api.ipify.org)" || fail "could not find the runner's public ip"
+  [[ "$ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "unexpected runner ip"
+  rules="$(fw_rules_without_ci)" || fail "reading the Hetzner firewall failed (token or firewall id)"
+  rules="$(jq --arg ip "$ip/32" --arg port "${DB_PORT:-6003}" --arg tag "$FW_TAG ${GITHUB_RUN_ID:-local}" \
+    '. + [{direction: "in", protocol: "tcp", port: $port, source_ips: [$ip], description: $tag}]' <<<"$rules")"
+  fw_set_rules "$rules" || fail "adding the runner's ip to the Hetzner firewall failed"
+  # Hetzner applies rules within seconds; the dump retries the connection meanwhile
+  summary "firewall opened for this runner on port ${DB_PORT:-6003}"
+}
+
+close_firewall() {
+  [[ -n "${HCLOUD_TOKEN:-}" && -n "${HCLOUD_FIREWALL_ID:-}" ]] || fail "no HCLOUD_TOKEN or HCLOUD_FIREWALL_ID"
+  local rules
+  rules="$(fw_rules_without_ci)" || fail "reading the Hetzner firewall failed: remove the '$FW_TAG' rule by hand"
+  fw_set_rules "$rules" || fail "removing the runner's rule failed: remove the '$FW_TAG' rule by hand"
+  summary "firewall closed again"
+}
+
 dump() {
   [[ -n "${STAGING_DB_URL:-}" ]] || fail "no STAGING_DB_URL"
 
@@ -72,8 +117,13 @@ dump() {
 
   [[ "$(pg_dump --version)" =~ \(PostgreSQL\)\ 16\. ]] || fail "pg_dump must be 16.x (got: $(pg_dump --version))"
 
-  PGOPTIONS='-c default_transaction_read_only=on' pg_dump -Fc -f "$DUMP_FILE" "$STAGING_DB_URL" 2>/dev/null \
-    || fail "dumping staging failed (connection or permissions)"
+  # a few tries: a firewall rule added just before takes a few seconds to apply
+  local try
+  for try in 1 2 3 4 5 6; do
+    PGOPTIONS='-c default_transaction_read_only=on' pg_dump -Fc -f "$DUMP_FILE" "$STAGING_DB_URL" 2>/dev/null && break
+    [[ $try -lt 6 ]] || fail "dumping staging failed (connection or permissions)"
+    sleep 5
+  done
 
   summary "staging dumped ($(du -h "$DUMP_FILE" | cut -f1))"
 }
@@ -180,10 +230,12 @@ rehearse() {
 }
 
 case "${1:-}" in
+  open-firewall) open_firewall ;;
   dump) dump ;;
+  close-firewall) close_firewall ;;
   rehearse) rehearse ;;
   *)
-    echo "usage: $0 dump|rehearse" >&2
+    echo "usage: $0 open-firewall|dump|close-firewall|rehearse" >&2
     exit 2
     ;;
 esac

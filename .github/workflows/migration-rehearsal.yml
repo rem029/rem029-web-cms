@@ -45,7 +45,8 @@ jobs:
     name: Rehearse on staging copy
     needs: changes
     if: needs.changes.outputs.rehearse == 'true'
-    runs-on: ubuntu-latest
+    # pinned: its Postgres client is 16, as staging (ubuntu-latest moves to a newer Ubuntu)
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     # Postgres 16, as on staging; holds the two copies for this run only
@@ -77,7 +78,7 @@ jobs:
       # fork pull requests don't get the secret: a migration change without a rehearsal must not pass
       - name: Staging secret available
         env:
-          HAS_SECRET: ${{ secrets.STAGING_DB_URL_READONLY != '' }}
+          HAS_SECRET: ${{ secrets.STAGING_DB_URL_READONLY != '' && secrets.HCLOUD_TOKEN != '' && secrets.HCLOUD_FIREWALL_ID != '' }}
         run: |
           if [[ "$HAS_SECRET" != "true" ]]; then
             echo "::error::no staging secret (fork pull request?): a maintainer must rehearse these migrations"
@@ -88,11 +89,26 @@ jobs:
         with:
           fetch-depth: 0
 
+      # the runner has no fixed ip: allow this one on the Hetzner firewall for the dump only
+      - name: Open the firewall
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          HCLOUD_FIREWALL_ID: ${{ secrets.HCLOUD_FIREWALL_ID }}
+        run: bash .github/scripts/rehearse-migrations.sh open-firewall
+
       # before any install or pull request code that isn't the script itself sees the secret
       - name: Dump staging
         env:
           STAGING_DB_URL: ${{ secrets.STAGING_DB_URL_READONLY }}
         run: bash .github/scripts/rehearse-migrations.sh dump
+
+      # always, also after a failed dump; it also clears rules left by a run that died
+      - name: Close the firewall
+        if: always()
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          HCLOUD_FIREWALL_ID: ${{ secrets.HCLOUD_FIREWALL_ID }}
+        run: bash .github/scripts/rehearse-migrations.sh close-firewall
 
       - uses: actions/setup-node@v4
         with:
