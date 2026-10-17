@@ -17,11 +17,20 @@ import { MenuFooter } from '../_components/MenuFooter'
 import { MenuHeader } from '../_components/MenuHeader'
 import { readMenuLocale } from '../_data/locale'
 import { mediaOf } from '../_data/media'
+import { parseMenuUrl } from '../_data/menuUrl'
 import { menuColorVars } from '../_data/menuColors'
 import { getMenuPage } from '../_data/menuData'
 
 type Args = {
   params: Promise<{ slug: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+// the page's searchParams as URLSearchParams (repeated params: the first wins)
+const toSearchParams = (raw: Record<string, string | string[] | undefined>): URLSearchParams => {
+  // 1. for each key: string → set; array → set first; undefined → skip
+  void raw
+  return new URLSearchParams()
 }
 
 // shared by the page and its metadata (react cache: primitives only, compared by identity)
@@ -42,10 +51,11 @@ const carouselImages = (menu: MenuDoc): { url: string; alt: string }[] => {
 /**
  * A menu's guest page, `/menu/<slug>` on its tenant's host (rem0017 phase 3). Rendered per
  * request (no generateStaticParams: the tenant comes from the host). Unknown host, unknown slug,
- * another tenant's slug or a draft outside preview → 404. No loading.tsx: it starts streaming
- * before the page can call notFound(), and the 404 would go out as a 200.
+ * another tenant's slug or a draft outside preview → the 404 page, after loading.tsx's skeleton
+ * (streamed, so with a 200 status and noindex: user decision 2026-10-17). The url's `?item=`,
+ * `?category=`, `?allergens=`, `?period=` set the menu's first state (`parseMenuUrl`).
  */
-export default async function MenuPage({ params }: Args) {
+export default async function MenuPage({ params, searchParams }: Args) {
   const tenantId = await getFrontendTenantId()
   if (tenantId === null) notFound()
 
@@ -77,6 +87,7 @@ export default async function MenuPage({ params }: Args) {
           currency={currency}
           locale={locale}
           filters={menu.filters}
+          initial={parseMenuUrl(toSearchParams(await searchParams))}
         />
       </main>
       <MenuFooter settings={settings} locale={locale} />

@@ -1,21 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 /**
- * The id of the menu section at the top of the screen, for the category nav to mark while the
- * guest scrolls (replaces sdq's useMenuNav, whose url and fetch syncing a whole-menu page doesn't
- * need). IntersectionObserver on the section elements; `setActive` lets a nav click mark its
- * section straight away.
+ * Writes the section at the top of the screen to the store's `category` while the guest scrolls,
+ * so the category nav and the url follow (sdq's useMenuNav did this with per-category fetching
+ * a whole-menu page doesn't need). IntersectionObserver on the section elements.
  */
-export const useActiveSection = (
-  ids: string[],
-): { active: string | null; setActive: (id: string) => void } => {
-  // 1. state active = ids[0] ?? null
+export const useActiveSection = (ids: string[]): void => {
+  // 1. setCategory from useMenuStore
   // 2. effect: IntersectionObserver (rootMargin '-20% 0px -70% 0px') on each
-  //    document.getElementById(id); the first intersecting entry → setActive(entry.target.id)
+  //    document.getElementById(id); the first intersecting entry → setCategory(entry.target.id)
   // 3. disconnect on cleanup; no IntersectionObserver (old browser, jsdom) → do nothing
-  const [active, setActive] = useState<string | null>(ids[0] ?? null)
   useEffect(() => {}, [ids])
-  return { active, setActive }
 }

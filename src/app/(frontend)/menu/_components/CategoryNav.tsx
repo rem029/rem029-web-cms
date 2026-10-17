@@ -7,9 +7,6 @@ import type { MenuSection } from '../_data/menuData'
 
 export type CategoryNavProps = {
   sections: MenuSection[]
-  /** the section id the guest is reading (`category-<slug>`) */
-  active: string | null
-  onPick: (sectionId: string) => void
   locale: TypedLocale
 }
 
@@ -20,13 +17,17 @@ export const sectionId = (section: MenuSection): string =>
 /**
  * The menu's category tabs (sdq `filter-categories.tsx`): one button per section in a row that
  * scrolls sideways on phones (RTL: starts at the right), the active one marked
- * (`aria-current="true"`, primary colour) and kept in view.
+ * (`aria-current="true"`, primary colour) and kept in view. The active one is the store's
+ * `category`: set by a click (which also scrolls to the section) and by `useActiveSection` while
+ * the guest scrolls.
  */
 export const CategoryNav: React.FC<CategoryNavProps> = (props) => {
   // 1. <nav aria-label=t.categories> with a horizontal overflow-x-auto list
-  // 2. a button per section: label category title ?? t.other, aria-current when active,
-  //    onClick → onPick(sectionId(section))
-  // 3. effect: active changes → the active button scrollIntoView({ inline: 'nearest',
+  // 2. category / setCategory from useMenuStore
+  // 3. a button per section: label category title ?? t.other, aria-current when it's the
+  //    category, onClick → setCategory(id) + document.getElementById(id)?.scrollIntoView(
+  //    { behavior: reduced motion ? 'auto' : 'smooth' })
+  // 4. effect: category changes → the active button scrollIntoView({ inline: 'nearest',
   //    block: 'nearest' }) inside the row
   void props
   return <nav />

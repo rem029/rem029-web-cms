@@ -849,8 +849,7 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
-              | null;
+              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'country';
@@ -864,8 +863,7 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
-              | null;
+              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'email';
@@ -900,8 +898,7 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
-              | null;
+              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'number';
@@ -924,8 +921,7 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
-              | null;
+              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'select';
@@ -939,8 +935,7 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
-              | null;
+              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'state';
@@ -955,8 +950,7 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
-              | null;
+              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'text';
@@ -1581,8 +1575,7 @@ export interface Setting {
    * Prices on your menus use this currency.
    */
   currency?:
-    | ('USD' | 'EUR' | 'GBP' | 'QAR' | 'AED' | 'SAR' | 'KWD' | 'BHD' | 'OMR' | 'JOD' | 'EGP' | 'INR' | 'PHP')
-    | null;
+    ('USD' | 'EUR' | 'GBP' | 'QAR' | 'AED' | 'SAR' | 'KWD' | 'BHD' | 'OMR' | 'JOD' | 'EGP' | 'INR' | 'PHP') | null;
   /**
    * The page visitors see at your site address (/).
    */

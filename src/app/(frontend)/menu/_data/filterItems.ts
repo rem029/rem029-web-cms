@@ -1,22 +1,20 @@
 import type { GuestMenuItem, MenuSection } from './menuData'
 
 /**
- * The guest menu's filters (rem0017 phase 3 step 3): hide items containing any picked allergen,
- * and show one meal period. Items without an availability, or served all day, match every
+ * The guest menu's filters (rem0017 phase 3 step 3): show only the items containing one of the
+ * picked allergens (none picked = no filter), and one meal period. Items without an availability, or served all day, match every
  * period. Sections left empty by the filters are dropped. Pure: the whole menu is on the client.
  */
 
 export type Period = 'all' | 'breakfast' | 'lunch' | 'dinner'
 
 export type MenuFilterState = {
-  hiddenAllergens: number[]
+  allergens: number[]
   period: Period
 }
 
-export const NO_FILTERS: MenuFilterState = { hiddenAllergens: [], period: 'all' }
-
 export const matchesFilters = (item: GuestMenuItem, filters: MenuFilterState): boolean => {
-  // 1. any of item.allergens in filters.hiddenAllergens → false
+  // 1. allergens picked and none of item.allergens among them → false
   // 2. period 'all' → true
   // 3. no availability, or it has 'all_day' → true
   // 4. else availability includes the period
@@ -25,7 +23,10 @@ export const matchesFilters = (item: GuestMenuItem, filters: MenuFilterState): b
   throw new Error('not implemented')
 }
 
-export const filterSections = (sections: MenuSection[], filters: MenuFilterState): MenuSection[] => {
+export const filterSections = (
+  sections: MenuSection[],
+  filters: MenuFilterState,
+): MenuSection[] => {
   // 1. each section keeps its items matching the filters
   // 2. drop sections without items
   void sections

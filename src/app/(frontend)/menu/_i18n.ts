@@ -30,7 +30,7 @@ const EN = {
   menuNotFound: 'This menu could not be found.',
   categories: 'Categories',
   filters: 'Filters',
-  hideItemsWith: 'Hide items with',
+  withAllergens: 'Show items with',
 }
 
 export type MenuStrings = Record<keyof typeof EN, string>
@@ -63,7 +63,7 @@ const STRINGS: Record<TypedLocale, MenuStrings> = {
     menuNotFound: 'لم يتم العثور على هذه القائمة.',
     categories: 'الأقسام',
     filters: 'التصفية',
-    hideItemsWith: 'إخفاء الأطباق التي تحتوي على',
+    withAllergens: 'عرض الأطباق التي تحتوي على',
   },
 }
 

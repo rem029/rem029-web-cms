@@ -21,8 +21,8 @@ describe('Menu', () => {
 
   it('filters items by allergen', () => {
     // arrange: filters.showAllergens on; Soup has 'Gluten', Steak none
-    // act: pick 'Gluten' in the allergen filter (hide items containing it)
-    // assert: Soup is hidden, Steak is shown
+    // act: open Filters, pick 'Gluten' (show only items containing it)
+    // assert: Soup is shown, Steak is hidden
     expect.fail('not implemented')
   })
 
@@ -44,6 +44,20 @@ describe('Menu', () => {
     // arrange: Steak with inStock false
     // act: render
     // assert: Steak shows 'Out of stock'
+    expect.fail('not implemented')
+  })
+
+  it('opens the item from a shared link', () => {
+    // arrange: initial { itemSlug: 'soup' } (what parseMenuUrl reads from ?item=soup)
+    // act: render
+    // assert: the item view shows Soup
+    expect.fail('not implemented')
+  })
+
+  it('writes the picked filters to the url', () => {
+    // arrange: filters.showAvailability on; window.history.replaceState spied
+    // act: open Filters, pick 'Dinner'
+    // assert: the last replaceState url has period=dinner
     expect.fail('not implemented')
   })
 
