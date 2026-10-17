@@ -42,6 +42,8 @@ const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
 }
 
 // the doc's own tenant url, so previews and canonical urls point at the tenant's site
+// rem0017 step 1 implementation: menus → `/menu/<slug>` (collectionConfig.slug === 'menus'),
+// GenerateURL/GenerateTitle typed for Post | Page | Menu
 const generateURL: GenerateURL<Post | Page> = async ({ doc, req }) => {
   const path = !doc?.slug || doc.slug === 'home' ? '' : doc.slug
   const tenantId = extractTenantId(doc?.tenant)

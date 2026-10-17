@@ -37,6 +37,7 @@ const PATH_BUILDERS: Record<string, (slug?: string | null) => string> = {
   theme: () => '/preview/theme',
   header: () => '/',
   footer: () => '/',
+  // rem0017 step 1 implementation: menus: (slug) => `/menu/${slug ?? ''}`
 }
 
 export async function previewURL({

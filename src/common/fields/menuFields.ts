@@ -1,4 +1,6 @@
-import type { SelectField, TextField } from 'payload'
+import type { FilterOptions, SelectField, TextField } from 'payload'
+
+import { extractTenantId } from '@/common/utils/tenantCollections'
 
 /**
  * Field definitions shared by the menu collections (rem0017): the catalog (categories,
@@ -35,4 +37,10 @@ export const availabilityField: SelectField = {
   admin: {
     description: 'Guests can filter the menu by these when the menu shows the availability filter.',
   },
+}
+
+/** Admin pickers offer only docs of the doc's own tenant (`validateSameTenant` enforces it). */
+export const sameTenantFilter: FilterOptions = ({ data }) => {
+  const tenantId = extractTenantId(data?.tenant)
+  return tenantId !== null ? { tenant: { equals: tenantId } } : false
 }

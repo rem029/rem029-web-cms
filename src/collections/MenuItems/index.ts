@@ -1,19 +1,12 @@
-import type { CollectionConfig, FilterOptions } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-import { availabilityField, menuTitleField } from '@/common/fields/menuFields'
+import { availabilityField, menuTitleField, sameTenantFilter } from '@/common/fields/menuFields'
+import { validateSameTenant } from '@/common/hooks/validateSameTenant'
 import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
-import { extractTenantId } from '@/common/utils/tenantCollections'
 import { slugField } from '@/fields/slug'
 
-import { validateSameTenant } from './hooks/validateSameTenant'
 import { readMenuItems } from './utils/access'
-
-// the admin pickers only offer docs of the item's tenant (validateSameTenant enforces it)
-const sameTenant: FilterOptions = ({ data }) => {
-  const tenantId = extractTenantId(data?.tenant)
-  return tenantId !== null ? { tenant: { equals: tenantId } } : false
-}
 
 /**
  * Menu items (rem0017): the tenant's catalog. One price and one category per item; menus pick
@@ -37,6 +30,8 @@ export const MenuItems: CollectionConfig = {
   },
   indexes: [{ fields: ['tenant', 'slug'], unique: true }],
   hooks: {
+    // rem0017 step 1 implementation: afterChange/afterDelete revalidateMenus(Delete) here and on
+    // menu-categories, menu-allergens, menu-tags (a menu shows them)
     beforeValidate: [
       validateTenantSlugUniqueness('menu-items', 'item'),
       validateSameTenant([
@@ -70,7 +65,7 @@ export const MenuItems: CollectionConfig = {
       type: 'relationship',
       relationTo: 'menu-categories',
       label: 'Category',
-      filterOptions: sameTenant,
+      filterOptions: sameTenantFilter,
       admin: { description: 'Items without a category show under "Other".' },
     },
     {
@@ -94,7 +89,7 @@ export const MenuItems: CollectionConfig = {
           relationTo: 'menu-allergens',
           hasMany: true,
           label: 'Allergens',
-          filterOptions: sameTenant,
+          filterOptions: sameTenantFilter,
           admin: { width: '50%' },
         },
         {
@@ -103,7 +98,7 @@ export const MenuItems: CollectionConfig = {
           relationTo: 'menu-tags',
           hasMany: true,
           label: 'Tags',
-          filterOptions: sameTenant,
+          filterOptions: sameTenantFilter,
           admin: { width: '50%' },
         },
       ],

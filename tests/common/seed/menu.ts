@@ -177,6 +177,10 @@ const seedCatalog = async (
   payload.logger.info(`test seed: menu catalog in ${tenantSlug}`)
 }
 
+// rem0017 phase 2 step 1 implementation: seedMenus(payload, tenants): upsert by tenant + slug
+// TEST_MENU.dinner (published, items soup, steak, lemonade) in a and b, draftMenu (draft) in a,
+// onlyInB (published) in b; context disableRevalidate
+
 export const seedTestMenu = async (payload: Payload, tenants: TenantIds): Promise<void> => {
   await seedCatalog(payload, tenants.a, TEST_TENANTS.a)
   await seedCatalog(payload, tenants.b, TEST_TENANTS.b)

@@ -4,6 +4,7 @@ import type { CollectionAfterChangeHook } from 'payload'
 import { extractTenantId as relationId } from '@/common/utils/tenantCollections'
 
 // hideable collections with drafts → their main table (`<table>_rels` holds visibleTo)
+// rem0017 step 1 implementation: + menus: 'menus'
 const TABLES: Record<string, string> = { pages: 'pages', posts: 'posts' }
 
 type Query = ReturnType<typeof sql>

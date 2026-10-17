@@ -141,6 +141,7 @@ export interface Config {
     'menu-allergens': MenuAllergen;
     'menu-tags': MenuTag;
     'menu-items': MenuItem;
+    menus: Menu;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -168,6 +169,7 @@ export interface Config {
     'menu-allergens': MenuAllergensSelect<false> | MenuAllergensSelect<true>;
     'menu-tags': MenuTagsSelect<false> | MenuTagsSelect<true>;
     'menu-items': MenuItemsSelect<false> | MenuItemsSelect<true>;
+    menus: MenusSelect<false> | MenusSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -367,6 +369,7 @@ export interface UsersAccess {
           | 'menu-allergens'
           | 'menu-tags'
           | 'menu-items'
+          | 'menus'
           | 'redirects'
           | 'forms'
           | 'form-submissions'
@@ -1710,6 +1713,74 @@ export interface MenuItem {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menus".
+ */
+export interface Menu {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  title: string;
+  items?: (number | MenuItem)[] | null;
+  header?: {
+    /**
+     * The big title at the top. Leave empty to use the menu title.
+     */
+    title?: string | null;
+    /**
+     * Leave empty to use the logo from Settings.
+     */
+    logo?: (number | null) | Media;
+    showLanguageSwitch?: boolean | null;
+  };
+  /**
+   * Optional photos shown under the header. Leave empty for no carousel.
+   */
+  carousel?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  intro?: {
+    heading?: string | null;
+    subheading?: string | null;
+  };
+  filters?: {
+    showSearch?: boolean | null;
+    showAllergens?: boolean | null;
+    showAvailability?: boolean | null;
+  };
+  /**
+   * Leave empty to use your site's theme. Set them to give this menu its own look.
+   */
+  colors?: {
+    primary?: string | null;
+    background?: string | null;
+    card?: string | null;
+    text?: string | null;
+  };
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  slug?: string | null;
+  slugLock?: boolean | null;
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1948,6 +2019,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'menu-items';
         value: number | MenuItem;
+      } | null)
+    | ({
+        relationTo: 'menus';
+        value: number | Menu;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -2980,6 +3055,65 @@ export interface MenuItemsSelect<T extends boolean = true> {
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menus_select".
+ */
+export interface MenusSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  items?: T;
+  header?:
+    | T
+    | {
+        title?: T;
+        logo?: T;
+        showLanguageSwitch?: T;
+      };
+  carousel?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  intro?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+      };
+  filters?:
+    | T
+    | {
+        showSearch?: T;
+        showAllergens?: T;
+        showAvailability?: T;
+      };
+  colors?:
+    | T
+    | {
+        primary?: T;
+        background?: T;
+        card?: T;
+        text?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  slug?: T;
+  slugLock?: T;
+  isHidden?: T;
+  visibleTo?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

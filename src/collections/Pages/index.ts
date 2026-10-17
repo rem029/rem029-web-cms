@@ -143,6 +143,8 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
+    // rem0017 step 1 implementation (same line as rem0016's): slugField('title', { slugOverrides:
+    // { validate: validatePageSlug } }) (src/common/utils/reservedSlugs.ts): refuses menu, forms, …
     ...slugField(),
     {
       name: 'isHomepage',

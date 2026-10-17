@@ -89,6 +89,11 @@ export const TEST_MENU = {
   lemonade: 'fresh-lemonade',
   // an item in test-a only, "Show on menus" unticked
   inactiveItem: 'seasonal-special',
+  // menus: published in test-a and test-b (soup, steak, lemonade), a draft in test-a only, and a
+  // published one in test-b only
+  dinner: 'dinner',
+  draftMenu: 'brunch-draft',
+  onlyInB: 'drinks-b',
 } as const
 
 /** The active theme of test-a and test-b, so their branding differs. */

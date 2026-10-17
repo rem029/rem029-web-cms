@@ -8,6 +8,10 @@
  *
  * Runs after `multiTenancy` (needs the tenants). Idempotent: upserts categories and items by
  * tenant + slug, allergens and tags by tenant + English title. Phase 2 adds menus here.
+ *
+ * rem0017 phase 2 step 1 implementation: per business, menus "All day" (every active item,
+ * published), "Breakfast" (breakfast items, published, allergen + availability filters on) and
+ * "Drinks (draft)" (drafts), upserted by tenant + slug, context disableRevalidate.
  */
 import type { Payload, Where } from 'payload'
 

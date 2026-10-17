@@ -1,4 +1,8 @@
-import type { CollectionBeforeValidateHook, CollectionSlug } from 'payload'
+import type {
+  CollectionBeforeChangeHook,
+  CollectionBeforeValidateHook,
+  CollectionSlug,
+} from 'payload'
 import { ValidationError } from 'payload'
 
 import { extractTenantId } from '@/common/utils/tenantCollections'
@@ -22,9 +26,9 @@ const relationIds = (value: unknown): number[] => {
 /**
  * Refuses links to another business's docs (rem0017) with a plain-words error. Payload's own
  * `filterOptions` validation also refuses them, but only says "This field is invalid", and only
- * when validation runs. `beforeValidate`, so it runs before that check (phase 2 also runs it in
- * `beforeChange` for `menus`, whose draft saves skip validation, and promotes it to
- * `src/common/hooks/`).
+ * when validation runs. `validateSameTenant` runs in `beforeValidate`, so before that check;
+ * collections with drafts also add `validateSameTenantOnChange` in `beforeChange`, since draft
+ * saves skip validation.
  */
 export const validateSameTenant =
   (fields: SameTenantField[]): CollectionBeforeValidateHook =>
@@ -65,5 +69,14 @@ export const validateSameTenant =
       })
     }
 
+    return data
+  }
+
+/** The same check for `beforeChange` (draft saves skip `beforeValidate`'s validation). */
+export const validateSameTenantOnChange =
+  (_fields: SameTenantField[]): CollectionBeforeChangeHook =>
+  async ({ data }) => {
+    // 1. move the loop above into a shared `checkSameTenant(args, fields)` and call it from both
+    // 2. return data
     return data
   }

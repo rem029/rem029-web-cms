@@ -24,6 +24,7 @@ import { Settings } from './collections/Settings'
 import { MenuAllergens } from './collections/MenuAllergens'
 import { MenuCategories } from './collections/MenuCategories'
 import { MenuItems } from './collections/MenuItems'
+import { Menus } from './collections/Menus'
 import { MenuTags } from './collections/MenuTags'
 
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
@@ -116,6 +117,7 @@ export default buildConfig({
     MenuAllergens,
     MenuTags,
     MenuItems,
+    Menus,
   ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [],
