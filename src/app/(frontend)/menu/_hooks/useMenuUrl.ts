@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
+import { menuUrlParams } from '../_data/menuUrl'
 import { useMenuStore } from '../_store/store'
 
 /**
@@ -12,10 +13,27 @@ import { useMenuStore } from '../_store/store'
  * into view.
  */
 export const useMenuUrl = (): void => {
-  // 1. read allergens, period, category, itemSlug with useMenuStore
-  // 2. effect on them: next = menuUrlParams(new URLSearchParams(location.search), state);
-  //    unchanged → skip; else history.replaceState(null, '', `${pathname}?${next}` or pathname)
-  // 3. effect once: initial category → document.getElementById(category)?.scrollIntoView()
+  const allergens = useMenuStore((state) => state.allergens)
+  const period = useMenuStore((state) => state.period)
   const category = useMenuStore((state) => state.category)
-  useEffect(() => {}, [category])
+  const itemSlug = useMenuStore((state) => state.itemSlug)
+  const initialCategory = useRef(category)
+
+  useEffect(() => {
+    const current = new URLSearchParams(window.location.search)
+    const next = menuUrlParams(current, { allergens, period, category, itemSlug })
+    if (next.toString() === current.toString()) return
+    const query = next.toString()
+    window.history.replaceState(
+      window.history.state,
+      '',
+      query ? `${window.location.pathname}?${query}` : window.location.pathname,
+    )
+  }, [allergens, period, category, itemSlug])
+
+  useEffect(() => {
+    if (initialCategory.current) {
+      document.getElementById(initialCategory.current)?.scrollIntoView()
+    }
+  }, [])
 }

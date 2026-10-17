@@ -1,7 +1,11 @@
 import type { TypedLocale } from 'payload'
 import React from 'react'
 
+import { formatPrice } from '@/common/utils/formatPrice'
+import { cn } from '@/utilities/ui'
+
 import type { GuestMenuItem } from '../_data/menuData'
+import { menuStrings } from '../_i18n'
 
 export type MenuItemCardProps = {
   item: GuestMenuItem
@@ -16,11 +20,43 @@ export type MenuItemCardProps = {
  * item view. Out of stock items stay visible, dimmed. The price is `<bdi dir="ltr">`, so Arabic
  * reads "9.00 US$" instead of the bidi-scrambled "$US 9.00".
  */
-export const MenuItemCard: React.FC<MenuItemCardProps> = (props) => {
-  // 1. <button type="button" onClick={() => onOpen(item)} className="… text-start">
-  // 2. img (loading lazy, alt '') when imageUrl
-  // 3. title, description (line-clamp-2), price via formatPrice(item.price, currency, locale)
-  // 4. !inStock → t.outOfStock badge + opacity
-  void props
-  return <button type="button" />
+export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, currency, locale, onOpen }) => {
+  const t = menuStrings(locale)
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(item)}
+      className={cn(
+        'flex w-full gap-3 overflow-hidden rounded border border-menu-border bg-menu-card p-3 text-start text-menu-text',
+        'transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary motion-reduce:transition-none',
+        !item.inStock && 'opacity-70',
+      )}
+    >
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="font-semibold">{item.title}</span>
+        {item.description && (
+          <span className="line-clamp-2 text-sm text-menu-muted">{item.description}</span>
+        )}
+        <span className="mt-auto flex flex-wrap items-center gap-2 pt-1">
+          <bdi dir="ltr" className="font-medium">
+            {formatPrice(item.price, currency, locale)}
+          </bdi>
+          {!item.inStock && (
+            <span className="rounded bg-menu-border px-2 py-0.5 text-xs font-medium">
+              {t.outOfStock}
+            </span>
+          )}
+        </span>
+      </span>
+      {item.imageUrl && (
+        // eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size
+        <img
+          src={item.imageUrl}
+          alt=""
+          loading="lazy"
+          className="size-24 shrink-0 rounded object-cover sm:size-28"
+        />
+      )}
+    </button>
+  )
 }

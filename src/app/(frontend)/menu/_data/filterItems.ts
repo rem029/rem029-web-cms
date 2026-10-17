@@ -14,30 +14,32 @@ export type MenuFilterState = {
 }
 
 export const matchesFilters = (item: GuestMenuItem, filters: MenuFilterState): boolean => {
-  // 1. allergens picked and none of item.allergens among them → false
-  // 2. period 'all' → true
-  // 3. no availability, or it has 'all_day' → true
-  // 4. else availability includes the period
-  void item
-  void filters
-  throw new Error('not implemented')
+  if (
+    filters.allergens.length > 0 &&
+    !item.allergens.some((allergen) => filters.allergens.includes(allergen.id))
+  ) {
+    return false
+  }
+  if (filters.period === 'all') return true
+  if (item.availability.length === 0 || item.availability.includes('all_day')) return true
+  return item.availability.includes(filters.period)
 }
 
-export const filterSections = (
-  sections: MenuSection[],
-  filters: MenuFilterState,
-): MenuSection[] => {
-  // 1. each section keeps its items matching the filters
-  // 2. drop sections without items
-  void sections
-  void filters
-  throw new Error('not implemented')
-}
+export const filterSections = (sections: MenuSection[], filters: MenuFilterState): MenuSection[] =>
+  sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => matchesFilters(item, filters)),
+    }))
+    .filter((section) => section.items.length > 0)
 
 /** The allergens on this menu's items, by title: the allergen filter's choices. */
 export const allergensOf = (sections: MenuSection[]): { id: number; title: string }[] => {
-  // 1. every item's allergens, unique by id
-  // 2. sorted by title (localeCompare)
-  void sections
-  throw new Error('not implemented')
+  const byId = new Map<number, { id: number; title: string }>()
+  for (const section of sections) {
+    for (const item of section.items) {
+      for (const allergen of item.allergens) byId.set(allergen.id, allergen)
+    }
+  }
+  return [...byId.values()].sort((a, b) => a.title.localeCompare(b.title))
 }

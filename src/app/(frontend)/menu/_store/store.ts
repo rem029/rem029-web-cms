@@ -47,11 +47,16 @@ export const INITIAL_MENU_STATE: MenuState = {
 }
 
 export const createMenuStore = (initial: Partial<MenuState> = {}): StoreApi<MenuStore> =>
-  // 1. createStore((set) => ({ ...INITIAL_MENU_STATE, ...initial, setX: (x) => set({ x }), … }))
-  createStore<MenuStore>(() => {
-    void initial
-    throw new Error('not implemented')
-  })
+  createStore<MenuStore>((set) => ({
+    ...INITIAL_MENU_STATE,
+    ...initial,
+    setAllergens: (allergens) => set({ allergens }),
+    setPeriod: (period) => set({ period }),
+    setCategory: (category) => set({ category }),
+    openItem: (itemSlug) => set({ itemSlug }),
+    setSearchOpen: (searchOpen) => set({ searchOpen }),
+    setFiltersOpen: (filtersOpen) => set({ filtersOpen }),
+  }))
 
 const MenuStoreContext = createContext<StoreApi<MenuStore> | null>(null)
 
@@ -69,8 +74,6 @@ export const MenuStoreProvider = ({
 }
 
 export const useMenuStore = <T>(selector: (state: MenuStore) => T): T => {
-  // 1. store = useContext(MenuStoreContext); none → throw (a component outside the provider)
-  // 2. return useStore(store, selector)
   const store = useContext(MenuStoreContext)
   if (!store) throw new Error('useMenuStore outside MenuStoreProvider')
   return useStore(store, selector)

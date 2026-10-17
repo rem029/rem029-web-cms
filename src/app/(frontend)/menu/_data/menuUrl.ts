@@ -14,24 +14,44 @@ const PERIODS: Period[] = ['all', 'breakfast', 'lunch', 'dinner']
 // a sane cap on what a pasted url can ask for
 const MAX_ALLERGENS = 20
 
+const SLUG = /^[a-z0-9-]{1,100}$/
+const CATEGORY_PREFIX = 'category-'
+
+const isPeriod = (value: string | null): value is Period =>
+  PERIODS.some((period) => period === value)
+
 /** The state a url asks for; unknown or malformed values are ignored (left at the default). */
 export const parseMenuUrl = (params: URLSearchParams): Partial<MenuUrlState> => {
-  // 1. item: a slug-shaped string (/^[a-z0-9-]{1,100}$/) → itemSlug
-  // 2. category: same check → category `category-<slug>`
-  // 3. allergens: comma list → positive integers only, unique, at most MAX_ALLERGENS
-  // 4. period: one of PERIODS other than 'all'
-  void params
-  void PERIODS
-  void MAX_ALLERGENS
-  throw new Error('not implemented')
+  const state: Partial<MenuUrlState> = {}
+
+  const item = params.get('item')
+  if (item && SLUG.test(item)) state.itemSlug = item
+
+  const category = params.get('category')
+  if (category && SLUG.test(category)) state.category = `${CATEGORY_PREFIX}${category}`
+
+  const allergens = (params.get('allergens') ?? '')
+    .split(',')
+    .filter((value) => /^\d+$/.test(value))
+    .map(Number)
+    .filter((id) => id > 0)
+  if (allergens.length > 0) state.allergens = [...new Set(allergens)].slice(0, MAX_ALLERGENS)
+
+  const period = params.get('period')
+  if (isPeriod(period) && period !== 'all') state.period = period
+
+  return state
 }
 
 /** `params` with the menu's state written in: defaults remove their param. */
 export const menuUrlParams = (params: URLSearchParams, state: MenuUrlState): URLSearchParams => {
-  // 1. copy params
-  // 2. set or delete item, category (without the `category-` prefix), allergens (joined),
-  //    period ('all' → delete)
-  void params
-  void state
-  throw new Error('not implemented')
+  const next = new URLSearchParams(params)
+  const write = (key: string, value: string | null) =>
+    value ? next.set(key, value) : next.delete(key)
+
+  write('item', state.itemSlug)
+  write('category', state.category?.replace(CATEGORY_PREFIX, '') ?? null)
+  write('allergens', state.allergens.length > 0 ? state.allergens.join(',') : null)
+  write('period', state.period === 'all' ? null : state.period)
+  return next
 }
