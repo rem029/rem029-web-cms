@@ -6,9 +6,11 @@
  * One file per kind of fixture (`tenants.ts`, `profiles.ts`, `users.ts`), run in dependency order
  * by `seedTestData`; the names tests read are in `fixtures.ts`.
  *
- * - Three businesses (`test-a`, `test-b`, and `test-c` without members) on top of what the migrations create (the `admin` tenant,
+ * - Four businesses (`test-a`, `test-b`, `test-c` without members, and the inactive `test-inactive`) on
+ *   top of what the migrations create (the `admin` tenant,
  *   the `default` profile and the platform templates).
- * - An `editor` and a `viewer` profile in test-a and test-b (`TEST_PROFILES`, see `profiles.ts`).
+ * - An `editor` and a `viewer` profile in test-a, test-b and test-inactive (`TEST_PROFILES`, see
+ *   `profiles.ts`).
  * - One user per role (`TEST_USERS`), each logging in with their email as the password.
  * - Idempotent: upserts tenants and profiles by slug (+ tenant), users by email, so a re-run
  *   converges on these definitions.

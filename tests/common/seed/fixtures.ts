@@ -5,6 +5,8 @@ export const TEST_TENANTS = {
   b: 'test-b',
   // no members: a business nobody in the seed belongs to
   c: 'test-c',
+  // inactive (`isActive` false): read-only for its members, with an editor and a tenant admin
+  inactive: 'test-inactive',
 } as const
 
 /** The profiles each test business has (slugs are unique per tenant, the same in each). */
@@ -39,10 +41,14 @@ export const TEST_USERS = {
   mixed: 'mixed-ab@example.test',
   // editor in test-a, is_disabled
   disabled: 'disabled-a@example.test',
+  // editor in test-inactive only
+  inactiveMember: 'member-inactive@example.test',
+  // tenant admin of test-inactive only
+  inactiveAdmin: 'admin-inactive@example.test',
 } as const
 
 /** Ids of what one seed creates, by fixture key, for the seeds that run after it. */
 export type TenantIds = Record<keyof typeof TEST_TENANTS, number>
 
 /** Profile ids per business that has profiles (test-c has none). */
-export type ProfileIds = Record<keyof typeof TEST_PROFILES, Record<'a' | 'b', number>>
+export type ProfileIds = Record<keyof typeof TEST_PROFILES, Record<'a' | 'b' | 'inactive', number>>

@@ -185,6 +185,20 @@ export const seedTestUsers = async (
       is_disabled: true,
       tenants: [{ tenant: tenants.a, access: profiles.editor.a }],
     },
+    {
+      email: TEST_USERS.inactiveMember,
+      name: 'Inactive Business Member',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.inactive, access: profiles.editor.inactive }],
+    },
+    {
+      email: TEST_USERS.inactiveAdmin,
+      name: 'Inactive Business Admin',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.inactive, isTenantAdmin: true }],
+    },
   ]
 
   for (const user of users) {

@@ -1,5 +1,5 @@
 /**
- * The profiles in each test business with members (test-a, test-b; `TEST_PROFILES`):
+ * The profiles in each test business with members (test-a, test-b, test-inactive; `TEST_PROFILES`):
  * - `editor`: CRUD on pages, posts, media, categories; read/update on header and footer
  * - `viewer`: read on pages, posts, media, categories, header and footer
  * Both open /admin. Every other slug is hidden and denied.
@@ -122,10 +122,24 @@ export const seedTestProfiles = async (
     editor: {
       a: await upsertProfile(payload, tenants.a, TEST_TENANTS.a, EDITOR, slugs),
       b: await upsertProfile(payload, tenants.b, TEST_TENANTS.b, EDITOR, slugs),
+      inactive: await upsertProfile(
+        payload,
+        tenants.inactive,
+        TEST_TENANTS.inactive,
+        EDITOR,
+        slugs,
+      ),
     },
     viewer: {
       a: await upsertProfile(payload, tenants.a, TEST_TENANTS.a, VIEWER, slugs),
       b: await upsertProfile(payload, tenants.b, TEST_TENANTS.b, VIEWER, slugs),
+      inactive: await upsertProfile(
+        payload,
+        tenants.inactive,
+        TEST_TENANTS.inactive,
+        VIEWER,
+        slugs,
+      ),
     },
   }
 }
