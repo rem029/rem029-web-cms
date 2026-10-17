@@ -9,9 +9,15 @@ import { slugField } from '@/fields/slug'
 export const formSidebarFields: Field[] = [
   // `/forms/<slug>` on the tenant's site; unique per tenant (validateTenantSlugUniqueness)
   ...slugField('title'),
-  // step 3b: ADD — { name: 'public_url', type: 'ui', admin: { position: 'sidebar',
-  //   components: { Field: '@/plugins/components/PublicFormUrl#PublicFormUrl' } } }
-  //   (ui field: no column, no migration; then pnpm generate:importmap)
+  // the saved form's address on its business's site (ui field: no column)
+  {
+    name: 'public_url',
+    type: 'ui',
+    admin: {
+      position: 'sidebar',
+      components: { Field: '@/plugins/components/PublicFormUrl#PublicFormUrl' },
+    },
+  },
   {
     name: 'isActive',
     type: 'checkbox',

@@ -15,6 +15,7 @@ import {
   type SubmissionContext,
   type SubmitInput,
   type UploadInput,
+  type VisitorInfo,
   submitForm,
   uploadFile,
 } from './submissions'
@@ -39,8 +40,37 @@ const requestContext = async (payload: Payload): Promise<SubmissionContext> => {
     tenantId: await getFrontendTenantId(),
     user: user?.collection === 'users' ? user : null,
     ip: clientIpFromHeaders(headerList),
-    // step 3b: ADD — visitor: { ip: clientIpFromHeaders ?? first x-forwarded-for ?? x-real-ip,
-    // deviceType from user-agent (tablet / mobile / desktop, as src/utilities/analytics.ts),
-    // pagePath: the referer's pathname when it is this host, else null }
+    visitor: visitorFrom(headerList),
+  }
+}
+
+// for logs and analytics only: these headers can be spoofed without a trusted proxy
+const visitorFrom = (headerList: Headers): VisitorInfo => {
+  const reportedIp =
+    headerList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    headerList.get('x-real-ip')?.trim() ||
+    null
+  return {
+    ip: clientIpFromHeaders(headerList) ?? reportedIp?.slice(0, 64) ?? null,
+    deviceType: deviceTypeOf(headerList.get('user-agent') ?? ''),
+    pagePath: refererPath(headerList.get('referer'), headerList.get('host')),
+  }
+}
+
+// as src/utilities/analytics.ts does in the browser
+const deviceTypeOf = (userAgent: string): VisitorInfo['deviceType'] => {
+  if (/tablet|ipad|playbook|silk/i.test(userAgent)) return 'tablet'
+  if (/Mobile|Android|iP(hone|od)/i.test(userAgent)) return 'mobile'
+  return 'desktop'
+}
+
+// the page the form was sent from, when the referer is this host
+const refererPath = (referer: string | null, host: string | null): string | null => {
+  if (!referer) return null
+  try {
+    const url = new URL(referer)
+    return url.host === host ? url.pathname.slice(0, 512) : null
+  } catch {
+    return null
   }
 }

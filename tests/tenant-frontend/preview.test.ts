@@ -10,7 +10,9 @@ import type { Page, Tenant } from '@/payload-types'
 import { getTestPayload } from '../common/payload'
 import { TEST_CONTENT, TEST_TENANTS, TEST_USERS } from '../common/seed'
 import { findTenant } from '../common/tenants'
+import { uniqueName } from '../common/unique'
 import { loadUser, reqFor, type SessionUser } from '../common/users'
+import { formData } from '../form-builder/forms'
 
 describe('preview', () => {
   let payload: Payload
@@ -183,10 +185,26 @@ describe('preview', () => {
     })
 
     it('passes the form path for forms', async () => {
-      // arrange: a form in test-a (slug from its title); the tenant admin of test-a (forms read)
-      // act: previewURL({ collection: 'forms', slug: form.slug, tenant: test-a, req })
-      // assert: path '/forms/<slug>?lang=en', collection 'forms'
-      expect.fail('not implemented')
+      // arrange
+      const tenantAdmin = await loadUser(payload, TEST_USERS.tenantAdmin)
+      const form = await payload.create({
+        collection: 'forms',
+        data: { ...formData(tenantA.id, uniqueName('preview-form'), []) },
+        depth: 0,
+      })
+
+      // act
+      const url = await previewURL({
+        collection: 'forms',
+        slug: form.slug,
+        tenant: form.tenant,
+        req: await reqFor(payload, tenantAdmin),
+      })
+
+      // assert
+      const params = new URL(url ?? '').searchParams
+      expect(params.get('path')).toBe(`/forms/${form.slug}?lang=en`)
+      expect(params.get('collection')).toBe('forms')
     })
 
     it("gives another business's member no link", async () => {

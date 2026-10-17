@@ -564,6 +564,7 @@ describe('audit log hooks', () => {
       const form = await payload.create({
         collection: 'forms',
         data: {
+          _status: 'published',
           title: prefix,
           tenant: tenantA.id,
           confirmationType: 'message',

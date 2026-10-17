@@ -76,10 +76,17 @@ describe('validateSubmission', () => {
   })
 
   it('refuses a form that was never published', async () => {
-    // arrange: a form in test-a saved as a draft only (_status 'draft'), no required fields
-    // act: create a submission as anonymous
-    // assert: rejects with 403; nothing saved
-    expect.fail('not implemented')
+    // arrange
+    const form = await makeForm(tenantA, [{ blockType: 'text', name: 'name', label: 'Name' }], {
+      _status: 'draft',
+    })
+
+    // act
+    const call = submitAnonymously(form.id, [{ field: 'name', value: 'Sara' }])
+
+    // assert
+    await expect(call).rejects.toMatchObject({ status: 403 })
+    expect(await savedFor(form.id)).toEqual([])
   })
 
   it('drops answers the form does not ask for', async () => {

@@ -29,6 +29,7 @@ import * as migration_20261010_170458_audit_logs from './20261010_170458_audit_l
 import * as migration_20261010_201646_audit_logs_retention from './20261010_201646_audit_logs_retention';
 import * as migration_20261015_193545_audit_logs_login_failed from './20261015_193545_audit_logs_login_failed';
 import * as migration_20261017_170605_form_builder from './20261017_170605_form_builder';
+import * as migration_20261017_203501_form_drafts from './20261017_203501_form_drafts';
 
 export const migrations = [
   {
@@ -184,6 +185,11 @@ export const migrations = [
   {
     up: migration_20261017_170605_form_builder.up,
     down: migration_20261017_170605_form_builder.down,
-    name: '20261017_170605_form_builder'
+    name: '20261017_170605_form_builder',
+  },
+  {
+    up: migration_20261017_203501_form_drafts.up,
+    down: migration_20261017_203501_form_drafts.down,
+    name: '20261017_203501_form_drafts'
   },
 ];

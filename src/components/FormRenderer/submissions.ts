@@ -4,21 +4,22 @@
  * submitForm.test.ts`, `uploadFile.test.ts`). `actions.ts` reads them from the request and calls
  * these. Server only; never import from a client component.
  *
- * Every refusal is logged (`warn`, with tenant id, form id and reason) and returned to the
- * visitor in their language (`formText`). The `validateSubmission` hook repeats the form checks
- * on `form-submissions` create, so the REST api can't skip them.
+ * Every refusal is logged (`warn`, with tenant id, form id, reason and the visitor's ip) and
+ * returned to the visitor in their language (`formText`). The `validateSubmission` hook repeats
+ * the form checks on `form-submissions` create, so the REST api can't skip them. Submit attempts
+ * on a form are recorded in `analytics` (`recordFormAnalytics`).
  */
 import type { Payload } from 'payload'
 import { ValidationError } from 'payload'
 
 import { FORM_UPLOAD_MAX_BYTES, FORM_UPLOAD_MIME_TYPES } from '@/collections/FormUploads/constants'
-import { type FormRefusal, formRefusal } from '@/common/utils/formAvailability'
+import { formRefusal } from '@/common/utils/formAvailability'
 import { frontendTenantWhere } from '@/common/utils/frontendTenant'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 import type { Form, User } from '@/payload-types'
 
 import { fieldAtPath } from './helpers'
-import { type FormText, formText } from './i18n'
+import { type FormText, formText, refusalMessage } from './i18n'
 import type { RendererLocale, SubmissionRow, SubmitResult, UploadResult } from './types'
 
 export type SubmissionContext = {
@@ -28,41 +29,17 @@ export type SubmissionContext = {
   user: User | null
   /** For the rate limit; `null` (no trusted proxy header) skips it. */
   ip: string | null
-  /**
-   * step 3b: ADD — the visitor as the request shows it, for logs and analytics only (never for
-   * the rate limit): `ip` the trusted ip, else the first `x-forwarded-for` / `x-real-ip` value
-   * (can be spoofed without a trusted proxy), `deviceType` from the user agent, `pagePath` from
-   * the referer (the page the form is on)
-   */
+  /** The visitor as the request shows it, for logs and analytics only (never the rate limit). */
   visitor?: VisitorInfo
   now?: Date
 }
 
 export type VisitorInfo = {
+  /** The trusted ip, else the first `x-forwarded-for` / `x-real-ip` (spoofable without a proxy). */
   ip: string | null
   deviceType: 'desktop' | 'mobile' | 'tablet'
+  /** The page the form is on (the referer's path), if known. */
   pagePath: string | null
-}
-
-/**
- * step 3b: ADD — one `analytics` row per submit attempt that reached a form: eventType
- * `form_submission` (saved) or `error` (refused or failed), tenant = the form's, ip and
- * deviceType from `visitor`, pagePath (else `/forms/<slug>`), email and phone from the answers
- * when the form has them (the first `email` block, else a field named `email`; the first `phone`
- * block, else a field named `phone`), payload { formID, formName, success | errorMessage }.
- * overrideAccess (visitors can't create analytics); never throws: a failed record is logged
- * (`error`) and the visitor's result stays as it was.
- */
-export const recordFormAnalytics = async (
-  _context: SubmissionContext,
-  _event: {
-    form: Pick<Form, 'id' | 'title' | 'slug' | 'fields'>
-    tenantId: number
-    submissionData: SubmissionRow[]
-    result: SubmitResult
-  },
-): Promise<void> => {
-  throw new Error('not implemented')
 }
 
 export type SubmitInput = {
@@ -108,10 +85,61 @@ export const allowHit = (key: string, limit: number, now: number): boolean => {
 
 const refused = (error: string): { ok: false; error: string } => ({ ok: false, error })
 
-const refusalText = (reason: FormRefusal, text: FormText): string => {
-  if (reason === 'not_open_yet') return text.notOpenYet
-  if (reason === 'members_only') return text.membersOnly
-  return text.formClosed
+/** The visitor's ip for logs: what the request shows, else the trusted one. */
+const logIp = (context: SubmissionContext): string | null => context.visitor?.ip ?? context.ip
+
+/** The first answer of an `email` / `phone` block, else of a field with that name. */
+const answerOf = (
+  form: Pick<Form, 'fields'>,
+  rows: SubmissionRow[],
+  kind: 'email' | 'phone',
+): string | undefined => {
+  const fields = form.fields ?? []
+  const byBlock = rows.find((row) => fieldAtPath(fields, row.field)?.blockType === kind)
+  const byName = rows.find((row) => row.field === kind)
+  return (byBlock ?? byName)?.value || undefined
+}
+
+/**
+ * One `analytics` row per submit attempt that reached a form: `form_submission` (saved) or
+ * `error` (refused or failed), under the form's tenant, with the visitor's ip, device and page,
+ * and email and phone when the form asks for them. Never throws: a failed record is logged and
+ * the visitor's result stays as it was.
+ */
+export const recordFormAnalytics = async (
+  context: SubmissionContext,
+  event: {
+    form: Pick<Form, 'id' | 'title' | 'slug' | 'fields'>
+    tenantId: number
+    submissionData: SubmissionRow[]
+    result: SubmitResult
+  },
+): Promise<void> => {
+  const { payload, visitor } = context
+  const { form, tenantId, submissionData, result } = event
+  try {
+    // visitors can't create analytics through access
+    await payload.create({
+      collection: 'analytics',
+      data: {
+        tenant: tenantId,
+        eventType: result.ok ? 'form_submission' : 'error',
+        ip: logIp(context) ?? undefined,
+        email: answerOf(form, submissionData, 'email'),
+        phone: answerOf(form, submissionData, 'phone'),
+        deviceType: visitor?.deviceType ?? 'desktop',
+        pagePath: visitor?.pagePath ?? `/forms/${form.slug ?? ''}`,
+        timestamp: (context.now ?? new Date()).toISOString(),
+        payload: result.ok
+          ? { formID: form.id, formName: form.title, success: true }
+          : { formID: form.id, formName: form.title, errorMessage: result.error },
+      },
+      overrideAccess: true,
+      depth: 0,
+    })
+  } catch (err) {
+    payload.logger.error({ msg: 'form analytics not recorded', tenantId, formId: form.id, err })
+  }
 }
 
 type OpenForm = { form: Form; tenantId: number }
@@ -119,7 +147,7 @@ type OpenForm = { form: Form; tenantId: number }
 /**
  * The form if it belongs to the host's tenant and takes answers from this visitor, else the
  * refusal in their words. Read as the public reads forms (no user: a signed-in visitor of
- * another business still sees a public form).
+ * another business still sees a public form; published forms only).
  */
 const findOpenForm = async (
   context: SubmissionContext,
@@ -128,11 +156,11 @@ const findOpenForm = async (
   kind: 'submit' | 'upload',
 ): Promise<OpenForm | { ok: false; error: string }> => {
   const { payload, tenantId, user } = context
+  const ip = logIp(context)
   if (tenantId === null) {
-    payload.logger.warn({ msg: `form ${kind} refused: unknown host`, formId })
+    payload.logger.warn({ msg: `form ${kind} refused: unknown host`, formId, ip })
     return refused(text.somethingWrong)
   }
-  // step 3b: forms get drafts; this public read returns published forms only
   const { docs } = await payload.find({
     collection: 'forms',
     where: frontendTenantWhere(tenantId, { id: { equals: formId } }),
@@ -142,7 +170,7 @@ const findOpenForm = async (
   })
   const form = docs[0]
   if (!form) {
-    payload.logger.warn({ msg: `form ${kind} refused: not_found`, tenantId, formId })
+    payload.logger.warn({ msg: `form ${kind} refused: not_found`, tenantId, formId, ip })
     return refused(text.somethingWrong)
   }
   const reason = formRefusal(form, user, context.now ?? new Date())
@@ -152,8 +180,9 @@ const findOpenForm = async (
       tenantId,
       formId,
       userId: user?.id,
+      ip,
     })
-    return refused(refusalText(reason, text))
+    return refused(refusalMessage(reason, text))
   }
   return { form, tenantId: extractTenantId(form.tenant) ?? tenantId }
 }
@@ -163,36 +192,24 @@ const errorCount = (err: ValidationError): number => {
   return Array.isArray(errors) && errors.length ? errors.length : 1
 }
 
-// step 3b: CHANGE — every log line of submitForm and uploadFile also carries the visitor's ip
-// (`context.visitor?.ip ?? context.ip`), not only the rate-limit ones
-export const submitForm = async (
+/** Saves the submission, or the refusal in the visitor's words; analytics are recorded after. */
+const saveSubmission = async (
   context: SubmissionContext,
+  { form, tenantId }: OpenForm,
   input: SubmitInput,
+  text: FormText,
 ): Promise<SubmitResult> => {
   const { payload, user, ip } = context
-  const { formId } = input
-  const text = formText(input.locale)
-
-  // the bot sees success, nothing is saved
-  if (input.honeypot) {
-    payload.logger.warn({
-      msg: 'form submission dropped: honeypot',
-      tenantId: context.tenantId,
-      formId,
-    })
-    return { ok: true }
-  }
-
-  const found = await findOpenForm(context, formId, text, 'submit')
-  if ('ok' in found) return found
-  const { form, tenantId } = found
-  // step 3b: ADD — from here on every return goes through recordFormAnalytics (refusals for
-  // terms, rate limit and invalid answers as `error`, a save as `form_submission`); refusals
-  // before the form is found (unknown host, other tenant, closed) record nothing: no tenant to
-  // file them under, and the honeypot never records (bots)
+  const formId = form.id
+  const loggedIp = logIp(context)
 
   if (form.has_terms && !input.termsAccepted) {
-    payload.logger.warn({ msg: 'form submit refused: terms not accepted', tenantId, formId })
+    payload.logger.warn({
+      msg: 'form submit refused: terms not accepted',
+      tenantId,
+      formId,
+      ip: loggedIp,
+    })
     return refused(text.termsRequired)
   }
 
@@ -207,21 +224,65 @@ export const submitForm = async (
     // setFormSubmissionTenant sets the tenant
     const submission = await payload.create({
       collection: 'form-submissions',
-      data: { form: form.id, submissionData: input.submissionData },
+      data: { form: formId, submissionData: input.submissionData },
       ...(user ? { user } : {}),
       overrideAccess: false,
       depth: 0,
     })
-    payload.logger.info({ msg: 'form submitted', tenantId, formId, submissionId: submission.id })
+    payload.logger.info({
+      msg: 'form submitted',
+      tenantId,
+      formId,
+      submissionId: submission.id,
+      ip: loggedIp,
+    })
     return { ok: true }
   } catch (err) {
     if (err instanceof ValidationError) {
-      payload.logger.warn({ msg: 'form submit refused: invalid answers', tenantId, formId })
+      payload.logger.warn({
+        msg: 'form submit refused: invalid answers',
+        tenantId,
+        formId,
+        ip: loggedIp,
+      })
       return refused(text.fixErrors(errorCount(err)))
     }
-    payload.logger.error({ msg: 'form submit failed', tenantId, formId, err })
+    payload.logger.error({ msg: 'form submit failed', tenantId, formId, ip: loggedIp, err })
     return refused(text.somethingWrong)
   }
+}
+
+export const submitForm = async (
+  context: SubmissionContext,
+  input: SubmitInput,
+): Promise<SubmitResult> => {
+  const { payload } = context
+  const { formId } = input
+  const text = formText(input.locale)
+
+  // the bot sees success, nothing is saved or recorded
+  if (input.honeypot) {
+    payload.logger.warn({
+      msg: 'form submission dropped: honeypot',
+      tenantId: context.tenantId,
+      formId,
+      ip: logIp(context),
+    })
+    return { ok: true }
+  }
+
+  // refusals before the form is found have no tenant to record them under
+  const found = await findOpenForm(context, formId, text, 'submit')
+  if ('ok' in found) return found
+
+  const result = await saveSubmission(context, found, input, text)
+  await recordFormAnalytics(context, {
+    form: found.form,
+    tenantId: found.tenantId,
+    submissionData: input.submissionData,
+    result,
+  })
+  return result
 }
 
 export const uploadFile = async (
@@ -231,6 +292,7 @@ export const uploadFile = async (
   const { payload, ip } = context
   const { formId, fieldName, file } = input
   const text = formText(input.locale)
+  const loggedIp = logIp(context)
 
   const found = await findOpenForm(context, formId, text, 'upload')
   if ('ok' in found) return found
@@ -243,6 +305,7 @@ export const uploadFile = async (
       tenantId,
       formId,
       fieldName,
+      ip: loggedIp,
     })
     return refused(text.somethingWrong)
   }
@@ -254,6 +317,7 @@ export const uploadFile = async (
       tenantId,
       formId,
       type: file.type,
+      ip: loggedIp,
     })
     return refused(text.wrongType)
   }
@@ -263,6 +327,7 @@ export const uploadFile = async (
       tenantId,
       formId,
       size: file.size,
+      ip: loggedIp,
     })
     return refused(text.tooLarge)
   }
@@ -283,10 +348,23 @@ export const uploadFile = async (
       overrideAccess: true,
       depth: 0,
     })
-    payload.logger.info({ msg: 'form upload stored', tenantId, formId, uploadId: upload.id })
+    payload.logger.info({
+      msg: 'form upload stored',
+      tenantId,
+      formId,
+      uploadId: upload.id,
+      ip: loggedIp,
+    })
     return { ok: true, id: upload.id }
   } catch (err) {
-    payload.logger.error({ msg: 'form upload failed', tenantId, formId, fieldName, err })
+    payload.logger.error({
+      msg: 'form upload failed',
+      tenantId,
+      formId,
+      fieldName,
+      ip: loggedIp,
+      err,
+    })
     return refused(text.somethingWrong)
   }
 }

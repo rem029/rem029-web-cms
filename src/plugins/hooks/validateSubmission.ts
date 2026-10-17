@@ -49,10 +49,13 @@ export const validateSubmission: CollectionBeforeValidateHook<FormSubmission> = 
     throw new APIError('The form associated with this submission could not be found.', 400)
   }
   const tenantId = extractTenantId(form.tenant)
-  // step 3b: ADD — form._status !== 'published' (never published: only a draft) → as
-  // 'inactive' (403); findByID above reads the main row, which holds the published version
 
-  const reason = formRefusal(form, isUser(req.user) ? req.user : null, new Date())
+  // a form never published is only a draft: closed, as an inactive one (findByID reads the main
+  // row, which holds the published version)
+  const reason =
+    form._status === 'draft'
+      ? 'inactive'
+      : formRefusal(form, isUser(req.user) ? req.user : null, new Date())
   if (reason) {
     payload.logger.warn({ msg: `form submission refused: ${reason}`, tenantId, formId })
     throw new APIError(REFUSALS[reason], 403)

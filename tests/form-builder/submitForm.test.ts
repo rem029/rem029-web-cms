@@ -62,6 +62,15 @@ describe('submitForm', () => {
     submissionData: [{ field: 'name', value: 'Sara' }],
   })
 
+  const analyticsAt = async (pagePath: string) => {
+    const { docs } = await payload.find({
+      collection: 'analytics',
+      where: { pagePath: { equals: pagePath } },
+      depth: 0,
+    })
+    return docs
+  }
+
   const savedFor = async (formId: number) => {
     const { docs } = await payload.find({
       collection: 'form-submissions',
@@ -192,18 +201,62 @@ describe('submitForm', () => {
   })
 
   it('records the submission in analytics with ip, email and phone', async () => {
-    // arrange: an open form in test-a with an email block `email` and a phone block `phone`;
-    //          context.visitor { ip: '203.0.113.9', deviceType: 'mobile', pagePath: '/contact' }
-    // act: submitForm with name, email and phone answers
-    // assert: one analytics row for the form (payload.formID): eventType form_submission,
-    //         tenant test-a, ip, email, phone, deviceType, pagePath as given
-    expect.fail('not implemented')
+    // arrange
+    const form = await createForm(
+      payload,
+      superUser,
+      formData(tenantA.id, uniqueName('analytics'), [
+        { blockType: 'text', name: 'name', label: 'Name' },
+        { blockType: 'email', name: 'email', label: 'Email' },
+        { blockType: 'phone', name: 'phone', label: 'Phone' },
+      ]),
+    )
+    const pagePath = `/${uniqueName('contact')}`
+    const context = {
+      ...contextFor(tenantA),
+      visitor: { ip: '203.0.113.9', deviceType: 'mobile' as const, pagePath },
+    }
+
+    // act
+    await submitForm(context, {
+      formId: form.id,
+      locale: 'en',
+      submissionData: [
+        { field: 'name', value: 'Sara' },
+        { field: 'email', value: 'sara@example.test' },
+        { field: 'phone', value: '+97455501234' },
+      ],
+    })
+
+    // assert
+    const rows = await analyticsAt(pagePath)
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({
+      eventType: 'form_submission',
+      tenant: tenantA.id,
+      ip: '203.0.113.9',
+      email: 'sara@example.test',
+      phone: '+97455501234',
+      deviceType: 'mobile',
+    })
   })
 
   it('records a refused submission in analytics with the ip', async () => {
-    // arrange: a form with has_terms; context.visitor with an ip
-    // act: submitForm without termsAccepted
-    // assert: one analytics row for the form: eventType error, the ip, no email or phone
-    expect.fail('not implemented')
+    // arrange
+    const form = await openForm({ has_terms: true })
+    const pagePath = `/${uniqueName('terms')}`
+    const context = {
+      ...contextFor(tenantA),
+      visitor: { ip: '198.51.100.4', deviceType: 'desktop' as const, pagePath },
+    }
+
+    // act
+    await submitForm(context, answers(form.id))
+
+    // assert
+    const rows = await analyticsAt(pagePath)
+    expect(rows).toHaveLength(1)
+    expect(rows[0]).toMatchObject({ eventType: 'error', ip: '198.51.100.4' })
+    expect(rows[0]?.email ?? null).toBeNull()
   })
 })

@@ -1,10 +1,12 @@
-import type { Field } from 'payload'
+import type { Field, PayloadRequest } from 'payload'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { appearanceTab } from '@/common/fields/formAppearance'
 import { formBuilderFields } from '@/common/fields/formBlocks'
 import { formHeaderFields, formSidebarFields } from '@/common/fields/formSettings'
+import { publishedOrPermission, versionsAccess } from '@/common/utils/access'
+import { previewURL } from '@/common/utils/preview'
 import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 import { validateMultiStep } from '@/plugins/hooks/validateMultiStep'
 import { setFormSubmissionTenant } from '@/plugins/hooks/setFormSubmissionTenant'
@@ -78,6 +80,14 @@ const formLayout = (defaultFields: Field[]): Field[] => {
   ]
 }
 
+const formPreviewURL = async (data: Record<string, unknown>, req: PayloadRequest) =>
+  (await previewURL({
+    collection: 'forms',
+    slug: typeof data?.slug === 'string' ? data.slug : '',
+    tenant: data?.tenant,
+    req,
+  })) ?? ''
+
 /**
  * Forms and form submissions (`@payloadcms/plugin-form-builder`): the field blocks editors build
  * forms from, the form settings and appearance, and the submission's tenant.
@@ -85,11 +95,16 @@ const formLayout = (defaultFields: Field[]): Field[] => {
 export const formBuilder = formBuilderPlugin({
   fields: formBuilderFields(),
   formOverrides: {
-    // step 3b: ADD — admin.livePreview.url and admin.preview: previewURL({ collection: 'forms',
-    // slug: data.slug, tenant: data.tenant, req }) ?? '' (as Pages)
-    // step 3b: ADD — versions: { drafts: { autosave: { interval: 100 } }, maxPerDoc: 50 } (as
-    // Pages): autosave refreshes the live preview while typing, and edits to a live form reach
-    // visitors only on Publish. schema change: `_status` + `_forms_v` (migration below)
+    admin: {
+      livePreview: { url: ({ data, req }) => formPreviewURL(data, req) },
+      preview: (data, { req }) => formPreviewURL(data, req),
+    },
+    // set here, before the multi-tenant plugin wraps it (it adds the tenant filter for signed-in
+    // users): the public reads published forms only, members with read also their drafts
+    access: { read: publishedOrPermission('forms'), readVersions: versionsAccess('forms') },
+    // as Pages: autosave refreshes the live preview while typing, and edits to a live form reach
+    // visitors only on Publish
+    versions: { drafts: { autosave: { interval: 100 } }, maxPerDoc: 50 },
     indexes: [{ fields: ['tenant', 'slug'], unique: true }],
     hooks: {
       beforeValidate: [validateTenantSlugUniqueness('forms', 'form')],

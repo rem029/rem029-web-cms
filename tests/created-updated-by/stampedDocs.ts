@@ -182,6 +182,8 @@ export const createStampedDocs = async (
   const form = await payload.create({
     collection: 'forms',
     data: {
+      // published: anonymous readers see published forms only
+      _status: 'published',
       title: name,
       tenant: tenant.id,
       confirmationType: 'message',
