@@ -297,9 +297,14 @@
 // has no backdrop of its own, so closing stays the hamburger (and opening a page at 768px and below).
 // Pointer and wheel only: Tab can still reach the page (blocking it needs `inert`, i.e. JS).
 @media (max-width: 1024px) {
-  // the page scrolls on the root, which pointer-events can't stop: lock it while the nav is open
+  // the page scrolls on the root, which pointer-events can't stop: lock it while the nav is open.
+  // Payload's `body { overflow-x: hidden }` makes the body a scroller once the root is locked, so
+  // lock both
   html:has(.template-default--nav-open) {
-    overflow: hidden;
+    &,
+    body {
+      overflow: hidden;
+    }
   }
 
   .template-default--nav-open .template-default__wrap {
