@@ -33,7 +33,10 @@ const confirmation = (message: string): NonNullable<Form['confirmationMessage']>
   },
 })
 
-/** A minimal form in `tenantId` titled `title` with the given top-level blocks. */
+/**
+ * A minimal form in `tenantId` titled `title` with the given top-level blocks.
+ * step 3b: ADD — `_status: 'published'` (forms get drafts; a draft-only form isn't public)
+ */
 export const formData = (tenantId: number, title: string, fields: FormFields): FormData => ({
   tenant: tenantId,
   title,

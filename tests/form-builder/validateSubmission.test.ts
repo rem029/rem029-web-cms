@@ -75,6 +75,13 @@ describe('validateSubmission', () => {
     expect(await savedFor(form.id)).toEqual([])
   })
 
+  it('refuses a form that was never published', async () => {
+    // arrange: a form in test-a saved as a draft only (_status 'draft'), no required fields
+    // act: create a submission as anonymous
+    // assert: rejects with 403; nothing saved
+    expect.fail('not implemented')
+  })
+
   it('drops answers the form does not ask for', async () => {
     // arrange
     const form = await makeForm(tenantA, [

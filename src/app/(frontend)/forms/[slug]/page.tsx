@@ -14,12 +14,13 @@ type Args = {
 export default async function FormPage(_args: Args) {
   // 1. tenantId = await getFrontendTenantId(); none → notFound()
   // 2. locale from the LOCALE_STORAGE_KEY cookie (as [...slug]/page.tsx); 'ar' | 'en'
-  // 3. form = await findFrontendForm(payload, tenantId, slug, locale); none → notFound()
+  // 3. draft = await isPreviewing(); form = await findFrontendForm(payload, tenantId, slug,
+  //    { draft, locale }); none → notFound()
   // 4. user = (await payload.auth({ headers: await headers() })).user, if from `users`
   // 5. reason = formRefusal(form, user, new Date()): 'inactive' can't happen here (404)
   //    reason → <div className={css('page')}> header image + title + <p role="status">
   //    refusalMessage(reason, formText(locale))</p>
-  // 6. else: draft = await isPreviewing(); {draft && <LivePreviewListener />}
+  // 6. else: {draft && <LivePreviewListener />} (refreshes on every autosave)
   //    <PublicForm form locale saveDraft={!draft} /> inside the page container
   return <div />
 }

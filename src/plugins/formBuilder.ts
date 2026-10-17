@@ -86,8 +86,10 @@ export const formBuilder = formBuilderPlugin({
   fields: formBuilderFields(),
   formOverrides: {
     // step 3b: ADD — admin.livePreview.url and admin.preview: previewURL({ collection: 'forms',
-    // slug: data.slug, tenant: data.tenant, req }) ?? '' (as Pages); the page reloads on save
-    // (forms have no drafts, so no autosave)
+    // slug: data.slug, tenant: data.tenant, req }) ?? '' (as Pages)
+    // step 3b: ADD — versions: { drafts: { autosave: { interval: 100 } }, maxPerDoc: 50 } (as
+    // Pages): autosave refreshes the live preview while typing, and edits to a live form reach
+    // visitors only on Publish. schema change: `_status` + `_forms_v` (migration below)
     indexes: [{ fields: ['tenant', 'slug'], unique: true }],
     hooks: {
       beforeValidate: [validateTenantSlugUniqueness('forms', 'form')],

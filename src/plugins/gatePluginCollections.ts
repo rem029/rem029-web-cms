@@ -2,6 +2,8 @@ import type { CollectionSlug, Plugin } from 'payload'
 
 import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
 
+// step 3b: ADD — forms read → publishedOrPermission('forms') (forms get drafts): the public sees
+// published forms only, members with read on forms also their tenant's drafts
 // plugin collections: the ops a plugin leaves open to any signed-in user come from the profile
 // instead, and so does the nav. public ops stay as the plugins set them (forms/redirects/search
 // read, form-submissions create); form-submissions update stays off.

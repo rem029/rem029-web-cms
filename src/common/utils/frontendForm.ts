@@ -7,17 +7,20 @@ import type { Payload, TypedLocale } from 'payload'
 
 import type { Form } from '@/payload-types'
 
-/** The host tenant's form with `slug`, populated for the renderer, or `null`. */
+/**
+ * The host tenant's form with `slug`, populated for the renderer, or `null`. `draft` (only while
+ * previewing, `isPreviewing()`) reads the latest draft, as pages do.
+ */
 export const findFrontendForm = async (
   _payload: Payload,
   _tenantId: number | null,
   _slug: string,
-  _locale: TypedLocale,
+  _options: { draft: boolean; locale: TypedLocale },
 ): Promise<Form | null> => {
   // 1. tenantId null → null (unknown or inactive host)
   // 2. payload.find forms, frontendTenantWhere(tenantId, { slug: { equals: slug } }), locale,
-  //    depth 1 (header image, image blocks), limit 1, overrideAccess false, no user: the public
-  //    read
+  //    draft, overrideAccess: draft (as pages), depth 1 (header image, image blocks), limit 1;
+  //    not previewing → the public read: published forms only (publishedOrPermission)
   // 3. none, or isActive false → null (log debug: slug, tenant, reason)
   // 4. else the form (window and members-only are shown on the page, not a 404)
   throw new Error('not implemented')

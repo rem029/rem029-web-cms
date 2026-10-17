@@ -98,6 +98,7 @@ const findOpenForm = async (
     payload.logger.warn({ msg: `form ${kind} refused: unknown host`, formId })
     return refused(text.somethingWrong)
   }
+  // step 3b: forms get drafts; this public read returns published forms only
   const { docs } = await payload.find({
     collection: 'forms',
     where: frontendTenantWhere(tenantId, { id: { equals: formId } }),

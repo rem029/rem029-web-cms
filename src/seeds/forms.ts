@@ -284,6 +284,7 @@ export const seedForms = async (payload: Payload): Promise<void> => {
       const created = await payload.create({
         collection: 'forms',
         locale: 'en',
+        // step 3b: ADD — _status: 'published' (forms get drafts; the default is a draft)
         data: { ...spec, slugLock: false, tenant: tenant.id },
         depth: 0,
       })
