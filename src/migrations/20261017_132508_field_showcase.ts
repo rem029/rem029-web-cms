@@ -396,6 +396,9 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   ALTER TABLE "_field_showcase_v_texts" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "_field_showcase_v_numbers" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "_field_showcase_v_rels" DISABLE ROW LEVEL SECURITY;
+  -- Payload's generator drops the tables (CASCADE) before this FK, which the cascade already
+  -- removed, so down failed: drop it first
+  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_field_showcase_fk";
   DROP TABLE "field_showcase_select_many" CASCADE;
   DROP TABLE "field_showcase_blocks_showcase_callout" CASCADE;
   DROP TABLE "field_showcase_blocks_showcase_quote" CASCADE;
@@ -416,7 +419,6 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "_field_showcase_v_texts" CASCADE;
   DROP TABLE "_field_showcase_v_numbers" CASCADE;
   DROP TABLE "_field_showcase_v_rels" CASCADE;
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_field_showcase_fk";
   
   -- profiles get a row for every collection, so rows for this slug exist once a profile is saved:
   -- remove them first, or the cast back to the old enum fails
