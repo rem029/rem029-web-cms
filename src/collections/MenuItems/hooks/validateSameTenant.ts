@@ -1,4 +1,7 @@
-import type { CollectionBeforeChangeHook, CollectionSlug } from 'payload'
+import type { CollectionBeforeValidateHook, CollectionSlug } from 'payload'
+import { ValidationError } from 'payload'
+
+import { extractTenantId } from '@/common/utils/tenantCollections'
 
 /** A relationship field of the doc that must point at docs of the doc's own tenant. */
 export type SameTenantField = {
@@ -10,23 +13,57 @@ export type SameTenantField = {
   label: string
 }
 
+// one id, a populated doc, or a list of them → the ids
+const relationIds = (value: unknown): number[] => {
+  const values = Array.isArray(value) ? value : [value]
+  return values.map(extractTenantId).filter((id): id is number => id !== null)
+}
+
 /**
- * Refuses links to another business's docs (rem0017): `filterOptions` only narrows the admin
- * pickers, so a crafted API call could still link another tenant's category, allergen or tag.
- * `beforeChange`, not `beforeValidate`: draft saves skip validation (phase 2 reuses this for
- * `menus.items` and promotes it to `src/common/hooks/`).
+ * Refuses links to another business's docs (rem0017) with a plain-words error. Payload's own
+ * `filterOptions` validation also refuses them, but only says "This field is invalid", and only
+ * when validation runs. `beforeValidate`, so it runs before that check (phase 2 also runs it in
+ * `beforeChange` for `menus`, whose draft saves skip validation, and promotes it to
+ * `src/common/hooks/`).
  */
 export const validateSameTenant =
-  (_fields: SameTenantField[]): CollectionBeforeChangeHook =>
-  async ({ data }) => {
-    // 1. tenant = extractTenantId(data.tenant ?? originalDoc.tenant); none → return data
-    // 2. for each field: collect the ids in data[path] (one id, a populated doc, or an array of them)
-    // 3. none → next field
-    // 4. payload.find(collection, where: id in ids AND tenant not_equals tenant, overrideAccess: true,
-    //    depth 0, limit 1, req) — other tenants' docs must be found even if the user can't read them
-    // 5. found → logger.warn({ msg: 'menu: other tenant link refused', collection, path, tenantId,
-    //    userId, docId }), throw ValidationError on path:
-    //    `This ${label} belongs to another business. Pick one of this business's ${label}s.`
-    // 6. return data
+  (fields: SameTenantField[]): CollectionBeforeValidateHook =>
+  async ({ data, originalDoc, req, collection }) => {
+    const tenantId = extractTenantId(data?.tenant ?? originalDoc?.tenant)
+    if (tenantId === null) return data
+
+    for (const field of fields) {
+      const ids = relationIds(data?.[field.path])
+      if (ids.length === 0) continue
+
+      // overrideAccess: other tenants' docs must be found even when the user can't read them
+      const { totalDocs } = await req.payload.count({
+        collection: field.collection,
+        where: { and: [{ id: { in: ids } }, { tenant: { not_equals: tenantId } }] },
+        overrideAccess: true,
+        req,
+      })
+      if (totalDocs === 0) continue
+
+      req.payload.logger.warn({
+        msg: 'menu: link to another business refused',
+        collection: collection.slug,
+        path: field.path,
+        tenantId,
+        userId: req.user?.id,
+        docId: originalDoc?.id,
+      })
+      throw new ValidationError({
+        collection: collection.slug,
+        errors: [
+          {
+            path: field.path,
+            message: `This ${field.label} belongs to another business. Pick one from this business.`,
+          },
+        ],
+        req,
+      })
+    }
+
     return data
   }

@@ -37,8 +37,8 @@ export const MenuItems: CollectionConfig = {
   },
   indexes: [{ fields: ['tenant', 'slug'], unique: true }],
   hooks: {
-    beforeValidate: [validateTenantSlugUniqueness('menu-items', 'item')],
-    beforeChange: [
+    beforeValidate: [
+      validateTenantSlugUniqueness('menu-items', 'item'),
       validateSameTenant([
         { path: 'category', collection: 'menu-categories', label: 'category' },
         { path: 'allergens', collection: 'menu-allergens', label: 'allergen' },
@@ -169,7 +169,7 @@ export const MenuItems: CollectionConfig = {
         },
       ],
     },
-    ...slugField(),
+    ...slugField('title', { categoryPrefix: false }),
     {
       name: 'inStock',
       type: 'checkbox',

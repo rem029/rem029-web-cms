@@ -232,6 +232,12 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   ALTER TABLE "menu_items" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "menu_items_locales" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "menu_items_rels" DISABLE ROW LEVEL SECURITY;
+  -- drop the foreign keys first: DROP TABLE … CASCADE below already removes them, and the
+  -- DROP CONSTRAINTs Payload generates after it then fail (known generator bug, see CLAUDE.md)
+  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_menu_categories_fk";
+  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_menu_allergens_fk";
+  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_menu_tags_fk";
+  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_menu_items_fk";
   DROP TABLE "menu_categories" CASCADE;
   DROP TABLE "menu_categories_locales" CASCADE;
   DROP TABLE "menu_allergens" CASCADE;
@@ -246,15 +252,10 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "menu_items" CASCADE;
   DROP TABLE "menu_items_locales" CASCADE;
   DROP TABLE "menu_items_rels" CASCADE;
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_menu_categories_fk";
-  
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_menu_allergens_fk";
-  
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_menu_tags_fk";
-  
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_menu_items_fk";
-  
   ALTER TABLE "users_access_access" ALTER COLUMN "slug" SET DATA TYPE text;
+  -- profile rows for the menu collections: the old enum has no value for them
+  DELETE FROM "users_access_access"
+    WHERE "slug" IN ('menu-categories', 'menu-allergens', 'menu-tags', 'menu-items');
   DROP TYPE "public"."enum_users_access_access_slug";
   CREATE TYPE "public"."enum_users_access_access_slug" AS ENUM('pages', 'posts', 'media', 'categories', 'users', 'users-access', 'analytics', 'tenants', 'header', 'footer', 'theme', 'settings', 'redirects', 'forms', 'form-submissions', 'search');
   ALTER TABLE "users_access_access" ALTER COLUMN "slug" SET DATA TYPE "public"."enum_users_access_access_slug" USING "slug"::"public"."enum_users_access_access_slug";

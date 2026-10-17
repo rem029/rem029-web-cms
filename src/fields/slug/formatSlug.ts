@@ -7,11 +7,11 @@ export const formatSlug = (val: string): string =>
     .toLowerCase()
 
 export const formatSlugHook =
-  (fallback: string): FieldHook =>
+  (fallback: string, options: { categoryPrefix?: boolean } = {}): FieldHook =>
   async ({ data, operation, value, req }) => {
     let categorySlug = ''
 
-    if (data?.category) {
+    if (options.categoryPrefix !== false && data?.category) {
       const category = await req.payload.findByID({
         collection: 'categories',
         id: data?.category,

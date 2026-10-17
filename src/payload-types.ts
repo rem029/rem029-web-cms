@@ -1677,7 +1677,7 @@ export interface MenuItem {
   /**
    * Guests can filter the menu by these when the menu shows the availability filter.
    */
-  availability: ('breakfast' | 'lunch' | 'dinner' | 'all_day')[];
+  availability?: ('breakfast' | 'lunch' | 'dinner' | 'all_day')[] | null;
   /**
    * Choices guests see on the item, e.g. Size (Small, Large) or Milk (Oat, Soy).
    */

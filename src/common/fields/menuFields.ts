@@ -24,7 +24,7 @@ export const availabilityField: SelectField = {
   type: 'select',
   label: 'Served',
   hasMany: true,
-  required: true,
+  // not required: API callers may leave it out, and an empty list means all day
   defaultValue: ['all_day'],
   options: [
     { label: 'Breakfast', value: 'breakfast' },
