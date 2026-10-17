@@ -68,13 +68,15 @@ export default async function FormPage({ params }: Args) {
             </p>
           </section>
         ) : (
-          <FormRenderer
-            form={form}
-            locale={locale}
-            saveDraft={!draft}
-            submit={submitFormAction}
-            upload={uploadFileAction}
-          />
+          <div className="py-10 md:py-16">
+            <FormRenderer
+              form={form}
+              locale={locale}
+              saveDraft={!draft}
+              submit={submitFormAction}
+              upload={uploadFileAction}
+            />
+          </div>
         )}
       </div>
     </div>

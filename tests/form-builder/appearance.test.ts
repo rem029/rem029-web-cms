@@ -39,10 +39,10 @@ describe('appearanceToStyle', () => {
     // act
     const { dataAttrs, cssVars } = appearanceToStyle(appearance)
 
-    // assert
+    // assert: the theme css defines --primary as a full colour (#102721), not an hsl triplet
     expect(cssVars).toMatchObject({
-      '--fb-accent': 'hsl(var(--primary))',
-      '--fb-accent-foreground': 'hsl(var(--primary-foreground))',
+      '--fb-accent': 'var(--primary)',
+      '--fb-accent-foreground': 'var(--primary-foreground)',
     })
     expect(dataAttrs['data-width']).toBe('medium')
   })

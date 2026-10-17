@@ -1,21 +1,27 @@
 /*
  * The form renderer's default design, keyed off the root's data attributes and css variables
  * (appearance.ts) and the stable fb-* classes (the Custom CSS contract). Imported by
- * FormRenderer (index.tsx). Colours come from the tenant theme tokens (hsl(var(--…))) or the
+ * FormRenderer (index.tsx). Colours come from the tenant theme tokens or the
  * form's accent (--fb-accent); logical properties only (rtl); motion off under
  * prefers-reduced-motion.
  *
  * Everything sits in the `fb-defaults` cascade layer: unlayered rules (a form's scoped Custom
- * CSS, the site's own css) always win over it, whatever their specificity.
+ * CSS, the site's own css) always win over it, whatever their specificity. It sits above the
+ * `reset` layer that holds Tailwind's preflight (globals.css), which would otherwise strip the
+ * fields' borders and the buttons' fills.
  */
+@layer payload-default, reset, fb-defaults;
+
 @layer fb-defaults {
   /* 1. root, body card, background image */
   .fb-form {
+    /* the theme css defines --background, --foreground and --primary as full colours, the rest
+       as hsl triplets (src/utilities/defaults.ts) */
     --fb-border: hsl(var(--border));
     --fb-surface: hsl(var(--card));
-    --fb-text: hsl(var(--foreground));
+    --fb-text: var(--foreground);
     --fb-muted: hsl(var(--muted-foreground));
-    --fb-field-bg: hsl(var(--background));
+    --fb-field-bg: var(--background);
     --fb-error-color: hsl(var(--destructive));
     --fb-pad: 2rem;
     --fb-control-height: 2.75rem;
@@ -45,7 +51,7 @@
     background: var(--fb-surface);
     border: 1px solid var(--fb-border);
     border-radius: min(var(--fb-radius, 0.5rem), 1.5rem);
-    box-shadow: 0 1px 2px hsl(var(--foreground) / 0.06);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--fb-text) 6%, transparent);
   }
 
   .fb-form[data-background='image'] {
@@ -163,7 +169,8 @@
   }
 
   .fb-form[data-field-style='filled'] .fb-input {
-    background: hsl(var(--muted));
+    /* a tint that shows on the card and on a plain page alike */
+    background: color-mix(in srgb, var(--fb-border) 45%, var(--fb-surface));
     border-color: transparent;
   }
 

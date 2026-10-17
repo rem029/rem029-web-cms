@@ -3,7 +3,7 @@
  * `data-*` attributes for the presets (the default design in `formRenderer.css` is keyed off
  * them) and CSS variables for the values (`--fb-accent`, `--fb-radius`, `--fb-gap`,
  * `--fb-max-width`, `--fb-bg-image`). With no accent the variables point at the tenant theme
- * tokens (`hsl(var(--primary))`), so a form follows the site's branding by default.
+ * tokens (`var(--primary)`: the theme css defines it as a full colour), so a form follows the site's branding by default.
  * Used by `FormRenderer` (index.tsx); pure, unit tested in `tests/form-builder/appearance.test.ts`.
  */
 import type React from 'react'
@@ -106,8 +106,8 @@ export const appearanceToStyle = (
   if (imageUrl) dataAttrs['data-background'] = 'image'
 
   const cssVars: FormCssVars = {
-    '--fb-accent': accent ?? 'hsl(var(--primary))',
-    '--fb-accent-foreground': accent ? readableTextOn(accent) : 'hsl(var(--primary-foreground))',
+    '--fb-accent': accent ?? 'var(--primary)',
+    '--fb-accent-foreground': accent ? readableTextOn(accent) : 'var(--primary-foreground)',
     '--fb-radius': RADIUS[value.radius],
     '--fb-max-width': MAX_WIDTH[value.width],
     '--fb-gap': GAP[value.density],
