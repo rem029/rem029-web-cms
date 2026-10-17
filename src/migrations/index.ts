@@ -25,8 +25,10 @@ import * as migration_20261003_102355_tenant_admins from './20261003_102355_tena
 import * as migration_20261003_122558_hidden_documents from './20261003_122558_hidden_documents';
 import * as migration_20261003_160746_access_templates from './20261003_160746_access_templates';
 import * as migration_20261010_121953_created_updated_by from './20261010_121953_created_updated_by';
-import * as migration_20261017_134822_form_builder_blocks from './20261017_134822_form_builder_blocks';
-import * as migration_20261017_164643_form_builder_settings_uploads from './20261017_164643_form_builder_settings_uploads';
+import * as migration_20261010_170458_audit_logs from './20261010_170458_audit_logs';
+import * as migration_20261010_201646_audit_logs_retention from './20261010_201646_audit_logs_retention';
+import * as migration_20261015_193545_audit_logs_login_failed from './20261015_193545_audit_logs_login_failed';
+import * as migration_20261017_170605_form_builder from './20261017_170605_form_builder';
 
 export const migrations = [
   {
@@ -165,13 +167,23 @@ export const migrations = [
     name: '20261010_121953_created_updated_by',
   },
   {
-    up: migration_20261017_134822_form_builder_blocks.up,
-    down: migration_20261017_134822_form_builder_blocks.down,
-    name: '20261017_134822_form_builder_blocks',
+    up: migration_20261010_170458_audit_logs.up,
+    down: migration_20261010_170458_audit_logs.down,
+    name: '20261010_170458_audit_logs',
   },
   {
-    up: migration_20261017_164643_form_builder_settings_uploads.up,
-    down: migration_20261017_164643_form_builder_settings_uploads.down,
-    name: '20261017_164643_form_builder_settings_uploads'
+    up: migration_20261010_201646_audit_logs_retention.up,
+    down: migration_20261010_201646_audit_logs_retention.down,
+    name: '20261010_201646_audit_logs_retention',
+  },
+  {
+    up: migration_20261015_193545_audit_logs_login_failed.up,
+    down: migration_20261015_193545_audit_logs_login_failed.down,
+    name: '20261015_193545_audit_logs_login_failed',
+  },
+  {
+    up: migration_20261017_170605_form_builder.up,
+    down: migration_20261017_170605_form_builder.down,
+    name: '20261017_170605_form_builder'
   },
 ];
