@@ -91,6 +91,7 @@ jobs:
 
       # the runner has no fixed ip: allow this one on the Hetzner firewall for the dump only
       - name: Open the firewall
+        id: open
         env:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
           HCLOUD_FIREWALL_ID: ${{ secrets.HCLOUD_FIREWALL_ID }}
@@ -102,9 +103,9 @@ jobs:
           STAGING_DB_URL: ${{ secrets.STAGING_DB_URL_READONLY }}
         run: bash .github/scripts/rehearse-migrations.sh dump
 
-      # always, also after a failed dump; it also clears rules left by a run that died
+      # whenever opening was tried, also after a failed dump; it also clears rules left by a run that died
       - name: Close the firewall
-        if: always()
+        if: always() && steps.open.outcome != 'skipped'
         env:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
           HCLOUD_FIREWALL_ID: ${{ secrets.HCLOUD_FIREWALL_ID }}
