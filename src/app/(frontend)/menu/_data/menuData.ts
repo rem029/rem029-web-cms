@@ -1,7 +1,10 @@
 import type { Payload, TypedLocale } from 'payload'
 import { unstable_cache } from 'next/cache'
 
-import type { Menu, MenuCategory, MenuItem } from '@/payload-types'
+import { menusTag } from '@/common/hooks/revalidateMenus'
+import { frontendTenantWhere } from '@/common/utils/frontendTenant'
+import { tenantCurrency } from '@/common/utils/tenantCurrency'
+import type { Menu, MenuAllergen, MenuCategory, MenuItem, MenuTag } from '@/payload-types'
 
 /**
  * The guest menu pages' data (rem0017 phase 3): `/menu` lists the host tenant's published menus,
@@ -47,40 +50,88 @@ export type MenuPageData = {
   currency: string
 }
 
+// search results shown at once; a guest refines the query rather than scrolling far
+const SEARCH_LIMIT = 20
+// a search box query, not a document: anything longer is cut
+const MAX_QUERY_LENGTH = 100
+
+const isDoc = <T extends { id: number }>(value: number | T | null | undefined): value is T =>
+  typeof value === 'object' && value !== null
+
+// 600px wide: sharp on a phone card without sending the original
+const imageUrlOf = (image: MenuItem['image']): string | null => {
+  if (!isDoc(image)) return null
+  return image.sizes?.small?.url ?? image.url ?? null
+}
+
+const lookups = (values: (number | MenuAllergen | MenuTag)[] | null | undefined) =>
+  (values ?? []).filter(isDoc).map(({ id, title }) => ({ id, title }))
+
+const toGuestItem = (item: MenuItem): GuestMenuItem => ({
+  id: item.id,
+  slug: item.slug ?? String(item.id),
+  title: item.title,
+  description: item.description ?? null,
+  price: item.price,
+  imageUrl: imageUrlOf(item.image),
+  inStock: item.inStock !== false,
+  allergens: lookups(item.allergens),
+  tags: lookups(item.tags),
+  availability: item.availability ?? [],
+  modifierGroups: (item.modifierGroups ?? []).map((group) => ({
+    name: group.name,
+    inputType: group.inputType,
+    required: group.required === true,
+    options: group.options.map((option) => option.label),
+  })),
+})
+
+const categoryIdOf = (item: MenuItem): number | null =>
+  isDoc(item.category) ? item.category.id : (item.category ?? null)
+
 /** The menu with this slug on this tenant: published, or the draft while previewing. */
 export const findMenuPage = async (
   payload: Payload,
   tenantId: number | null,
   slug: string,
-  options: FindOptions,
+  { draft, locale }: FindOptions,
 ): Promise<Menu | null> => {
-  // 1. no tenant (unknown or inactive host) → null, no query
-  // 2. payload.find menus: frontendTenantWhere(tenantId, { slug }), draft: options.draft,
-  //    overrideAccess: options.draft (guests: published only), locale, depth 2 (items with their
-  //    category, allergens, tags, image), limit 1
-  // 3. debug log { msg: 'menu page', tenantId, slug, draft, menuId }
-  // 4. return the doc or null
-  void payload
-  void tenantId
-  void slug
-  void options
-  throw new Error('not implemented')
+  if (tenantId === null) return null
+  const { docs } = await payload.find({
+    collection: 'menus',
+    where: frontendTenantWhere(tenantId, { slug: { equals: slug } }),
+    draft,
+    // guests read published menus and active items only; a preview reads everything, like Pages
+    overrideAccess: draft,
+    locale,
+    // the items, with their category, allergens, tags and image
+    depth: 2,
+    limit: 1,
+    pagination: false,
+  })
+  const menu = docs[0] ?? null
+  payload.logger.debug({ msg: 'menu page', tenantId, slug, draft, menuId: menu?.id })
+  return menu
 }
 
 /** The host tenant's published menus for `/menu`, by title. */
 export const listMenus = async (
   payload: Payload,
   tenantId: number | null,
-  options: { locale: TypedLocale },
+  { locale }: { locale: TypedLocale },
 ): Promise<Menu[]> => {
-  // 1. no tenant → []
-  // 2. payload.find menus: frontendTenantWhere(tenantId), overrideAccess false (published only),
-  //    sort 'title', depth 1 (header logo for the card), limit 0, pagination false, locale
-  // 3. return the docs
-  void payload
-  void tenantId
-  void options
-  throw new Error('not implemented')
+  if (tenantId === null) return []
+  const { docs } = await payload.find({
+    collection: 'menus',
+    where: frontendTenantWhere(tenantId),
+    overrideAccess: false,
+    locale,
+    sort: 'title',
+    // the header logo and carousel images for the cards, not the items' own relations
+    depth: 1,
+    pagination: false,
+  })
+  return docs
 }
 
 /**
@@ -93,15 +144,29 @@ export const buildMenuSections = (
   items: Menu['items'],
   categories: MenuCategory[],
 ): MenuSection[] => {
-  // 1. keep populated items (objects, not ids) with isActive !== false; map each to GuestMenuItem
-  //    (toGuestItem below: image url, populated allergens/tags titles, option labels)
-  // 2. for each category in categories sorted by sortOrder (then title): its items in menu order;
-  //    skip it when empty
-  // 3. the items whose category is empty or not in `categories` → a last section with
-  //    category null
-  void items
-  void categories
-  throw new Error('not implemented')
+  const shown = (items ?? []).filter(isDoc).filter((item) => item.isActive !== false)
+  const sorted = [...categories].sort(
+    (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.title.localeCompare(b.title),
+  )
+  const known = new Set(sorted.map((category) => category.id))
+
+  const sections: MenuSection[] = sorted
+    .map((category) => ({
+      category: {
+        id: category.id,
+        slug: category.slug ?? String(category.id),
+        title: category.title,
+      },
+      items: shown.filter((item) => categoryIdOf(item) === category.id).map(toGuestItem),
+    }))
+    .filter((section) => section.items.length > 0)
+
+  const other = shown.filter((item) => {
+    const id = categoryIdOf(item)
+    return id === null || !known.has(id)
+  })
+  if (other.length > 0) sections.push({ category: null, items: other.map(toGuestItem) })
+  return sections
 }
 
 /** The menu items matching `query` (title or description) that are on this menu. */
@@ -112,19 +177,61 @@ export const searchMenuItems = async (
   query: string,
   locale: TypedLocale,
 ): Promise<GuestMenuItem[]> => {
-  // 1. no tenant, or a blank query → []
-  // 2. the menu's item ids: payload.find menus where frontendTenantWhere(tenantId, { id: menuId }),
-  //    overrideAccess false, depth 0 → its items (another tenant's menu id → nothing → [])
-  // 3. payload.find menu-items: frontendTenantWhere(tenantId, { id in ids, or: [title like
-  //    query, description like query] }), overrideAccess false (active only), locale, depth 1,
-  //    limit 20
-  // 4. map with toGuestItem, in the menu's order
-  void payload
-  void tenantId
-  void menuId
-  void query
-  void locale
-  throw new Error('not implemented')
+  const text = query.trim().slice(0, MAX_QUERY_LENGTH)
+  if (tenantId === null || text === '') return []
+
+  // another tenant's menu id finds nothing here, so its items never come back
+  const { docs: menus } = await payload.find({
+    collection: 'menus',
+    where: frontendTenantWhere(tenantId, { id: { equals: menuId } }),
+    overrideAccess: false,
+    depth: 0,
+    limit: 1,
+    pagination: false,
+  })
+  const ids = (menus[0]?.items ?? []).map((entry) => (isDoc(entry) ? entry.id : entry))
+  if (ids.length === 0) return []
+
+  const { docs } = await payload.find({
+    collection: 'menu-items',
+    where: frontendTenantWhere(tenantId, {
+      and: [
+        { id: { in: ids } },
+        { or: [{ title: { like: text } }, { description: { like: text } }] },
+      ],
+    }),
+    overrideAccess: false,
+    locale,
+    depth: 1,
+    limit: SEARCH_LIMIT,
+    pagination: false,
+  })
+  payload.logger.debug({ msg: 'menu search', tenantId, menuId, results: docs.length })
+  // in the menu's order, as the page lists them
+  return [...docs].sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)).map(toGuestItem)
+}
+
+const loadMenuPage = async (
+  payload: Payload,
+  tenantId: number,
+  slug: string,
+  options: FindOptions,
+): Promise<MenuPageData | null> => {
+  const menu = await findMenuPage(payload, tenantId, slug, options)
+  if (!menu) return null
+  const { docs: categories } = await payload.find({
+    collection: 'menu-categories',
+    where: frontendTenantWhere(tenantId),
+    overrideAccess: false,
+    locale: options.locale,
+    depth: 0,
+    pagination: false,
+  })
+  return {
+    menu,
+    sections: buildMenuSections(menu.items, categories),
+    currency: await tenantCurrency(payload, tenantId),
+  }
 }
 
 /**
@@ -137,19 +244,14 @@ export const getMenuPage = async (
   slug: string,
   options: FindOptions,
 ): Promise<MenuPageData | null> => {
-  // 1. no tenant → null
-  // 2. load = async (tenantId, slug, locale, draft) →
-  //    findMenuPage → null when missing; the tenant's categories (menu-categories,
-  //    frontendTenantWhere, sort sortOrder, locale, limit 0); currency via tenantCurrency;
-  //    → { menu, sections: buildMenuSections(menu.items, categories), currency }
-  // 3. draft → load directly; else unstable_cache(load, ['menu-page'], { tags: [menusTag(tenantId)] })
-  //    (tenantId, slug, locale, false)
-  void payload
-  void tenantId
-  void slug
-  void options
-  void unstable_cache
-  throw new Error('not implemented')
+  if (tenantId === null) return null
+  if (options.draft) return loadMenuPage(payload, tenantId, slug, options)
+  return unstable_cache(
+    (id: number, menuSlug: string, locale: TypedLocale) =>
+      loadMenuPage(payload, id, menuSlug, { draft: false, locale }),
+    ['menu-page'],
+    { tags: [menusTag(tenantId)] },
+  )(tenantId, slug, options.locale)
 }
 
 /** `/menu` data, cached per tenant like getMenuPage. */
@@ -158,11 +260,10 @@ export const getMenuList = async (
   tenantId: number | null,
   options: { locale: TypedLocale },
 ): Promise<Menu[]> => {
-  // 1. no tenant → []
-  // 2. unstable_cache((tenantId, locale) => listMenus(...), ['menu-list'],
-  //    { tags: [menusTag(tenantId)] })(tenantId, options.locale)
-  void payload
-  void tenantId
-  void options
-  throw new Error('not implemented')
+  if (tenantId === null) return []
+  return unstable_cache(
+    (id: number, locale: TypedLocale) => listMenus(payload, id, { locale }),
+    ['menu-list'],
+    { tags: [menusTag(tenantId)] },
+  )(tenantId, options.locale)
 }

@@ -1,15 +1,17 @@
 import type { Metadata } from 'next'
 import configPromise from '@payload-config'
-import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { getPayload, type TypedLocale } from 'payload'
+import { getPayload } from 'payload'
 import React from 'react'
 
 import { getFrontendTenantId } from '@/common/utils/frontendTenant'
 import { getTenantDoc } from '@/common/utils/getTenantDoc'
-import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from '@/utilities/constant'
 
 import { MenuCard } from './_components/MenuCard'
+import { MenuFooter } from './_components/MenuFooter'
+import { MenuHeader } from './_components/MenuHeader'
+import { readMenuLocale } from './_data/locale'
+import { mediaOf } from './_data/media'
 import { getMenuList } from './_data/menuData'
 import { menuStrings } from './_i18n'
 
@@ -18,28 +20,44 @@ import { menuStrings } from './_i18n'
  * by title. Unknown or inactive host → 404; no menus → a short empty state. Per request.
  */
 export default async function MenuListPage() {
-  // 1. tenantId = await getFrontendTenantId(); null → notFound()
-  // 2. locale from the cookie; menus = await getMenuList(payload, tenantId, { locale })
-  // 3. t = menuStrings(locale); <MenuHeader title={settings.siteName} logo={settings logo} homeHref="/"
-  //    showLanguageSwitch />, then a container with <h1>{t.menus}</h1>, then
-  //    menus.length === 0 → <p>{t.noMenus}</p>, else a grid (1 column on phones, 2–3 wider) of
-  //    <MenuCard key menu={menu} />
-  void configPromise
-  void getPayload
-  void getFrontendTenantId
-  void notFound
-  void getMenuList
-  void menuStrings
-  void MenuCard
-  void readLocale
-  return <div />
+  const tenantId = await getFrontendTenantId()
+  if (tenantId === null) notFound()
+
+  const locale = await readMenuLocale()
+  const payload = await getPayload({ config: configPromise })
+  const menus = await getMenuList(payload, tenantId, { locale })
+  const settings = await getTenantDoc('settings', tenantId, { depth: 1, locale })
+  const t = menuStrings(locale)
+
+  return (
+    <div className="menu-theme flex min-h-dvh flex-col">
+      <MenuHeader
+        title={settings?.siteName || t.menus}
+        logo={mediaOf(settings?.logo)}
+        homeHref="/"
+        showLanguageSwitch
+        locale={locale}
+      />
+      <main className="container flex-1 py-6">
+        <h1 className="text-3xl font-semibold">{t.menus}</h1>
+        {menus.length === 0 ? (
+          <p className="mt-4 text-menu-muted">{t.noMenus}</p>
+        ) : (
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {menus.map((menu) => (
+              <MenuCard key={menu.id} menu={menu} />
+            ))}
+          </div>
+        )}
+      </main>
+      <MenuFooter settings={settings} locale={locale} />
+    </div>
+  )
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  // title: `${t.menus} | ${settings.siteName}` (getTenantDoc('settings', tenantId, { locale }))
-  void getTenantDoc
-  return {}
+  const locale = await readMenuLocale()
+  const settings = await getTenantDoc('settings', await getFrontendTenantId(), { locale })
+  const t = menuStrings(locale)
+  return { title: settings?.siteName ? `${t.menus} | ${settings.siteName}` : t.menus }
 }
-
-const readLocale = async (): Promise<TypedLocale> =>
-  ((await cookies()).get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE) as TypedLocale

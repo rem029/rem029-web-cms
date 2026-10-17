@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import React from 'react'
 
-import type { Media, Menu } from '@/payload-types'
+import type { Menu } from '@/payload-types'
+
+import { mediaOf } from '../_data/media'
 
 export type MenuCardProps = {
   menu: Pick<Menu, 'title' | 'slug' | 'intro' | 'header' | 'carousel'>
@@ -9,23 +11,26 @@ export type MenuCardProps = {
 
 /**
  * One menu on the `/menu` list: its first carousel image (or the header logo), title and intro
- * heading, the whole card one link to `/menu/<slug>`. Theme classes only (bg-card,
- * text-card-foreground, border-border), logical spacing (ps/pe, text-start) for RTL. Server
- * component.
+ * heading, the whole card one link to `/menu/<slug>`. Theme classes only, logical spacing for
+ * RTL. Server component.
  */
 export const MenuCard: React.FC<MenuCardProps> = ({ menu }) => {
-  // 1. image = first carousel image if populated, else header.logo if populated (imageOf below)
-  // 2. <Link href={`/menu/${menu.slug}`} className="block rounded border bg-card … focus-visible:ring">
-  //      {image && <img src alt="" loading="lazy" className="aspect-video w-full object-cover" />}
-  //      <div className="p-4 text-start"><h2>{menu.title}</h2>
-  //        {menu.intro?.heading && <p className="text-muted-foreground">{heading}</p>}</div>
-  //    </Link>
-  void menu
-  void Link
-  void imageOf
-  return <div />
-}
+  const image = mediaOf(menu.carousel?.[0]?.image) ?? mediaOf(menu.header?.logo)
+  const src = image?.sizes?.small?.url ?? image?.url
 
-// a populated upload, else nothing (depth 1 populates them; an id alone has no url)
-const imageOf = (value: number | Media | null | undefined): Media | null =>
-  value && typeof value === 'object' ? value : null
+  return (
+    <Link
+      href={`/menu/${menu.slug}`}
+      className="block overflow-hidden rounded border border-menu-border bg-menu-card text-menu-text no-underline transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary motion-reduce:transition-none"
+    >
+      {src && (
+        // eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size
+        <img src={src} alt="" loading="lazy" className="aspect-video w-full object-cover" />
+      )}
+      <div className="p-4 text-start">
+        <h2 className="text-xl font-semibold">{menu.title}</h2>
+        {menu.intro?.heading && <p className="mt-1 text-menu-muted">{menu.intro.heading}</p>}
+      </div>
+    </Link>
+  )
+}

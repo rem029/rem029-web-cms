@@ -1,0 +1,18 @@
+/*
+ * The menu pages' colours (rem0017 phase 3). Tenant themes set --background, --foreground,
+ * --primary and --primary-foreground as full colours (hex), while Tailwind's `bg-primary` etc.
+ * expect HSL triplets, so the menu reads the theme's colours through its own tokens (Tailwind
+ * `menu-*`). A menu's own colours (menuColorVars) set the four base tokens inline on the same
+ * element, so the derived ones (card, muted, border) follow them.
+ */
+.menu-theme {
+  --menu-bg: var(--background);
+  --menu-text: var(--foreground);
+  --menu-primary: var(--primary);
+  --menu-primary-text: var(--primary-foreground);
+  --menu-card: color-mix(in srgb, var(--menu-text) 5%, var(--menu-bg));
+  --menu-muted: color-mix(in srgb, var(--menu-text) 72%, var(--menu-bg));
+  --menu-border: color-mix(in srgb, var(--menu-text) 15%, var(--menu-bg));
+  background: var(--menu-bg);
+  color: var(--menu-text);
+}

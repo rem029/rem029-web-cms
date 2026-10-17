@@ -1,15 +1,12 @@
 import React from 'react'
 
+import './menu.css'
+
 /**
- * The menu pages' own frame (rem0017 phase 3): outside the `(site)` group, so no site Header or
- * Footer. Each page renders its MenuHeader (the menu's title and logo differ per page); the
- * MenuFooter is the same on `/menu` and `/menu/<slug>`, so it lives here.
+ * The menu pages (rem0017 phase 3) sit outside the `(site)` route group, so they get no site
+ * Header or Footer: each page renders its own MenuHeader and MenuFooter inside its `menu-theme`
+ * wrapper, where the menu's own colours apply. This layout only loads the menu colour tokens.
  */
-export default async function MenuLayout({ children }: { children: React.ReactNode }) {
-  // 1. locale from the cookie; tenantId = await getFrontendTenantId()
-  // 2. settings = await getTenantDoc('settings', tenantId, { depth: 1, locale })
-  // 3. <div className="flex min-h-dvh flex-col bg-background text-foreground">
-  //      <div className="flex-1">{children}</div><MenuFooter settings={settings} locale={locale} />
-  //    </div>
-  return <>{children}</>
+export default function MenuLayout({ children }: { children: React.ReactNode }) {
+  return children
 }

@@ -1,7 +1,11 @@
+import Link from 'next/link'
+import type { TypedLocale } from 'payload'
 import React from 'react'
 
+import { SocialMedia } from '@/components/Social'
 import type { Setting } from '@/payload-types'
-import type { TypedLocale } from 'payload'
+
+import { menuStrings } from '../_i18n'
 
 export type MenuFooterProps = {
   settings: Setting | null
@@ -10,21 +14,37 @@ export type MenuFooterProps = {
 
 /**
  * The menu pages' own footer (rem0017 phase 3), in place of the site Footer: what a guest at the
- * table needs: the business name, phone (tel: link), address and social links (the existing
- * `SocialMedia`), and a link to all menus. Rows without a value are left out; nothing at all →
- * just the name. Theme classes only, logical spacing for RTL. Server component.
+ * table needs: the business name, phone (tel: link), address, social links and a link to all
+ * menus. Rows without a value are left out. Theme classes only, logical spacing for RTL.
  */
-export const MenuFooter: React.FC<MenuFooterProps> = (props) => {
-  // 1. t = menuStrings(locale)
-  // 2. <footer className="border-t border-border bg-card text-card-foreground">
-  //      <div className="container grid gap-2 py-6 text-start text-sm">
-  //        <p className="font-semibold">{settings?.siteName}</p>
-  //        {phone && <a href={`tel:${phone}`}>{phone}</a>}
-  //        {address && <p>{address}</p>}
-  //        <SocialMedia socialMedia={settings?.socialMedia} … />
-  //        <Link href="/menu">{t.allMenus}</Link>
-  //      </div>
-  //    </footer>
-  void props
-  return <footer />
+export const MenuFooter: React.FC<MenuFooterProps> = ({ settings, locale }) => {
+  const t = menuStrings(locale)
+  const phone = settings?.contact?.phone
+  const address = settings?.address?.full_address
+
+  return (
+    <footer className="border-t border-menu-border bg-menu-card text-menu-text">
+      <div className="container grid gap-2 py-6 text-start text-sm">
+        {settings?.siteName && <p className="font-semibold">{settings.siteName}</p>}
+        {phone && (
+          <a
+            href={`tel:${phone}`}
+            className="w-fit text-menu-text underline-offset-4 hover:underline"
+            dir="ltr"
+          >
+            {phone}
+          </a>
+        )}
+        {address && <p className="text-menu-muted">{address}</p>}
+        <SocialMedia
+          classNameContainer="flex gap-3"
+          classNameItem="text-lg hover:text-menu-primary"
+          socialMedia={settings?.socialMedia}
+        />
+        <Link href="/menu" className="w-fit text-menu-text underline-offset-4 hover:underline">
+          {t.allMenus}
+        </Link>
+      </div>
+    </footer>
+  )
 }

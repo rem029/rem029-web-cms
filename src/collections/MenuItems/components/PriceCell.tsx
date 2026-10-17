@@ -1,20 +1,13 @@
-import type { DefaultServerCellComponentProps, Payload } from 'payload'
+import type { DefaultServerCellComponentProps } from 'payload'
 import { cache } from 'react'
 
 import { DEFAULT_CURRENCY } from '@/collections/Settings/fields/currency'
 import { formatPrice } from '@/common/utils/formatPrice'
+import { tenantCurrency as readTenantCurrency } from '@/common/utils/tenantCurrency'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 
-// one settings read per tenant per request, not one per row; the currency is no secret
-const tenantCurrency = cache(async (payload: Payload, tenantId: number): Promise<string> => {
-  const { docs } = await payload.find({
-    collection: 'settings',
-    where: { tenant: { equals: tenantId } },
-    limit: 1,
-    depth: 0,
-  })
-  return docs[0]?.currency ?? DEFAULT_CURRENCY
-})
+// one settings read per tenant per request, not one per row
+const tenantCurrency = cache(readTenantCurrency)
 
 /**
  * Price in the items list with the tenant's currency (Settings → Currency), e.g. "QAR 12.50".

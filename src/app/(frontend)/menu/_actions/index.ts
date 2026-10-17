@@ -1,11 +1,11 @@
 'use server'
 
 import configPromise from '@payload-config'
-import { getPayload, type TypedLocale } from 'payload'
+import { getPayload } from 'payload'
 
 import { getFrontendTenantId } from '@/common/utils/frontendTenant'
-import { SUPPORTED_LOCALES } from '@/utilities/constant'
 
+import { toLocale } from '../_data/locale'
 import { searchMenuItems, type GuestMenuItem } from '../_data/menuData'
 
 export type SearchMenuResult = { ok: true; items: GuestMenuItem[] } | { ok: false; error: string }
@@ -13,26 +13,25 @@ export type SearchMenuResult = { ok: true; items: GuestMenuItem[] } | { ok: fals
 /**
  * The menu page's search box (rem0017 phase 3, SearchOverlay): items on this menu matching the
  * query, in the visitor's locale. The tenant comes from the request's host, never from the
- * client; the menu id only narrows within that tenant.
+ * client; the menu id only narrows within that tenant. The error is a key the overlay shows in
+ * the visitor's language.
  */
 export const searchMenuItemsAction = async (args: {
   menuId: number
   query: string
   locale: string
 }): Promise<SearchMenuResult> => {
-  // 1. validate: menuId a positive integer, query a string trimmed to 100 chars, locale one of
-  //    SUPPORTED_LOCALES (else 'en') → TypedLocale
-  // 2. payload = await getPayload; tenantId = await getFrontendTenantId()
-  // 3. { ok: true, items: await searchMenuItems(payload, tenantId, menuId, query, locale) }
-  // 4. on throw: payload.logger.error({ msg: 'menu search failed', tenantId, menuId, err }) →
-  //    { ok: false, error: 'Search failed. Try again.' } (the overlay shows it in the locale)
-  void args
-  void configPromise
-  void getPayload
-  void getFrontendTenantId
-  void SUPPORTED_LOCALES
-  void searchMenuItems
-  const locale: TypedLocale = 'en'
-  void locale
-  throw new Error('not implemented')
+  const payload = await getPayload({ config: configPromise })
+  const menuId = Number(args?.menuId)
+  const query = typeof args?.query === 'string' ? args.query : ''
+  if (!Number.isInteger(menuId) || menuId <= 0) return { ok: true, items: [] }
+
+  const tenantId = await getFrontendTenantId()
+  try {
+    const items = await searchMenuItems(payload, tenantId, menuId, query, toLocale(args?.locale))
+    return { ok: true, items }
+  } catch (err) {
+    payload.logger.error({ msg: 'menu search failed', tenantId, menuId, err })
+    return { ok: false, error: 'searchFailed' }
+  }
 }

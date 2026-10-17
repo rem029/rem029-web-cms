@@ -19,7 +19,7 @@ import {
 
 import type { Availability } from '@/common/fields/menuFields'
 import { isDisabledUser } from '@/common/utils/access'
-import { DEFAULT_CURRENCY } from '@/collections/Settings/fields/currency'
+import { tenantCurrency } from '@/common/utils/tenantCurrency'
 import type { MenuCategory, MenuItem } from '@/payload-types'
 
 import type {
@@ -165,17 +165,6 @@ const categoryInTenant = async (
   return totalDocs > 0
 }
 
-// the currency is no secret: read without access, once the user's own read of the items worked
-const tenantCurrency = async (payload: Payload, tenantId: number): Promise<string> => {
-  const { docs } = await payload.find({
-    collection: 'settings',
-    where: { tenant: { equals: tenantId } },
-    limit: 1,
-    depth: 0,
-  })
-  return docs[0]?.currency ?? DEFAULT_CURRENCY
-}
-
 /** Items panel: the tenant's items (active or not), filtered by category and title. */
 export const listBuilderItems = async (
   payload: Payload,
@@ -205,6 +194,7 @@ export const listBuilderItems = async (
     return {
       ok: true,
       items: docs.map(toBuilderItem),
+      // read without access, once the user's own read of the items worked
       currency: await tenantCurrency(payload, tenantId),
     }
   } catch (err) {

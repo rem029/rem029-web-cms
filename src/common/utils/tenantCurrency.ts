@@ -1,15 +1,18 @@
 import type { Payload } from 'payload'
 
+import { DEFAULT_CURRENCY } from '@/collections/Settings/fields/currency'
+
 /**
  * A tenant's currency (Settings → Currency), `DEFAULT_CURRENCY` without settings. Read without
  * access: the currency is no secret. Used by the items list price cell, the menu builder and the
- * guest menu pages (promoted from the first two in rem0017 phase 3).
+ * guest menu pages.
  */
 export const tenantCurrency = async (payload: Payload, tenantId: number): Promise<string> => {
-  // 1. payload.find settings where tenant equals tenantId, limit 1, depth 0
-  // 2. docs[0]?.currency ?? DEFAULT_CURRENCY
-  // (then PriceCell wraps it in react cache, builder.ts imports it, both local copies removed)
-  void payload
-  void tenantId
-  throw new Error('not implemented')
+  const { docs } = await payload.find({
+    collection: 'settings',
+    where: { tenant: { equals: tenantId } },
+    limit: 1,
+    depth: 0,
+  })
+  return docs[0]?.currency ?? DEFAULT_CURRENCY
 }

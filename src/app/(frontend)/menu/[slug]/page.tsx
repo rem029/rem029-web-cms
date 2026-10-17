@@ -1,67 +1,94 @@
 import type { Metadata } from 'next'
 import configPromise from '@payload-config'
-import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload, type TypedLocale } from 'payload'
-import React from 'react'
+import React, { cache } from 'react'
 
+import { formatPrice } from '@/common/utils/formatPrice'
 import { getFrontendTenantId } from '@/common/utils/frontendTenant'
+import { getTenantDoc } from '@/common/utils/getTenantDoc'
 import { isPreviewing } from '@/common/utils/isPreviewing'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
-import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY } from '@/utilities/constant'
 import { generateMeta } from '@/utilities/generateMeta'
 
-import { getMenuPage, type MenuPageData } from '../_data/menuData'
+import { MenuFooter } from '../_components/MenuFooter'
+import { MenuHeader } from '../_components/MenuHeader'
+import { readMenuLocale } from '../_data/locale'
+import { mediaOf } from '../_data/media'
+import { menuColorVars } from '../_data/menuColors'
+import { getMenuPage } from '../_data/menuData'
+import { menuStrings } from '../_i18n'
 
 type Args = {
   params: Promise<{ slug: string }>
 }
 
+// shared by the page and its metadata (react cache: primitives only, compared by identity)
+const loadMenuPage = cache(async (slug: string, locale: TypedLocale) => {
+  const payload = await getPayload({ config: configPromise })
+  const tenantId = await getFrontendTenantId()
+  return getMenuPage(payload, tenantId, slug, { draft: await isPreviewing(), locale })
+})
+
 /**
  * A menu's guest page, `/menu/<slug>` on its tenant's host (rem0017 phase 3). Rendered per
  * request (no generateStaticParams: the tenant comes from the host). Unknown host, unknown slug,
- * another tenant's slug or a draft outside preview → 404.
+ * another tenant's slug or a draft outside preview → 404. No loading.tsx: it starts streaming
+ * before the page can call notFound(), and the 404 would go out as a 200.
  */
 export default async function MenuPage({ params }: Args) {
-  // 1. tenantId = await getFrontendTenantId(); null → notFound()
-  // 2. draft = await isPreviewing(); locale from the cookie (as the [...slug] page)
-  // 3. data = await loadMenuPage(slug, locale); null → notFound()
-  // 4. render: wrapper div with style={menuColorVars(data.menu.colors)} and the theme classes
-  //    (bg-background text-foreground), {draft && <LivePreviewListener />},
-  //    <MenuHeader title={header.title || title} logo={header.logo ?? settings logo} homeHref="/menu"
-  //    showLanguageSwitch={header.showLanguageSwitch !== false} />, then
-  //    <Menu data={data} locale={locale} /> (step 3; until then the sections as a plain list)
-  void params
-  void notFound
-  void LivePreviewListener
-  void loadMenuPage
-  return <div />
+  const tenantId = await getFrontendTenantId()
+  if (tenantId === null) notFound()
+
+  const { slug } = await params
+  const locale = await readMenuLocale()
+  const data = await loadMenuPage(slug, locale)
+  if (!data) notFound()
+
+  const { menu, sections, currency } = data
+  const settings = await getTenantDoc('settings', tenantId, { depth: 1, locale })
+  const t = menuStrings(locale)
+
+  return (
+    <div style={menuColorVars(menu.colors)} className="menu-theme flex min-h-dvh flex-col">
+      {(await isPreviewing()) && <LivePreviewListener />}
+      <MenuHeader
+        title={menu.header?.title || menu.title}
+        logo={mediaOf(menu.header?.logo) ?? mediaOf(settings?.logo)}
+        homeHref="/menu"
+        showLanguageSwitch={menu.header?.showLanguageSwitch !== false}
+        locale={locale}
+      />
+      {/* step 3 replaces this list with the interactive <Menu /> */}
+      <main className="container flex-1 py-6">
+        {menu.intro?.heading && <h1 className="text-3xl font-semibold">{menu.intro.heading}</h1>}
+        {menu.intro?.subheading && <p className="mt-1 text-menu-muted">{menu.intro.subheading}</p>}
+        {sections.map((section) => (
+          <section key={section.category?.id ?? 'other'} className="mt-8">
+            <h2 className="text-xl font-semibold">{section.category?.title ?? t.other}</h2>
+            <ul className="mt-3 grid gap-3">
+              {section.items.map((item) => (
+                <li key={item.id} className="flex justify-between gap-4 rounded bg-menu-card p-3">
+                  <span className="grid">
+                    <span>{item.title}</span>
+                    {!item.inStock && (
+                      <span className="text-sm text-menu-muted">{t.outOfStock}</span>
+                    )}
+                  </span>
+                  <bdi className="shrink-0">{formatPrice(item.price, currency, locale)}</bdi>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </main>
+      <MenuFooter settings={settings} locale={locale} />
+    </div>
+  )
 }
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
-  // 1. data = await loadMenuPage(slug, locale) (the same cached read as the page)
-  // 2. generateMeta({ doc: data?.menu ?? null }) (generateMeta takes a Menu too; urls from
-  //    getFrontendTenantURL())
-  void params
-  void generateMeta
-  return {}
+  const { slug } = await params
+  const data = await loadMenuPage(slug, await readMenuLocale())
+  return generateMeta({ doc: data?.menu ?? null })
 }
-
-// shared by the page and its metadata: the host's tenant, preview or not, and the locale
-const loadMenuPage = async (slug: string, locale: TypedLocale): Promise<MenuPageData | null> => {
-  // 1. payload = await getPayload({ config }); tenantId = await getFrontendTenantId()
-  // 2. getMenuPage(payload, tenantId, slug, { draft: await isPreviewing(), locale })
-  void slug
-  void locale
-  void configPromise
-  void getPayload
-  void getFrontendTenantId
-  void isPreviewing
-  void getMenuPage
-  return null
-}
-
-const readLocale = async (): Promise<TypedLocale> =>
-  ((await cookies()).get(LOCALE_STORAGE_KEY)?.value || DEFAULT_LOCALE) as TypedLocale
-
-void readLocale
