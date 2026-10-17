@@ -12,6 +12,7 @@ import { cn } from '@/utilities/ui'
 
 import type { FieldOf } from './types'
 
+// step 2: CHANGE — image radius from var(--fb-radius)
 const IMAGE_SIZES = { small: 'max-w-xs', medium: 'max-w-md', full: 'w-full' } as const
 
 export const MessageContent: React.FC<{ block: FieldOf<'message'> }> = ({ block }) => {

@@ -43,6 +43,7 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
       {sections.map((section, i) => {
         const answers = visibleAnswers(section.fields ?? [], values, listCounts)
         return (
+          // step 2: CHANGE — border / padding → formRenderer.css (.fb-review)
           <section className="fb-review rounded border border-border p-4" key={section.id ?? i}>
             <div className="mb-3 flex items-center justify-between gap-2">
               <h3 className="text-base font-semibold">{section.label}</h3>

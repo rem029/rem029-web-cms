@@ -34,6 +34,9 @@ export type FieldControlProps = {
   prefix: string
 }
 
+// step 2: CHANGE — INPUT_CLASS / CHOICE_CLASS / star classes: keep only layout utilities; borders,
+// step 2:   colours, radius and focus move to formRenderer.css (.fb-input, .fb-choice, .fb-star) so the
+// step 2:   presets and Custom CSS can restyle them without fighting tailwind
 const INPUT_CLASS =
   'fb-input w-full rounded border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
 
@@ -135,6 +138,8 @@ export const FieldControl: React.FC<FieldControlProps> = ({ field, prefix }) => 
     if (value === undefined && fallback !== undefined) setValue(path, fallback)
   }, [value, fallback, path, setValue])
 
+  // step 2: ADD — onBlur on every input: required and !isFilled(value) → setFieldError(path, text.required)
+  // step 2:   (inline validation when leaving a field; cleared again by setValue)
   const shell = (children: React.ReactNode, group = false) => (
     <FieldShell field={field} group={group} inputId={inputId} path={path}>
       {children}

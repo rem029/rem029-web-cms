@@ -60,6 +60,7 @@ export const useDraft = (
     }
   }, [draft, formId, enabled])
 
+  // step 2: ADD — savedAt: Date | null, set after each successful write, returned for the 'draft saved' note
   const updateDraft = useCallback((update: (prev: Draft) => Draft) => {
     changed.current = true
     setDraft(update)

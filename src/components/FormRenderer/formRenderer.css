@@ -1,0 +1,25 @@
+/*
+ * The form renderer's default design, keyed off the root's data attributes and css variables
+ * (appearance.ts) and the stable fb-* classes (the Custom CSS contract). Imported by
+ * FormRenderer (index.tsx). Colours come from the tenant theme tokens (hsl(var(--…))) or the
+ * form's accent (--fb-accent); logical properties only (rtl); motion off under
+ * prefers-reduced-motion.
+ *
+ * Plan (implementation fills these in):
+ * 1. .fb-form: max-width var(--fb-max-width), margin-inline auto, gap var(--fb-gap);
+ *    [data-card="card"] → card background, border, radius, padding, shadow
+ *    [data-density="compact"] → smaller paddings
+ *    background image + [data-overlay] on the root when --fb-bg-image is set
+ * 2. inputs (.fb-input): border/radius var(--fb-radius), focus ring in --fb-accent;
+ *    [data-field-style="filled"] muted background, no border until focus;
+ *    [data-field-style="underlined"] only a bottom border, radius 0
+ * 3. labels: [data-label-position="inline"] label beside the input from sm up;
+ *    [data-label-position="floating"] label inside the input, moves up on focus / value
+ *    (text-like inputs only; the others keep the label above)
+ * 4. choices (.fb-choice, .fb-star): checked in --fb-accent / --fb-accent-foreground
+ * 5. buttons (.fb-button--primary): [data-button-style="outline"], [data-button-full] width 100%
+ * 6. errors: .fb-field--error border in destructive, .fb-error-summary
+ * 7. sequence numbers: [data-numbered] .fb-field counter (css counters, no js)
+ * 8. steps: .fb-steps--numbered / --dots states, progress bar fill in --fb-accent
+ * 9. focus-visible everywhere; @media (prefers-reduced-motion: reduce) no transitions
+ */

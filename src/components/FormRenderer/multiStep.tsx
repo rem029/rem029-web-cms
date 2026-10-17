@@ -15,6 +15,7 @@ import { cn } from '@/utilities/ui'
 import { useFormRenderer } from './context'
 import { focusFirstError, missingRequired } from './helpers'
 import { formText } from './i18n'
+// step 2: CHANGE — ProgressBar → StepIndicator with variant = step_indicator prop from FormRenderer
 import { ProgressBar } from './progressBar'
 import { RecursiveFields } from './recursiveFields'
 import { ReviewScreen } from './reviewScreen'
@@ -24,6 +25,7 @@ export type MultiStepProps = {
   block: MultiStepBlock
   submitLabel: string
   submitting: boolean
+  // step 2: ADD — stepIndicator: StepIndicatorVariant (from appearanceToStyle's preset)
   /** Called from the review screen; FormRenderer runs the full check and sends. */
   onSubmit: () => void
 }
@@ -93,6 +95,7 @@ export const MultiStep: React.FC<MultiStepProps> = ({
       )}
       <section
         aria-labelledby={`fb-step-${current}`}
+        // step 2: CHANGE — tailwind look → formRenderer.css (.fb-step); same for fb-actions
         className={cn('fb-step fb-step--active flex flex-col gap-4', step.css_class)}
       >
         <div>

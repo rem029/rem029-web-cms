@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Form } from '@/payload-types'
 
+// step 2: ADD — import './formRenderer.css', appearanceToStyle, scopeCustomCss
 import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
 
@@ -127,6 +128,8 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
     setStatus('done')
   }
 
+  // step 2: ADD — const { dataAttrs, cssVars } = appearanceToStyle(form.appearance)
+  // step 2: ADD — const scopedCss = scopeCustomCss(form.custom_css, form.id)
   const state: FormRendererState = {
     formId: form.id,
     locale,
@@ -150,6 +153,9 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   return (
     <FormRendererContext.Provider value={state}>
       <div
+        // step 2: CHANGE — className 'fb-form' only (layout and look move to formRenderer.css);
+        // step 2:   spread {...dataAttrs}, style={cssVars}; render <style>{scopedCss}</style> first when set
+        // step 2: ADD — 'draft saved' note in fb-actions (savedAt from useDraft, aria-live polite)
         className="fb-form flex flex-col gap-6"
         data-form-id={form.id}
         data-numbered={form.show_sequence_number || undefined}

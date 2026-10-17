@@ -1,4 +1,5 @@
 /**
+ * step 2: REMOVE — replaced by stepIndicator.tsx (its progress variant takes this markup).
  * Where the visitor is in a multi-step form: "Step 2 of 3" + a bar (`fb-progress`, `role`
  * progressbar with aria-valuenow). Step 2 replaces it with `stepIndicator.tsx` (progress /
  * numbered / dots / none from the Appearance tab). Rendered by `MultiStep`.

@@ -27,6 +27,7 @@ export type RecursiveFieldsProps = {
 }
 
 export const RecursiveFields: React.FC<RecursiveFieldsProps> = ({ fields, prefix = '' }) => (
+  // step 2: CHANGE — gap-4 → var(--fb-gap) in formRenderer.css; group / list borders and padding move there too
   <div className="fb-fields flex flex-wrap gap-4">
     {fields.map((field, i) => (
       <FieldNode field={field} key={field.id ?? i} prefix={prefix} />

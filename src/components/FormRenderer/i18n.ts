@@ -28,6 +28,7 @@ export type FormText = {
   yes: string
   no: string
   stepOf: (current: number, total: number) => string
+  // step 2: ADD — draftSaved: string ('Draft saved' / 'تم حفظ المسودة')
   somethingWrong: string
 }
 

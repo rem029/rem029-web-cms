@@ -162,4 +162,35 @@ describe('FormRenderer', () => {
     // assert
     expect(screen.getByLabelText<HTMLInputElement>('Name').value).toBe('Sara')
   })
+
+  it('adds field css classes and fb hooks', () => {
+    // arrange: formDoc([{ text full_name, css_class 'big-input' }])
+    // act: render
+    // assert: the field wrapper has fb-field, fb-field--text, big-input and data-field="full_name";
+    //         the input has fb-input; the label fb-label
+    expect.fail('not implemented')
+  })
+
+  it('renders content blocks without inputs', () => {
+    // arrange: formDoc([message 'Welcome'])
+    // act: render, then click Send
+    // assert: 'Welcome' shows in .fb-content--message, no textbox; submit called with []
+    expect.fail('not implemented')
+  })
+
+  // proposed additions
+  it('applies appearance and scoped custom css to the root', () => {
+    // arrange: formDoc(stockFields(), { appearance: { width: 'wide' }, custom_css: '.fb-label { color: red; }' })
+    // act: render
+    // assert: .fb-form has data-width="wide" and data-form-id="1"; a <style> holds
+    //         '[data-form-id="1"]'
+    expect.fail('not implemented')
+  })
+
+  it('shows a required error when leaving an empty field', () => {
+    // arrange: formDoc(twoStepFields()), rendered
+    // act: focus then blur the empty "Full name"
+    // assert: 'This field is required.' shows before any Next click
+    expect.fail('not implemented')
+  })
 })
