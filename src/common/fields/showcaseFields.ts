@@ -1,4 +1,5 @@
 import type { Field } from 'payload'
+import { FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { ShowcaseCallout, ShowcaseQuote } from './showcaseBlocks'
 
@@ -177,13 +178,15 @@ export const showcaseFields = (relations: Field[]): Field[] => [
       {
         label: 'Content',
         fields: [
-          // PLAN(step 2) its own editor: `editor: lexicalEditor({ features: ({ defaultFeatures }) =>
-          // [...defaultFeatures, FixedToolbarFeature()] })` (import both from
-          // '@payloadcms/richtext-lexical'). The site-wide `defaultLexical` has no headings, so the
-          // seeded heading fails to parse ("type heading not found"); Payload's defaults have
-          // headings, lists, quote, code, upload, relationship, and the fixed toolbar shows every
-          // toolbar style. Then `pnpm generate:importmap` (the features' client parts).
-          { name: 'richText', type: 'richText' },
+          // its own editor: the site-wide one has no headings, and Payload's defaults plus the fixed
+          // toolbar show every rich text control
+          {
+            name: 'richText',
+            type: 'richText',
+            editor: lexicalEditor({
+              features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+            }),
+          },
           { name: 'layout', type: 'blocks', blocks: [ShowcaseCallout, ShowcaseQuote] },
         ],
       },

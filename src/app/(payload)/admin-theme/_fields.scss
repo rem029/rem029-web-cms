@@ -398,45 +398,314 @@ $collapsible-inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width
   }
 }
 
-// PLAN(step 2) rich text (`@payloadcms/richtext-lexical` 3.44 bundled.css; plain unlayered rules there,
-// so match its specificity, e.g. `.rich-text-lexical .editor-container`)
-// `.rich-text-lexical__wrap`: the $inputs look: surface, 2px border, radius-s, padding; focus-within
-//   --admin-shadow-s; `.rich-text-lexical--read-only`: dashed border, --admin-raised
-// `.rich-text-lexical .editor-container`: --font-body instead of Payload's --font-serif, no letter-spacing
-// gutter line (`--show-gutter … .ContentEditable__root::before`): --admin-border, 2px
-// `.editor-placeholder`: --admin-muted
-// error (`.rich-text-lexical.error`): border --admin-danger-text (replaces Payload's gutter-only red)
-// content: `.LexicalEditorTheme__quote`: 4px --admin-secondary rule on the inline start, padding;
-//   `__code` and inline code: mono on --admin-raised, radius-s; `__hr`: 2px --admin-border;
-//   headings: display font; links already get the highlighter in `_base.scss`
+// rich text editor (`@payloadcms/richtext-lexical` bundled.css is unlayered; match its specificity)
+.rich-text-lexical {
+  > .rich-text-lexical__wrap {
+    padding: var(--base) 12px;
+    background: var(--admin-surface);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    box-shadow: none;
+    transition: box-shadow var(--admin-duration) var(--admin-ease);
 
-// PLAN(step 2) rich text toolbars and menus: like popups (brutal-box -s, radius-s)
-// `.fixed-toolbar`: --admin-raised bar with a 2px rule under it (inside the editor box, no shadow)
-// `.inline-toolbar-popup`, `.slash-menu-popup`, `.toolbar-popup__dropdown-items`, `.link-editor`:
-//   brutal-box(var(--admin-shadow-s)), radius-s; `.inline-toolbar-popup .caret`: hidden
-// `.toolbar-popup__button`: 28px, radius-s; hover --admin-raised; `.active`: sky fill, ink (icons
-//   inherit); focus-visible --admin-shadow-xs
-// `.toolbar-popup__dropdown`: chip like the buttons; dark-mode caret filter stays Payload's
-// `.slash-menu-popup__group-title`: mono, uppercase, muted; `__item`: radius-s, hover --admin-raised;
-//   `__item--selected`: sky fill, ink
-// `.add-block-menu`, `.draggable-block-menu`: 2px border chips, surface, radius-s
-// `.lexical-block`: same as the blocks rows (collapsible look from step 1 already applies; check)
+    &:focus-within {
+      box-shadow: var(--admin-shadow-s);
+    }
+  }
 
-// PLAN(step 2) upload
-// `.upload__dropzoneAndUpload .dropzone`, `.file-field .dropzone`, `.bulk-upload--add-files__dropArea`:
-//   dashed 2px --admin-border panel, radius-m, --admin-surface, muted text (like the empty state);
-//   `.dropzone.dragging` (check the class in Payload's Dropzone): sky mixed 25% into the surface
-// `.upload-relationship-details`, `.upload--has-many__dragItem`, `.file-details`: bordered card
-//   (2px, radius-s, surface, no shadow); `__filename`: body font 600; `__meta`: mono, muted;
-//   `__actions` buttons: chips with press like the row ⋮ (step 1)
-// `.thumbnail` inside them: 2px --admin-border, radius-s, --admin-raised behind transparent images
-// `.file-field__filename`, `.file-field__thumbnail-wrap`: same card language
+  &--read-only > .rich-text-lexical__wrap {
+    border-style: dashed;
+    background: var(--admin-raised);
 
-// PLAN(step 2) code / json: only the frame (Monaco keeps its own light/dark colours, user 2026-10-18)
-// `.code-editor`, `.json-field .code-editor`: 2px border, radius-s, overflow hidden so Monaco's
-//   corners don't stick out; focus-within --admin-shadow-s; `.error` / `.json-field.error`: border
-//   --admin-danger-text
+    &:focus-within {
+      box-shadow: none;
+    }
+  }
 
-// PLAN(step 2) join table (`.relationship-table`, the Children join)
-// `.relationship-table__header`: label in the display font, count pill mono, "Add new" on one line
-// the table inside is the phase 3 `.table` panel; empty: the phase 3 dashed `.no-results`
+  &.error > .rich-text-lexical__wrap {
+    border-color: var(--admin-danger-text);
+  }
+
+  .editor-container {
+    font-family: var(--font-body);
+    letter-spacing: normal;
+  }
+
+  .editor-placeholder {
+    color: var(--admin-muted);
+  }
+}
+
+.rich-text-lexical--show-gutter,
+html[data-theme='light'] .rich-text-lexical.rich-text-lexical--show-gutter.error:not(:hover),
+html[data-theme='light'] .rich-text-lexical.rich-text-lexical--show-gutter.error:hover,
+html[data-theme='dark'] .rich-text-lexical.rich-text-lexical--show-gutter.error {
+  > .rich-text-lexical__wrap
+    > .editor-container
+    > .editor-scroller
+    > .editor
+    > .ContentEditable__root::before {
+    border-left: var(--admin-border-width) solid var(--admin-border);
+  }
+}
+
+.LexicalEditorTheme__h1,
+.LexicalEditorTheme__h2,
+.LexicalEditorTheme__h3,
+.LexicalEditorTheme__h4,
+.LexicalEditorTheme__h5,
+.LexicalEditorTheme__h6 {
+  font-family: var(--admin-font-display);
+}
+
+.LexicalEditorTheme__quote {
+  border-inline-start: 4px solid var(--admin-secondary);
+  padding-inline-start: 12px;
+  padding-block: 4px;
+}
+
+.LexicalEditorTheme__code {
+  font-family: var(--admin-font-mono);
+  background: var(--admin-raised);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+
+  &::before {
+    border-right-color: var(--admin-border);
+    color: var(--admin-muted);
+  }
+}
+
+.LexicalEditorTheme__textCode,
+html[data-theme='dark'] .LexicalEditorTheme__textCode {
+  font-family: var(--admin-font-mono);
+  background: var(--admin-raised);
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+}
+
+.LexicalEditorTheme__hr::after {
+  height: var(--admin-border-width);
+  background-color: var(--admin-border);
+}
+
+// rich text toolbars and menus
+.fixed-toolbar {
+  margin: calc(var(--base) * -1) -12px 0;
+  padding: 6px 8px;
+  background: var(--admin-raised);
+  border: 0;
+  border-bottom: var(--admin-border-width) solid var(--admin-border);
+  border-top-left-radius: calc(var(--admin-radius-s) - var(--admin-border-width));
+  border-top-right-radius: calc(var(--admin-radius-s) - var(--admin-border-width));
+  box-shadow: none;
+  transform: none;
+
+  &::before,
+  &::after {
+    display: none;
+  }
+
+  .fixed-toolbar__group .divider {
+    background-color: var(--admin-border);
+  }
+}
+
+.inline-toolbar-popup,
+.slash-menu-popup,
+.toolbar-popup__dropdown-items,
+.link-editor,
+html[data-theme='light'] .inline-toolbar-popup,
+html[data-theme='light'] .slash-menu-popup,
+html[data-theme='light'] .toolbar-popup__dropdown-items,
+html[data-theme='light'] .link-editor,
+html[data-theme='dark'] .fixed-toolbar__dropdown-items {
+  @include brutal-box(var(--admin-shadow-s));
+  border-radius: var(--admin-radius-s);
+}
+
+.inline-toolbar-popup .caret {
+  display: none;
+}
+
+.toolbar-popup__button {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--admin-radius-s);
+  color: var(--admin-text);
+
+  &:hover:not(.disabled) {
+    background: var(--admin-raised);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--admin-shadow-xs);
+    outline: none;
+  }
+
+  &.active,
+  &.active:hover {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+
+    .icon {
+      color: inherit;
+    }
+  }
+}
+
+.toolbar-popup__dropdown,
+html[data-theme='dark'] .fixed-toolbar .toolbar-popup__dropdown {
+  height: 28px;
+  border-radius: var(--admin-radius-s);
+  color: var(--admin-text);
+
+  &:hover:not([disabled]) {
+    background: var(--admin-raised);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--admin-shadow-xs);
+    outline: none;
+  }
+
+  .toolbar-popup__dropdown-label {
+    color: inherit;
+    font-family: var(--admin-font-mono);
+  }
+}
+
+.toolbar-popup__dropdown-items .toolbar-popup__dropdown-item,
+html[data-theme='dark'] .fixed-toolbar__dropdown-items .toolbar-popup__dropdown-item {
+  border-radius: var(--admin-radius-s);
+  color: var(--admin-text);
+
+  &:hover:not([disabled]) {
+    background: var(--admin-raised);
+  }
+
+  &.active,
+  &.active:hover {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+
+    .icon {
+      color: inherit;
+    }
+  }
+}
+
+.slash-menu-popup__group-title {
+  font-family: var(--admin-font-mono);
+  text-transform: uppercase;
+  color: var(--admin-muted);
+}
+
+.slash-menu-popup__item {
+  border-radius: var(--admin-radius-s);
+  color: var(--admin-text);
+
+  &:hover {
+    background: var(--admin-raised);
+  }
+
+  &--selected,
+  &--selected:hover {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+
+    .icon {
+      color: inherit;
+    }
+  }
+}
+
+.add-block-menu,
+.draggable-block-menu {
+  background: var(--admin-surface);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+
+  &:hover {
+    background: var(--admin-raised);
+  }
+}
+
+// upload dropzone and file cards
+.dropzone:not(.dropzoneStyle--none) {
+  border: var(--admin-border-width) dashed var(--admin-border);
+  border-radius: var(--admin-radius-m);
+  background: var(--admin-surface);
+  color: var(--admin-muted);
+
+  &.dragging {
+    background: color-mix(in srgb, var(--admin-primary) 25%, var(--admin-surface));
+    border-color: var(--admin-border);
+    box-shadow: none;
+  }
+}
+
+.upload-relationship-details,
+.upload--has-many__dragItem,
+.file-details {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-surface);
+  box-shadow: none;
+
+  .thumbnail {
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    background: var(--admin-raised);
+  }
+}
+
+.file-field__thumbnail-wrap .thumbnail {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-raised);
+}
+
+.upload-relationship-details__filename,
+.file-field__filename {
+  font-family: var(--admin-font-body);
+  font-weight: 600;
+}
+
+.upload-relationship-details__meta,
+.file-details__meta {
+  font-family: var(--admin-font-mono);
+  color: var(--admin-muted);
+}
+
+// code / json editor frame (Monaco keeps its own light/dark colours)
+.code-editor,
+.json-field .code-editor {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  overflow: hidden;
+  box-shadow: none;
+  transition: box-shadow var(--admin-duration) var(--admin-ease);
+
+  &:focus-within {
+    box-shadow: var(--admin-shadow-s);
+  }
+}
+
+.field-type.error .code-editor,
+.json-field.error .code-editor,
+.code-editor.error {
+  border-color: var(--admin-danger-text);
+}
+
+// join table (`.relationship-table`)
+.relationship-table__header {
+  align-items: center;
+
+  .field-label,
+  h3,
+  h4 {
+    font-family: var(--admin-font-display);
+  }
+}

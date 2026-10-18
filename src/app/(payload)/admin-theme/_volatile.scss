@@ -199,10 +199,74 @@
   border: 0;
 }
 
-// PLAN(step 2) live preview (Payload 3.44 `@payloadcms/next` `.live-preview*`; rem0013 redoes it)
-// `.live-preview-window`: --admin-raised behind the frame; `__wrapper`: no change
-// `.live-preview-iframe`: 2px --admin-border, radius-m, --admin-shadow-s, white background kept
-//   (the site paints its own)
-// `.live-preview-toolbar`: bordered bar (2px, radius-s, surface); `--draggable`: brutal-box -s
-// `__drag-handle`: chip like the row drag handle; controls (`__breakpoint`, `__zoom` selects,
-//   `__size` inputs): already `$inputs` / popup buttons, check; `__external` link: chip
+// live preview (`@payloadcms/next` `.live-preview*`; rem0013 redoes it)
+.live-preview-window {
+  background: var(--admin-raised);
+}
+
+.live-preview-iframe,
+.live-preview-window--has-breakpoint .live-preview-iframe {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-m);
+  box-shadow: var(--admin-shadow-s);
+}
+
+.live-preview-toolbar {
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+
+  &--static {
+    border: 0;
+    border-bottom: var(--admin-border-width) solid var(--admin-border);
+    border-radius: 0;
+  }
+
+  &--draggable {
+    @include brutal-box(var(--admin-shadow-s));
+    border-radius: var(--admin-radius-s);
+  }
+
+  &__drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 2px;
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    @include press(none, var(--admin-shadow-xs), none);
+
+    .icon--drag-handle .fill {
+      fill: var(--admin-text);
+    }
+  }
+}
+
+.live-preview-toolbar-controls {
+  &__breakpoint,
+  &__zoom,
+  &__size {
+    font-family: var(--admin-font-mono);
+    color: var(--admin-text);
+    background: var(--admin-surface);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+  }
+
+  &__external {
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    @include press(none, var(--admin-shadow-xs), none);
+
+    &:hover {
+      background: var(--admin-surface);
+    }
+  }
+}
