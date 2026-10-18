@@ -16,11 +16,16 @@ vi.mock('@payloadcms/ui', () => ({
   useTheme: () => ({ theme: themeState.theme, setTheme: themeState.setTheme, autoMode: false }),
 }))
 
+let rafSpy: ReturnType<typeof vi.spyOn> | undefined
+
 describe('ThemeToggle', () => {
   afterEach(() => {
     cleanup()
     themeState.theme = 'dark'
     themeState.setTheme.mockReset()
+    rafSpy?.mockRestore()
+    rafSpy = undefined
+    document.documentElement.classList.remove('theme-switching')
   })
 
   it('offers light mode while dark', () => {
@@ -69,5 +74,45 @@ describe('ThemeToggle', () => {
     // assert: setTheme called once with 'dark'
     expect(themeState.setTheme).toHaveBeenCalledTimes(1)
     expect(themeState.setTheme).toHaveBeenCalledWith('dark')
+  })
+
+  it('pauses transitions while the theme switches', () => {
+    // arrange: theme 'dark', render <ThemeToggle />, rAF stubbed (vi.spyOn window.requestAnimationFrame,
+    //   callbacks held, not run)
+    const callbacks: FrameRequestCallback[] = []
+    let nextId = 1
+    rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      callbacks.push(cb)
+      return nextId++
+    })
+    themeState.theme = 'dark'
+    render(<ThemeToggle />)
+
+    // act: click the button
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to light mode' }))
+
+    // assert: <html> has the class 'theme-switching'
+    expect(document.documentElement.classList.contains('theme-switching')).toBe(true)
+  })
+
+  it('resumes transitions after the switch', () => {
+    // arrange: as above, then click the button
+    const callbacks: FrameRequestCallback[] = []
+    let nextId = 1
+    rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+      callbacks.push(cb)
+      return nextId++
+    })
+    themeState.theme = 'dark'
+    render(<ThemeToggle />)
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to light mode' }))
+    expect(document.documentElement.classList.contains('theme-switching')).toBe(true)
+
+    // act: run the held rAF callbacks (two frames: the first schedules the second)
+    callbacks.shift()?.(0)
+    callbacks.shift()?.(0)
+
+    // assert: <html> no longer has 'theme-switching'
+    expect(document.documentElement.classList.contains('theme-switching')).toBe(false)
   })
 })

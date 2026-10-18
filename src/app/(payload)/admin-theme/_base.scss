@@ -4,9 +4,6 @@ body {
   background: var(--admin-bg);
   color: var(--admin-text);
   font-family: var(--admin-font-body);
-  transition:
-    background-color var(--admin-duration-slow) var(--admin-ease),
-    color var(--admin-duration-slow) var(--admin-ease);
 }
 
 h1,
@@ -56,6 +53,15 @@ pre {
   *::before,
   *::after {
     animation: none !important;
+    transition: none !important;
+  }
+}
+
+// pauses all transitions while ThemeToggle flips the theme
+html.theme-switching {
+  *,
+  *::before,
+  *::after {
     transition: none !important;
   }
 }

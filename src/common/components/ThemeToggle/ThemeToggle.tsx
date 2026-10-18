@@ -55,6 +55,8 @@ function MoonIcon() {
  * goes (sun while dark, moon while light). The admin opens on Automatic (no cookie: the device's
  * colour scheme); Payload's `setTheme` stores a click in the `payload-theme` cookie, and Automatic
  * comes back from the account page. Styled by `.theme-toggle` in `admin-theme/_shell.scss`.
+ * While it switches, `theme-switching` on `<html>` stops every transition, so the whole admin
+ * changes in one frame instead of fading at each element's own speed.
  */
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -67,7 +69,17 @@ export function ThemeToggle() {
       className="theme-toggle"
       aria-label={label}
       title={label}
-      onClick={() => setTheme(next)}
+      onClick={() => {
+        // pause transitions for two frames so all colours switch at once
+        const { classList } = document.documentElement
+        classList.add('theme-switching')
+        setTheme(next)
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            classList.remove('theme-switching')
+          })
+        })
+      }}
     >
       {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
     </button>
