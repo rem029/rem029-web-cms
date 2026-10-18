@@ -1,0 +1,115 @@
+// Buttons (rem0005 phase 2). Checked against Payload 3.44.0 (`@payloadcms/ui` elements/Button).
+// Payload paints buttons from variables (--bg-color, --color, --box-shadow and their --hover-*
+// twins), so each style only sets those. The border is an inset shadow, so it adds no size.
+@use './motion' as *;
+
+$border: inset 0 0 0 var(--admin-border-width) var(--admin-border);
+$lifted: var(--admin-shadow-m);
+
+.btn {
+  font-family: var(--admin-font-body);
+  border-radius: var(--admin-radius-s);
+}
+
+// sky fill and ink text; the fill stays on hover, the shadow does the talking
+.btn--style-primary {
+  --bg-color: var(--admin-primary);
+  --hover-bg: var(--admin-primary);
+  --color: var(--admin-ink);
+  --hover-color: var(--admin-ink);
+  --btn-font-weight: 600;
+}
+
+.btn--style-secondary {
+  --bg-color: var(--admin-surface);
+  --hover-bg: var(--admin-surface);
+  --color: var(--admin-text);
+  --hover-color: var(--admin-text);
+  --btn-font-weight: 600;
+}
+
+// the two styles above get the shadow and the lift; a split button (Publish + its ⋮) moves as one
+.btn--style-primary,
+.btn--style-secondary {
+  --box-shadow: #{$border};
+  --hover-box-shadow: #{$border};
+
+  &.btn--withoutPopup {
+    @include press(($border, var(--admin-shadow-s)), ($border, $lifted), $border);
+  }
+
+  // the wrapper of a split button has no border of its own: its two halves draw theirs
+  &.btn--withPopup {
+    border-radius: var(--admin-radius-s);
+    @include press(var(--admin-shadow-s), $lifted, 0 0 0 var(--admin-shadow));
+  }
+}
+
+// quieter controls: border only, no shadow, no motion
+.btn--style-pill,
+.btn--style-subtle {
+  --bg-color: var(--admin-surface);
+  --hover-bg: var(--admin-raised);
+  --color: var(--admin-text);
+  --hover-color: var(--admin-text);
+  --box-shadow: #{$border};
+  --hover-box-shadow: #{$border};
+}
+
+.btn--style-icon-label {
+  --color: var(--admin-text);
+  --hover-color: var(--admin-accent-text);
+}
+
+// confirm buttons in the delete/unpublish modals
+.confirmation-modal .btn--style-primary,
+.delete-document .btn--style-primary {
+  --bg-color: var(--admin-danger);
+  --hover-bg: var(--admin-danger);
+}
+
+.btn--disabled,
+.btn--style-primary.btn--disabled,
+.btn--style-secondary.btn--disabled {
+  --bg-color: var(--admin-raised);
+  --hover-bg: var(--admin-raised);
+  --color: var(--admin-muted);
+  --hover-color: var(--admin-muted);
+  --box-shadow: inset 0 0 0 var(--admin-border-width) var(--admin-muted);
+  --hover-box-shadow: var(--box-shadow);
+}
+
+// small buttons sit in tight rows (list controls, cards): a smaller shadow
+.btn--size-small,
+.btn--size-xsmall {
+  &.btn--style-primary.btn--withoutPopup:not(.btn--disabled),
+  &.btn--style-secondary.btn--withoutPopup:not(.btn--disabled) {
+    box-shadow:
+      #{$border},
+      var(--admin-shadow-xs);
+
+    &:hover {
+      box-shadow:
+        #{$border},
+        var(--admin-shadow-s);
+    }
+
+    &:active {
+      transform: translate(2px, 2px);
+      box-shadow: #{$border};
+    }
+  }
+}
+
+// the ⋮ / caret next to Publish: same fill as its button, a 2px divider instead of Payload's 1px
+.btn--withPopup .popup-button {
+  border-radius: var(--admin-radius-s);
+
+  html:not([dir='RTL']) & {
+    border-left: var(--admin-border-width) solid var(--admin-border);
+  }
+
+  html[dir='RTL'] & {
+    border-right: var(--admin-border-width) solid var(--admin-border);
+  }
+}

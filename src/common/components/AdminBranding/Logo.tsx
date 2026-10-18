@@ -2,8 +2,8 @@
 import type { ServerProps } from 'payload'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import { PayloadLogo } from '@payloadcms/ui/shared'
 import { getAdminBranding } from '@/common/utils/tenantBranding'
+import { MASCOT_URL } from './mascot'
 
 export async function Logo(props: Partial<ServerProps>) {
   const payload = props.payload ?? (await getPayload({ config: configPromise }))
@@ -21,5 +21,5 @@ export async function Logo(props: Partial<ServerProps>) {
     )
   }
 
-  return <PayloadLogo />
+  return <img src={MASCOT_URL} alt="" className="admin-mascot admin-mascot--logo" />
 }

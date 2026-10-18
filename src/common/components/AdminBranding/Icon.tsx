@@ -4,10 +4,11 @@ import type { User } from '@/payload-types'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { cookies, headers } from 'next/headers'
-import { PayloadIcon } from '@payloadcms/ui'
 import { getAdminBranding } from '@/common/utils/tenantBranding'
+import { MASCOT_URL } from './mascot'
 
-// the step nav's home slot is 18x18 and clips overflow
+// the step nav's home slot is 18x18 and clips overflow; the icon is the home link's only content,
+// so every variant names it "Dashboard" (the link's purpose)
 export async function Icon(props: Partial<ServerProps>) {
   const payload = props.payload ?? (await getPayload({ config: configPromise }))
 
@@ -22,27 +23,32 @@ export async function Icon(props: Partial<ServerProps>) {
 
   const branding = await getAdminBranding(payload, user, selectedCookie)
 
+  const mascot = <img src={MASCOT_URL} alt="Dashboard" className="admin-mascot" />
+
   if (!branding) {
-    return <PayloadIcon />
+    return mascot
   }
 
   if (branding.logo?.url) {
     return (
       <img
         src={branding.logo.url}
-        alt={branding.logo.alt}
+        alt="Dashboard"
         style={{ maxHeight: '18px', width: 'auto', objectFit: 'contain' }}
       />
     )
   }
 
+  // the platform's own tenant shows the mascot; other businesses without a logo, their initial
   const initial = branding.tenantName.trim().charAt(0).toUpperCase()
-  if (!initial) {
-    return <PayloadIcon />
+  if (branding.isPlatform || !initial) {
+    return mascot
   }
 
   return (
     <div
+      role="img"
+      aria-label="Dashboard"
       style={{
         display: 'flex',
         alignItems: 'center',

@@ -12,6 +12,7 @@ import { search } from '@/plugins/search'
 import { seo } from '@/plugins/seo'
 import { storage } from '@/plugins/storage'
 import { addTenantMembershipCheck } from '@/plugins/tenantMembershipCheck'
+import { addSidebarToggle } from '@/plugins/sidebarToggle'
 import { showTenantsFieldToManagers } from '@/plugins/tenantsFieldForManagers'
 
 // order matters: the multi-tenant plugin runs after the plugins that create collections
@@ -25,6 +26,7 @@ export const plugins: Plugin[] = [
   multiTenant,
   addTenantMembershipCheck,
   addCreatedUpdatedBy,
+  addSidebarToggle,
   addAuditLog,
   gatePluginCollections,
   showTenantsFieldToManagers,

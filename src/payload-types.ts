@@ -143,6 +143,7 @@ export interface Config {
     'menu-items': MenuItem;
     menus: Menu;
     'audit-logs': AuditLog;
+    'field-showcase': FieldShowcase;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -152,7 +153,11 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'field-showcase': {
+      children: 'field-showcase';
+    };
+  };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -172,6 +177,7 @@ export interface Config {
     'menu-items': MenuItemsSelect<false> | MenuItemsSelect<true>;
     menus: MenusSelect<false> | MenusSelect<true>;
     'audit-logs': AuditLogsSelect<false> | AuditLogsSelect<true>;
+    'field-showcase': FieldShowcaseSelect<false> | FieldShowcaseSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -186,9 +192,11 @@ export interface Config {
   };
   globals: {
     'audit-logs-settings': AuditLogsSetting;
+    'field-showcase-global': FieldShowcaseGlobal;
   };
   globalsSelect: {
     'audit-logs-settings': AuditLogsSettingsSelect<false> | AuditLogsSettingsSelect<true>;
+    'field-showcase-global': FieldShowcaseGlobalSelect<false> | FieldShowcaseGlobalSelect<true>;
   };
   locale: 'en' | 'ar';
   user: User & {
@@ -378,10 +386,12 @@ export interface UsersAccess {
           | 'menu-items'
           | 'menus'
           | 'audit-logs'
+          | 'field-showcase'
           | 'redirects'
           | 'forms'
           | 'form-submissions'
-          | 'search';
+          | 'search'
+          | 'field-showcase-global';
         hidden?: boolean | null;
         read?: boolean | null;
         create?: boolean | null;
@@ -849,7 +859,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'country';
@@ -863,7 +874,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'email';
@@ -898,7 +910,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'number';
@@ -921,7 +934,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'select';
@@ -935,7 +949,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'state';
@@ -950,7 +965,8 @@ export interface Form {
              * Select an icon to display next to this field (frontend implementation required).
              */
             icon?:
-              ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location') | null;
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'text';
@@ -1575,7 +1591,8 @@ export interface Setting {
    * Prices on your menus use this currency.
    */
   currency?:
-    ('USD' | 'EUR' | 'GBP' | 'QAR' | 'AED' | 'SAR' | 'KWD' | 'BHD' | 'OMR' | 'JOD' | 'EGP' | 'INR' | 'PHP') | null;
+    | ('USD' | 'EUR' | 'GBP' | 'QAR' | 'AED' | 'SAR' | 'KWD' | 'BHD' | 'OMR' | 'JOD' | 'EGP' | 'INR' | 'PHP')
+    | null;
   /**
    * The page visitors see at your site address (/).
    */
@@ -1809,6 +1826,191 @@ export interface AuditLog {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-showcase".
+ */
+export interface FieldShowcase {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  title: string;
+  /**
+   * A plain text field.
+   */
+  text?: string | null;
+  textMany?: string[] | null;
+  /**
+   * Switch the locale at the top to edit the Arabic value.
+   */
+  textLocalized?: string | null;
+  textReadOnly?: string | null;
+  textarea?: string | null;
+  email?: string | null;
+  /**
+   * Between 0 and 100: try 150 to see the error state.
+   */
+  number?: number | null;
+  numberMany?: number[] | null;
+  code?: string | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  checkbox?: boolean | null;
+  showMore?: boolean | null;
+  conditional?: string | null;
+  selectSingle?: ('small' | 'medium' | 'large') | null;
+  selectMany?: ('red' | 'green' | 'blue')[] | null;
+  selectLong?:
+    | (
+        | 'apple'
+        | 'banana'
+        | 'cherry'
+        | 'date'
+        | 'elderberry'
+        | 'fig'
+        | 'grape'
+        | 'honeydew'
+        | 'kiwi'
+        | 'lemon'
+        | 'mango'
+        | 'nectarine'
+      )
+    | null;
+  radio?: ('morning' | 'afternoon' | 'evening') | null;
+  radioHorizontal?: ('yes' | 'no' | 'maybe') | null;
+  dateTime?: string | null;
+  dateDay?: string | null;
+  dateMonth?: string | null;
+  dateTimeOnly?: string | null;
+  /**
+   * Children of a doc show in its Children list below.
+   */
+  parent?: (number | null) | FieldShowcase;
+  people?: (number | User)[] | null;
+  related?:
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null);
+  image?: (number | null) | Media;
+  gallery?: (number | Media)[] | null;
+  children?: {
+    docs?: (number | FieldShowcase)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Picks from a list in a side drawer.
+   */
+  pageDrawer?: (number | null) | Page;
+  pagesDrawer?: (number | Page)[] | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  layout?:
+    | (
+        | {
+            tone?: ('info' | 'success' | 'warning' | 'danger') | null;
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'showcaseCallout';
+          }
+        | {
+            quote: string;
+            author?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'showcaseQuote';
+          }
+      )[]
+    | null;
+  items?:
+    | {
+        label: string;
+        done?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  meta?: {
+    note?: string | null;
+    level?: ('low' | 'high') | null;
+    links?:
+      | {
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  firstName?: string | null;
+  lastName?: string | null;
+  openNote?: string | null;
+  closedNote?: string | null;
+  namedTab?: {
+    /**
+     * Saved as namedTab.note: a tab with a name works like a group.
+     */
+    note?: string | null;
+  };
+  stage?: ('idea' | 'review' | 'done') | null;
+  featured?: boolean | null;
+  reviewedAt?: string | null;
+  /**
+   * From 1 (low) to 5 (urgent).
+   */
+  priority?: number | null;
+  visibility?: ('me' | 'team' | 'everyone') | null;
+  /**
+   * A long list, to check the menu in the panel.
+   */
+  labels?:
+    | (
+        | 'apple'
+        | 'banana'
+        | 'cherry'
+        | 'date'
+        | 'elderberry'
+        | 'fig'
+        | 'grape'
+        | 'honeydew'
+        | 'kiwi'
+        | 'lemon'
+        | 'mango'
+        | 'nectarine'
+      )[]
+    | null;
+  reviewer?: (number | null) | User;
+  owner?: string | null;
+  summary?: string | null;
+  remindAt?: string | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2058,6 +2260,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'audit-logs';
         value: number | AuditLog;
+      } | null)
+    | ({
+        relationTo: 'field-showcase';
+        value: number | FieldShowcase;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -3167,6 +3373,108 @@ export interface AuditLogsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-showcase_select".
+ */
+export interface FieldShowcaseSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  text?: T;
+  textMany?: T;
+  textLocalized?: T;
+  textReadOnly?: T;
+  textarea?: T;
+  email?: T;
+  number?: T;
+  numberMany?: T;
+  code?: T;
+  json?: T;
+  checkbox?: T;
+  showMore?: T;
+  conditional?: T;
+  selectSingle?: T;
+  selectMany?: T;
+  selectLong?: T;
+  radio?: T;
+  radioHorizontal?: T;
+  dateTime?: T;
+  dateDay?: T;
+  dateMonth?: T;
+  dateTimeOnly?: T;
+  parent?: T;
+  people?: T;
+  related?: T;
+  image?: T;
+  gallery?: T;
+  children?: T;
+  pageDrawer?: T;
+  pagesDrawer?: T;
+  richText?: T;
+  layout?:
+    | T
+    | {
+        showcaseCallout?:
+          | T
+          | {
+              tone?: T;
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        showcaseQuote?:
+          | T
+          | {
+              quote?: T;
+              author?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  items?:
+    | T
+    | {
+        label?: T;
+        done?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        note?: T;
+        level?: T;
+        links?:
+          | T
+          | {
+              url?: T;
+              id?: T;
+            };
+      };
+  firstName?: T;
+  lastName?: T;
+  openNote?: T;
+  closedNote?: T;
+  namedTab?:
+    | T
+    | {
+        note?: T;
+      };
+  stage?: T;
+  featured?: T;
+  reviewedAt?: T;
+  priority?: T;
+  visibility?: T;
+  labels?: T;
+  reviewer?: T;
+  owner?: T;
+  summary?: T;
+  remindAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects_select".
  */
 export interface RedirectsSelect<T extends boolean = true> {
@@ -3448,10 +3756,281 @@ export interface AuditLogsSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-showcase-global".
+ */
+export interface FieldShowcaseGlobal {
+  id: number;
+  title: string;
+  /**
+   * A plain text field.
+   */
+  text?: string | null;
+  textMany?: string[] | null;
+  /**
+   * Switch the locale at the top to edit the Arabic value.
+   */
+  textLocalized?: string | null;
+  textReadOnly?: string | null;
+  textarea?: string | null;
+  email?: string | null;
+  /**
+   * Between 0 and 100: try 150 to see the error state.
+   */
+  number?: number | null;
+  numberMany?: number[] | null;
+  code?: string | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  checkbox?: boolean | null;
+  showMore?: boolean | null;
+  conditional?: string | null;
+  selectSingle?: ('small' | 'medium' | 'large') | null;
+  selectMany?: ('red' | 'green' | 'blue')[] | null;
+  selectLong?:
+    | (
+        | 'apple'
+        | 'banana'
+        | 'cherry'
+        | 'date'
+        | 'elderberry'
+        | 'fig'
+        | 'grape'
+        | 'honeydew'
+        | 'kiwi'
+        | 'lemon'
+        | 'mango'
+        | 'nectarine'
+      )
+    | null;
+  radio?: ('morning' | 'afternoon' | 'evening') | null;
+  radioHorizontal?: ('yes' | 'no' | 'maybe') | null;
+  dateTime?: string | null;
+  dateDay?: string | null;
+  dateMonth?: string | null;
+  dateTimeOnly?: string | null;
+  people?: (number | User)[] | null;
+  related?:
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null);
+  image?: (number | null) | Media;
+  gallery?: (number | Media)[] | null;
+  /**
+   * Picks from a list in a side drawer.
+   */
+  pageDrawer?: (number | null) | Page;
+  pagesDrawer?: (number | Page)[] | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  layout?:
+    | (
+        | {
+            tone?: ('info' | 'success' | 'warning' | 'danger') | null;
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'showcaseCallout';
+          }
+        | {
+            quote: string;
+            author?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'showcaseQuote';
+          }
+      )[]
+    | null;
+  items?:
+    | {
+        label: string;
+        done?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  meta?: {
+    note?: string | null;
+    level?: ('low' | 'high') | null;
+    links?:
+      | {
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  firstName?: string | null;
+  lastName?: string | null;
+  openNote?: string | null;
+  closedNote?: string | null;
+  namedTab?: {
+    /**
+     * Saved as namedTab.note: a tab with a name works like a group.
+     */
+    note?: string | null;
+  };
+  stage?: ('idea' | 'review' | 'done') | null;
+  featured?: boolean | null;
+  reviewedAt?: string | null;
+  /**
+   * From 1 (low) to 5 (urgent).
+   */
+  priority?: number | null;
+  visibility?: ('me' | 'team' | 'everyone') | null;
+  /**
+   * A long list, to check the menu in the panel.
+   */
+  labels?:
+    | (
+        | 'apple'
+        | 'banana'
+        | 'cherry'
+        | 'date'
+        | 'elderberry'
+        | 'fig'
+        | 'grape'
+        | 'honeydew'
+        | 'kiwi'
+        | 'lemon'
+        | 'mango'
+        | 'nectarine'
+      )[]
+    | null;
+  reviewer?: (number | null) | User;
+  owner?: string | null;
+  summary?: string | null;
+  remindAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "audit-logs-settings_select".
  */
 export interface AuditLogsSettingsSelect<T extends boolean = true> {
   retentionMonths?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-showcase-global_select".
+ */
+export interface FieldShowcaseGlobalSelect<T extends boolean = true> {
+  title?: T;
+  text?: T;
+  textMany?: T;
+  textLocalized?: T;
+  textReadOnly?: T;
+  textarea?: T;
+  email?: T;
+  number?: T;
+  numberMany?: T;
+  code?: T;
+  json?: T;
+  checkbox?: T;
+  showMore?: T;
+  conditional?: T;
+  selectSingle?: T;
+  selectMany?: T;
+  selectLong?: T;
+  radio?: T;
+  radioHorizontal?: T;
+  dateTime?: T;
+  dateDay?: T;
+  dateMonth?: T;
+  dateTimeOnly?: T;
+  people?: T;
+  related?: T;
+  image?: T;
+  gallery?: T;
+  pageDrawer?: T;
+  pagesDrawer?: T;
+  richText?: T;
+  layout?:
+    | T
+    | {
+        showcaseCallout?:
+          | T
+          | {
+              tone?: T;
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        showcaseQuote?:
+          | T
+          | {
+              quote?: T;
+              author?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  items?:
+    | T
+    | {
+        label?: T;
+        done?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        note?: T;
+        level?: T;
+        links?:
+          | T
+          | {
+              url?: T;
+              id?: T;
+            };
+      };
+  firstName?: T;
+  lastName?: T;
+  openNote?: T;
+  closedNote?: T;
+  namedTab?:
+    | T
+    | {
+        note?: T;
+      };
+  stage?: T;
+  featured?: T;
+  reviewedAt?: T;
+  priority?: T;
+  visibility?: T;
+  labels?: T;
+  reviewer?: T;
+  owner?: T;
+  summary?: T;
+  remindAt?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

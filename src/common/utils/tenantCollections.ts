@@ -15,6 +15,7 @@ export const tenantScopedCollections: CollectionSlug[] = [
   'menu-tags',
   'menu-items',
   'menus',
+  'field-showcase',
 ]
 
 // one doc per tenant (were globals before multi-tenancy)

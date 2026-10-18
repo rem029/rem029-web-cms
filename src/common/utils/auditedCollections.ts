@@ -37,4 +37,6 @@ export const notAudited: CollectionSlug[] = [
   'form-submissions',
   // synced from posts by the search plugin (the post's own change is logged)
   'search',
+  // dev sample data for checking the admin theme (rem0005); nothing on the site reads it
+  'field-showcase',
 ]

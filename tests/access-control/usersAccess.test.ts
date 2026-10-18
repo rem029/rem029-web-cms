@@ -30,7 +30,7 @@ describe('users-access', () => {
 
   it('offers plugin collections and no payload internals', () => {
     // act
-    const slugs = getAccessSlugs(payload.config.collections)
+    const slugs = getAccessSlugs(payload.config.collections, payload.config.globals)
 
     // assert
     expect(slugs).toContain('forms')
@@ -55,7 +55,7 @@ describe('users-access', () => {
     })
 
     // assert
-    const expectedSlugs = getAccessSlugs(payload.config.collections)
+    const expectedSlugs = getAccessSlugs(payload.config.collections, payload.config.globals)
     const rows = profile.access ?? []
     expect(rows).toHaveLength(expectedSlugs.length)
     expect(

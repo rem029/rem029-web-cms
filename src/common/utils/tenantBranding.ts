@@ -3,6 +3,7 @@ import type { User } from '@/payload-types'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 import { getDefaultTenantId, getTenantDoc } from '@/common/utils/getTenantDoc'
 import { resolveTenantIdFromCookie } from '@/common/utils/getSelectedTenant'
+import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
 
 /** The active theme's `--primary`, only when it's a plain hex color (it ends up in a style attribute). */
 export const accentFromThemeCSS = (css: string | null | undefined): string | null => {
@@ -14,6 +15,8 @@ export type AdminBranding = {
   tenantName: string
   logo: { url: string; alt: string } | null
   accent: string | null
+  /** the platform's own `admin` tenant: the admin shows the platform mascot, not an initial */
+  isPlatform: boolean
 }
 
 // selected tenant (validated cookie), else the user's first tenant, else (login page) `admin`
@@ -65,7 +68,7 @@ export const getAdminBranding = async (
         : null
     const accent = accentFromThemeCSS(theme?.themes?.find((t) => t.active)?.css)
 
-    return { tenantName, logo, accent }
+    return { tenantName, logo, accent, isPlatform: tenant.slug === DEFAULT_TENANT_SLUG }
   } catch (err) {
     // the admin must still render: fall back to Payload's graphics
     payload.logger.warn({ msg: 'admin branding failed', userId: user?.id, err })

@@ -454,17 +454,12 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "_menus_v" CASCADE;
   DROP TABLE "_menus_v_locales" CASCADE;
   DROP TABLE "_menus_v_rels" CASCADE;
-  
-  
-  
-  
-  
-  ALTER TABLE "users_access_access" ALTER COLUMN "slug" SET DATA TYPE text;
   -- profile rows for the menu collections: the old enum has no value for them
   DELETE FROM "users_access_access"
     WHERE "slug" IN ('menu-categories', 'menu-allergens', 'menu-tags', 'menu-items', 'menus');
+  ALTER TABLE "users_access_access" ALTER COLUMN "slug" SET DATA TYPE text;
   DROP TYPE "public"."enum_users_access_access_slug";
-  CREATE TYPE "public"."enum_users_access_access_slug" AS ENUM('pages', 'posts', 'media', 'categories', 'users', 'users-access', 'analytics', 'tenants', 'header', 'footer', 'theme', 'settings', 'audit-logs', 'redirects', 'forms', 'form-submissions', 'search');
+  CREATE TYPE "public"."enum_users_access_access_slug" AS ENUM('pages', 'posts', 'media', 'categories', 'users', 'users-access', 'analytics', 'tenants', 'header', 'footer', 'theme', 'settings', 'audit-logs', 'field-showcase', 'redirects', 'forms', 'form-submissions', 'search', 'field-showcase-global');
   ALTER TABLE "users_access_access" ALTER COLUMN "slug" SET DATA TYPE "public"."enum_users_access_access_slug" USING "slug"::"public"."enum_users_access_access_slug";
   DROP INDEX "payload_locked_documents_rels_menu_categories_id_idx";
   DROP INDEX "payload_locked_documents_rels_menu_allergens_id_idx";

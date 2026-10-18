@@ -25,6 +25,7 @@ export const createdUpdatedByCollections: CollectionSlug[] = [
   'menu-tags',
   'menu-items',
   'menus',
+  'field-showcase',
 ]
 
 // deliberately without them

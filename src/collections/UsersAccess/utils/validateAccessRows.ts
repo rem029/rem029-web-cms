@@ -82,7 +82,8 @@ export const validateAccessRows: ArrayFieldValidation = async (
   }
 
   const collections = req?.payload?.config?.collections || []
-  const validSlugs = getAccessSlugs(collections)
+  const globals = req?.payload?.config?.globals || []
+  const validSlugs = getAccessSlugs(collections, globals)
   const seenSlugs = new Set<string>()
 
   for (const row of value) {
@@ -92,7 +93,7 @@ export const validateAccessRows: ArrayFieldValidation = async (
         : ''
 
     if (!slug || !validSlugs.includes(slug)) {
-      return `Unknown collection slug "${slug}"`
+      return `Unknown slug "${slug}"`
     }
 
     if (seenSlugs.has(slug)) {
