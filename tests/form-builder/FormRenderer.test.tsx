@@ -278,29 +278,55 @@ describe('FormRenderer', () => {
   // step 4a (critique P1)
   it('names the missing field in arabic', () => {
     // arrange
+    renderForm(formDoc(twoStepFields()), 'ar')
+
     // act
+    fireEvent.click(screen.getByRole('button', { name: 'التالي' }))
+
     // assert
-    expect.fail('not implemented')
+    expect(screen.getByText('حقل «Full name» مطلوب.')).toBeTruthy()
   })
 
   it('shows the title as the page heading when given', () => {
     // arrange
+    const form = formDoc(stockFields())
+
     // act
+    render(
+      <FormRenderer
+        form={form}
+        locale="en"
+        submit={fakeSubmit()}
+        title="Book a table"
+        upload={fakeUpload()}
+      />,
+    )
+
     // assert
-    expect.fail('not implemented')
+    expect(screen.getByRole('heading', { level: 1, name: 'Book a table' })).toBeTruthy()
   })
 
   it('shows no page heading without a title', () => {
     // arrange
+    const form = formDoc(stockFields())
+
     // act
+    renderForm(form)
+
     // assert
-    expect.fail('not implemented')
+    expect(screen.queryByRole('heading', { level: 1 })).toBeNull()
   })
 
   it('heads the review screen with review your answers', () => {
     // arrange
+    renderForm(formDoc(twoStepFields()))
+    fireEvent.change(screen.getByLabelText(/Full name/), { target: { value: 'Sara' } })
+
     // act
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Review' }))
+
     // assert
-    expect.fail('not implemented')
+    expect(screen.getByRole('heading', { level: 2, name: 'Review your answers' })).toBeTruthy()
   })
 })

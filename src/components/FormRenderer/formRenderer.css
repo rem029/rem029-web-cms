@@ -617,7 +617,8 @@
 
   /* the form's title on /forms/<slug> (the Form block's page has its own headings) */
   .fb-title {
-    margin: 0 0 1.5rem;
+    /* .fb-body's gap spaces it from the form */
+    margin: 0;
     font-size: 1.75rem;
     font-weight: 700;
     line-height: 1.2;
