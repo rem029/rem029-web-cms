@@ -270,3 +270,11 @@
     }
   }
 }
+
+// width / height inputs (Payload's `input.toolbar-input`): the same edge as the other controls
+.live-preview-toolbar input.toolbar-input {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-surface);
+  color: var(--admin-text);
+}

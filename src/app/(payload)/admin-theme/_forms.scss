@@ -39,13 +39,6 @@ $error-inputs: '.field-type.text.error input, .field-type.email.error input, .fi
   outline: none;
 }
 
-// placeholder text in muted colour
-@each $sel in string.split($inputs, ', ') {
-  #{$sel}::placeholder {
-    color: var(--admin-muted);
-  }
-}
-
 .react-select .rs__placeholder {
   color: var(--admin-muted);
 }

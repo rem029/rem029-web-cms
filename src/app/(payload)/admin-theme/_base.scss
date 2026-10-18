@@ -31,6 +31,12 @@ pre {
   color: var(--admin-ink);
 }
 
+// every placeholder, Payload's own inputs included (list search, block row titles)
+::placeholder {
+  color: var(--admin-muted);
+  opacity: 1;
+}
+
 // highlighter underline on links inside descriptions and rich text
 .field-description a,
 .rich-text-lexical a {

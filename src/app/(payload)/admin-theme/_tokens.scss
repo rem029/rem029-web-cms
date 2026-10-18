@@ -116,17 +116,19 @@ $status-steps: (
   950
 );
 
-// low steps sit near the background, 500 is the fill, high steps head to the readable text colour
+// low steps sit near the background, 500 is the fill, 750+ the readable text colour
 @mixin status-scale($name, $fill, $text) {
   @each $step in $status-steps {
     @if $step <= 500 {
       --theme-#{$name}-#{$step}: color-mix(in srgb, var(#{$fill}) #{$step * 0.2%}, var(--admin-bg));
-    } @else {
+    } @else if $step <= 700 {
       --theme-#{$name}-#{$step}: color-mix(
         in srgb,
-        var(#{$text}) #{($step - 500) * 0.2222%},
+        var(#{$text}) #{($step - 500) * 0.4%},
         var(#{$fill})
       );
+    } @else {
+      --theme-#{$name}-#{$step}: var(#{$text});
     }
   }
 }
@@ -138,13 +140,24 @@ html[data-theme='dark'] {
   --theme-text: var(--admin-text);
   --theme-border-color: var(--admin-border);
 
-  // 0 is the background, 1000 the text, each step a mix of the two
+  // 0 is the background, 1000 the text; 400–500 (Payload's secondary text) are the muted
+  // text colour, so they stay AA
   @each $step in $elevation-steps {
-    --theme-elevation-#{$step}: color-mix(
-      in srgb,
-      var(--admin-text) #{$step * 0.1%},
-      var(--admin-bg)
-    );
+    @if $step <= 350 {
+      --theme-elevation-#{$step}: color-mix(
+        in srgb,
+        var(--admin-text) #{$step * 0.1%},
+        var(--admin-bg)
+      );
+    } @else if $step <= 500 {
+      --theme-elevation-#{$step}: var(--admin-muted);
+    } @else {
+      --theme-elevation-#{$step}: color-mix(
+        in srgb,
+        var(--admin-text) #{($step - 500) * 0.2%},
+        var(--admin-muted)
+      );
+    }
   }
 
   @include status-scale('success', '--admin-success', '--admin-success-text');

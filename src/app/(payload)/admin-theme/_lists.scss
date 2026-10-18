@@ -60,6 +60,11 @@ $inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width));
 
     &:has(td.cell-_select .checkbox-input--checked) {
       background: color-mix(in srgb, var(--admin-primary) 25%, var(--admin-surface));
+
+      // 15% in dark: muted text stays AA (4.7:1)
+      html[data-theme='dark'] & {
+        background: color-mix(in srgb, var(--admin-primary) 15%, var(--admin-surface));
+      }
     }
   }
 

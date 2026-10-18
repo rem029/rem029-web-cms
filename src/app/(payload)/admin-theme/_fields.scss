@@ -271,10 +271,6 @@ $collapsible-inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width
   box-shadow: none;
   transition: box-shadow var(--admin-duration) var(--admin-ease);
 
-  &::placeholder {
-    color: var(--admin-muted);
-  }
-
   &:hover,
   &:not(:disabled):hover {
     border-color: var(--admin-border);
