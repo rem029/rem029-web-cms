@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // The document bar button opens the edit view's sidebar as a floating panel and closes it again.
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
@@ -175,5 +175,70 @@ describe('SidebarToggle', () => {
     // assert: renders "Show sidebar" without throwing; the click still opens it in the page
     expect(screen.getByRole('button', { name: 'Hide sidebar' })).toBeDefined()
     expect(document.documentElement.getAttribute(SIDEBAR_OPEN_ATTRIBUTE)).toBe('open')
+  })
+
+  // a relationship's doc drawer has its own document bar and sidebar (user, 2026-10-18: the
+  // drawer's ✕ moved when its panel opened, because the page behind was locked)
+  describe('in a drawer', () => {
+    const Drawer = ({ testId }: { testId: string }) => (
+      <div className="payload__modal-container">
+        <div className="payload__modal-item drawer">
+          <div className="drawer__content" data-testid={testId}>
+            <div className="doc-controls">
+              <SidebarToggle />
+            </div>
+            <div className="document-fields">
+              <div className="document-fields__sidebar-wrap" />
+              <div data-testid={`${testId}-form`} />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+
+    it('opens its own drawer, not the page', () => {
+      // arrange: a toggle inside a drawer
+      render(<Drawer testId="drawer" />)
+
+      // act: click "Show sidebar"
+      fireEvent.click(screen.getByRole('button', { name: 'Show sidebar' }))
+
+      // assert: the drawer's content is open, <html> is not (the page stays unlocked)
+      expect(screen.getByTestId('drawer').getAttribute(SIDEBAR_OPEN_ATTRIBUTE)).toBe('open')
+      expect(document.documentElement.hasAttribute(SIDEBAR_OPEN_ATTRIBUTE)).toBe(false)
+    })
+
+    it("closes on a click on the drawer's form", () => {
+      // arrange: a toggle inside a drawer, opened
+      render(<Drawer testId="drawer" />)
+      fireEvent.click(screen.getByRole('button', { name: 'Show sidebar' }))
+
+      // act: pointerdown on the drawer's dimmed form
+      fireEvent.pointerDown(screen.getByTestId('drawer-form'))
+
+      // assert: closed, button "Show sidebar"
+      expect(screen.getByTestId('drawer').hasAttribute(SIDEBAR_OPEN_ATTRIBUTE)).toBe(false)
+      expect(screen.getByRole('button', { name: 'Show sidebar' })).toBeDefined()
+    })
+
+    it('keeps the page panel open on a click in a drawer', () => {
+      // arrange: the page's toggle, opened, and a drawer over the page
+      render(
+        <>
+          <div data-testid="page">
+            <SidebarToggle />
+          </div>
+          <Drawer testId="drawer" />
+        </>,
+      )
+      const page = within(screen.getByTestId('page'))
+      fireEvent.click(page.getByRole('button', { name: 'Show sidebar' }))
+
+      // act: pointerdown on the drawer's form
+      fireEvent.pointerDown(screen.getByTestId('drawer-form'))
+
+      // assert: the page's panel is still open
+      expect(document.documentElement.getAttribute(SIDEBAR_OPEN_ATTRIBUTE)).toBe('open')
+    })
   })
 })

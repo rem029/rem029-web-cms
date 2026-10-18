@@ -133,6 +133,35 @@
   padding: 2px;
 }
 
+// phones: the breadcrumb shrinks (and scrolls, as Payload's wrapper already allows) so the actions,
+// locale and account always fit; otherwise the row overflows and Payload's absolutely placed locale
+// button lands on the theme toggle (Payload 3.44 AppHeader)
+.app-header__controls-wrapper {
+  min-width: 0;
+}
+
+.app-header__step-nav-wrapper {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-inline-end: 8px;
+}
+
+.app-header__actions-wrapper,
+.app-header__localizer-spacing,
+.app-header__account {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .app-header__account {
+    margin-inline-start: 6px;
+  }
+
+  .app-header__localizer.localizer {
+    right: calc(var(--base) * 2 + 6px);
+  }
+}
+
 // header dark/light switch (ThemeToggle): a bordered chip like the account, square, icon only
 .theme-toggle {
   display: flex;
@@ -298,8 +327,6 @@
 // Pointer and wheel only: Tab can still reach the page (blocking it needs `inert`, i.e. JS).
 @media (max-width: 1024px) {
   // the page scrolls on the root, which pointer-events can't stop: lock it while the nav is open.
-  // Payload's `body { overflow-x: hidden }` makes the body a scroller once the root is locked, so
-  // lock both
   // lock the body only: Payload scrolls the page on <body> (its overflow reaches the viewport);
   // locking <html> as well cuts that link, so the page jumps to the top
   html:has(.template-default--nav-open) body {
@@ -377,8 +404,9 @@
 // 3.44.0 (`@payloadcms/ui` elements/DocumentFields): `.document-fields--has-sidebar`,
 // `.document-fields__main` (two thirds), `.document-fields__sidebar-wrap` (sticky, a third, stacked
 // under the form below 1024px). The sidebar never takes a column: it opens as a panel over the form
-// from the document bar's button (`SidebarToggle`, which sets `html[data-doc-sidebar='open']` and
-// `--doc-sidebar-top`, the bottom of the document bar: the topbar scrolls away, the bar sticks).
+// from the document bar's button (`SidebarToggle`, which sets `data-doc-sidebar="open"` and
+// `--doc-sidebar-top` on `<html>` for the page, or on `.drawer__content` when inside a drawer so
+// drawers carry their own state without locking the page).
 // Layers: above the document bar (5), below popups (10, so the bar's ⋮ menu opens over it).
 $doc-sidebar-top: var(
   --doc-sidebar-top,
@@ -403,7 +431,10 @@ html[data-doc-sidebar='open'] {
   body {
     overflow: hidden;
   }
+}
 
+html[data-doc-sidebar='open'] .template-default,
+.drawer__content[data-doc-sidebar='open'] {
   .document-fields--has-sidebar {
     .document-fields__main {
       pointer-events: none;
@@ -424,7 +455,9 @@ html[data-doc-sidebar='open'] {
       top: $doc-sidebar-top;
       bottom: 0;
       inset-inline-end: 0;
-      width: min(420px, 100vw);
+      // 100%, not 100vw: in a drawer (Payload transforms `.drawer__content`) the panel is placed in
+      // the drawer, and 100vw overflowed it on phones
+      width: min(420px, 100%);
       min-width: 0;
       height: auto;
       z-index: 9;
@@ -450,10 +483,13 @@ html[data-doc-sidebar='open'] {
 }
 
 @media (max-width: 768px) {
-  html[data-doc-sidebar='open'] .document-fields--has-sidebar .document-fields__sidebar-wrap {
-    width: 100vw;
-    border-inline-start: 0;
-    box-shadow: none;
+  html[data-doc-sidebar='open'] .template-default,
+  .drawer__content[data-doc-sidebar='open'] {
+    .document-fields--has-sidebar .document-fields__sidebar-wrap {
+      width: 100%;
+      border-inline-start: 0;
+      box-shadow: none;
+    }
   }
 }
 
