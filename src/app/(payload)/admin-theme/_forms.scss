@@ -165,6 +165,13 @@ html[data-theme] {
     background: var(--admin-primary);
   }
 
+  // Payload 3.44 pins the 20px icon inside the border (1px there, unnoticed); ours is 2px, so the
+  // tick sat 2px low and right: pin it to the border's outer edge, centred in the 20px box
+  .checkbox-input__icon {
+    top: calc(-1 * var(--admin-border-width));
+    left: calc(-1 * var(--admin-border-width));
+  }
+
   .checkbox-input__icon,
   .checkbox-input__icon path,
   .checkbox-input__icon .stroke {
