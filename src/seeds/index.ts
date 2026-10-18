@@ -12,6 +12,7 @@ import { getPayload } from 'payload'
 
 import { seedAccess, seedTenantAccess } from './access'
 import { seedDefaultAdmin } from './defaultAdmin'
+import { seedForms } from './forms'
 import { seedHiddenDocuments } from './hiddenDocuments'
 import { seedInactiveTenants } from './inactiveTenants'
 import { seedMultiTenancy } from './multiTenancy'
@@ -28,6 +29,7 @@ const seeds = [
   { name: 'tenantAccess', run: seedTenantAccess },
   { name: 'inactiveTenants', run: seedInactiveTenants },
   { name: 'hiddenDocuments', run: seedHiddenDocuments },
+  { name: 'forms', run: seedForms },
 ]
 
 const payload = await getPayload({ config })

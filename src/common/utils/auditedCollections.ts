@@ -29,6 +29,7 @@ export const notAudited: CollectionSlug[] = [
   // written by visitors in high volume, with their personal data; never edited by a user
   'analytics',
   'form-submissions',
+  'form-uploads',
   // synced from posts by the search plugin (the post's own change is logged)
   'search',
 ]

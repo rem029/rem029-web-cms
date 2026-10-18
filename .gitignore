@@ -9,6 +9,8 @@ node_modules
 
 # Payload default media upload directory
 public/media/
+# visitor uploads in dev (staging stores them in S3/MinIO)
+form-uploads/
 
 # Claude Code files live in docs/ (private repo); `pnpm setup:docs` links them here
 /.claude
@@ -24,3 +26,5 @@ pnpm-workspace.yaml
 # typescript incremental build cache
 *.tsbuildinfo
 .temp
+# impeccable design tool's local state (live server, critique snapshots); the skill lives in docs/
+/.impeccable/

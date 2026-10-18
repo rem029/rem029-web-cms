@@ -271,6 +271,7 @@ const upsertContactForm = async (payload: Payload, tenant: Tenant): Promise<numb
   const form = await payload.create({
     collection: 'forms',
     data: {
+      _status: 'published',
       title,
       tenant: tenant.id,
       fields: [{ blockType: 'email', name: 'email', label: 'Email', required: true }],

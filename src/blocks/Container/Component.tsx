@@ -11,7 +11,7 @@ import { MultiMediaBlock } from '@/blocks/MultiMedia/Component'
 import { CardWithBackgroundBlock } from '../CardWithBackground/Component'
 import { CardInlineImageBlock } from '../CardInlineImage/Component'
 import { CardRowBlock } from '../CardRow/Component'
-import { FormBlock } from '../old/Form/Component'
+import { FormBlock } from '../Form/Component'
 import { CarouselBlock } from '../Carousel/Component'
 
 export type ContainerBlockTypeProps = ContainerBlockType

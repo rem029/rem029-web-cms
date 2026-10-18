@@ -1,6 +1,7 @@
 /**
  * The profiles in each test business with members (test-a, test-b, test-inactive; `TEST_PROFILES`):
- * - `editor`: CRUD on pages, posts, media, categories; read/update on header and footer
+ * - `editor`: CRUD on pages, posts, media, categories; read/update on header and footer;
+ *   read/delete on form-uploads
  * - `viewer`: read on pages, posts, media, categories, header and footer
  * - `log-reader`: every box on audit-logs (only read and the nav count there)
  * Editor and viewer open /admin. Every other slug is hidden and denied.
@@ -39,6 +40,7 @@ const EDITOR: ProfileSpec = {
     categories: CRUD,
     header: READ_UPDATE,
     footer: READ_UPDATE,
+    'form-uploads': { hidden: false, read: true, delete: true },
     users: OPEN_ADMIN,
   },
 }

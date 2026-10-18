@@ -11,6 +11,7 @@ import { syncHiddenToDoc } from '@/common/hooks/syncHiddenToDoc'
 
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
+import { validatePageSlug } from '@/common/utils/reservedSlugs'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { previewURL } from '@/common/utils/preview'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
@@ -23,7 +24,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { CallToAction } from '@/blocks/old/CallToAction/config'
-import { FormBlock } from '@/blocks/old/Form/config'
+import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/old/MediaBlock/config'
 import { Content } from '@/blocks/old/Content/config'
 import { Archive } from '@/blocks/old/ArchiveBlock/config'
@@ -143,7 +144,7 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
-    ...slugField(),
+    ...slugField('title', { slugOverrides: { validate: validatePageSlug } }),
     {
       name: 'isHomepage',
       type: 'checkbox',

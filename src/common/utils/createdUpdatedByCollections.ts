@@ -28,6 +28,7 @@ export const withoutCreatedUpdatedBy: CollectionSlug[] = [
   'analytics',
   'form-submissions',
   'search',
+  'form-uploads',
   // written by the audit hooks, never edited
   'audit-logs',
 ]

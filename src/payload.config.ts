@@ -24,6 +24,7 @@ import { Settings } from './collections/Settings'
 
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 import { Analytics } from './collections/Analytics'
+import { FormUploads } from './collections/FormUploads'
 import { AuditLogs } from './collections/AuditLogs'
 import { Tenants } from './collections/Tenants'
 import { ar } from '@payloadcms/translations/languages/ar'
@@ -116,6 +117,7 @@ export default buildConfig({
     Footer,
     Theme,
     Settings,
+    FormUploads,
     AuditLogs,
   ],
   cors: [getServerSideURL()].filter(Boolean),

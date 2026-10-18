@@ -10,14 +10,14 @@ export const tenantScopedCollections: CollectionSlug[] = [
   'forms',
   'form-submissions',
   'search',
+  'form-uploads',
 ]
 
 // one doc per tenant (were globals before multi-tenancy)
 export const tenantGlobalCollections: CollectionSlug[] = ['header', 'footer', 'theme', 'settings']
 
 export const isTenantCollection = (slug: CollectionSlug | string): boolean =>
-  tenantScopedCollections.some((s) => s === slug) ||
-  tenantGlobalCollections.some((s) => s === slug)
+  tenantScopedCollections.some((s) => s === slug) || tenantGlobalCollections.some((s) => s === slug)
 
 const isRecord = (val: unknown): val is Record<string, unknown> =>
   typeof val === 'object' && val !== null

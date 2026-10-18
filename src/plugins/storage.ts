@@ -6,6 +6,8 @@ export const storage: Plugin[] = process.env.S3_ENDPOINT
       s3Storage({
         collections: {
           media: true,
+          // served through Payload's file route (read access applies), never a public bucket url
+          'form-uploads': { prefix: 'form-uploads' },
         },
         bucket: process.env.S3_BUCKET || '',
         config: {

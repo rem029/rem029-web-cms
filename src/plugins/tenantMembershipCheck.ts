@@ -4,9 +4,12 @@ import { enforceTenantMembership } from '@/common/hooks/enforceTenantMembership'
 import { tenantGlobalCollections, tenantScopedCollections } from '@/common/utils/tenantCollections'
 
 // form submissions take their tenant from the form (setFormSubmissionTenant), so anyone,
-// signed in or not, can submit any tenant's public form
+// signed in or not, can submit any tenant's public form; form uploads are written by the submit
+// action the same way
 const membershipCheckedCollections: CollectionSlug[] = [
-  ...tenantScopedCollections.filter((slug) => slug !== 'form-submissions'),
+  ...tenantScopedCollections.filter(
+    (slug) => slug !== 'form-submissions' && slug !== 'form-uploads',
+  ),
   ...tenantGlobalCollections,
 ]
 

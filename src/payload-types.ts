@@ -137,6 +137,7 @@ export interface Config {
     footer: Footer;
     theme: Theme;
     settings: Setting;
+    'form-uploads': FormUpload;
     'audit-logs': AuditLog;
     redirects: Redirect;
     forms: Form;
@@ -161,6 +162,7 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
     theme: ThemeSelect<false> | ThemeSelect<true>;
     settings: SettingsSelect<false> | SettingsSelect<true>;
+    'form-uploads': FormUploadsSelect<false> | FormUploadsSelect<true>;
     'audit-logs': AuditLogsSelect<false> | AuditLogsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -362,6 +364,7 @@ export interface UsersAccess {
           | 'footer'
           | 'theme'
           | 'settings'
+          | 'form-uploads'
           | 'audit-logs'
           | 'redirects'
           | 'forms'
@@ -812,7 +815,38 @@ export interface FormBlock {
 export interface Form {
   id: number;
   tenant?: (number | null) | Tenant;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  isActive?: boolean | null;
+  activeFrom?: string | null;
+  activeTo?: string | null;
+  available_languages?: ('en' | 'ar')[] | null;
+  /**
+   * Only signed-in members of this business can fill it in.
+   */
+  requires_auth?: boolean | null;
+  show_sequence_number?: boolean | null;
   title: string;
+  /**
+   * Shown above the form. 16:9 works best.
+   */
+  header_image?: (number | null) | Media;
+  has_terms?: boolean | null;
+  terms_content?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   fields?:
     | (
         | {
@@ -821,6 +855,11 @@ export interface Form {
             width?: number | null;
             required?: boolean | null;
             defaultValue?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'checkbox';
@@ -830,6 +869,11 @@ export interface Form {
             label?: string | null;
             width?: number | null;
             required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
             /**
              * Select an icon to display next to this field (frontend implementation required).
              */
@@ -845,6 +889,11 @@ export interface Form {
             label?: string | null;
             width?: number | null;
             required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
             /**
              * Select an icon to display next to this field (frontend implementation required).
              */
@@ -871,6 +920,10 @@ export interface Form {
               };
               [k: string]: unknown;
             } | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'message';
@@ -881,6 +934,11 @@ export interface Form {
             width?: number | null;
             defaultValue?: number | null;
             required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
             /**
              * Select an icon to display next to this field (frontend implementation required).
              */
@@ -905,6 +963,11 @@ export interface Form {
                 }[]
               | null;
             required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
             /**
              * Select an icon to display next to this field (frontend implementation required).
              */
@@ -920,6 +983,11 @@ export interface Form {
             label?: string | null;
             width?: number | null;
             required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
             /**
              * Select an icon to display next to this field (frontend implementation required).
              */
@@ -936,6 +1004,11 @@ export interface Form {
             width?: number | null;
             defaultValue?: string | null;
             required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
             /**
              * Select an icon to display next to this field (frontend implementation required).
              */
@@ -952,10 +1025,64 @@ export interface Form {
             width?: number | null;
             defaultValue?: string | null;
             required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'textarea';
           }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            options?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            direction?: ('column' | 'row') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'radio';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: string | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'date';
+          }
+        | FormFileBlock
+        | FormSignatureBlock
+        | FormPhoneBlock
+        | FormTimeBlock
+        | FormRatingBlock
+        | FormScaleBlock
+        | FormImageBlock
+        | FormGroupBlock
+        | FormListBlock
+        | FormConditionalBlock
+        | FormMultiStepBlock
       )[]
     | null;
   submitButtonLabel?: string | null;
@@ -1013,10 +1140,1195 @@ export interface Form {
         id?: string | null;
       }[]
     | null;
+  appearance?: {
+    width?: ('narrow' | 'medium' | 'wide' | 'full') | null;
+    card?: ('plain' | 'card') | null;
+    density?: ('comfortable' | 'compact') | null;
+    field_style?: ('outlined' | 'filled' | 'underlined') | null;
+    label_position?: ('above' | 'floating' | 'inline') | null;
+    radius?: ('none' | 'small' | 'medium' | 'large' | 'pill') | null;
+    button_style?: ('solid' | 'outline') | null;
+    button_full_width?: boolean | null;
+    step_indicator?: ('progress' | 'numbered' | 'dots' | 'none') | null;
+    /**
+     * Optional, e.g. #0f766e. Empty uses the site theme's primary colour.
+     */
+    accent_color?: string | null;
+    background_image?: (number | null) | Media;
+    background_overlay?: ('none' | 'light' | 'dark') | null;
+  };
+  /**
+   * Applies to this form only. Target its parts with: fb-form, fb-body, fb-header, fb-steps, fb-step, fb-step--active, fb-progress, fb-field, fb-field--<type>, fb-field--error, fb-label, fb-input, fb-help, fb-error, fb-error-summary, fb-choice, fb-group, fb-list, fb-list-row, fb-conditional, fb-content, fb-review, fb-actions, fb-button, fb-button--primary, fb-confirmation, a field's "CSS class", or [data-field="<name>"].
+   */
+  custom_css?: string | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormFileBlock".
+ */
+export interface FormFileBlock {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  help_text?: string | null;
+  /**
+   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+   */
+  css_class?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'file';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormSignatureBlock".
+ */
+export interface FormSignatureBlock {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  help_text?: string | null;
+  /**
+   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+   */
+  css_class?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'signature';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormPhoneBlock".
+ */
+export interface FormPhoneBlock {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  help_text?: string | null;
+  /**
+   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+   */
+  css_class?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'phone';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormTimeBlock".
+ */
+export interface FormTimeBlock {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  help_text?: string | null;
+  /**
+   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+   */
+  css_class?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'time';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormRatingBlock".
+ */
+export interface FormRatingBlock {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  help_text?: string | null;
+  /**
+   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+   */
+  css_class?: string | null;
+  /**
+   * Ignored when point labels are set.
+   */
+  point_count?: number | null;
+  display?: ('stars' | 'buttons') | null;
+  /**
+   * Optional: one row per point (e.g. "Poor" … "Excellent"). The number of rows sets the number of points.
+   */
+  labels?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'rating';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormScaleBlock".
+ */
+export interface FormScaleBlock {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  help_text?: string | null;
+  /**
+   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+   */
+  css_class?: string | null;
+  min?: number | null;
+  max?: number | null;
+  step?: number | null;
+  min_label?: string | null;
+  max_label?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'scale';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormImageBlock".
+ */
+export interface FormImageBlock {
+  media: number | Media;
+  caption?: string | null;
+  size?: ('small' | 'medium' | 'full') | null;
+  /**
+   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+   */
+  css_class?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'image';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormGroupBlock".
+ */
+export interface FormGroupBlock {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  help_text?: string | null;
+  /**
+   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+   */
+  css_class?: string | null;
+  fields?:
+    | (
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textarea';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'email';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'number';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            placeholder?: string | null;
+            options?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'select';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'checkbox';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            options?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            direction?: ('column' | 'row') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'radio';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: string | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'date';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'country';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'state';
+          }
+        | {
+            message?: {
+              root: {
+                type: string;
+                children: {
+                  type: string;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'message';
+          }
+        | FormFileBlock
+        | FormSignatureBlock
+        | FormPhoneBlock
+        | FormTimeBlock
+        | FormRatingBlock
+        | FormScaleBlock
+        | FormImageBlock
+      )[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'group';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormListBlock".
+ */
+export interface FormListBlock {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  help_text?: string | null;
+  /**
+   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+   */
+  css_class?: string | null;
+  /**
+   * Optional: how many rows a visitor can add.
+   */
+  max_items?: number | null;
+  fields?:
+    | (
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textarea';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'email';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'number';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            placeholder?: string | null;
+            options?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'select';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'checkbox';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            options?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            direction?: ('column' | 'row') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'radio';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: string | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'date';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'country';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'state';
+          }
+        | {
+            message?: {
+              root: {
+                type: string;
+                children: {
+                  type: string;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'message';
+          }
+        | FormFileBlock
+        | FormSignatureBlock
+        | FormPhoneBlock
+        | FormTimeBlock
+        | FormRatingBlock
+        | FormScaleBlock
+        | FormImageBlock
+      )[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'list';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormConditionalBlock".
+ */
+export interface FormConditionalBlock {
+  /**
+   * The name of the field to watch.
+   */
+  condition_field: string;
+  operator: 'equal' | 'not_equal' | 'contains' | 'not_contains';
+  value: string;
+  /**
+   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+   */
+  css_class?: string | null;
+  fields?:
+    | (
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textarea';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'email';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'number';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            placeholder?: string | null;
+            options?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'select';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'checkbox';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            defaultValue?: string | null;
+            options?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            direction?: ('column' | 'row') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'radio';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            defaultValue?: string | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'date';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'country';
+          }
+        | {
+            name: string;
+            label?: string | null;
+            width?: number | null;
+            required?: boolean | null;
+            help_text?: string | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            /**
+             * Select an icon to display next to this field (frontend implementation required).
+             */
+            icon?:
+              | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'state';
+          }
+        | {
+            message?: {
+              root: {
+                type: string;
+                children: {
+                  type: string;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            /**
+             * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+             */
+            css_class?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'message';
+          }
+        | FormFileBlock
+        | FormSignatureBlock
+        | FormPhoneBlock
+        | FormTimeBlock
+        | FormRatingBlock
+        | FormScaleBlock
+        | FormImageBlock
+        | FormGroupBlock
+        | FormListBlock
+      )[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'conditional';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormMultiStepBlock".
+ */
+export interface FormMultiStepBlock {
+  steps?:
+    | {
+        /**
+         * Shown in the step indicator, e.g. "Your details".
+         */
+        label: string;
+        css_class?: string | null;
+        description?: string | null;
+        fields?:
+          | (
+              | {
+                  name: string;
+                  label?: string | null;
+                  width?: number | null;
+                  defaultValue?: string | null;
+                  required?: boolean | null;
+                  help_text?: string | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  /**
+                   * Select an icon to display next to this field (frontend implementation required).
+                   */
+                  icon?:
+                    | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'text';
+                }
+              | {
+                  name: string;
+                  label?: string | null;
+                  width?: number | null;
+                  defaultValue?: string | null;
+                  required?: boolean | null;
+                  help_text?: string | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'textarea';
+                }
+              | {
+                  name: string;
+                  label?: string | null;
+                  width?: number | null;
+                  required?: boolean | null;
+                  help_text?: string | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  /**
+                   * Select an icon to display next to this field (frontend implementation required).
+                   */
+                  icon?:
+                    | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'email';
+                }
+              | {
+                  name: string;
+                  label?: string | null;
+                  width?: number | null;
+                  defaultValue?: number | null;
+                  required?: boolean | null;
+                  help_text?: string | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  /**
+                   * Select an icon to display next to this field (frontend implementation required).
+                   */
+                  icon?:
+                    | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'number';
+                }
+              | {
+                  name: string;
+                  label?: string | null;
+                  width?: number | null;
+                  defaultValue?: string | null;
+                  placeholder?: string | null;
+                  options?:
+                    | {
+                        label: string;
+                        value: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  required?: boolean | null;
+                  help_text?: string | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  /**
+                   * Select an icon to display next to this field (frontend implementation required).
+                   */
+                  icon?:
+                    | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'select';
+                }
+              | {
+                  name: string;
+                  label?: string | null;
+                  width?: number | null;
+                  required?: boolean | null;
+                  defaultValue?: boolean | null;
+                  help_text?: string | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'checkbox';
+                }
+              | {
+                  name: string;
+                  label?: string | null;
+                  width?: number | null;
+                  defaultValue?: string | null;
+                  options?:
+                    | {
+                        label: string;
+                        value: string;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  required?: boolean | null;
+                  help_text?: string | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  direction?: ('column' | 'row') | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'radio';
+                }
+              | {
+                  name: string;
+                  label?: string | null;
+                  width?: number | null;
+                  required?: boolean | null;
+                  defaultValue?: string | null;
+                  help_text?: string | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'date';
+                }
+              | {
+                  name: string;
+                  label?: string | null;
+                  width?: number | null;
+                  required?: boolean | null;
+                  help_text?: string | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  /**
+                   * Select an icon to display next to this field (frontend implementation required).
+                   */
+                  icon?:
+                    | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'country';
+                }
+              | {
+                  name: string;
+                  label?: string | null;
+                  width?: number | null;
+                  required?: boolean | null;
+                  help_text?: string | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  /**
+                   * Select an icon to display next to this field (frontend implementation required).
+                   */
+                  icon?:
+                    | ('' | 'person' | 'email' | 'phone' | 'message' | 'number' | 'select' | 'checkbox' | 'location')
+                    | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'state';
+                }
+              | {
+                  message?: {
+                    root: {
+                      type: string;
+                      children: {
+                        type: string;
+                        version: number;
+                        [k: string]: unknown;
+                      }[];
+                      direction: ('ltr' | 'rtl') | null;
+                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                      indent: number;
+                      version: number;
+                    };
+                    [k: string]: unknown;
+                  } | null;
+                  /**
+                   * Extra CSS classes for this field's wrapper, used by the form's Custom CSS.
+                   */
+                  css_class?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'message';
+                }
+              | FormFileBlock
+              | FormSignatureBlock
+              | FormPhoneBlock
+              | FormTimeBlock
+              | FormRatingBlock
+              | FormScaleBlock
+              | FormImageBlock
+              | FormGroupBlock
+              | FormListBlock
+              | FormConditionalBlock
+            )[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'multi-step';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1598,6 +2910,32 @@ export interface Setting {
   createdAt: string;
 }
 /**
+ * Files and signatures visitors sent with a form.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-uploads".
+ */
+export interface FormUpload {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  form?: (number | null) | Form;
+  /**
+   * The form field the visitor used.
+   */
+  field_name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "audit-logs".
  */
@@ -1851,6 +3189,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'settings';
         value: number | Setting;
+      } | null)
+    | ({
+        relationTo: 'form-uploads';
+        value: number | FormUpload;
       } | null)
     | ({
         relationTo: 'audit-logs';
@@ -2811,6 +4153,26 @@ export interface SettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "form-uploads_select".
+ */
+export interface FormUploadsSelect<T extends boolean = true> {
+  tenant?: T;
+  form?: T;
+  field_name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "audit-logs_select".
  */
 export interface AuditLogsSelect<T extends boolean = true> {
@@ -2849,7 +4211,18 @@ export interface RedirectsSelect<T extends boolean = true> {
  */
 export interface FormsSelect<T extends boolean = true> {
   tenant?: T;
+  slug?: T;
+  slugLock?: T;
+  isActive?: T;
+  activeFrom?: T;
+  activeTo?: T;
+  available_languages?: T;
+  requires_auth?: T;
+  show_sequence_number?: T;
   title?: T;
+  header_image?: T;
+  has_terms?: T;
+  terms_content?: T;
   fields?:
     | T
     | {
@@ -2861,6 +4234,8 @@ export interface FormsSelect<T extends boolean = true> {
               width?: T;
               required?: T;
               defaultValue?: T;
+              help_text?: T;
+              css_class?: T;
               id?: T;
               blockName?: T;
             };
@@ -2871,6 +4246,8 @@ export interface FormsSelect<T extends boolean = true> {
               label?: T;
               width?: T;
               required?: T;
+              help_text?: T;
+              css_class?: T;
               icon?: T;
               id?: T;
               blockName?: T;
@@ -2882,6 +4259,8 @@ export interface FormsSelect<T extends boolean = true> {
               label?: T;
               width?: T;
               required?: T;
+              help_text?: T;
+              css_class?: T;
               icon?: T;
               id?: T;
               blockName?: T;
@@ -2890,6 +4269,7 @@ export interface FormsSelect<T extends boolean = true> {
           | T
           | {
               message?: T;
+              css_class?: T;
               id?: T;
               blockName?: T;
             };
@@ -2901,6 +4281,8 @@ export interface FormsSelect<T extends boolean = true> {
               width?: T;
               defaultValue?: T;
               required?: T;
+              help_text?: T;
+              css_class?: T;
               icon?: T;
               id?: T;
               blockName?: T;
@@ -2921,6 +4303,8 @@ export interface FormsSelect<T extends boolean = true> {
                     id?: T;
                   };
               required?: T;
+              help_text?: T;
+              css_class?: T;
               icon?: T;
               id?: T;
               blockName?: T;
@@ -2932,6 +4316,8 @@ export interface FormsSelect<T extends boolean = true> {
               label?: T;
               width?: T;
               required?: T;
+              help_text?: T;
+              css_class?: T;
               icon?: T;
               id?: T;
               blockName?: T;
@@ -2944,6 +4330,8 @@ export interface FormsSelect<T extends boolean = true> {
               width?: T;
               defaultValue?: T;
               required?: T;
+              help_text?: T;
+              css_class?: T;
               icon?: T;
               id?: T;
               blockName?: T;
@@ -2956,9 +4344,56 @@ export interface FormsSelect<T extends boolean = true> {
               width?: T;
               defaultValue?: T;
               required?: T;
+              help_text?: T;
+              css_class?: T;
               id?: T;
               blockName?: T;
             };
+        radio?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              direction?: T;
+              id?: T;
+              blockName?: T;
+            };
+        date?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              defaultValue?: T;
+              help_text?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        file?: T | FormFileBlockSelect<T>;
+        signature?: T | FormSignatureBlockSelect<T>;
+        phone?: T | FormPhoneBlockSelect<T>;
+        time?: T | FormTimeBlockSelect<T>;
+        rating?: T | FormRatingBlockSelect<T>;
+        scale?: T | FormScaleBlockSelect<T>;
+        image?: T | FormImageBlockSelect<T>;
+        group?: T | FormGroupBlockSelect<T>;
+        list?: T | FormListBlockSelect<T>;
+        conditional?: T | FormConditionalBlockSelect<T>;
+        'multi-step'?: T | FormMultiStepBlockSelect<T>;
       };
   submitButtonLabel?: T;
   confirmationType?: T;
@@ -2980,10 +4415,871 @@ export interface FormsSelect<T extends boolean = true> {
         message?: T;
         id?: T;
       };
+  appearance?:
+    | T
+    | {
+        width?: T;
+        card?: T;
+        density?: T;
+        field_style?: T;
+        label_position?: T;
+        radius?: T;
+        button_style?: T;
+        button_full_width?: T;
+        step_indicator?: T;
+        accent_color?: T;
+        background_image?: T;
+        background_overlay?: T;
+      };
+  custom_css?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormFileBlock_select".
+ */
+export interface FormFileBlockSelect<T extends boolean = true> {
+  name?: T;
+  label?: T;
+  width?: T;
+  required?: T;
+  help_text?: T;
+  css_class?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormSignatureBlock_select".
+ */
+export interface FormSignatureBlockSelect<T extends boolean = true> {
+  name?: T;
+  label?: T;
+  width?: T;
+  required?: T;
+  help_text?: T;
+  css_class?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormPhoneBlock_select".
+ */
+export interface FormPhoneBlockSelect<T extends boolean = true> {
+  name?: T;
+  label?: T;
+  width?: T;
+  required?: T;
+  help_text?: T;
+  css_class?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormTimeBlock_select".
+ */
+export interface FormTimeBlockSelect<T extends boolean = true> {
+  name?: T;
+  label?: T;
+  width?: T;
+  required?: T;
+  help_text?: T;
+  css_class?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormRatingBlock_select".
+ */
+export interface FormRatingBlockSelect<T extends boolean = true> {
+  name?: T;
+  label?: T;
+  width?: T;
+  required?: T;
+  help_text?: T;
+  css_class?: T;
+  point_count?: T;
+  display?: T;
+  labels?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormScaleBlock_select".
+ */
+export interface FormScaleBlockSelect<T extends boolean = true> {
+  name?: T;
+  label?: T;
+  width?: T;
+  required?: T;
+  help_text?: T;
+  css_class?: T;
+  min?: T;
+  max?: T;
+  step?: T;
+  min_label?: T;
+  max_label?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormImageBlock_select".
+ */
+export interface FormImageBlockSelect<T extends boolean = true> {
+  media?: T;
+  caption?: T;
+  size?: T;
+  css_class?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormGroupBlock_select".
+ */
+export interface FormGroupBlockSelect<T extends boolean = true> {
+  name?: T;
+  label?: T;
+  width?: T;
+  required?: T;
+  help_text?: T;
+  css_class?: T;
+  fields?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        textarea?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        email?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        number?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        select?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              placeholder?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        checkbox?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              defaultValue?: T;
+              help_text?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        radio?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              direction?: T;
+              id?: T;
+              blockName?: T;
+            };
+        date?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              defaultValue?: T;
+              help_text?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        country?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        state?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        message?:
+          | T
+          | {
+              message?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        file?: T | FormFileBlockSelect<T>;
+        signature?: T | FormSignatureBlockSelect<T>;
+        phone?: T | FormPhoneBlockSelect<T>;
+        time?: T | FormTimeBlockSelect<T>;
+        rating?: T | FormRatingBlockSelect<T>;
+        scale?: T | FormScaleBlockSelect<T>;
+        image?: T | FormImageBlockSelect<T>;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormListBlock_select".
+ */
+export interface FormListBlockSelect<T extends boolean = true> {
+  name?: T;
+  label?: T;
+  width?: T;
+  required?: T;
+  help_text?: T;
+  css_class?: T;
+  max_items?: T;
+  fields?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        textarea?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        email?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        number?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        select?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              placeholder?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        checkbox?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              defaultValue?: T;
+              help_text?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        radio?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              direction?: T;
+              id?: T;
+              blockName?: T;
+            };
+        date?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              defaultValue?: T;
+              help_text?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        country?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        state?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        message?:
+          | T
+          | {
+              message?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        file?: T | FormFileBlockSelect<T>;
+        signature?: T | FormSignatureBlockSelect<T>;
+        phone?: T | FormPhoneBlockSelect<T>;
+        time?: T | FormTimeBlockSelect<T>;
+        rating?: T | FormRatingBlockSelect<T>;
+        scale?: T | FormScaleBlockSelect<T>;
+        image?: T | FormImageBlockSelect<T>;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormConditionalBlock_select".
+ */
+export interface FormConditionalBlockSelect<T extends boolean = true> {
+  condition_field?: T;
+  operator?: T;
+  value?: T;
+  css_class?: T;
+  fields?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        textarea?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        email?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        number?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        select?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              placeholder?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        checkbox?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              defaultValue?: T;
+              help_text?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        radio?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              defaultValue?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              direction?: T;
+              id?: T;
+              blockName?: T;
+            };
+        date?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              defaultValue?: T;
+              help_text?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        country?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        state?:
+          | T
+          | {
+              name?: T;
+              label?: T;
+              width?: T;
+              required?: T;
+              help_text?: T;
+              css_class?: T;
+              icon?: T;
+              id?: T;
+              blockName?: T;
+            };
+        message?:
+          | T
+          | {
+              message?: T;
+              css_class?: T;
+              id?: T;
+              blockName?: T;
+            };
+        file?: T | FormFileBlockSelect<T>;
+        signature?: T | FormSignatureBlockSelect<T>;
+        phone?: T | FormPhoneBlockSelect<T>;
+        time?: T | FormTimeBlockSelect<T>;
+        rating?: T | FormRatingBlockSelect<T>;
+        scale?: T | FormScaleBlockSelect<T>;
+        image?: T | FormImageBlockSelect<T>;
+        group?: T | FormGroupBlockSelect<T>;
+        list?: T | FormListBlockSelect<T>;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormMultiStepBlock_select".
+ */
+export interface FormMultiStepBlockSelect<T extends boolean = true> {
+  steps?:
+    | T
+    | {
+        label?: T;
+        css_class?: T;
+        description?: T;
+        fields?:
+          | T
+          | {
+              text?:
+                | T
+                | {
+                    name?: T;
+                    label?: T;
+                    width?: T;
+                    defaultValue?: T;
+                    required?: T;
+                    help_text?: T;
+                    css_class?: T;
+                    icon?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              textarea?:
+                | T
+                | {
+                    name?: T;
+                    label?: T;
+                    width?: T;
+                    defaultValue?: T;
+                    required?: T;
+                    help_text?: T;
+                    css_class?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              email?:
+                | T
+                | {
+                    name?: T;
+                    label?: T;
+                    width?: T;
+                    required?: T;
+                    help_text?: T;
+                    css_class?: T;
+                    icon?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              number?:
+                | T
+                | {
+                    name?: T;
+                    label?: T;
+                    width?: T;
+                    defaultValue?: T;
+                    required?: T;
+                    help_text?: T;
+                    css_class?: T;
+                    icon?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              select?:
+                | T
+                | {
+                    name?: T;
+                    label?: T;
+                    width?: T;
+                    defaultValue?: T;
+                    placeholder?: T;
+                    options?:
+                      | T
+                      | {
+                          label?: T;
+                          value?: T;
+                          id?: T;
+                        };
+                    required?: T;
+                    help_text?: T;
+                    css_class?: T;
+                    icon?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              checkbox?:
+                | T
+                | {
+                    name?: T;
+                    label?: T;
+                    width?: T;
+                    required?: T;
+                    defaultValue?: T;
+                    help_text?: T;
+                    css_class?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              radio?:
+                | T
+                | {
+                    name?: T;
+                    label?: T;
+                    width?: T;
+                    defaultValue?: T;
+                    options?:
+                      | T
+                      | {
+                          label?: T;
+                          value?: T;
+                          id?: T;
+                        };
+                    required?: T;
+                    help_text?: T;
+                    css_class?: T;
+                    direction?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              date?:
+                | T
+                | {
+                    name?: T;
+                    label?: T;
+                    width?: T;
+                    required?: T;
+                    defaultValue?: T;
+                    help_text?: T;
+                    css_class?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              country?:
+                | T
+                | {
+                    name?: T;
+                    label?: T;
+                    width?: T;
+                    required?: T;
+                    help_text?: T;
+                    css_class?: T;
+                    icon?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              state?:
+                | T
+                | {
+                    name?: T;
+                    label?: T;
+                    width?: T;
+                    required?: T;
+                    help_text?: T;
+                    css_class?: T;
+                    icon?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              message?:
+                | T
+                | {
+                    message?: T;
+                    css_class?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              file?: T | FormFileBlockSelect<T>;
+              signature?: T | FormSignatureBlockSelect<T>;
+              phone?: T | FormPhoneBlockSelect<T>;
+              time?: T | FormTimeBlockSelect<T>;
+              rating?: T | FormRatingBlockSelect<T>;
+              scale?: T | FormScaleBlockSelect<T>;
+              image?: T | FormImageBlockSelect<T>;
+              group?: T | FormGroupBlockSelect<T>;
+              list?: T | FormListBlockSelect<T>;
+              conditional?: T | FormConditionalBlockSelect<T>;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

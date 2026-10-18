@@ -1,4 +1,15 @@
-@tailwind base;
+/*
+ * Tailwind's reset (preflight) and our base rules sit in a cascade layer below the form
+ * renderer's `fb-defaults`, so the form's design wins over the reset; everything unlayered
+ * (utilities, the tenant's theme css, a form's Custom CSS) still wins over both. Payload's own
+ * `payload-default` stays below the reset, as when the reset was unlayered. The same order is
+ * declared in formRenderer.css, so it holds whichever stylesheet loads first.
+ */
+@layer payload-default, reset, fb-defaults;
+
+@layer reset {
+  @tailwind base;
+}
 @tailwind components;
 @tailwind utilities;
 

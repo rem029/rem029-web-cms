@@ -7,7 +7,7 @@ import { canPreviewTenant } from '@/common/utils/preview'
 import { signPreview, verifyPreview } from '@/common/utils/previewToken'
 import { getFrontendTenantId } from '@/common/utils/frontendTenant'
 
-const ALLOWED_COLLECTIONS = ['pages', 'posts', 'header', 'footer', 'theme'] as const
+const ALLOWED_COLLECTIONS = ['pages', 'posts', 'header', 'footer', 'theme', 'forms'] as const
 type PreviewCollection = (typeof ALLOWED_COLLECTIONS)[number]
 
 const isPreviewCollection = (col: string | null): col is PreviewCollection =>
