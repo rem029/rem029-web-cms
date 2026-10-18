@@ -68,13 +68,17 @@ $inner-radius: calc(var(--admin-radius-m) - var(--admin-border-width));
     color: var(--admin-text);
     text-decoration: none;
 
+    // the whole word on lilac, like the breadcrumb: ink is only readable on the fill (a 40% low
+    // highlighter left most of the dark ink on the dark row). Payload 3.44 makes the hovered link
+    // `flow-root`, the cell's width: keep it inline, the text's width
     &:hover,
     &:focus-visible {
+      display: inline;
       text-decoration: none;
       background-image: linear-gradient(var(--admin-secondary), var(--admin-secondary));
-      background-position: 0 90%;
       background-repeat: no-repeat;
-      background-size: 100% 40%;
+      background-size: 100% 100%;
+      box-decoration-break: clone;
       color: var(--admin-ink);
     }
   }
