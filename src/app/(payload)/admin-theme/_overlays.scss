@@ -94,6 +94,14 @@
     background: var(--admin-surface);
     color: var(--admin-text);
     @include press(none, var(--admin-shadow-xs), none);
+
+    // Payload 3.44 (`CloseModalButton`, `DrawerHeader`) makes the icon 2× its button and nudges it
+    // up and left by half a base for its own small borderless button: fill ours, centred
+    svg {
+      position: static;
+      width: 100%;
+      height: 100%;
+    }
   }
 }
 
