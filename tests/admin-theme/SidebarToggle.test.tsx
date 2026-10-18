@@ -71,6 +71,54 @@ describe('SidebarToggle', () => {
     expect(screen.getByRole('button', { name: 'Show sidebar' })).toBeDefined()
   })
 
+  it('closes it on a click outside the panel', () => {
+    // arrange: render the toggle next to a panel (`.document-fields__sidebar-wrap`) and a dimmed
+    //   form (`.document-fields`), click once (open)
+    render(
+      <>
+        <SidebarToggle />
+        <div className="document-fields">
+          <div className="document-fields__sidebar-wrap">
+            <span data-testid="inside" />
+          </div>
+          <div data-testid="form" />
+        </div>
+      </>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Show sidebar' }))
+
+    // act: pointerdown on the form
+    fireEvent.pointerDown(screen.getByTestId('form'))
+
+    // assert: no data-doc-sidebar on <html>; button "Show sidebar"; localStorage 'closed'
+    expect(document.documentElement.hasAttribute(SIDEBAR_OPEN_ATTRIBUTE)).toBe(false)
+    expect(screen.getByRole('button', { name: 'Show sidebar' })).toBeDefined()
+    expect(localStorage.getItem(SIDEBAR_STORAGE_KEY)).toBe('closed')
+  })
+
+  it('stays open on a click inside the panel', () => {
+    // arrange: same markup, click once (open)
+    render(
+      <>
+        <SidebarToggle />
+        <div className="document-fields">
+          <div className="document-fields__sidebar-wrap">
+            <span data-testid="inside" />
+          </div>
+          <div data-testid="form" />
+        </div>
+      </>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Show sidebar' }))
+
+    // act: pointerdown on an element inside the panel
+    fireEvent.pointerDown(screen.getByTestId('inside'))
+
+    // assert: <html data-doc-sidebar="open">; button "Hide sidebar"
+    expect(document.documentElement.getAttribute(SIDEBAR_OPEN_ATTRIBUTE)).toBe('open')
+    expect(screen.getByRole('button', { name: 'Hide sidebar' })).toBeDefined()
+  })
+
   it('remembers the choice', () => {
     // arrange: render, click once (open), unmount
     const { unmount } = render(<SidebarToggle />)

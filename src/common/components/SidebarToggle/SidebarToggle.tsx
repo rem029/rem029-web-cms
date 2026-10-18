@@ -47,15 +47,30 @@ export function SidebarToggle() {
 
   useEffect(() => {
     if (!open) return
-    const onKeyDown = (event: KeyboardEvent) => {
-      // a select menu or date picker in the panel handles its own Escape first
-      if (event.key !== 'Escape' || event.defaultPrevented) return
+    const close = () => {
       setOpen(false)
       try {
         localStorage.setItem(SIDEBAR_STORAGE_KEY, 'closed')
       } catch {
         // keep in-page state when storage is unavailable
       }
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      // a select menu or date picker in the panel handles its own Escape first
+      if (event.key !== 'Escape' || event.defaultPrevented) return
+      close()
+    }
+    // the dimmed form takes no clicks (CSS), so a press anywhere outside the panel and the
+    // document bar closes it (user, 2026-10-18)
+    const onPointerDown = (event: PointerEvent) => {
+      if (!(event.target instanceof Element)) return
+      if (
+        event.target.closest(
+          '.document-fields__sidebar-wrap, .sidebar-toggle, .doc-controls, .payload__modal-container, .popup__content',
+        )
+      )
+        return
+      close()
     }
     // the page is locked (CSS): the wheel over the dimmed form scrolls the panel instead
     const onWheel = (event: WheelEvent) => {
@@ -67,9 +82,11 @@ export function SidebarToggle() {
       panel.scrollBy({ top: event.deltaY })
     }
     document.addEventListener('keydown', onKeyDown)
+    document.addEventListener('pointerdown', onPointerDown)
     document.addEventListener('wheel', onWheel, { passive: false })
     return () => {
       document.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('pointerdown', onPointerDown)
       document.removeEventListener('wheel', onWheel)
     }
   }, [open])
