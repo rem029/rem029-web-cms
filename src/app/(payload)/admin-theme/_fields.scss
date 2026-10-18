@@ -661,6 +661,14 @@ html[data-theme='dark'] .fixed-toolbar__dropdown-items .toolbar-popup__dropdown-
   }
 }
 
+// gallery rows: Payload's 26px thumbnails (22px inside our border) are too small to tell images
+// apart (user, 2026-10-18)
+.upload--has-many__dragItem .thumbnail {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
 .file-field__thumbnail-wrap .thumbnail {
   border: var(--admin-border-width) solid var(--admin-border);
   border-radius: var(--admin-radius-s);
