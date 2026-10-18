@@ -62,6 +62,22 @@ describe('admin branding', () => {
     expect(result).toMatchObject({ tenantName: admin.name })
   })
 
+  it('marks the admin tenant as the platform', async () => {
+    // act
+    const result = await getAdminBranding(payload, null, undefined)
+
+    // assert
+    expect(result).toMatchObject({ tenantName: admin.name, isPlatform: true })
+  })
+
+  it('does not mark a business as the platform', async () => {
+    // act
+    const result = await getAdminBranding(payload, superUser, String(tenantB.id))
+
+    // assert
+    expect(result).toMatchObject({ tenantName: tenantB.name, isPlatform: false })
+  })
+
   describe('themes', () => {
     const activeCSS = async (tenantId: number) =>
       (await getTenantDoc('theme', tenantId))?.themes?.find((t) => t.active)?.css

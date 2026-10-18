@@ -26,11 +26,13 @@ import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 import { Analytics } from './collections/Analytics'
 import { AuditLogs } from './collections/AuditLogs'
 import { Tenants } from './collections/Tenants'
+import { FieldShowcase } from './collections/FieldShowcase'
 import { ar } from '@payloadcms/translations/languages/ar'
 import { en } from '@payloadcms/translations/languages/en'
 import { isNextBuild } from 'payload/shared'
 import { getSeedAdminCredentials, isLoginPrefillEnabled } from './common/utils/seedAdmin'
 import { AuditLogsSettings } from './globals/AuditLogsSettings/config'
+import { FieldShowcaseGlobal } from './globals/FieldShowcase/config'
 import { canRunJobs, jobsCollectionAccess } from './common/utils/jobsAccess'
 import {
   ensurePruneJobQueued,
@@ -46,11 +48,18 @@ export default buildConfig({
   admin: {
     // dev only, opt-in (DEV_PREFILL_LOGIN=true): fills the login form, still needs a click
     autoLogin: prefillCredentials ? { ...prefillCredentials, prefillOnly: true } : false,
+    // the platform mascot instead of Payload's favicons (admin only; public sites use Settings)
+    meta: {
+      icons: [
+        { rel: 'icon', type: 'image/png', sizes: '32x32', url: '/admin-branding/favicon-32.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', url: '/admin-branding/favicon-180.png' },
+      ],
+    },
     components: {
-      // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
-      beforeLogin: ['@/components/BeforeLogin'],
+      actions: ['@/common/components/ThemeToggle/ThemeToggle#ThemeToggle'],
+      beforeLogin: ['@/common/components/LoginIntro/LoginIntro#LoginIntro'],
       header: ['@/common/components/InactiveTenantNotice#InactiveTenantNotice'],
+      providers: ['@/common/components/AdminTheme/AdminTheme#AdminTheme'],
       graphics: {
         Icon: '@/common/components/AdminBranding/Icon#Icon',
         Logo: '@/common/components/AdminBranding/Logo#Logo',
@@ -117,9 +126,10 @@ export default buildConfig({
     Theme,
     Settings,
     AuditLogs,
+    FieldShowcase,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [AuditLogsSettings],
+  globals: [AuditLogsSettings, FieldShowcaseGlobal],
 
   plugins: [...plugins, withAccessSlugOptions],
   secret: process.env.PAYLOAD_SECRET,

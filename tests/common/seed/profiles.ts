@@ -1,7 +1,9 @@
 /**
  * The profiles in each test business with members (test-a, test-b, test-inactive; `TEST_PROFILES`):
- * - `editor`: CRUD on pages, posts, media, categories; read/update on header and footer
- * - `viewer`: read on pages, posts, media, categories, header and footer
+ * - `editor`: CRUD on pages, posts, media, categories, field-showcase; read/update on header,
+ *   footer and the field-showcase-global global
+ * - `viewer`: read on pages, posts, media, categories, field-showcase, header, footer and the
+ *   field-showcase-global global
  * - `log-reader`: every box on audit-logs (only read and the nav count there)
  * Editor and viewer open /admin. Every other slug is hidden and denied.
  */
@@ -37,6 +39,8 @@ const EDITOR: ProfileSpec = {
     posts: CRUD,
     media: CRUD,
     categories: CRUD,
+    'field-showcase': CRUD,
+    'field-showcase-global': READ_UPDATE,
     header: READ_UPDATE,
     footer: READ_UPDATE,
     users: OPEN_ADMIN,
@@ -52,6 +56,8 @@ const VIEWER: ProfileSpec = {
     posts: READ,
     media: READ,
     categories: READ,
+    'field-showcase': READ,
+    'field-showcase-global': READ,
     header: READ,
     footer: READ,
     users: OPEN_ADMIN,
@@ -135,7 +141,7 @@ export const seedTestProfiles = async (
   payload: Payload,
   tenants: TenantIds,
 ): Promise<ProfileIds> => {
-  const slugs = getAccessSlugs(payload.config.collections)
+  const slugs = getAccessSlugs(payload.config.collections, payload.config.globals)
   return {
     editor: {
       a: await upsertProfile(payload, tenants.a, TEST_TENANTS.a, EDITOR, slugs),

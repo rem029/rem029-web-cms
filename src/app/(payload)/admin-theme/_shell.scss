@@ -1,0 +1,520 @@
+// The admin shell (rem0005 phase 2): sidebar, topbar, breadcrumbs. Checked against Payload 3.44.0.
+// Payload's own styles sit in `@layer payload-default`, so these plain rules win without !important.
+
+// a small mono uppercase label: nav groups, dashboard groups, the tenant selector
+%admin-label {
+  font-family: var(--admin-font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+}
+
+// sidebar
+.nav {
+  background: var(--admin-bg);
+  border-inline-end: var(--admin-border-width) solid var(--admin-border);
+
+  [dir='rtl'] & {
+    border-left: var(--admin-border-width) solid var(--admin-border);
+  }
+}
+
+.nav__link {
+  width: 100%;
+  padding: 6px 10px;
+  margin-block: 2px;
+  border: var(--admin-border-width) solid transparent;
+  border-radius: var(--admin-radius-s);
+  color: var(--admin-text);
+  transition:
+    transform var(--admin-duration) var(--admin-ease),
+    box-shadow var(--admin-duration) var(--admin-ease);
+}
+
+.nav a.nav__link:hover,
+.nav a.nav__link:focus-visible {
+  background: var(--admin-raised);
+  text-decoration: none;
+}
+
+// the fill shows the current page (user, 2026-10-17: sky fill), so the indicator bar goes
+.nav__link-indicator {
+  display: none;
+}
+
+.nav .nav__link:has(.nav__link-indicator) {
+  padding-inline-start: 10px;
+  background: var(--admin-primary);
+  color: var(--admin-ink);
+  border-color: var(--admin-border);
+  box-shadow: var(--admin-shadow-s);
+}
+
+.nav-group {
+  padding-top: 12px;
+  border-top: var(--admin-border-width) solid var(--admin-border);
+}
+
+.nav-group__toggle {
+  @extend %admin-label;
+  margin-bottom: 6px;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--admin-text);
+  }
+}
+
+.nav-group__indicator svg .stroke {
+  stroke: currentColor;
+}
+
+.nav__label {
+  @extend %admin-label;
+}
+
+// topbar
+.app-header__bg {
+  background: var(--admin-bg);
+}
+
+.app-header__content::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  border-bottom: var(--admin-border-width) solid var(--admin-border);
+  pointer-events: none;
+}
+
+.step-nav {
+  font-family: var(--admin-font-mono);
+  font-size: 0.8125rem;
+
+  // the home link is the icon only: no underline
+  a:not(.step-nav__home) {
+    font-weight: 500;
+    text-decoration: none;
+    background-image: linear-gradient(var(--admin-secondary), var(--admin-secondary));
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 100% 2px;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: none;
+      background-size: 100% 100%;
+      color: var(--admin-ink);
+    }
+  }
+}
+
+// locale switcher and account: bordered chips
+.localizer-button,
+.app-header__account {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-surface);
+}
+
+.localizer-button {
+  padding: 2px 6px 2px 10px;
+  font-family: var(--admin-font-mono);
+  font-size: 0.8125rem;
+
+  &__label {
+    color: var(--admin-muted);
+  }
+}
+
+.app-header__account {
+  display: flex;
+  padding: 2px;
+}
+
+// phones: the breadcrumb shrinks (and scrolls, as Payload's wrapper already allows) so the actions,
+// locale and account always fit; otherwise the row overflows and Payload's absolutely placed locale
+// button lands on the theme toggle (Payload 3.44 AppHeader)
+.app-header__controls-wrapper {
+  min-width: 0;
+}
+
+.app-header__step-nav-wrapper {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-inline-end: 8px;
+}
+
+.app-header__actions-wrapper,
+.app-header__localizer-spacing,
+.app-header__account {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .app-header__account {
+    margin-inline-start: 6px;
+  }
+
+  .app-header__localizer.localizer {
+    right: calc(var(--base) * 2 + 6px);
+  }
+}
+
+// header dark/light switch (ThemeToggle): a bordered chip like the account, square, icon only
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 2px;
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--admin-raised);
+  }
+
+  @media (pointer: coarse) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+.hamburger {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-surface);
+}
+
+// multi-tenant plugin
+.tenant-selector {
+  label,
+  .field-label {
+    @extend %admin-label;
+  }
+
+  .react-select .rs__control {
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    box-shadow: none;
+  }
+}
+
+// small shell controls get a 24px target (WCAG 2.5.8), 44px on touch screens; the icons stay
+// their size, centred in the bigger box
+.nav-group__toggle,
+.nav__log-out,
+.step-nav .step-nav__home {
+  min-width: 24px;
+  min-height: 24px;
+  align-items: center;
+
+  @media (pointer: coarse) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+.nav__log-out,
+.step-nav .step-nav__home {
+  display: flex;
+  justify-content: center;
+}
+
+.step-nav .step-nav__home {
+  width: auto;
+  height: auto;
+}
+
+// Payload nudges the chevron up for its top-aligned toggle; ours is centred
+.nav-group__toggle svg {
+  margin-top: 0;
+}
+
+// notices: the inactive business and hidden document banners, a warning sticker. information,
+// not a control, so no shadow
+.admin-notice {
+  margin-block-end: 12px;
+  padding: 8px 12px;
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-warning);
+  color: var(--admin-ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+// the inactive business notice sits in the admin `header` slot, above the topbar
+.admin-notice--page {
+  margin: 12px var(--gutter-h) 0;
+}
+
+// document tabs (Edit / Versions / API): `.doc-tab`, `.doc-tab--active`, `.doc-tab__label`,
+// version count `.pill-version-count`
+.doc-tab {
+  background: transparent;
+  color: var(--admin-text);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  font-family: var(--admin-font-mono);
+
+  .doc-tab__label {
+    font-family: var(--admin-font-mono);
+    color: inherit;
+  }
+
+  &:hover {
+    background: var(--admin-raised);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--admin-shadow-xs);
+  }
+
+  &.doc-tab--active,
+  &.doc-tab--active:hover {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+  }
+
+  .pill-version-count {
+    background: var(--admin-raised);
+    color: var(--admin-text);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    font-family: var(--admin-font-mono);
+  }
+
+  &.doc-tab--active .pill-version-count {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+  }
+}
+
+// document status (Status: Published — Unpublish, Last Modified, Created)
+.status {
+  .status__label {
+    font-family: var(--admin-font-mono);
+    color: var(--admin-muted);
+  }
+
+  .status__value {
+    font-family: var(--admin-font-display);
+    font-weight: 600;
+    color: var(--admin-text);
+  }
+}
+
+// floating nav, tablet and phone only (user, 2026-10-17): at and below 1024px the open nav lies
+// over the page on the left (420px, full width at and below 768px, where Payload makes it 100vw),
+// the page under it dims and takes no clicks or scrolling; the topbar and the hamburger (outside the
+// wrap) stay usable. Above 1024px Payload's own nav is untouched: it pushes the page and everything
+// keeps scrolling (user: "on desktop I'd like the default Payload UI").
+// Payload 3.44: `.template-default` is a grid whose first column is the nav width when open
+// (`--nav-open`, and `--nav-hydrated` below 1441px); `.nav` is sticky with `--nav-width` 275px and
+// has no backdrop of its own, so closing stays the hamburger (and opening a page at 768px and below).
+// Pointer and wheel only: Tab can still reach the page (blocking it needs `inert`, i.e. JS).
+@media (max-width: 1024px) {
+  // the page scrolls on the root, which pointer-events can't stop: lock it while the nav is open.
+  // lock the body only: Payload scrolls the page on <body> (its overflow reaches the viewport);
+  // locking <html> as well cuts that link, so the page jumps to the top
+  html:has(.template-default--nav-open) body {
+    overflow: hidden;
+  }
+
+  .template-default--nav-open .template-default__wrap {
+    > :not(.app-header) {
+      pointer-events: none;
+    }
+
+    &::after {
+      content: '';
+      position: fixed;
+      inset: var(--app-header-height) 0 0 0;
+      z-index: calc(var(--z-nav) - 1);
+      background: var(--admin-bg);
+      opacity: 0.8;
+    }
+  }
+
+  // the fixed nav leaves the grid's flow, so the content is its first item: one full-width track
+  // in every state (Payload's `0 auto` would put the content in the 0 column)
+  .template-default {
+    &,
+    &.template-default--nav-open,
+    &.template-default--nav-hydrated,
+    &.template-default--nav-hydrated.template-default--nav-open {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .nav {
+    // fixed below the topbar so the hamburger stays reachable; hidden when closed so it never
+    // catches clicks over the page
+    position: fixed;
+    top: var(--app-header-height);
+    inset-inline-start: 0;
+    width: min(420px, 100vw);
+    height: calc(100vh - var(--app-header-height));
+    z-index: var(--z-nav);
+    background: var(--admin-bg);
+    border-top: var(--admin-border-width) solid var(--admin-border);
+    border-inline-end: var(--admin-border-width) solid var(--admin-border);
+    box-shadow: none;
+    visibility: hidden;
+    pointer-events: none;
+
+    &.nav--nav-open {
+      visibility: visible;
+      pointer-events: auto;
+      box-shadow: var(--admin-shadow-l);
+    }
+
+    // the nav keeps its own scroll, contained so it never hands the scroll on to the page
+    .nav__scroll {
+      overscroll-behavior: contain;
+      // Payload pads it by the topbar's height (its nav starts at the top); this one starts below
+      padding-top: 24px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .nav {
+    width: 100vw;
+
+    &.nav--nav-open {
+      box-shadow: none;
+    }
+  }
+}
+
+// The floating document sidebar (rem0005 phase 3 step 4), at every width. Checked against Payload
+// 3.44.0 (`@payloadcms/ui` elements/DocumentFields): `.document-fields--has-sidebar`,
+// `.document-fields__main` (two thirds), `.document-fields__sidebar-wrap` (sticky, a third, stacked
+// under the form below 1024px). The sidebar never takes a column: it opens as a panel over the form
+// from the document bar's button (`SidebarToggle`, which sets `data-doc-sidebar="open"` and
+// `--doc-sidebar-top` on `<html>` for the page, or on `.drawer__content` when inside a drawer so
+// drawers carry their own state without locking the page).
+// Layers: above the document bar (5), below popups (10, so the bar's ⋮ menu opens over it).
+$doc-sidebar-top: var(
+  --doc-sidebar-top,
+  calc(var(--app-header-height) + var(--doc-controls-height))
+);
+
+.document-fields--has-sidebar {
+  .document-fields__main {
+    width: 100%;
+  }
+
+  .document-fields__sidebar-wrap {
+    display: none;
+  }
+}
+
+html[data-doc-sidebar='open'] {
+  // the page scrolls, which pointer-events can't stop: lock it while the panel is open. Payload
+  // scrolls the page on <body> (its overflow reaches the viewport): lock the body only. Locking
+  // <html> too cuts that link, so the page jumped to the top under a panel measured for the
+  // scrolled position and covered the document bar
+  body {
+    overflow: hidden;
+  }
+}
+
+html[data-doc-sidebar='open'] .template-default,
+.drawer__content[data-doc-sidebar='open'] {
+  .document-fields--has-sidebar {
+    .document-fields__main {
+      pointer-events: none;
+
+      &::after {
+        content: '';
+        position: fixed;
+        inset: $doc-sidebar-top 0 0 0;
+        z-index: 8;
+        background: var(--admin-bg);
+        opacity: 0.8;
+      }
+    }
+
+    .document-fields__sidebar-wrap {
+      display: block;
+      position: fixed;
+      top: $doc-sidebar-top;
+      bottom: 0;
+      inset-inline-end: 0;
+      // 100%, not 100vw: in a drawer (Payload transforms `.drawer__content`) the panel is placed in
+      // the drawer, and 100vw overflowed it on phones
+      width: min(420px, 100%);
+      min-width: 0;
+      height: auto;
+      z-index: 9;
+      background: var(--admin-bg);
+      border-top: var(--admin-border-width) solid var(--admin-border);
+      border-inline-start: var(--admin-border-width) solid var(--admin-border);
+      box-shadow: var(--admin-shadow-l);
+    }
+
+    // its own scroll, contained so it never hands the scroll on to the page
+    .document-fields__sidebar {
+      height: 100%;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-bottom: 0;
+    }
+
+    .document-fields__sidebar-fields {
+      gap: var(--base);
+      padding: 24px var(--gutter-h);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  html[data-doc-sidebar='open'] .template-default,
+  .drawer__content[data-doc-sidebar='open'] {
+    .document-fields--has-sidebar .document-fields__sidebar-wrap {
+      width: 100%;
+      border-inline-start: 0;
+      box-shadow: none;
+    }
+  }
+}
+
+// the toggle button in the document bar: the ⋮ chip's look; filled while the panel is open
+.sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--admin-text);
+  background: var(--admin-surface);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    color: var(--admin-ink);
+    background: var(--admin-primary);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--admin-shadow-xs);
+  }
+}

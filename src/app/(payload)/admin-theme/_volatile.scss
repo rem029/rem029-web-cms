@@ -1,0 +1,280 @@
+// Areas Payload changes by 3.91 (rem0005): re-check this whole file in rem0013.
+// Checked against Payload 3.44.0: dashboard (`@payloadcms/next` views/Dashboard), login (views/Login),
+// list controls (`@payloadcms/ui` elements/ListControls, SearchFilter, WhereBuilder, ColumnSelector).
+@use './motion' as *;
+
+// dashboard
+.dashboard__label {
+  font-family: var(--admin-font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+}
+
+.dashboard__card-list .card {
+  @include brutal-box(var(--admin-shadow-m));
+
+  &.card--has-onclick {
+    @include press(var(--admin-shadow-m), var(--admin-shadow-l), var(--admin-shadow-xs));
+
+    &:hover {
+      background: var(--admin-surface);
+      border-color: var(--admin-border);
+    }
+  }
+}
+
+.card__title {
+  font-family: var(--admin-font-display);
+  font-weight: 700;
+}
+
+// the "+" create button stays (user, 2026-10-17): a square bordered chip
+.card__actions .btn__icon {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-surface);
+
+  &:hover {
+    border: var(--admin-border-width) solid var(--admin-border);
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+    box-shadow: none;
+  }
+}
+
+// login: the form on a card
+.template-minimal.login .template-minimal__wrap {
+  @include brutal-box(var(--admin-shadow-m));
+  max-width: 420px;
+  padding: 32px;
+}
+
+.login__brand {
+  margin-bottom: 24px;
+}
+
+// the platform mascot (AdminBranding): the breadcrumb home icon, and the logo on the login card
+.admin-mascot {
+  display: block;
+  width: auto;
+  height: 18px;
+}
+
+.admin-mascot--logo {
+  height: 120px;
+}
+
+// step 2's LoginIntro
+.login-intro {
+  margin-bottom: 24px;
+
+  &__title {
+    margin: 0 0 4px;
+    font-family: var(--admin-font-display);
+  }
+
+  &__text {
+    margin: 0;
+    color: var(--admin-muted);
+  }
+}
+
+// list controls: search, Columns, Filters
+.list-controls {
+  // the bar around the search is the input; the field inside stays bare
+  .list-controls__wrap {
+    background: var(--admin-surface);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    transition: box-shadow var(--admin-duration) var(--admin-ease);
+
+    &:has(.search-filter__input:focus) {
+      box-shadow: var(--admin-shadow-s);
+    }
+  }
+
+  .search-filter__input,
+  .search-filter__input:focus {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    outline: none;
+  }
+
+  .search-filter .icon--search {
+    color: var(--admin-muted);
+  }
+
+  .list-controls__toggle-columns,
+  .list-controls__toggle-where,
+  .list-controls__toggle-sort {
+    &[aria-expanded='true'] {
+      --bg-color: var(--admin-primary);
+      --hover-bg: var(--admin-primary);
+      --color: var(--admin-ink);
+      --hover-color: var(--admin-ink);
+      background: var(--admin-primary);
+      color: var(--admin-ink);
+    }
+  }
+
+  .list-controls__modified {
+    color: var(--admin-ink);
+  }
+
+  .where-builder,
+  .pill-selector,
+  .sort-complex {
+    background: var(--admin-surface);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-m);
+    box-shadow: none;
+  }
+
+  .pill-selector__pill {
+    background: var(--admin-raised);
+    color: var(--admin-text);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    box-shadow: none;
+
+    &:hover {
+      background: var(--admin-surface);
+    }
+
+    &.pill-selector__pill--selected,
+    &.pill-selector__pill--selected:hover {
+      background: var(--admin-primary);
+      color: var(--admin-ink);
+      box-shadow: none;
+    }
+  }
+}
+
+// popups (the ⋮ document menu, per page, locale, Publish ▾, column sort)
+.popup {
+  .popup__content,
+  &.popup--size-xsmall .popup__content,
+  &.popup--size-small .popup__content {
+    @include brutal-box(var(--admin-shadow-s));
+    border-radius: var(--admin-radius-s);
+  }
+
+  // the box's border and shadow carry the popup without a caret
+  .popup__caret {
+    display: none;
+  }
+}
+
+.popup-button-list__button {
+  color: var(--admin-text);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--admin-raised);
+    color: var(--admin-text);
+  }
+
+  &.popup-button-list__button--selected,
+  &.popup-button-list__button--selected:hover,
+  &.popup-button-list__button--selected:focus-visible {
+    background: var(--admin-primary);
+    color: var(--admin-ink);
+  }
+
+  &.popup-button-list__button--disabled,
+  &:disabled {
+    color: var(--admin-muted);
+    background: transparent;
+    cursor: not-allowed;
+  }
+}
+
+.popup-divider {
+  height: var(--admin-border-width);
+  background: var(--admin-border);
+  border: 0;
+}
+
+// live preview (`@payloadcms/next` `.live-preview*`; rem0013 redoes it)
+.live-preview-window {
+  background: var(--admin-raised);
+}
+
+.live-preview-iframe,
+.live-preview-window--has-breakpoint .live-preview-iframe {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-m);
+  box-shadow: var(--admin-shadow-s);
+}
+
+.live-preview-toolbar {
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+
+  &--static {
+    border: 0;
+    border-bottom: var(--admin-border-width) solid var(--admin-border);
+    border-radius: 0;
+  }
+
+  &--draggable {
+    @include brutal-box(var(--admin-shadow-s));
+    border-radius: var(--admin-radius-s);
+  }
+
+  &__drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 2px;
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    @include press(none, var(--admin-shadow-xs), none);
+
+    .icon--drag-handle .fill {
+      fill: var(--admin-text);
+    }
+  }
+}
+
+.live-preview-toolbar-controls {
+  &__breakpoint,
+  &__zoom,
+  &__size {
+    font-family: var(--admin-font-mono);
+    color: var(--admin-text);
+    background: var(--admin-surface);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+  }
+
+  &__external {
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    @include press(none, var(--admin-shadow-xs), none);
+
+    &:hover {
+      background: var(--admin-surface);
+    }
+  }
+}
+
+// width / height inputs (Payload's `input.toolbar-input`): the same edge as the other controls
+.live-preview-toolbar input.toolbar-input {
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  background: var(--admin-surface);
+  color: var(--admin-text);
+}

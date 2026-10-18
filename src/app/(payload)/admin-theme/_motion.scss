@@ -1,0 +1,37 @@
+// Shared neo-brutalist building blocks (rem0005). Checked against Payload 3.44.0.
+// Only transform and box-shadow move; _base.scss turns every transition off under reduced motion.
+
+// a bordered surface with a hard shadow: cards, the login form, popups
+@mixin brutal-box($shadow: var(--admin-shadow-m)) {
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-m);
+  box-shadow: $shadow;
+}
+
+// hover lifts towards the light, active presses into the shadow; nothing when disabled
+@mixin press($rest, $hover, $active) {
+  box-shadow: $rest;
+  transition:
+    transform var(--admin-duration) var(--admin-ease),
+    box-shadow var(--admin-duration) var(--admin-ease);
+
+  &:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: $hover;
+  }
+
+  &:active {
+    transform: translate(4px, 4px);
+    box-shadow: $active;
+  }
+
+  &[disabled],
+  &.btn--disabled {
+    transform: none;
+    // buttons keep their (muted) inset border, everything else loses the shadow
+    box-shadow: var(--box-shadow, none);
+    cursor: not-allowed;
+  }
+}
