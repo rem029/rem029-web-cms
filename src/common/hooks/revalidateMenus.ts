@@ -39,6 +39,9 @@ export const revalidateMenus: CollectionAfterChangeHook = ({
   collection,
   req,
 }) => {
+  // a draft that was never published changes nothing guests see; Payload also creates the first
+  // draft while rendering the admin's create view (autosave), where Next throws on revalidateTag
+  if (doc?._status === 'draft' && previousDoc?._status !== 'published') return doc
   revalidate(req.payload, req.context, collection.slug, doc, previousDoc?.tenant)
   return doc
 }

@@ -92,7 +92,10 @@ export default async function MenuPage({ params, searchParams }: Args) {
       <main className="flex-1">
         <MenuCarousel images={carouselImages(menu)} />
         <div className="container py-6">
-          {menu.intro?.heading && <h1 className="text-3xl font-semibold">{menu.intro.heading}</h1>}
+          {/* without an intro heading the page still gets an h1 (the menu title, screen readers only) */}
+          <h1 className={menu.intro?.heading ? 'text-3xl font-semibold' : 'sr-only'}>
+            {menu.intro?.heading || menu.title}
+          </h1>
           {menu.intro?.subheading && (
             <p className="mt-1 text-menu-muted">{menu.intro.subheading}</p>
           )}
