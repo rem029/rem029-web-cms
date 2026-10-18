@@ -58,14 +58,12 @@ const en: FormText = {
   addRow: (label) => `Add ${label}`,
   removeRow: (label, row) => `Remove ${label} ${row}`,
   row: (label, row) => `${label} ${row}`,
-  // skeleton: becomes `${label} is required.`
-  required: () => 'This field is required.',
+  required: (label) => `${label} is required.`,
   fixErrors: (count) =>
     count === 1
       ? 'Please fix the highlighted field.'
       : `Please fix the ${count} highlighted fields.`,
-  // skeleton: 'Review your answers'
-  reviewTitle: '',
+  reviewTitle: 'Review your answers',
   uploading: 'Uploading…',
   uploadHint: 'Images or PDF, up to 10 MB.',
   tooLarge: 'Files can be up to 10 MB.',
@@ -99,13 +97,10 @@ const ar: FormText = {
   addRow: (label) => `إضافة ${label}`,
   removeRow: (label, row) => `حذف ${label} ${row}`,
   row: (label, row) => `${label} ${row}`,
-  // skeleton: becomes `حقل «${label}» مطلوب.`
-  // skeleton: becomes `حقل «${label}» مطلوب.`
-  required: () => 'هذا الحقل مطلوب.',
+  required: (label) => `حقل «${label}» مطلوب.`,
   fixErrors: (count) =>
     count === 1 ? 'يرجى تصحيح الحقل المحدد.' : `يرجى تصحيح الحقول المحددة (${count}).`,
-  // skeleton: 'راجع إجاباتك'
-  reviewTitle: '',
+  reviewTitle: 'راجع إجاباتك',
   uploading: 'جارٍ الرفع…',
   uploadHint: 'صور أو PDF، حتى 10 ميغابايت.',
   tooLarge: 'يمكن أن يصل حجم الملف إلى 10 ميغابايت.',

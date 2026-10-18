@@ -41,11 +41,10 @@ export const ReviewScreen: React.FC<ReviewScreenProps> = ({
 }) => {
   const { values, listCounts, locale, busy } = useFormRenderer()
   const text = formText(locale)
-  // skeleton: 1. <h2 className="fb-review-heading">{text.reviewTitle}</h2> above the sections
-  //   (the step titles inside become the next level down)
 
   return (
     <div className="fb-review-list">
+      <h2 className="fb-review-heading">{text.reviewTitle}</h2>
       {sections.map((section, i) => {
         const answers = visibleAnswers(section.fields ?? [], values, listCounts)
         return (

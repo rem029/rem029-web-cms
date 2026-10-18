@@ -55,7 +55,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
   submit,
   upload,
   saveDraft = true,
-  title: _title,
+  title,
 }) => {
   const { draft, updateDraft, clearDraft, savedAt } = useDraft(form.id, saveDraft)
   const { values, listCounts } = draft
@@ -226,7 +226,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
       >
         {scopedCss && <style>{scopedCss}</style>}
         <div className="fb-body">
-          {/* skeleton: 1. title → <h1 className="fb-title">{title}</h1>, above the header image */}
+          {title && <h1 className="fb-title">{title}</h1>}
           {headerImage && (
             <figure className="fb-header">
               <Media resource={headerImage} />
