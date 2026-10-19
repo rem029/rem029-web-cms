@@ -20,6 +20,11 @@ export const createdUpdatedByCollections: CollectionSlug[] = [
   'forms',
   'redirects',
   'users',
+  'menu-categories',
+  'menu-allergens',
+  'menu-tags',
+  'menu-items',
+  'menus',
   'field-showcase',
 ]
 

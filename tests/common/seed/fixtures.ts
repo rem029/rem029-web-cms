@@ -11,11 +11,11 @@ export const TEST_TENANTS = {
 
 /** The profiles each test business has (slugs are unique per tenant, the same in each). */
 export const TEST_PROFILES = {
-  // CRUD on pages, posts, media, categories, field-showcase; read/update on header, footer and the
-  // field-showcase-global global; opens /admin
+  // CRUD on pages, posts, media, categories, the menu catalog, field-showcase; read/update on header,
+  // footer and the field-showcase-global global; opens /admin
   editor: 'editor',
-  // read on pages, posts, media, categories, field-showcase, header, footer and the
-  // field-showcase-global global; opens /admin
+  // read on pages, posts, media, categories, the menu catalog, field-showcase, header, footer and
+  // the field-showcase-global global; opens /admin
   viewer: 'viewer',
   // every box ticked on audit-logs (only read and the nav count there); every other slug hidden
   // and denied. seeded without a user: only super users may set that row
@@ -78,6 +78,30 @@ export const TEST_CONTENT = {
   domainOfA: 'shop-a.example.test',
   // test-b's Settings → Homepage (admin has no homepage picked: its `home` page is the fallback)
   homepageOfB: 'about',
+} as const
+
+/**
+ * The menu catalog (`menu.ts`, rem0017): the same slugs in test-a and test-b, so a read that
+ * returns another business's doc is easy to spot. Titles have an Arabic version.
+ */
+export const TEST_MENU = {
+  // categories in test-a and test-b, sortOrder 1 and 2
+  starters: 'starters',
+  mains: 'mains',
+  // an allergen and a tag in test-a and test-b
+  gluten: 'Gluten',
+  vegan: 'Vegan',
+  // items in test-a and test-b: soup (starters, gluten), steak (mains), lemonade (no category)
+  soup: 'tomato-soup',
+  steak: 'grilled-steak',
+  lemonade: 'fresh-lemonade',
+  // an item in test-a only, "Show on menus" unticked
+  inactiveItem: 'seasonal-special',
+  // menus: published in test-a and test-b (soup, steak, lemonade), a draft in test-a only, and a
+  // published one in test-b only
+  dinner: 'dinner',
+  draftMenu: 'brunch-draft',
+  onlyInB: 'drinks-b',
 } as const
 
 /** The active theme of test-a and test-b, so their branding differs. */

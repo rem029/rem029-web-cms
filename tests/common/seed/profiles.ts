@@ -1,9 +1,9 @@
 /**
  * The profiles in each test business with members (test-a, test-b, test-inactive; `TEST_PROFILES`):
- * - `editor`: CRUD on pages, posts, media, categories, field-showcase; read/update on header,
+ * - `editor`: CRUD on pages, posts, media, categories, the menu catalog and field-showcase;
+ *   read/update on header, footer and the field-showcase-global global
+ * - `viewer`: read on pages, posts, media, categories, the menu catalog, field-showcase, header,
  *   footer and the field-showcase-global global
- * - `viewer`: read on pages, posts, media, categories, field-showcase, header, footer and the
- *   field-showcase-global global
  * - `log-reader`: every box on audit-logs (only read and the nav count there)
  * Editor and viewer open /admin. Every other slug is hidden and denied.
  */
@@ -39,6 +39,11 @@ const EDITOR: ProfileSpec = {
     posts: CRUD,
     media: CRUD,
     categories: CRUD,
+    'menu-categories': CRUD,
+    'menu-allergens': CRUD,
+    'menu-tags': CRUD,
+    'menu-items': CRUD,
+    menus: CRUD,
     'field-showcase': CRUD,
     'field-showcase-global': READ_UPDATE,
     header: READ_UPDATE,
@@ -56,6 +61,11 @@ const VIEWER: ProfileSpec = {
     posts: READ,
     media: READ,
     categories: READ,
+    'menu-categories': READ,
+    'menu-allergens': READ,
+    'menu-tags': READ,
+    'menu-items': READ,
+    menus: READ,
     'field-showcase': READ,
     'field-showcase-global': READ,
     header: READ,

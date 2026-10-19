@@ -20,6 +20,12 @@ export const auditedCollections: CollectionSlug[] = [
   'forms',
   'redirects',
   'users',
+  // the restaurant menu: catalog and menus
+  'menu-categories',
+  'menu-allergens',
+  'menu-tags',
+  'menu-items',
+  'menus',
 ]
 
 // deliberately not audited

@@ -5,12 +5,15 @@ import { formatSlugHook } from './formatSlug'
 type Overrides = {
   slugOverrides?: Partial<TextField>
   checkboxOverrides?: Partial<CheckboxField>
+  // false: never prefix the slug with the doc's blog `categories` slug (collections whose own
+  // `category` field points elsewhere, e.g. menu items)
+  categoryPrefix?: boolean
 }
 
 type Slug = (fieldToUse?: string, overrides?: Overrides) => [TextField, CheckboxField]
 
 export const slugField: Slug = (fieldToUse = 'title', overrides = {}) => {
-  const { slugOverrides, checkboxOverrides } = overrides
+  const { slugOverrides, checkboxOverrides, categoryPrefix = true } = overrides
 
   const checkBoxField: CheckboxField = {
     name: 'slugLock',
@@ -32,7 +35,7 @@ export const slugField: Slug = (fieldToUse = 'title', overrides = {}) => {
     ...(slugOverrides || {}),
     hooks: {
       // Kept this in for hook or API based updates
-      beforeValidate: [formatSlugHook(fieldToUse)],
+      beforeValidate: [formatSlugHook(fieldToUse, { categoryPrefix })],
     },
     admin: {
       position: 'sidebar',

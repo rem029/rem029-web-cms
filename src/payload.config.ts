@@ -21,6 +21,11 @@ import { getServerSideURL } from './utilities/getURL'
 import { Theme } from './collections/Theme'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { Settings } from './collections/Settings'
+import { MenuAllergens } from './collections/MenuAllergens'
+import { MenuCategories } from './collections/MenuCategories'
+import { MenuItems } from './collections/MenuItems'
+import { Menus } from './collections/Menus'
+import { MenuTags } from './collections/MenuTags'
 
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
 import { Analytics } from './collections/Analytics'
@@ -125,6 +130,11 @@ export default buildConfig({
     Footer,
     Theme,
     Settings,
+    MenuCategories,
+    MenuAllergens,
+    MenuTags,
+    MenuItems,
+    Menus,
     AuditLogs,
     FieldShowcase,
   ],

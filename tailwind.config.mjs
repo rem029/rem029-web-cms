@@ -89,6 +89,17 @@ const config = {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
         },
+        // the menu pages' colours (src/app/(frontend)/menu/menu.css): the tenant theme's full
+        // colours, overridable per menu
+        menu: {
+          bg: 'var(--menu-bg)',
+          text: 'var(--menu-text)',
+          muted: 'var(--menu-muted)',
+          card: 'var(--menu-card)',
+          border: 'var(--menu-border)',
+          primary: 'var(--menu-primary)',
+          'primary-text': 'var(--menu-primary-text)',
+        },
         success: 'hsl(var(--success))',
         error: 'hsl(var(--error))',
         warning: 'hsl(var(--warning))',

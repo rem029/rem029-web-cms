@@ -31,6 +31,9 @@ import * as migration_20261015_193545_audit_logs_login_failed from './20261015_1
 import * as migration_20261017_170736_field_showcase from './20261017_170736_field_showcase';
 import * as migration_20261017_222951_field_showcase_sidebar from './20261017_222951_field_showcase_sidebar';
 import * as migration_20261017_225947_showcase_global from './20261017_225947_showcase_global';
+import * as migration_20261018_215217_restaurant_menu from './20261018_215217_restaurant_menu';
+import * as migration_20261019_115508_menu_links from './20261019_115508_menu_links';
+import * as migration_20261019_123104_menu_custom_css from './20261019_123104_menu_custom_css';
 
 export const migrations = [
   {
@@ -196,6 +199,21 @@ export const migrations = [
   {
     up: migration_20261017_225947_showcase_global.up,
     down: migration_20261017_225947_showcase_global.down,
-    name: '20261017_225947_showcase_global'
+    name: '20261017_225947_showcase_global',
+  },
+  {
+    up: migration_20261018_215217_restaurant_menu.up,
+    down: migration_20261018_215217_restaurant_menu.down,
+    name: '20261018_215217_restaurant_menu',
+  },
+  {
+    up: migration_20261019_115508_menu_links.up,
+    down: migration_20261019_115508_menu_links.down,
+    name: '20261019_115508_menu_links',
+  },
+  {
+    up: migration_20261019_123104_menu_custom_css.up,
+    down: migration_20261019_123104_menu_custom_css.down,
+    name: '20261019_123104_menu_custom_css'
   },
 ];

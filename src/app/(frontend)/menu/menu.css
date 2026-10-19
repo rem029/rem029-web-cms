@@ -1,0 +1,32 @@
+/*
+ * The menu pages' colours (rem0017 phase 3). Tenant themes set --background, --foreground,
+ * --primary and --primary-foreground as full colours (hex), while Tailwind's `bg-primary` etc.
+ * expect HSL triplets, so the menu reads the theme's colours through its own tokens (Tailwind
+ * `menu-*`). A menu's own colours (menuColorVars) set the four base tokens inline on the same
+ * element, so the derived ones (card, muted, border) follow them.
+ */
+.menu-theme {
+  --menu-bg: var(--background);
+  --menu-text: var(--foreground);
+  --menu-primary: var(--primary);
+  --menu-primary-text: var(--primary-foreground);
+  --menu-card: color-mix(in srgb, var(--menu-text) 5%, var(--menu-bg));
+  /* secondary text: close to the text colour, since themes already ship soft body text (#5d5d5d
+     on cream is 6.4:1); 90% keeps it AA on the seeded themes (about 5:1 on the page, 4.6:1 on
+     cards; 88% gave 4.47:1 on cards) */
+  --menu-muted: color-mix(in srgb, var(--menu-text) 90%, var(--menu-bg));
+  --menu-border: color-mix(in srgb, var(--menu-text) 15%, var(--menu-bg));
+  background: var(--menu-bg);
+  color: var(--menu-text);
+}
+
+/*
+ * The carousel's dots in the menu's colours. Tenant theme css (src/utilities/defaults.ts) colours
+ * `.swiper-pagination-bullet(-active)` for the site's Carousel block; scoped here so it wins.
+ */
+.menu-theme .swiper-pagination-bullet {
+  background-color: var(--menu-text);
+}
+.menu-theme .swiper-pagination-bullet-active {
+  background-color: var(--menu-primary);
+}

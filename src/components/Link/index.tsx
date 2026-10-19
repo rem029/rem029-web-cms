@@ -1,7 +1,7 @@
 'use client'
 
 import { type ButtonProps } from '@/components/ui/button'
-import { Post, Page } from '@/payload-types'
+import { Menu, Page, Post } from '@/payload-types'
 import Link from 'next/link'
 import { useRouter } from 'next/compat/router'
 
@@ -14,11 +14,11 @@ type CMSLinkType = {
   label?: string | null
   newTab?: boolean | null
   reference?: {
-    relationTo: 'pages' | 'posts'
-    value: Page | Post | string | number
+    relationTo: 'pages' | 'posts' | 'menus'
+    value: Page | Post | Menu | string | number
   } | null
   size?: ButtonProps['size'] | null
-  type?: 'custom' | 'reference' | 'group' | null
+  type?: 'custom' | 'reference' | 'group' | 'menus' | null
   url?: string | null
   onClick?: () => void
 }
@@ -33,7 +33,18 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
   if (type === 'reference' && reference) {
     if (reference.relationTo === 'pages') {
       href = `/${(reference.value as Page).slug}`
+    } else if (reference.relationTo === 'menus') {
+      if (
+        typeof reference.value === 'object' &&
+        reference.value !== null &&
+        'slug' in reference.value &&
+        typeof reference.value.slug === 'string'
+      ) {
+        href = `/menu/${reference.value.slug}`
+      }
     }
+  } else if (type === 'menus') {
+    href = '/menu'
   } else if (url) {
     // For custom links, use the URL directly
     href = url

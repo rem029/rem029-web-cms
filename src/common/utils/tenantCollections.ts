@@ -10,6 +10,11 @@ export const tenantScopedCollections: CollectionSlug[] = [
   'forms',
   'form-submissions',
   'search',
+  'menu-categories',
+  'menu-allergens',
+  'menu-tags',
+  'menu-items',
+  'menus',
   'field-showcase',
 ]
 

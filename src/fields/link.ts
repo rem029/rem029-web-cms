@@ -1,7 +1,7 @@
 import type { Field, GroupField } from 'payload'
 
+import { extractTenantId } from '@/common/utils/tenantCollections'
 import deepMerge from '@/utilities/deepMerge'
-import { off } from 'process'
 
 export type LinkAppearances = 'default' | 'outline'
 
@@ -56,6 +56,11 @@ export const link: LinkType = ({
                 label: 'Custom URL',
                 value: 'custom',
               },
+              // the business's list of menus, `/menu` (rem0017)
+              {
+                label: 'Our menus',
+                value: 'menus',
+              },
               ...(enableGrouping
                 ? [
                     {
@@ -91,7 +96,14 @@ export const link: LinkType = ({
         width: '50%',
       },
       label: 'Document to link to',
-      relationTo: ['pages', 'posts'],
+      // a menu opens at /menu/<slug> (rem0017); only menus of the doc's own business: the
+      // multi-tenant plugin adds no tenant filter to a relationship to several collections
+      relationTo: ['pages', 'posts', 'menus'],
+      filterOptions: ({ relationTo, data }) => {
+        if (relationTo !== 'menus') return true
+        const tenantId = extractTenantId(data?.tenant)
+        return tenantId !== null ? { tenant: { equals: tenantId } } : false
+      },
       required: true,
     },
     {

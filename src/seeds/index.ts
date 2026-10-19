@@ -15,6 +15,7 @@ import { seedDefaultAdmin } from './defaultAdmin'
 import { seedFieldShowcase } from './fieldShowcase'
 import { seedHiddenDocuments } from './hiddenDocuments'
 import { seedInactiveTenants } from './inactiveTenants'
+import { seedMenu } from './menu'
 import { seedMultiTenancy } from './multiTenancy'
 
 if (process.env.NODE_ENV === 'production') {
@@ -29,6 +30,7 @@ const seeds = [
   { name: 'tenantAccess', run: seedTenantAccess },
   { name: 'inactiveTenants', run: seedInactiveTenants },
   { name: 'hiddenDocuments', run: seedHiddenDocuments },
+  { name: 'menu', run: seedMenu },
   { name: 'fieldShowcase', run: seedFieldShowcase },
 ]
 

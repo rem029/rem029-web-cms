@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import type { TypedLocale } from 'payload'
 
-import type { Media, Page, Post, Config } from '../payload-types'
+import type { Media, Menu, Page, Post, Config } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 import { getTenantDoc } from '@/common/utils/getTenantDoc'
@@ -24,7 +24,7 @@ const getImageURL = async (image?: Media | Config['db']['defaultIDType'] | null)
 }
 
 export const generateMeta = async (args: {
-  doc: Partial<Page> | Partial<Post> | null
+  doc: Partial<Page> | Partial<Post> | Partial<Menu> | null
 }): Promise<Metadata> => {
   const { doc } = args
   const tenantId = await getFrontendTenantId()
