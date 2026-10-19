@@ -35,6 +35,8 @@ vi.mock('@payloadcms/ui', () => ({
   useLocale: () => ({ code: 'en' }),
 }))
 
+const OFFLINE = "Couldn't reach the server. Check your connection and try again."
+
 /** What the builder wrote to the form's `items` field. */
 const itemsSetTo = (ids: number[]) => ({ type: 'UPDATE', path: 'items', value: ids })
 
@@ -176,6 +178,32 @@ describe('MenuBuilder', () => {
 
     // assert
     expect(await screen.findByText('You can only edit items of this business.')).toBeTruthy()
+    expect(stock).toHaveProperty('checked', true)
+  })
+
+  it('shows an error when the items fail to load', async () => {
+    // arrange: the items action rejects (the request never got an answer)
+    actions.listBuilderItemsAction.mockRejectedValue(new Error('Failed to fetch'))
+
+    // act
+    render(<MenuBuilder />)
+
+    // assert
+    expect(await screen.findByText(OFFLINE)).toBeTruthy()
+  })
+
+  it('shows an error when a quick edit fails to send', async () => {
+    // arrange
+    listItems([a])
+    actions.quickUpdateItemAction.mockRejectedValue(new Error('Failed to fetch'))
+    render(<MenuBuilder />)
+    const stock = await screen.findByRole('checkbox', { name: 'In stock: Soup' })
+
+    // act
+    fireEvent.click(stock)
+
+    // assert
+    expect(await screen.findByText(OFFLINE)).toBeTruthy()
     expect(stock).toHaveProperty('checked', true)
   })
 })

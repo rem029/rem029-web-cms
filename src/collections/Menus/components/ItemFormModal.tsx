@@ -16,7 +16,15 @@ import {
   saveItemAction,
   uploadItemImageAction,
 } from './actions'
-import type { BuilderCategory, BuilderItem, BuilderLookup, ItemFormData } from './builderTypes'
+import {
+  IMAGE_TOO_BIG,
+  MAX_IMAGE_BYTES,
+  type BuilderCategory,
+  type BuilderItem,
+  type BuilderLookup,
+  type ItemFormData,
+} from './builderTypes'
+import { callAction } from './callAction'
 import { ModifierGroupsEditor } from './ModifierGroupsEditor'
 
 export type ItemFormModalProps = {
@@ -134,13 +142,13 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = (props) => {
 
   useEffect(() => {
     let current = true
-    void listLookupsAction({ tenantId, locale }).then((result) => {
+    void callAction(() => listLookupsAction({ tenantId, locale })).then((result) => {
       if (!current || !result.ok) return
       setAllergens(result.allergens)
       setTags(result.tags)
     })
     if (itemId !== 'new') {
-      void getItemFormAction({ tenantId, locale, itemId }).then((result) => {
+      void callAction(() => getItemFormAction({ tenantId, locale, itemId })).then((result) => {
         if (!current) return
         if (!result.ok) {
           setError(result.error)
@@ -159,11 +167,16 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = (props) => {
     setData((current) => (current ? { ...current, ...patch } : current))
 
   const upload = async (file: File) => {
+    // checked here too: a bigger file would only fail on the way, without the reason
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError(IMAGE_TOO_BIG)
+      return
+    }
     const form = new FormData()
     form.set('file', file)
     form.set('tenantId', String(tenantId))
     setBusy(true)
-    const result = await uploadItemImageAction(form)
+    const result = await callAction(() => uploadItemImageAction(form))
     setBusy(false)
     if (!result.ok) {
       setError(result.error)
@@ -177,12 +190,9 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = (props) => {
   const save = async () => {
     if (!data) return
     setBusy(true)
-    const result = await saveItemAction({
-      tenantId,
-      locale,
-      ...(itemId === 'new' ? {} : { itemId }),
-      data,
-    })
+    const result = await callAction(() =>
+      saveItemAction({ tenantId, locale, ...(itemId === 'new' ? {} : { itemId }), data }),
+    )
     setBusy(false)
     if (!result.ok) {
       setError(result.error)

@@ -19,6 +19,7 @@ import {
   saveCategoryAction,
 } from './actions'
 import type { BuilderCategory, BuilderItem, QuickItemUpdate } from './builderTypes'
+import { callAction } from './callAction'
 import { CategoriesPanel } from './CategoriesPanel'
 import { ItemFormModal } from './ItemFormModal'
 import { ItemsPanel, type RowStatus } from './ItemsPanel'
@@ -99,12 +100,14 @@ export const MenuBuilder: React.FC = () => {
     if (tenantId === null) return
     let current = true
     const load = async () => {
-      const result = await listBuilderItemsAction({
-        tenantId,
-        locale,
-        search,
-        categoryId: categoryFilter,
-      })
+      const result = await callAction(() =>
+        listBuilderItemsAction({
+          tenantId,
+          locale,
+          search,
+          categoryId: categoryFilter,
+        }),
+      )
       if (!current) return
       setLoaded(true)
       if (!result.ok) {
@@ -124,7 +127,7 @@ export const MenuBuilder: React.FC = () => {
 
   const loadCategories = useCallback(async () => {
     if (tenantId === null) return
-    const result = await listBuilderCategoriesAction({ tenantId, locale })
+    const result = await callAction(() => listBuilderCategoriesAction({ tenantId, locale }))
     if (!result.ok) {
       setCategoryError(result.error)
       return
@@ -150,7 +153,9 @@ export const MenuBuilder: React.FC = () => {
   }
 
   const addAll = async (categoryId: number) => {
-    const result = await listItemsOfCategoryAction({ tenantId, locale, categoryId })
+    const result = await callAction(() =>
+      listItemsOfCategoryAction({ tenantId, locale, categoryId }),
+    )
     if (!result.ok) {
       setCategoryError(result.error)
       return
@@ -159,7 +164,7 @@ export const MenuBuilder: React.FC = () => {
   }
 
   const quickUpdate = async (itemId: number, data: QuickItemUpdate) => {
-    const result = await quickUpdateItemAction({ tenantId, locale, itemId, data })
+    const result = await callAction(() => quickUpdateItemAction({ tenantId, locale, itemId, data }))
     if (!result.ok) {
       setRowStatus((status) => ({ ...status, [itemId]: { error: result.error } }))
       return
@@ -186,7 +191,7 @@ export const MenuBuilder: React.FC = () => {
   }
 
   const createCategory = async (title: string) => {
-    const result = await saveCategoryAction({ tenantId, locale, data: { title } })
+    const result = await callAction(() => saveCategoryAction({ tenantId, locale, data: { title } }))
     if (!result.ok) {
       setCategoryError(result.error)
       return
@@ -196,7 +201,9 @@ export const MenuBuilder: React.FC = () => {
   }
 
   const renameCategory = async (categoryId: number, title: string) => {
-    const result = await saveCategoryAction({ tenantId, locale, categoryId, data: { title } })
+    const result = await callAction(() =>
+      saveCategoryAction({ tenantId, locale, categoryId, data: { title } }),
+    )
     if (!result.ok) {
       setCategoryError(result.error)
       return
@@ -215,11 +222,13 @@ export const MenuBuilder: React.FC = () => {
     )
     if (!next) return
     setCategories(next)
-    const result = await reorderCategoriesAction({
-      tenantId,
-      locale,
-      ids: next.map((category) => category.id),
-    })
+    const result = await callAction(() =>
+      reorderCategoriesAction({
+        tenantId,
+        locale,
+        ids: next.map((category) => category.id),
+      }),
+    )
     if (!result.ok) {
       setCategoryError(result.error)
       void loadCategories()

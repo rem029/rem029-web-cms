@@ -1,8 +1,13 @@
 /**
  * Shapes the menu builder passes between its server functions (`../utils/builder.ts`), the server
- * actions (`./actions.ts`) and the client panels. Types only: no `payload` import, client-safe.
+ * actions (`./actions.ts`) and the client panels, and the limits both sides check. No `payload`
+ * import: client-safe.
  */
 import type { Availability } from '@/common/fields/menuFields'
+
+/** The largest item photo, checked in the item form and again on the server. */
+export const MAX_IMAGE_BYTES = 10 * 1024 * 1024
+export const IMAGE_TOO_BIG = 'The image is too big. Pick one under 10 MB.'
 
 /** A refused or failed builder call, with what went wrong in plain words. */
 export type BuilderRefusal = { ok: false; error: string }

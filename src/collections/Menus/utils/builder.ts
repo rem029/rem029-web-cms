@@ -33,13 +33,12 @@ import type {
   ItemFormData,
   QuickItemUpdate,
 } from '../components/builderTypes'
+import { IMAGE_TOO_BIG, MAX_IMAGE_BYTES } from '../components/builderTypes'
 
 type Locale = 'en' | 'ar'
 
 /** Passed to every write; scripts and tests outside Next.js set `disableRevalidate`. */
 export type BuilderOptions = { context?: RequestContext }
-
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024
 
 const NOT_ALLOWED_ITEMS = "You don't have permission to edit items. Ask your admin."
 const NOT_ALLOWED_CATEGORIES = "You don't have permission to edit categories. Ask your admin."
@@ -613,13 +612,7 @@ export const uploadItemImage = async (
     return refuse(payload, user, 'uploadItemImage', scope, 'Pick an image file (JPG, PNG or WebP).')
   }
   if (file.size > MAX_IMAGE_BYTES) {
-    return refuse(
-      payload,
-      user,
-      'uploadItemImage',
-      scope,
-      'The image is too big. Pick one under 10 MB.',
-    )
+    return refuse(payload, user, 'uploadItemImage', scope, IMAGE_TOO_BIG)
   }
 
   try {

@@ -157,4 +157,41 @@ describe('PublicURL', () => {
     expect(await screen.findByText('Give the menu a title and save it.')).toBeTruthy()
     expect(screen.queryByRole('button', { name: 'Copy' })).toBeNull()
   })
+
+  it('shows an error when the address fails to load', async () => {
+    // arrange: id 7, the action rejects (the request never got an answer)
+    docInfo.id = 7
+    docInfo.savedDocumentData = { updatedAt: 'a' }
+    actions.getMenuPublicURLAction.mockRejectedValue(new Error('Failed to fetch'))
+
+    // act: render
+    render(<PublicURL />)
+
+    // assert: the connection error shown
+    expect(
+      await screen.findByText("Couldn't reach the server. Check your connection and try again."),
+    ).toBeTruthy()
+  })
+
+  it('says how to copy by hand when the clipboard fails', async () => {
+    // arrange: id 7, a url, navigator.clipboard.writeText rejects (no permission, plain http)
+    docInfo.id = 7
+    docInfo.savedDocumentData = { updatedAt: 'a' }
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: vi.fn().mockRejectedValue(new Error('NotAllowedError')) },
+      configurable: true,
+    })
+    actions.getMenuPublicURLAction.mockResolvedValue({
+      ok: true,
+      url: 'https://a.example.com/menu/corniche',
+    })
+
+    // act: click Copy
+    render(<PublicURL />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Copy' }))
+
+    // assert: the hint shown, the button not "Copied"
+    expect(await screen.findByText("Couldn't copy. Select the address and copy it.")).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Copied' })).toBeNull()
+  })
 })

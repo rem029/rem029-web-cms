@@ -24,7 +24,13 @@ describe('CMSLink to a menu', () => {
 
   it('links a menu to its menu page', () => {
     // arrange: type 'reference', reference { relationTo: 'menus', value: { slug: 'corniche' } }
-    const menu = { slug: 'corniche' } as unknown as Menu
+    const menu: Menu = {
+      id: 1,
+      title: 'Corniche',
+      slug: 'corniche',
+      updatedAt: '2026-10-19T00:00:00.000Z',
+      createdAt: '2026-10-19T00:00:00.000Z',
+    }
 
     // act: render <CMSLink label="Our menu" … />
     render(
@@ -44,11 +50,7 @@ describe('CMSLink to a menu', () => {
     // arrange: reference { relationTo: 'menus', value: 12 } (not populated: unpublished menu)
     // act: render
     render(
-      <CMSLink
-        type="reference"
-        label="Our menu"
-        reference={{ relationTo: 'menus', value: 12 }}
-      />,
+      <CMSLink type="reference" label="Our menu" reference={{ relationTo: 'menus', value: 12 }} />,
     )
     const link = screen.getByText('Our menu').closest('a')
 
