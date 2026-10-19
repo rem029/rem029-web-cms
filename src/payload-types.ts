@@ -592,7 +592,7 @@ export interface CallToActionBlock {
   links?:
     | {
         link: {
-          type?: ('reference' | 'custom') | null;
+          type?: ('reference' | 'custom' | 'menus') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -602,6 +602,10 @@ export interface CallToActionBlock {
             | ({
                 relationTo: 'posts';
                 value: number | Post;
+              } | null)
+            | ({
+                relationTo: 'menus';
+                value: number | Menu;
               } | null);
           url?: string | null;
           items?:
@@ -705,6 +709,175 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menus".
+ */
+export interface Menu {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  title: string;
+  items?: (number | MenuItem)[] | null;
+  header?: {
+    /**
+     * The big title at the top. Leave empty to use the menu title.
+     */
+    title?: string | null;
+    /**
+     * Leave empty to use the logo from Settings.
+     */
+    logo?: (number | null) | Media;
+    showLanguageSwitch?: boolean | null;
+  };
+  /**
+   * Optional photos shown under the header. Leave empty for no carousel.
+   */
+  carousel?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  intro?: {
+    heading?: string | null;
+    subheading?: string | null;
+  };
+  filters?: {
+    showSearch?: boolean | null;
+    showAllergens?: boolean | null;
+    showAvailability?: boolean | null;
+  };
+  /**
+   * Leave empty to use your site's theme. Set them to give this menu its own look.
+   */
+  colors?: {
+    primary?: string | null;
+    background?: string | null;
+    card?: string | null;
+    text?: string | null;
+  };
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  slug?: string | null;
+  slugLock?: boolean | null;
+  isHidden?: boolean | null;
+  /**
+   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
+   */
+  visibleTo?: (number | User)[] | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu-items".
+ */
+export interface MenuItem {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  title: string;
+  /**
+   * In the currency set in Settings.
+   */
+  price: number;
+  /**
+   * Items without a category show under "Other".
+   */
+  category?: (number | null) | MenuCategory;
+  description?: string | null;
+  image?: (number | null) | Media;
+  allergens?: (number | MenuAllergen)[] | null;
+  tags?: (number | MenuTag)[] | null;
+  /**
+   * Guests can filter the menu by these when the menu shows the availability filter.
+   */
+  availability?: ('breakfast' | 'lunch' | 'dinner' | 'all_day')[] | null;
+  /**
+   * Choices guests see on the item, e.g. Size (Small, Large) or Milk (Oat, Soy).
+   */
+  modifierGroups?:
+    | {
+        name: string;
+        inputType: 'checkbox' | 'radio';
+        required?: boolean | null;
+        options: {
+          label: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+      }[]
+    | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  /**
+   * Out of stock items stay on the menu, marked as unavailable.
+   */
+  inStock?: boolean | null;
+  /**
+   * Untick to hide this item from every menu without deleting it.
+   */
+  isActive?: boolean | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu-categories".
+ */
+export interface MenuCategory {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  /**
+   * Lower numbers come first on the menu.
+   */
+  sortOrder?: number | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu-allergens".
+ */
+export interface MenuAllergen {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  title: string;
+  description?: string | null;
+  image?: (number | null) | Media;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu-tags".
+ */
+export interface MenuTag {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  title: string;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ContentBlock".
  */
 export interface ContentBlock {
@@ -728,7 +901,7 @@ export interface ContentBlock {
         } | null;
         enableLink?: boolean | null;
         link?: {
-          type?: ('reference' | 'custom') | null;
+          type?: ('reference' | 'custom' | 'menus') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -738,6 +911,10 @@ export interface ContentBlock {
             | ({
                 relationTo: 'posts';
                 value: number | Post;
+              } | null)
+            | ({
+                relationTo: 'menus';
+                value: number | Menu;
               } | null);
           url?: string | null;
           items?:
@@ -1450,7 +1627,7 @@ export interface Header {
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'custom' | 'group') | null;
+          type?: ('reference' | 'custom' | 'menus' | 'group') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -1460,6 +1637,10 @@ export interface Header {
             | ({
                 relationTo: 'posts';
                 value: number | Post;
+              } | null)
+            | ({
+                relationTo: 'menus';
+                value: number | Menu;
               } | null);
           url?: string | null;
           items?:
@@ -1497,7 +1678,7 @@ export interface Footer {
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'custom' | 'group') | null;
+          type?: ('reference' | 'custom' | 'menus' | 'group') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -1507,6 +1688,10 @@ export interface Footer {
             | ({
                 relationTo: 'posts';
                 value: number | Post;
+              } | null)
+            | ({
+                relationTo: 'menus';
+                value: number | Menu;
               } | null);
           url?: string | null;
           items?:
@@ -1627,175 +1812,6 @@ export interface Setting {
   updatedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "menu-categories".
- */
-export interface MenuCategory {
-  id: number;
-  tenant?: (number | null) | Tenant;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  /**
-   * Lower numbers come first on the menu.
-   */
-  sortOrder?: number | null;
-  createdBy?: (number | null) | User;
-  updatedBy?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "menu-allergens".
- */
-export interface MenuAllergen {
-  id: number;
-  tenant?: (number | null) | Tenant;
-  title: string;
-  description?: string | null;
-  image?: (number | null) | Media;
-  createdBy?: (number | null) | User;
-  updatedBy?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "menu-tags".
- */
-export interface MenuTag {
-  id: number;
-  tenant?: (number | null) | Tenant;
-  title: string;
-  createdBy?: (number | null) | User;
-  updatedBy?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "menu-items".
- */
-export interface MenuItem {
-  id: number;
-  tenant?: (number | null) | Tenant;
-  title: string;
-  /**
-   * In the currency set in Settings.
-   */
-  price: number;
-  /**
-   * Items without a category show under "Other".
-   */
-  category?: (number | null) | MenuCategory;
-  description?: string | null;
-  image?: (number | null) | Media;
-  allergens?: (number | MenuAllergen)[] | null;
-  tags?: (number | MenuTag)[] | null;
-  /**
-   * Guests can filter the menu by these when the menu shows the availability filter.
-   */
-  availability?: ('breakfast' | 'lunch' | 'dinner' | 'all_day')[] | null;
-  /**
-   * Choices guests see on the item, e.g. Size (Small, Large) or Milk (Oat, Soy).
-   */
-  modifierGroups?:
-    | {
-        name: string;
-        inputType: 'checkbox' | 'radio';
-        required?: boolean | null;
-        options: {
-          label: string;
-          id?: string | null;
-        }[];
-        id?: string | null;
-      }[]
-    | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  /**
-   * Out of stock items stay on the menu, marked as unavailable.
-   */
-  inStock?: boolean | null;
-  /**
-   * Untick to hide this item from every menu without deleting it.
-   */
-  isActive?: boolean | null;
-  createdBy?: (number | null) | User;
-  updatedBy?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "menus".
- */
-export interface Menu {
-  id: number;
-  tenant?: (number | null) | Tenant;
-  title: string;
-  items?: (number | MenuItem)[] | null;
-  header?: {
-    /**
-     * The big title at the top. Leave empty to use the menu title.
-     */
-    title?: string | null;
-    /**
-     * Leave empty to use the logo from Settings.
-     */
-    logo?: (number | null) | Media;
-    showLanguageSwitch?: boolean | null;
-  };
-  /**
-   * Optional photos shown under the header. Leave empty for no carousel.
-   */
-  carousel?:
-    | {
-        image: number | Media;
-        id?: string | null;
-      }[]
-    | null;
-  intro?: {
-    heading?: string | null;
-    subheading?: string | null;
-  };
-  filters?: {
-    showSearch?: boolean | null;
-    showAllergens?: boolean | null;
-    showAvailability?: boolean | null;
-  };
-  /**
-   * Leave empty to use your site's theme. Set them to give this menu its own look.
-   */
-  colors?: {
-    primary?: string | null;
-    background?: string | null;
-    card?: string | null;
-    text?: string | null;
-  };
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    description?: string | null;
-  };
-  slug?: string | null;
-  slugLock?: boolean | null;
-  isHidden?: boolean | null;
-  /**
-   * Who else can see this: click the box to pick people. You, tenant admins and super users always can.
-   */
-  visibleTo?: (number | User)[] | null;
-  createdBy?: (number | null) | User;
-  updatedBy?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

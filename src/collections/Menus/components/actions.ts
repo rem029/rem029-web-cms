@@ -22,6 +22,7 @@ import {
   saveItem,
   uploadItemImage,
 } from '../utils/builder'
+import { getMenuPublicURL } from '../utils/publicURL'
 
 type Args<F extends (...args: never[]) => unknown> = Parameters<F>[2]
 type Result<F extends (...args: never[]) => unknown> = Awaited<ReturnType<F>>
@@ -105,3 +106,8 @@ export const uploadItemImageAction = async (
     }),
   )
 }
+
+export const getMenuPublicURLAction = async (
+  args: Args<typeof getMenuPublicURL>,
+): Promise<Result<typeof getMenuPublicURL>> =>
+  signedIn((payload, user) => getMenuPublicURL(payload, user, args))

@@ -29,6 +29,7 @@ import { HomepageNotice as HomepageNotice_a591d5178c11f3a0f9b5a43c2b241599 } fro
 import { PriceCell as PriceCell_be512c21be1eb48a52eff84f026c17a3 } from '@/collections/MenuItems/components/PriceCell'
 import { OptionGroupRowLabel as OptionGroupRowLabel_d3e67d512bb85b3510c88a1e35d35607 } from '@/collections/MenuItems/components/OptionGroupRowLabel'
 import { YesNoCell as YesNoCell_c28151462987b3ff419b0dfcbd1b0fe9 } from '@/collections/MenuItems/components/YesNoCell'
+import { PublicURL as PublicURL_675edd152e0d0f60c9543834e508cc9d } from '@/collections/Menus/components/PublicURL'
 import { MenuBuilder as MenuBuilder_41b5687db8722a79c5ad98e00176daa7 } from '@/collections/Menus/components/MenuBuilder'
 import { ShowcaseBanner as ShowcaseBanner_ff3381454f74bb637fe497e0c393f186 } from '@/common/components/ShowcaseBanner/ShowcaseBanner'
 import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
@@ -87,6 +88,7 @@ export const importMap = {
   "@/collections/MenuItems/components/PriceCell#PriceCell": PriceCell_be512c21be1eb48a52eff84f026c17a3,
   "@/collections/MenuItems/components/OptionGroupRowLabel#OptionGroupRowLabel": OptionGroupRowLabel_d3e67d512bb85b3510c88a1e35d35607,
   "@/collections/MenuItems/components/YesNoCell#YesNoCell": YesNoCell_c28151462987b3ff419b0dfcbd1b0fe9,
+  "@/collections/Menus/components/PublicURL#PublicURL": PublicURL_675edd152e0d0f60c9543834e508cc9d,
   "@/collections/Menus/components/MenuBuilder#MenuBuilder": MenuBuilder_41b5687db8722a79c5ad98e00176daa7,
   "@/common/components/ShowcaseBanner/ShowcaseBanner#ShowcaseBanner": ShowcaseBanner_ff3381454f74bb637fe497e0c393f186,
   "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,

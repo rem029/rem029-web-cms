@@ -413,28 +413,34 @@ type MenuSpec = {
   filters?: { showSearch: boolean; showAllergens: boolean; showAvailability: boolean }
 }
 
+// in real use a menu is a restaurant (outlet) or an event, not a meal period: breakfast, lunch
+// and dinner are when an item is served, inside a menu (rem0017 phase 3 step 5)
 const MENUS: MenuSpec[] = [
   {
-    slug: 'all-day',
-    title: { en: 'All day', ar: 'طوال اليوم' },
-    subheading: { en: 'Everything we serve, all day long.', ar: 'كل ما نقدمه، طوال اليوم.' },
+    slug: 'corniche-branch',
+    title: { en: 'Corniche branch', ar: 'فرع الكورنيش' },
+    subheading: {
+      en: 'Our full menu, from breakfast to dinner.',
+      ar: 'قائمتنا الكاملة، من الفطور إلى العشاء.',
+    },
     status: 'published',
     items: () => true,
-  },
-  {
-    slug: 'breakfast',
-    title: { en: 'Breakfast', ar: 'الفطور' },
-    subheading: { en: 'Served until 11:30.', ar: 'يقدم حتى الساعة 11:30 صباحًا.' },
-    status: 'published',
-    items: (item) => item.category === 'breakfast' || item.category === 'drinks',
     filters: { showSearch: true, showAllergens: true, showAvailability: true },
   },
   {
-    slug: 'drinks',
-    title: { en: 'Drinks', ar: 'المشروبات' },
-    subheading: { en: 'Hot and cold drinks.', ar: 'مشروبات ساخنة وباردة.' },
+    slug: 'ramadan-iftar',
+    title: { en: 'Ramadan iftar', ar: 'إفطار رمضان' },
+    subheading: { en: 'Served at sunset.', ar: 'يقدم عند غروب الشمس.' },
+    status: 'published',
+    items: (item) => item.category !== 'breakfast',
+    filters: { showSearch: true, showAllergens: true, showAvailability: false },
+  },
+  {
+    slug: 'garden-wedding',
+    title: { en: 'Garden wedding', ar: 'حفل زفاف في الحديقة' },
+    subheading: { en: 'Desserts and drinks for the evening.', ar: 'حلويات ومشروبات للأمسية.' },
     status: 'draft',
-    items: (item) => item.category === 'drinks',
+    items: (item) => item.category === 'desserts' || item.category === 'drinks',
   },
 ]
 

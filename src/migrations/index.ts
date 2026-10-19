@@ -32,6 +32,7 @@ import * as migration_20261017_170736_field_showcase from './20261017_170736_fie
 import * as migration_20261017_222951_field_showcase_sidebar from './20261017_222951_field_showcase_sidebar';
 import * as migration_20261017_225947_showcase_global from './20261017_225947_showcase_global';
 import * as migration_20261018_215217_restaurant_menu from './20261018_215217_restaurant_menu';
+import * as migration_20261019_115508_menu_links from './20261019_115508_menu_links';
 
 export const migrations = [
   {
@@ -202,6 +203,11 @@ export const migrations = [
   {
     up: migration_20261018_215217_restaurant_menu.up,
     down: migration_20261018_215217_restaurant_menu.down,
-    name: '20261018_215217_restaurant_menu'
+    name: '20261018_215217_restaurant_menu',
+  },
+  {
+    up: migration_20261019_115508_menu_links.up,
+    down: migration_20261019_115508_menu_links.down,
+    name: '20261019_115508_menu_links'
   },
 ];

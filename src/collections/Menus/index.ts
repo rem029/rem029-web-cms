@@ -79,6 +79,14 @@ export const Menus: CollectionConfig<'menus'> = {
   fields: [
     hiddenBannerField,
     menuTitleField,
+    // in the main form, not the sidebar: editors need the address to share it (and for QR codes)
+    {
+      name: 'publicURL',
+      type: 'ui',
+      admin: {
+        components: { Field: '@/collections/Menus/components/PublicURL#PublicURL' },
+      },
+    },
     {
       type: 'tabs',
       tabs: [
