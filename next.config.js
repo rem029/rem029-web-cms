@@ -29,6 +29,11 @@ const nextConfig = {
   // next lint checks src/ by default; tests/ is linted like app code
   eslint: { dirs: ['src', 'tests'] },
   reactStrictMode: true,
+  // jsdom (pulled in by isomorphic-dompurify for the theme css/js) breaks when webpack bundles it:
+  // its modules import each other in a circle, and a change elsewhere in the chunk order made
+  // every frontend page fail with "Class extends value undefined" (rem0017). load it from
+  // node_modules instead, as Next recommends for jsdom
+  serverExternalPackages: ['isomorphic-dompurify', 'jsdom'],
   redirects,
   output: process.env.NODE_ENV && 'standalone',
 }

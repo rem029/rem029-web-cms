@@ -76,7 +76,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
     <dialog
       ref={ref}
       aria-label={t.search}
-      className="menu-theme m-0 h-dvh max-h-none w-full max-w-none overflow-y-auto bg-menu-bg p-0 text-menu-text"
+      className="menu-search menu-theme m-0 h-dvh max-h-none w-full max-w-none overflow-y-auto bg-menu-bg p-0 text-menu-text"
     >
       <div className="container py-4">
         <div className="flex items-center gap-2">
@@ -87,24 +87,28 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
             autoFocus
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            className="min-w-0 flex-1 rounded border border-menu-border bg-menu-card px-3 py-2 text-base text-menu-text placeholder:text-menu-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
+            className="menu-search-input min-w-0 flex-1 rounded border border-menu-border bg-menu-card px-3 py-2 text-base text-menu-text placeholder:text-menu-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
           />
           <button
             type="button"
             aria-label={t.close}
             onClick={close}
-            className="rounded-full p-2 hover:bg-menu-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
+            className="menu-btn menu-search-close rounded-full p-2 hover:bg-menu-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
           >
             <X className="size-5" aria-hidden />
           </button>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-2" aria-live="polite" aria-busy={loading}>
+        <div
+          className="menu-search-results mt-4 grid gap-3 md:grid-cols-2"
+          aria-live="polite"
+          aria-busy={loading}
+        >
           {loading &&
             Array.from({ length: SKELETONS }, (_, index) => <MenuItemCardSkeleton key={index} />)}
           {!loading && error && <p className="text-menu-muted">{error}</p>}
-          {!loading && !error && results?.length === 0 && (
-            <p className="text-menu-muted">{t.noResults}</p>
+          {!loading && !error && (results === null || results.length === 0) && (
+            <p className="menu-search-empty text-menu-muted">{t.noResults}</p>
           )}
           {!loading &&
             !error &&

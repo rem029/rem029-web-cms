@@ -20,7 +20,7 @@ export type MenuCarouselProps = {
 // slides are as wide as the page
 const SIZES = '100vw'
 
-const IMAGE_CLASS = 'aspect-[16/7] max-h-80 w-full object-cover'
+const IMAGE_CLASS = 'menu-carousel-image aspect-[16/7] max-h-80 w-full object-cover'
 const AUTOPLAY_DELAY = 5000
 
 /**
@@ -48,7 +48,7 @@ export const MenuCarousel: React.FC<MenuCarouselProps> = ({ images }) => {
         sizes={SIZES}
         alt={images[0]!.alt}
         fetchPriority="high"
-        className={IMAGE_CLASS}
+        className={`menu-carousel ${IMAGE_CLASS}`}
       />
     )
   }
@@ -60,10 +60,10 @@ export const MenuCarousel: React.FC<MenuCarouselProps> = ({ images }) => {
       pagination={{ clickable: true }}
       autoplay={{ delay: AUTOPLAY_DELAY, disableOnInteraction: true }}
       loop
-      className="w-full"
+      className="menu-carousel w-full"
     >
       {images.map((image, index) => (
-        <SwiperSlide key={`${image.url}-${index}`}>
+        <SwiperSlide key={`${image.url}-${index}`} className="menu-carousel-slide">
           {/* eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size */}
           <img
             src={image.url}

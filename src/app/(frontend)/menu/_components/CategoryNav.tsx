@@ -56,8 +56,11 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ sections, locale }) =>
   }
 
   return (
-    <nav aria-label={t.categories} className="min-w-0 flex-1">
-      <ul ref={listRef} className="flex gap-2 overflow-x-auto py-2 [scrollbar-width:none]">
+    <nav aria-label={t.categories} className="menu-category-nav min-w-0 flex-1">
+      <ul
+        ref={listRef}
+        className="menu-category-list flex gap-2 overflow-x-auto py-2 [scrollbar-width:none]"
+      >
         {sections.map((section) => {
           const id = sectionId(section)
           return (
@@ -67,6 +70,8 @@ export const CategoryNav: React.FC<CategoryNavProps> = ({ sections, locale }) =>
                 aria-current={id === active ? 'true' : undefined}
                 onClick={() => pick(id)}
                 className={cn(
+                  'menu-category-chip',
+                  id === active && 'is-active',
                   touchTarget,
                   'rounded-full border border-menu-border px-3 py-1.5 text-sm font-medium text-menu-text',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary',

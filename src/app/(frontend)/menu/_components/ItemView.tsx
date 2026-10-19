@@ -19,7 +19,7 @@ export type ItemViewProps = {
 
 const List: React.FC<{ title: string; values: string[] }> = ({ title, values }) =>
   values.length === 0 ? null : (
-    <section className="mt-4">
+    <section className="menu-item-view-list mt-4">
       <h3 className="text-sm font-semibold">{title}</h3>
       <ul className="mt-1 flex flex-wrap gap-1.5">
         {values.map((value) => (
@@ -51,28 +51,32 @@ export const ItemView: React.FC<ItemViewProps> = ({ item, currency, locale, onCl
       aria-labelledby="item-view-title"
       // a click on the backdrop lands on the dialog itself
       onClick={(event) => event.target === event.currentTarget && close()}
-      className="menu-theme m-0 mt-auto w-full max-w-none rounded-t-lg bg-menu-bg p-0 text-menu-text backdrop:bg-black/50 sm:m-auto sm:max-w-lg sm:rounded-lg"
+      className="menu-item-view menu-theme m-0 mt-auto w-full max-w-none rounded-t-lg bg-menu-bg p-0 text-menu-text backdrop:bg-black/50 sm:m-auto sm:max-w-lg sm:rounded-lg"
     >
       <div className="max-h-[85dvh] overflow-y-auto">
         {item.imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size
-          <img src={item.imageUrl} alt="" className="aspect-video w-full object-cover" />
+          <img
+            src={item.imageUrl}
+            alt=""
+            className="menu-item-view-image aspect-video w-full object-cover"
+          />
         )}
         <div className="p-5">
           <div className="flex items-start gap-3">
-            <h2 id="item-view-title" className="flex-1 text-2xl font-semibold">
+            <h2 id="item-view-title" className="menu-item-view-title flex-1 text-2xl font-semibold">
               {item.title}
             </h2>
             <button
               type="button"
               aria-label={t.close}
               onClick={close}
-              className="rounded-full p-1.5 hover:bg-menu-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
+              className="menu-btn menu-item-view-close rounded-full p-1.5 hover:bg-menu-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
             >
               <X className="size-5" aria-hidden />
             </button>
           </div>
-          <p className="mt-1 flex flex-wrap items-center gap-2 text-lg">
+          <p className="menu-item-view-price mt-1 flex flex-wrap items-center gap-2 text-lg">
             <bdi dir="ltr">{formatPrice(item.price, currency, locale)}</bdi>
             {!item.inStock && (
               <span className="w-auto rounded bg-menu-border px-2 py-0.5 text-sm">
@@ -85,7 +89,7 @@ export const ItemView: React.FC<ItemViewProps> = ({ item, currency, locale, onCl
           <List title={t.tags} values={item.tags.map((tag) => tag.title)} />
           <List title={t.availability} values={served.map((period) => t[period])} />
           {item.modifierGroups.map((group) => (
-            <section key={group.name} className="mt-4">
+            <section key={group.name} className="menu-item-view-options mt-4">
               <h3 className="font-semibold">{group.name}</h3>
               <p className="text-sm text-menu-muted">
                 {group.inputType === 'radio' ? t.chooseOne : t.chooseAny}

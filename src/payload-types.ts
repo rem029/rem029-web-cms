@@ -754,6 +754,10 @@ export interface Menu {
     card?: string | null;
     text?: string | null;
   };
+  /**
+   * Styles for this menu's page only. Target the menu-* class names, for example .menu-card-title { font-size: 2rem; }
+   */
+  customCss?: string | null;
   meta?: {
     title?: string | null;
     /**
@@ -3355,6 +3359,7 @@ export interface MenusSelect<T extends boolean = true> {
         card?: T;
         text?: T;
       };
+  customCss?: T;
   meta?:
     | T
     | {

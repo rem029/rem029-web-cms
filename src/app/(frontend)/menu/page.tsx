@@ -30,7 +30,7 @@ export default async function MenuListPage() {
   const t = menuStrings(locale)
 
   return (
-    <div className="menu-theme flex min-h-dvh flex-col">
+    <div className="menu-list-page menu-theme flex min-h-dvh flex-col">
       <MenuHeader
         title={settings?.siteName || t.menus}
         logo={mediaOf(settings?.logo)}
@@ -39,11 +39,11 @@ export default async function MenuListPage() {
         locale={locale}
       />
       <main className="container flex-1 py-6">
-        <h1 className="text-3xl font-semibold">{t.menus}</h1>
+        <h1 className="menu-list-title text-3xl font-semibold">{t.menus}</h1>
         {menus.length === 0 ? (
-          <p className="mt-4 text-menu-muted">{t.noMenus}</p>
+          <p className="menu-list-empty mt-4 text-menu-muted">{t.noMenus}</p>
         ) : (
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="menu-list mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {menus.map((menu) => (
               <MenuCard key={menu.id} menu={menu} />
             ))}

@@ -94,7 +94,7 @@ const MenuBody: React.FC<Omit<MenuProps, 'initial'>> = ({
 
   return (
     <div className="mt-6">
-      <div className="sticky top-0 z-20 -mx-4 border-b border-menu-border bg-menu-bg px-4">
+      <div className="menu-toolbar sticky top-0 z-20 -mx-4 border-b border-menu-border bg-menu-bg px-4">
         <div className="flex items-center gap-2">
           <CategoryNav sections={shown} locale={locale} />
           {showSearch && (
@@ -102,7 +102,7 @@ const MenuBody: React.FC<Omit<MenuProps, 'initial'>> = ({
               type="button"
               aria-label={t.search}
               onClick={() => setSearchOpen(true)}
-              className={barButtonClass}
+              className={cn('menu-btn menu-search-btn', barButtonClass)}
             >
               <Search className="size-4" aria-hidden />
             </button>
@@ -113,7 +113,7 @@ const MenuBody: React.FC<Omit<MenuProps, 'initial'>> = ({
               aria-expanded={filtersOpen}
               aria-controls="menu-filters"
               onClick={() => setFiltersOpen(!filtersOpen)}
-              className={barButtonClass}
+              className={cn('menu-btn menu-filter-btn', barButtonClass)}
             >
               <SlidersHorizontal className="size-4" aria-hidden />
               {t.filters}
@@ -121,7 +121,7 @@ const MenuBody: React.FC<Omit<MenuProps, 'initial'>> = ({
           )}
         </div>
         {filtersOpen && (
-          <div id="menu-filters" className="flex flex-col gap-4 py-3">
+          <div id="menu-filters" className="menu-filters flex flex-col gap-4 py-3">
             {showAvailability && <FilterAvailability locale={locale} />}
             {showAllergens && <FilterAllergens allergens={menuAllergens} locale={locale} />}
           </div>
@@ -132,11 +132,16 @@ const MenuBody: React.FC<Omit<MenuProps, 'initial'>> = ({
       {shown.map((section) => {
         const id = sectionId(section)
         return (
-          <section key={id} id={id} aria-labelledby={`${id}-title`} className="scroll-mt-20 pt-6">
-            <h2 id={`${id}-title`} className="mb-3 text-xl font-semibold">
+          <section
+            key={id}
+            id={id}
+            aria-labelledby={`${id}-title`}
+            className="menu-section scroll-mt-20 pt-6"
+          >
+            <h2 id={`${id}-title`} className="menu-section-title mb-3 text-xl font-semibold">
               {section.category?.title ?? t.other}
             </h2>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="menu-items grid gap-3 md:grid-cols-2">
               {section.items.map((item) => (
                 <MenuItemCard
                   key={item.id}

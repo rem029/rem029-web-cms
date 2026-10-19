@@ -15,11 +15,13 @@ import { Menu } from '../_components/Menu'
 import { MenuCarousel, type CarouselImage } from '../_components/MenuCarousel'
 import { MenuFooter } from '../_components/MenuFooter'
 import { MenuHeader } from '../_components/MenuHeader'
+import { MenuIntro } from '../_components/MenuIntro'
 import { readMenuLocale } from '../_data/locale'
 import { mediaOf } from '../_data/media'
-import { parseMenuUrl } from '../_data/menuUrl'
+import { menuCustomCss } from '../_data/menuCustomCss'
 import { menuColorVars } from '../_data/menuColors'
 import { getMenuPage } from '../_data/menuData'
+import { parseMenuUrl } from '../_data/menuUrl'
 
 type Args = {
   params: Promise<{ slug: string }>
@@ -78,10 +80,15 @@ export default async function MenuPage({ params, searchParams }: Args) {
 
   const { menu, sections, currency } = data
   const settings = await getTenantDoc('settings', tenantId, { depth: 1, locale })
+  const css = menuCustomCss(menu.customCss)
 
   return (
-    <div style={menuColorVars(menu.colors)} className="menu-theme flex min-h-dvh flex-col">
+    <div
+      style={menuColorVars(menu.colors)}
+      className="menu-page menu-theme flex min-h-dvh flex-col"
+    >
       {(await isPreviewing()) && <LivePreviewListener />}
+      {css && <style dangerouslySetInnerHTML={{ __html: css }} />}
       <MenuHeader
         title={menu.header?.title || menu.title}
         logo={mediaOf(menu.header?.logo) ?? mediaOf(settings?.logo)}
@@ -92,13 +99,11 @@ export default async function MenuPage({ params, searchParams }: Args) {
       <main className="flex-1">
         <MenuCarousel images={carouselImages(menu)} />
         <div className="container py-6">
-          {/* without an intro heading the page still gets an h1 (the menu title, screen readers only) */}
-          <h1 className={menu.intro?.heading ? 'text-3xl font-semibold' : 'sr-only'}>
-            {menu.intro?.heading || menu.title}
-          </h1>
-          {menu.intro?.subheading && (
-            <p className="mt-1 text-menu-muted">{menu.intro.subheading}</p>
-          )}
+          <MenuIntro
+            heading={menu.intro?.heading}
+            subheading={menu.intro?.subheading}
+            title={menu.title}
+          />
           <Menu
             menuId={menu.id}
             sections={sections}

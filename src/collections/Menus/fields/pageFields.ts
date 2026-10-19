@@ -1,4 +1,4 @@
-import type { Field, TextFieldSingleValidation } from 'payload'
+import type { CodeFieldValidation, Field, TextFieldSingleValidation } from 'payload'
 
 /**
  * How a menu's page looks (rem0017 phase 2): simple fields instead of a block layout, like the
@@ -7,6 +7,14 @@ import type { Field, TextFieldSingleValidation } from 'payload'
  */
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/
+
+// longest custom css a menu may have, in characters
+const CUSTOM_CSS_MAX = 20000
+
+const validateCustomCss: CodeFieldValidation = (value) =>
+  !value || value.length <= CUSTOM_CSS_MAX
+    ? true
+    : `Custom CSS can be at most ${CUSTOM_CSS_MAX} characters. Move shared styles to the Theme.`
 
 // empty is fine (the tenant theme is used); anything else must be #RRGGBB
 const validateColor: TextFieldSingleValidation = (value) =>
@@ -137,6 +145,26 @@ export const pageFields: Field[] = [
           colorField('card', 'Cards'),
           colorField('text', 'Text'),
         ],
+      },
+    ],
+  },
+  // the escape hatch, not the main UX: collapsed at the end of the tab (rem0017 phase 3 step 6)
+  {
+    type: 'collapsible',
+    label: 'Custom CSS',
+    admin: { initCollapsed: true },
+    fields: [
+      {
+        // one value, not localized: editor-only
+        name: 'customCss',
+        type: 'code',
+        label: 'Custom CSS',
+        validate: validateCustomCss,
+        admin: {
+          language: 'css',
+          description:
+            "Styles for this menu's page only. Target the menu-* class names, for example .menu-card-title { font-size: 2rem; }",
+        },
       },
     ],
   },

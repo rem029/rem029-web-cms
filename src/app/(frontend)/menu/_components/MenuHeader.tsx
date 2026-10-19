@@ -32,17 +32,17 @@ export const MenuHeader: React.FC<MenuHeaderProps> = ({
   showLanguageSwitch,
   locale,
 }) => (
-  <header className="border-b border-menu-border bg-menu-bg">
-    <div className="container flex items-center justify-between gap-4 py-3">
+  <header className="menu-header border-b border-menu-border bg-menu-bg">
+    <div className="menu-header-inner container flex items-center justify-between gap-4 py-3">
       <Link
         href={homeHref}
         className={`${touchTarget} flex min-w-0 items-center gap-3 rounded text-menu-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary`}
       >
         {logo?.url && (
           // eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size
-          <img src={logo.url} alt="" className="h-10 w-auto shrink-0" />
+          <img src={logo.url} alt="" className="menu-logo h-10 w-auto shrink-0" />
         )}
-        <span className="truncate text-lg font-semibold">{title}</span>
+        <span className="menu-header-title truncate text-lg font-semibold">{title}</span>
       </Link>
       {showLanguageSwitch && <LanguageSwitch locale={locale} />}
     </div>

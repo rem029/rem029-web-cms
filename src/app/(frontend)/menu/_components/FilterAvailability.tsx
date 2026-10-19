@@ -3,6 +3,8 @@
 import type { TypedLocale } from 'payload'
 import React from 'react'
 
+import { cn } from '@/utilities/ui'
+
 import type { Period } from '../_data/filterItems'
 import { menuStrings } from '../_i18n'
 import { useMenuStore } from '../_store/store'
@@ -20,20 +22,23 @@ export const FilterAvailability: React.FC<{ locale: TypedLocale }> = ({ locale }
   const setPeriod = useMenuStore((state) => state.setPeriod)
 
   return (
-    <fieldset>
-      <legend className="mb-2 text-sm font-semibold">{t.availability}</legend>
+    <fieldset className="menu-filter-group">
+      <legend className="menu-filter-label mb-2 text-sm font-semibold">{t.availability}</legend>
       <div className="flex flex-wrap gap-2">
-        {PERIODS.map((value) => (
-          <button
-            key={value}
-            type="button"
-            aria-pressed={value === period}
-            onClick={() => setPeriod(value)}
-            className={chipClass}
-          >
-            {t[value]}
-          </button>
-        ))}
+        {PERIODS.map((value) => {
+          const isPicked = value === period
+          return (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={isPicked}
+              onClick={() => setPeriod(value)}
+              className={cn('menu-filter-chip', isPicked && 'is-active', chipClass)}
+            >
+              {t[value]}
+            </button>
+          )
+        })}
       </div>
     </fieldset>
   )

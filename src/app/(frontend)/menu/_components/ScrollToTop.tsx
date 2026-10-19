@@ -39,7 +39,7 @@ export const ScrollToTop: React.FC<{ locale: TypedLocale }> = ({ locale }) => {
       tabIndex={visible ? 0 : -1}
       onClick={toTop}
       className={cn(
-        'fixed bottom-4 end-4 z-30 rounded-full bg-menu-primary p-3 text-menu-primary-text shadow-lg',
+        'menu-scroll-top menu-btn fixed bottom-4 end-4 z-30 rounded-full bg-menu-primary p-3 text-menu-primary-text shadow-lg',
         'transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-text motion-reduce:transition-none',
         visible ? 'opacity-100' : 'pointer-events-none opacity-0',
       )}

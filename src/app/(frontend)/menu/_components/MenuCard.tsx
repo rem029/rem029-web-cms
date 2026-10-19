@@ -21,15 +21,22 @@ export const MenuCard: React.FC<MenuCardProps> = ({ menu }) => {
   return (
     <Link
       href={`/menu/${menu.slug}`}
-      className="block overflow-hidden rounded border border-menu-border bg-menu-card text-menu-text no-underline transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary motion-reduce:transition-none"
+      className="menu-card block overflow-hidden rounded border border-menu-border bg-menu-card text-menu-text no-underline transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary motion-reduce:transition-none"
     >
       {src && (
         // eslint-disable-next-line @next/next/no-img-element -- a CMS upload of any size
-        <img src={src} alt="" loading="lazy" className="aspect-video w-full object-cover" />
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          className="menu-card-image aspect-video w-full object-cover"
+        />
       )}
       <div className="p-4 text-start">
-        <h2 className="text-xl font-semibold">{menu.title}</h2>
-        {menu.intro?.heading && <p className="mt-1 text-menu-muted">{menu.intro.heading}</p>}
+        <h2 className="menu-card-title text-xl font-semibold">{menu.title}</h2>
+        {menu.intro?.heading && (
+          <p className="menu-card-subtitle mt-1 text-menu-muted">{menu.intro.heading}</p>
+        )}
       </div>
     </Link>
   )

@@ -12,13 +12,13 @@ export default async function MenuNotFound() {
   const t = menuStrings(await readMenuLocale())
 
   return (
-    <main className="menu-theme min-h-dvh py-24 text-center">
+    <main className="menu-not-found menu-theme min-h-dvh py-24 text-center">
       <div className="container">
-        <h1 className="text-4xl font-semibold">404</h1>
-        <p className="mt-2 text-menu-muted">{t.menuNotFound}</p>
+        <h1 className="menu-not-found-title text-4xl font-semibold">404</h1>
+        <p className="menu-not-found-text mt-2 text-menu-muted">{t.menuNotFound}</p>
         <Link
           href="/menu"
-          className="mt-6 inline-block rounded bg-menu-primary px-4 py-2 text-menu-primary-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
+          className="menu-not-found-link mt-6 inline-block rounded bg-menu-primary px-4 py-2 text-menu-primary-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary"
         >
           {t.allMenus}
         </Link>

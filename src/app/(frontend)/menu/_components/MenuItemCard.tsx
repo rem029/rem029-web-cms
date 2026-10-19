@@ -28,21 +28,25 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, currency, loca
       type="button"
       onClick={() => onOpen(item)}
       className={cn(
+        'menu-item-card',
+        !item.inStock && 'is-out-of-stock',
         'flex w-full gap-3 overflow-hidden rounded border border-menu-border bg-menu-card p-3 text-start text-menu-text',
         'transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary motion-reduce:transition-none',
       )}
     >
-      <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="font-semibold">{item.title}</span>
+      <span className="menu-item-text flex min-w-0 flex-1 flex-col gap-1">
+        <span className="menu-item-title font-semibold">{item.title}</span>
         {item.description && (
-          <span className="line-clamp-2 text-sm text-menu-muted">{item.description}</span>
+          <span className="menu-item-description line-clamp-2 text-sm text-menu-muted">
+            {item.description}
+          </span>
         )}
         <span className="mt-auto flex flex-wrap items-center gap-2 pt-1">
-          <bdi dir="ltr" className="font-medium">
+          <bdi dir="ltr" className="menu-item-price font-medium">
             {formatPrice(item.price, currency, locale)}
           </bdi>
           {!item.inStock && (
-            <span className="w-auto rounded bg-menu-border px-2 py-0.5 text-xs font-medium">
+            <span className="menu-item-badge w-auto rounded bg-menu-border px-2 py-0.5 text-xs font-medium">
               {t.outOfStock}
             </span>
           )}
@@ -55,6 +59,7 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, currency, loca
           alt=""
           loading="lazy"
           className={cn(
+            'menu-item-image',
             'size-24 shrink-0 rounded object-cover sm:size-28',
             !item.inStock && 'opacity-60 grayscale',
           )}

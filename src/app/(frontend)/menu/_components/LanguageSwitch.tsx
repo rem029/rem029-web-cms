@@ -28,7 +28,10 @@ export const LanguageSwitch: React.FC<{ locale?: TypedLocale }> = ({ locale }) =
   }
 
   return (
-    <nav className="flex shrink-0 items-center gap-1 text-sm" aria-label="Language">
+    <nav
+      className="menu-lang-switch flex shrink-0 items-center gap-1 text-sm"
+      aria-label="Language"
+    >
       {LANGUAGES.map((language) => (
         <Link
           key={language.locale}
@@ -38,7 +41,7 @@ export const LanguageSwitch: React.FC<{ locale?: TypedLocale }> = ({ locale }) =
           title={language.name}
           aria-current={language.locale === locale ? 'true' : undefined}
           onClick={(event) => switchTo(language.locale, event)}
-          className={`${touchTarget} [@media(pointer:coarse)]:min-w-11 inline-flex items-center justify-center rounded px-2 py-1 font-medium text-menu-muted hover:text-menu-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary aria-[current=true]:bg-menu-primary aria-[current=true]:text-menu-primary-text`}
+          className={`menu-lang-link ${language.locale === locale ? 'is-active ' : ''}${touchTarget} [@media(pointer:coarse)]:min-w-11 inline-flex items-center justify-center rounded px-2 py-1 font-medium text-menu-muted hover:text-menu-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary aria-[current=true]:bg-menu-primary aria-[current=true]:text-menu-primary-text`}
         >
           {language.label}
         </Link>
