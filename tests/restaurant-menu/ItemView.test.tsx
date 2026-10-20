@@ -30,7 +30,15 @@ describe('ItemView', () => {
     // arrange
     const item = guestItem({
       modifierGroups: [
-        { name: 'Size', inputType: 'radio', required: true, options: ['Small', 'Large'] },
+        {
+          name: 'Size',
+          inputType: 'radio',
+          required: true,
+          options: [
+            { label: 'Small', price: null },
+            { label: 'Large', price: null },
+          ],
+        },
       ],
     })
 
@@ -43,6 +51,52 @@ describe('ItemView', () => {
     expect(screen.getByText('Large')).toBeTruthy()
     expect(screen.queryAllByRole('radio')).toHaveLength(0)
     expect(screen.queryAllByRole('checkbox')).toHaveLength(0)
+  })
+
+  // rem0018 phase 1 step 1a
+  it('shows the extra price of a choice', () => {
+    // arrange: Size with Small (price null) and Large (price 2)
+    const item = guestItem({
+      modifierGroups: [
+        {
+          name: 'Size',
+          inputType: 'radio',
+          required: true,
+          options: [
+            { label: 'Small', price: null },
+            { label: 'Large', price: 2 },
+          ],
+        },
+      ],
+    })
+
+    // act: view(item)
+    view(item)
+
+    // assert: '+ ' + formatPrice(2, 'QAR', 'en') is shown next to Large
+    const expected = ('+ ' + formatPrice(2, 'QAR', 'en')).replace(/\s+/g, ' ')
+    expect(screen.getByText(expected)).toBeTruthy()
+  })
+
+  it('shows no price for a free choice', () => {
+    // arrange: Size with Small (price null) only
+    const item = guestItem({
+      modifierGroups: [
+        {
+          name: 'Size',
+          inputType: 'radio',
+          required: true,
+          options: [{ label: 'Small', price: null }],
+        },
+      ],
+    })
+
+    // act: view(item)
+    const { container } = view(item)
+
+    // assert: no text starting with '+' in the options section
+    const optionsSection = container.querySelector('.menu-item-view-options')
+    expect(optionsSection?.textContent).not.toContain('+')
   })
 
   it('lists allergens and tags', () => {

@@ -230,6 +230,58 @@ describe('menu builder', () => {
       expect(saved).toMatchObject({ price: 9, inStock: false })
     })
 
+    // rem0018 phase 1 step 1a
+    it('saves and loads the extra price of a choice', async () => {
+      // arrange: saveItem with a Milk group: Oat price 1, Full fat price null
+      const modifierGroups = [
+        {
+          name: 'Milk',
+          inputType: 'radio' as const,
+          required: false,
+          options: [
+            { label: 'Full fat', price: null },
+            { label: 'Oat', price: 1 },
+          ],
+        },
+      ]
+      const saved = await saveItem(
+        payload,
+        editor,
+        {
+          tenantId: tenantA.id,
+          locale: 'en',
+          data: {
+            title: uniqueName('Coffee'),
+            price: 5,
+            category: null,
+            description: '',
+            image: null,
+            allergens: [],
+            tags: [],
+            availability: ['all_day'],
+            inStock: true,
+            isActive: true,
+            modifierGroups,
+          },
+        },
+        { context },
+      )
+      expect(saved.ok).toBe(true)
+
+      // act: getItemForm for the saved item
+      const form = await getItemForm(payload, editor, {
+        tenantId: tenantA.id,
+        locale: 'en',
+        itemId: saved.ok ? saved.item.id : -1,
+      })
+
+      // assert: the form's options are [{ label: 'Full fat', price: null }, { label: 'Oat', price: 1 }]
+      expect(form.ok && form.data.modifierGroups[0]?.options).toEqual([
+        { label: 'Full fat', price: null },
+        { label: 'Oat', price: 1 },
+      ])
+    })
+
     it('creates an item in the menu tenant', async () => {
       // act
       const result = await saveItem(

@@ -184,7 +184,7 @@ describe('menu class names', () => {
     [
       'item view',
       'ItemView with image, allergens and options',
-      'menu-item-view, menu-item-view-image, menu-item-view-title, menu-item-view-close, menu-item-view-price, menu-item-view-list, menu-item-view-options',
+      'menu-item-view, menu-item-view-image, menu-item-view-title, menu-item-view-close, menu-item-view-price, menu-item-view-list, menu-item-view-options, menu-item-view-option-price',
       () =>
         render(
           <ItemView
@@ -197,7 +197,10 @@ describe('menu class names', () => {
                   name: 'Size',
                   inputType: 'radio',
                   required: true,
-                  options: ['Small', 'Large'],
+                  options: [
+                    { label: 'Small', price: null },
+                    { label: 'Large', price: 2 },
+                  ],
                 },
               ],
             })}

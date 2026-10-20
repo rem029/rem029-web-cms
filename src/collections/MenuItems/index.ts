@@ -160,11 +160,29 @@ export const MenuItems: CollectionConfig = {
           minRows: 1,
           fields: [
             {
-              name: 'label',
-              type: 'text',
-              label: 'Choice',
-              required: true,
-              localized: true,
+              type: 'row',
+              fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                  label: 'Choice',
+                  required: true,
+                  localized: true,
+                  admin: { width: '70%' },
+                },
+                // rem0018: add-ons can cost extra; empty = free
+                {
+                  name: 'price',
+                  type: 'number',
+                  label: 'Extra price',
+                  min: 0,
+                  admin: {
+                    width: '30%',
+                    step: 0.01,
+                    description: "Leave empty if it's free.",
+                  },
+                },
+              ],
             },
           ],
         },

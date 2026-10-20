@@ -120,6 +120,32 @@ describe('menu items', () => {
       // assert
       expect(item.modifierGroups).toMatchObject(modifierGroups)
     })
+
+    // rem0018 phase 1 step 1a: add-ons can cost extra
+    it('keeps an optional extra price per choice', async () => {
+      // arrange: a Size group with Small (no price) and Large (price 2)
+      const modifierGroups = [
+        {
+          name: 'Size',
+          inputType: 'radio' as const,
+          options: [{ label: 'Small' }, { label: 'Large', price: 2 }],
+        },
+      ]
+
+      // act: createItem(member, tenantA, { modifierGroups })
+      const item = await createItem(member, tenantA, { modifierGroups })
+
+      // assert: Large has price 2, Small has no price (null)
+      expect(item.modifierGroups).toMatchObject([
+        {
+          name: 'Size',
+          options: [
+            { label: 'Small', price: null },
+            { label: 'Large', price: 2 },
+          ],
+        },
+      ])
+    })
   })
 
   describe('validation', () => {
@@ -181,6 +207,24 @@ describe('menu items', () => {
 
       // assert
       expect(message).toContain('belongs to another business')
+    })
+
+    // rem0018 phase 1 step 1a
+    it('refuses a negative extra price', async () => {
+      // arrange: a group whose choice has price -1
+      const modifierGroups = [
+        {
+          name: 'Size',
+          inputType: 'radio' as const,
+          options: [{ label: 'Large', price: -1 }],
+        },
+      ]
+
+      // act: createItem(member, tenantA, { modifierGroups })
+      const message = await rejectionText(createItem(member, tenantA, { modifierGroups }))
+
+      // assert: rejects with a validation error
+      expect(message).toMatch(/price/i)
     })
 
     it('refuses a modifier group without options', async () => {

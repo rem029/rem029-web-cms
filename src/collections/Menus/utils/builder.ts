@@ -326,7 +326,10 @@ export const getItemForm = async (
           name: group.name,
           inputType: group.inputType,
           required: group.required === true,
-          options: (group.options ?? []).map((option) => ({ label: option.label })),
+          options: (group.options ?? []).map((option) => ({
+            label: option.label,
+            price: option.price ?? null,
+          })),
         })),
       },
     }

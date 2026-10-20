@@ -36,7 +36,8 @@ export type GuestMenuItem = {
     name: string
     inputType: 'checkbox' | 'radio'
     required: boolean
-    options: string[]
+    /** `price`: the extra price (rem0018), `null` = free */
+    options: { label: string; price: number | null }[]
   }[]
 }
 
@@ -86,7 +87,7 @@ const toGuestItem = (item: MenuItem): GuestMenuItem => ({
     name: group.name,
     inputType: group.inputType,
     required: group.required === true,
-    options: group.options.map((option) => option.label),
+    options: group.options.map((option) => ({ label: option.label, price: option.price ?? null })),
   })),
 })
 

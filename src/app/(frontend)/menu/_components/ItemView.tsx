@@ -34,7 +34,8 @@ const List: React.FC<{ title: string; values: string[] }> = ({ title, values }) 
 /**
  * An item's details (sdq `view-item.tsx` + `modal.tsx`), read only until rem0018 adds ordering:
  * photo, title, price, description, out of stock, allergens, tags, what it's served for, and its
- * options as plain lists (group name, "Choose one" / "Choose any", "Required", the options).
+ * options as plain lists (group name, "Choose one" / "Choose any", "Required", the options,
+ * "+ 2.00" after a choice with an extra price: rem0018).
  * A native <dialog> opened with showModal() (`useModalDialog`: focus kept inside, Escape and the
  * backdrop close it, focus goes back to the card); a bottom sheet on phones, centred on wider
  * screens.
@@ -97,7 +98,14 @@ export const ItemView: React.FC<ItemViewProps> = ({ item, currency, locale, onCl
               </p>
               <ul className="mt-1 list-disc ps-5">
                 {group.options.map((option) => (
-                  <li key={option}>{option}</li>
+                  <li key={option.label}>
+                    {option.label}
+                    {option.price !== null && (
+                      <span className="menu-item-view-option-price ms-1 text-menu-muted">
+                        <bdi dir="ltr">+ {formatPrice(option.price, currency, locale)}</bdi>
+                      </span>
+                    )}
+                  </li>
                 ))}
               </ul>
             </section>

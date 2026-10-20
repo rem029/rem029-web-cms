@@ -83,7 +83,8 @@ type GroupSpec = {
   name: Titles
   inputType: 'checkbox' | 'radio'
   required: boolean
-  options: Titles[]
+  // rem0018: an optional extra price per choice
+  options: (Titles & { price?: number })[]
 }
 
 const SIZE: GroupSpec[] = [
@@ -93,7 +94,7 @@ const SIZE: GroupSpec[] = [
     required: true,
     options: [
       { en: 'Regular', ar: 'عادي' },
-      { en: 'Large', ar: 'كبير' },
+      { en: 'Large', ar: 'كبير', price: 2 },
     ],
   },
 ]
@@ -105,8 +106,8 @@ const MILK: GroupSpec[] = [
     required: false,
     options: [
       { en: 'Full fat', ar: 'كامل الدسم' },
-      { en: 'Oat', ar: 'الشوفان' },
-      { en: 'Almond', ar: 'اللوز' },
+      { en: 'Oat', ar: 'الشوفان', price: 1 },
+      { en: 'Almond', ar: 'اللوز', price: 1 },
     ],
   },
 ]
@@ -116,7 +117,10 @@ const groupsIn = (groups: GroupSpec[], locale: 'en' | 'ar'): ModifierGroups =>
     name: group.name[locale],
     inputType: group.inputType,
     required: group.required,
-    options: group.options.map((option) => ({ label: option[locale] })),
+    options: group.options.map((option) => ({
+      label: option[locale],
+      price: option.price ?? null,
+    })),
   }))
 
 // the arabic labels on the saved rows: same ids, so the english labels stay

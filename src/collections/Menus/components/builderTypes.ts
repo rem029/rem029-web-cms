@@ -60,7 +60,8 @@ export type ModifierGroupInput = {
   name: string
   inputType: 'checkbox' | 'radio'
   required: boolean
-  options: { label: string }[]
+  /** `price`: the extra price of the choice (rem0018), `null` = free */
+  options: { label: string; price: number | null }[]
 }
 
 /** The full item form (`ItemFormModal`), in the admin locale. */

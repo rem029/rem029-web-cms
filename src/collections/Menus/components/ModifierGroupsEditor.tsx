@@ -1,8 +1,9 @@
 'use client'
 
 /**
- * Options editor of the item form: groups (e.g. Size) with their choices (Small, Large), how many
- * a guest picks (any number / exactly one) and whether it's required. Controlled by the form.
+ * Options editor of the item form: groups (e.g. Size) with their choices (Small, Large) and each
+ * choice's extra price (rem0018, empty = free), how many a guest picks (any number / exactly one)
+ * and whether it's required. Controlled by the form.
  */
 import React from 'react'
 
@@ -17,7 +18,7 @@ const emptyGroup = (): ModifierGroupInput => ({
   name: '',
   inputType: 'checkbox',
   required: false,
-  options: [{ label: '' }],
+  options: [{ label: '', price: null }],
 })
 
 export const ModifierGroupsEditor: React.FC<ModifierGroupsEditorProps> = ({ value, onChange }) => {
@@ -79,7 +80,28 @@ export const ModifierGroupsEditor: React.FC<ModifierGroupsEditorProps> = ({ valu
                     setGroup(index, {
                       ...group,
                       options: group.options.map((current, i) =>
-                        i === optionIndex ? { label: event.target.value } : current,
+                        i === optionIndex ? { ...current, label: event.target.value } : current,
+                      ),
+                    })
+                  }
+                />
+                <input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  aria-label={`Option group ${index + 1}, choice ${optionIndex + 1} extra price`}
+                  placeholder="Free"
+                  value={option.price ?? ''}
+                  onChange={(event) =>
+                    setGroup(index, {
+                      ...group,
+                      options: group.options.map((current, i) =>
+                        i === optionIndex
+                          ? {
+                              ...current,
+                              price: event.target.value === '' ? null : Number(event.target.value),
+                            }
+                          : current,
                       ),
                     })
                   }
@@ -104,7 +126,7 @@ export const ModifierGroupsEditor: React.FC<ModifierGroupsEditorProps> = ({ valu
             type="button"
             className="btn btn--style-secondary btn--size-small"
             onClick={() =>
-              setGroup(index, { ...group, options: [...group.options, { label: '' }] })
+              setGroup(index, { ...group, options: [...group.options, { label: '', price: null }] })
             }
           >
             Add choice

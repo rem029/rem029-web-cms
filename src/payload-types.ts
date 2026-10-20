@@ -813,6 +813,10 @@ export interface MenuItem {
         required?: boolean | null;
         options: {
           label: string;
+          /**
+           * Leave empty if it's free.
+           */
+          price?: number | null;
           id?: string | null;
         }[];
         id?: string | null;
@@ -3304,6 +3308,7 @@ export interface MenuItemsSelect<T extends boolean = true> {
           | T
           | {
               label?: T;
+              price?: T;
               id?: T;
             };
         id?: T;
