@@ -26,11 +26,13 @@ import { WatchTenantCollection as WatchTenantCollection_1d0591e3cf4f332c83a86da1
 import { RowLabel as RowLabel_ba1355e46507ebf8162dc3396bc8d138 } from '@/collections/Header/RowLabel'
 import { RowLabel as RowLabel_3478630308bdf5be7efe3c9e4153b49d } from '@/collections/Footer/RowLabel'
 import { HomepageNotice as HomepageNotice_a591d5178c11f3a0f9b5a43c2b241599 } from '@/collections/Settings/components/HomepageNotice'
+import { TimezoneSelect as TimezoneSelect_30370a0cf3f617998aca09d1f4949307 } from '@/collections/Settings/components/TimezoneSelect'
 import { PriceCell as PriceCell_be512c21be1eb48a52eff84f026c17a3 } from '@/collections/MenuItems/components/PriceCell'
 import { OptionGroupRowLabel as OptionGroupRowLabel_d3e67d512bb85b3510c88a1e35d35607 } from '@/collections/MenuItems/components/OptionGroupRowLabel'
 import { YesNoCell as YesNoCell_c28151462987b3ff419b0dfcbd1b0fe9 } from '@/collections/MenuItems/components/YesNoCell'
 import { PublicURL as PublicURL_675edd152e0d0f60c9543834e508cc9d } from '@/collections/Menus/components/PublicURL'
 import { MenuBuilder as MenuBuilder_41b5687db8722a79c5ad98e00176daa7 } from '@/collections/Menus/components/MenuBuilder'
+import { TableQrPanel as TableQrPanel_485125a8420880c99ec5f9c172a9499b } from '@/collections/Menus/components/TableQrPanel'
 import { ShowcaseBanner as ShowcaseBanner_ff3381454f74bb637fe497e0c393f186 } from '@/common/components/ShowcaseBanner/ShowcaseBanner'
 import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlockquoteFeatureClient as BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
@@ -85,11 +87,13 @@ export const importMap = {
   "@/collections/Header/RowLabel#RowLabel": RowLabel_ba1355e46507ebf8162dc3396bc8d138,
   "@/collections/Footer/RowLabel#RowLabel": RowLabel_3478630308bdf5be7efe3c9e4153b49d,
   "@/collections/Settings/components/HomepageNotice#HomepageNotice": HomepageNotice_a591d5178c11f3a0f9b5a43c2b241599,
+  "@/collections/Settings/components/TimezoneSelect#TimezoneSelect": TimezoneSelect_30370a0cf3f617998aca09d1f4949307,
   "@/collections/MenuItems/components/PriceCell#PriceCell": PriceCell_be512c21be1eb48a52eff84f026c17a3,
   "@/collections/MenuItems/components/OptionGroupRowLabel#OptionGroupRowLabel": OptionGroupRowLabel_d3e67d512bb85b3510c88a1e35d35607,
   "@/collections/MenuItems/components/YesNoCell#YesNoCell": YesNoCell_c28151462987b3ff419b0dfcbd1b0fe9,
   "@/collections/Menus/components/PublicURL#PublicURL": PublicURL_675edd152e0d0f60c9543834e508cc9d,
   "@/collections/Menus/components/MenuBuilder#MenuBuilder": MenuBuilder_41b5687db8722a79c5ad98e00176daa7,
+  "@/collections/Menus/components/TableQrPanel#TableQrPanel": TableQrPanel_485125a8420880c99ec5f9c172a9499b,
   "@/common/components/ShowcaseBanner/ShowcaseBanner#ShowcaseBanner": ShowcaseBanner_ff3381454f74bb637fe497e0c393f186,
   "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlockquoteFeatureClient": BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,

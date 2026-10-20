@@ -35,6 +35,7 @@ import * as migration_20261018_215217_restaurant_menu from './20261018_215217_re
 import * as migration_20261019_115508_menu_links from './20261019_115508_menu_links';
 import * as migration_20261019_123104_menu_custom_css from './20261019_123104_menu_custom_css';
 import * as migration_20261020_141219_menu_choice_prices from './20261020_141219_menu_choice_prices';
+import * as migration_20261020_163119_restaurant_tables_settings from './20261020_163119_restaurant_tables_settings';
 
 export const migrations = [
   {
@@ -220,6 +221,11 @@ export const migrations = [
   {
     up: migration_20261020_141219_menu_choice_prices.up,
     down: migration_20261020_141219_menu_choice_prices.down,
-    name: '20261020_141219_menu_choice_prices'
+    name: '20261020_141219_menu_choice_prices',
+  },
+  {
+    up: migration_20261020_163119_restaurant_tables_settings.up,
+    down: migration_20261020_163119_restaurant_tables_settings.down,
+    name: '20261020_163119_restaurant_tables_settings'
   },
 ];

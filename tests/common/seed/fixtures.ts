@@ -11,10 +11,10 @@ export const TEST_TENANTS = {
 
 /** The profiles each test business has (slugs are unique per tenant, the same in each). */
 export const TEST_PROFILES = {
-  // CRUD on pages, posts, media, categories, the menu catalog, field-showcase; read/update on header,
+  // CRUD on pages, posts, media, categories, the menu catalog, tables, field-showcase; read/update on header,
   // footer and the field-showcase-global global; opens /admin
   editor: 'editor',
-  // read on pages, posts, media, categories, the menu catalog, field-showcase, header, footer and
+  // read on pages, posts, media, categories, the menu catalog, tables, field-showcase, header, footer and
   // the field-showcase-global global; opens /admin
   viewer: 'viewer',
   // every box ticked on audit-logs (only read and the nav count there); every other slug hidden

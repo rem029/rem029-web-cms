@@ -17,6 +17,7 @@ import { seedHiddenDocuments } from './hiddenDocuments'
 import { seedInactiveTenants } from './inactiveTenants'
 import { seedMenu } from './menu'
 import { seedMultiTenancy } from './multiTenancy'
+import { seedRestaurant } from './restaurant'
 
 if (process.env.NODE_ENV === 'production') {
   console.error('seed: refusing to run with NODE_ENV=production')
@@ -31,6 +32,7 @@ const seeds = [
   { name: 'inactiveTenants', run: seedInactiveTenants },
   { name: 'hiddenDocuments', run: seedHiddenDocuments },
   { name: 'menu', run: seedMenu },
+  { name: 'restaurant', run: seedRestaurant },
   { name: 'fieldShowcase', run: seedFieldShowcase },
 ]
 

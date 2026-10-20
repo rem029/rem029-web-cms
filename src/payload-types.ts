@@ -142,6 +142,7 @@ export interface Config {
     'menu-tags': MenuTag;
     'menu-items': MenuItem;
     menus: Menu;
+    tables: Table;
     'audit-logs': AuditLog;
     'field-showcase': FieldShowcase;
     redirects: Redirect;
@@ -154,6 +155,9 @@ export interface Config {
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
+    menus: {
+      'ordering.tables': 'tables';
+    };
     'field-showcase': {
       children: 'field-showcase';
     };
@@ -176,6 +180,7 @@ export interface Config {
     'menu-tags': MenuTagsSelect<false> | MenuTagsSelect<true>;
     'menu-items': MenuItemsSelect<false> | MenuItemsSelect<true>;
     menus: MenusSelect<false> | MenusSelect<true>;
+    tables: TablesSelect<false> | TablesSelect<true>;
     'audit-logs': AuditLogsSelect<false> | AuditLogsSelect<true>;
     'field-showcase': FieldShowcaseSelect<false> | FieldShowcaseSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -385,6 +390,7 @@ export interface UsersAccess {
           | 'menu-tags'
           | 'menu-items'
           | 'menus'
+          | 'tables'
           | 'audit-logs'
           | 'field-showcase'
           | 'redirects'
@@ -758,6 +764,22 @@ export interface Menu {
    * Styles for this menu's page only. Target the menu-* class names, for example .menu-card-title { font-size: 2rem; }
    */
   customCss?: string | null;
+  ordering?: {
+    enabled?: boolean | null;
+    /**
+     * Each order follows these steps. Changing it only affects new orders. Changes apply when the menu is published.
+     */
+    flow?: ('waiter_kitchen_cashier' | 'waiter_kitchen' | 'kitchen_only') | null;
+    showPrices?: boolean | null;
+    /**
+     * The tables guests order from. Add a new one, or pick existing ones below.
+     */
+    tables?: {
+      docs?: (number | Table)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
   meta?: {
     title?: string | null;
     /**
@@ -879,6 +901,40 @@ export interface MenuTag {
   id: number;
   tenant?: (number | null) | Tenant;
   title: string;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tables".
+ */
+export interface Table {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  /**
+   * What guests and staff call it, e.g. Table 5 or Terrace 2.
+   */
+  label: string;
+  /**
+   * Guests at this table can order from these menus.
+   */
+  menus?: (number | Menu)[] | null;
+  /**
+   * For staff only.
+   */
+  seats?: number | null;
+  /**
+   * Lower numbers come first in lists.
+   */
+  sortOrder?: number | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  /**
+   * Untick to stop orders from this table without deleting it.
+   */
+  isActive?: boolean | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -1808,6 +1864,168 @@ export interface Setting {
     tiktok?: string | null;
     whatsapp?: string | null;
   };
+  restaurant?: {
+    /**
+     * Leave empty to use the site name.
+     */
+    name?: string | null;
+    /**
+     * Leave empty to use the site logo.
+     */
+    logo?: (number | null) | Media;
+    timezone?: string | null;
+    /**
+     * Order numbers restart and reports count from this time. Open past midnight? Pick a time after you close, e.g. 04:00.
+     */
+    dayStartsAt?:
+      | (
+          | '00:00'
+          | '01:00'
+          | '02:00'
+          | '03:00'
+          | '04:00'
+          | '05:00'
+          | '06:00'
+          | '07:00'
+          | '08:00'
+          | '09:00'
+          | '10:00'
+          | '11:00'
+          | '12:00'
+          | '13:00'
+          | '14:00'
+          | '15:00'
+          | '16:00'
+          | '17:00'
+          | '18:00'
+          | '19:00'
+          | '20:00'
+          | '21:00'
+          | '22:00'
+          | '23:00'
+        )
+      | null;
+    /**
+     * Leave empty if you take orders any time. Days without a row are closed.
+     */
+    openingHours?:
+      | {
+          weekday: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+          opens?:
+            | (
+                | '00:00'
+                | '00:30'
+                | '01:00'
+                | '01:30'
+                | '02:00'
+                | '02:30'
+                | '03:00'
+                | '03:30'
+                | '04:00'
+                | '04:30'
+                | '05:00'
+                | '05:30'
+                | '06:00'
+                | '06:30'
+                | '07:00'
+                | '07:30'
+                | '08:00'
+                | '08:30'
+                | '09:00'
+                | '09:30'
+                | '10:00'
+                | '10:30'
+                | '11:00'
+                | '11:30'
+                | '12:00'
+                | '12:30'
+                | '13:00'
+                | '13:30'
+                | '14:00'
+                | '14:30'
+                | '15:00'
+                | '15:30'
+                | '16:00'
+                | '16:30'
+                | '17:00'
+                | '17:30'
+                | '18:00'
+                | '18:30'
+                | '19:00'
+                | '19:30'
+                | '20:00'
+                | '20:30'
+                | '21:00'
+                | '21:30'
+                | '22:00'
+                | '22:30'
+                | '23:00'
+                | '23:30'
+              )
+            | null;
+          /**
+           * Earlier than Opens = after midnight.
+           */
+          closes?:
+            | (
+                | '00:00'
+                | '00:30'
+                | '01:00'
+                | '01:30'
+                | '02:00'
+                | '02:30'
+                | '03:00'
+                | '03:30'
+                | '04:00'
+                | '04:30'
+                | '05:00'
+                | '05:30'
+                | '06:00'
+                | '06:30'
+                | '07:00'
+                | '07:30'
+                | '08:00'
+                | '08:30'
+                | '09:00'
+                | '09:30'
+                | '10:00'
+                | '10:30'
+                | '11:00'
+                | '11:30'
+                | '12:00'
+                | '12:30'
+                | '13:00'
+                | '13:30'
+                | '14:00'
+                | '14:30'
+                | '15:00'
+                | '15:30'
+                | '16:00'
+                | '16:30'
+                | '17:00'
+                | '17:30'
+                | '18:00'
+                | '18:30'
+                | '19:00'
+                | '19:30'
+                | '20:00'
+                | '20:30'
+                | '21:00'
+                | '21:30'
+                | '22:00'
+                | '22:30'
+                | '23:00'
+                | '23:30'
+              )
+            | null;
+          closed?: boolean | null;
+          id?: string | null;
+        }[]
+      | null;
+    ordersOnlyWhenOpen?: boolean | null;
+    legalName?: string | null;
+    taxNumber?: string | null;
+  };
   /**
    * Hides it from other members in the admin only. The public site always uses it.
    */
@@ -2280,6 +2498,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'menus';
         value: number | Menu;
+      } | null)
+    | ({
+        relationTo: 'tables';
+        value: number | Table;
       } | null)
     | ({
         relationTo: 'audit-logs';
@@ -3236,6 +3458,26 @@ export interface SettingsSelect<T extends boolean = true> {
         tiktok?: T;
         whatsapp?: T;
       };
+  restaurant?:
+    | T
+    | {
+        name?: T;
+        logo?: T;
+        timezone?: T;
+        dayStartsAt?: T;
+        openingHours?:
+          | T
+          | {
+              weekday?: T;
+              opens?: T;
+              closes?: T;
+              closed?: T;
+              id?: T;
+            };
+        ordersOnlyWhenOpen?: T;
+        legalName?: T;
+        taxNumber?: T;
+      };
   isHidden?: T;
   visibleTo?: T;
   createdBy?: T;
@@ -3365,6 +3607,14 @@ export interface MenusSelect<T extends boolean = true> {
         text?: T;
       };
   customCss?: T;
+  ordering?:
+    | T
+    | {
+        enabled?: T;
+        flow?: T;
+        showPrices?: T;
+        tables?: T;
+      };
   meta?:
     | T
     | {
@@ -3381,6 +3631,24 @@ export interface MenusSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tables_select".
+ */
+export interface TablesSelect<T extends boolean = true> {
+  tenant?: T;
+  label?: T;
+  menus?: T;
+  seats?: T;
+  sortOrder?: T;
+  slug?: T;
+  slugLock?: T;
+  isActive?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

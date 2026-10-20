@@ -8,6 +8,7 @@ type TenantSlugCollection =
   | 'menu-categories'
   | 'menu-items'
   | 'menus'
+  | 'tables'
 
 type TenantValue = number | string | { id: number | string } | null | undefined
 

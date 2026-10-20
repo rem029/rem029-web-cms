@@ -23,6 +23,7 @@ import {
   uploadItemImage,
 } from '../utils/builder'
 import { getMenuPublicURL } from '../utils/publicURL'
+import { addTablesToMenu, listMenuTables } from '../utils/tables'
 
 type Args<F extends (...args: never[]) => unknown> = Parameters<F>[2]
 type Result<F extends (...args: never[]) => unknown> = Awaited<ReturnType<F>>
@@ -111,3 +112,14 @@ export const getMenuPublicURLAction = async (
   args: Args<typeof getMenuPublicURL>,
 ): Promise<Result<typeof getMenuPublicURL>> =>
   signedIn((payload, user) => getMenuPublicURL(payload, user, args))
+
+// rem0018: the Ordering tab's tables and QR codes
+export const listMenuTablesAction = async (
+  args: Args<typeof listMenuTables>,
+): Promise<Result<typeof listMenuTables>> =>
+  signedIn((payload, user) => listMenuTables(payload, user, args))
+
+export const addTablesToMenuAction = async (
+  args: Args<typeof addTablesToMenu>,
+): Promise<Result<typeof addTablesToMenu>> =>
+  signedIn((payload, user) => addTablesToMenu(payload, user, args))

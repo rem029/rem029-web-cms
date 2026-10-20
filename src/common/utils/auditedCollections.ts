@@ -26,6 +26,8 @@ export const auditedCollections: CollectionSlug[] = [
   'menu-tags',
   'menu-items',
   'menus',
+  // restaurant orders (rem0018)
+  'tables',
 ]
 
 // deliberately not audited

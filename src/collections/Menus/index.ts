@@ -21,6 +21,7 @@ import {
 import { previewURL } from '@/common/utils/preview'
 import { slugField } from '@/fields/slug'
 
+import { orderingTab } from './fields/ordering'
 import { pageFields } from './fields/pageFields'
 import { revalidateMenus, revalidateMenusDelete } from '@/common/hooks/revalidateMenus'
 
@@ -114,6 +115,7 @@ export const Menus: CollectionConfig<'menus'> = {
           ],
         },
         { label: 'Page', fields: pageFields },
+        orderingTab,
         {
           name: 'meta',
           label: 'SEO',
