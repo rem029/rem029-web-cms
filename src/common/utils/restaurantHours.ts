@@ -9,6 +9,16 @@ export const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as con
 
 export type Weekday = (typeof WEEKDAYS)[number]
 
+export const WEEKDAY_LABELS: Record<Weekday, string> = {
+  mon: 'Monday',
+  tue: 'Tuesday',
+  wed: 'Wednesday',
+  thu: 'Thursday',
+  fri: 'Friday',
+  sat: 'Saturday',
+  sun: 'Sunday',
+}
+
 /** One row of Settings → Restaurant → Opening hours; times are `HH:MM`. */
 export type OpeningHours = {
   weekday: Weekday

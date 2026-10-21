@@ -3,7 +3,8 @@
 import type { DefaultCellComponentProps } from 'payload'
 import React from 'react'
 
-// "In stock" and "Show on menus" in the items list: a short badge instead of true / false
+// a yes/no column in a list ("In stock" on items, "Taking orders" on tables): a short badge
+// instead of true / false
 export const YesNoCell: React.FC<DefaultCellComponentProps> = ({ cellData }) => {
   const yes = cellData === true
   return (

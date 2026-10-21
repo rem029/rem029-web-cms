@@ -27,6 +27,12 @@ export const TimezoneSelect: React.FC<TextFieldClientProps> = ({ field, path }) 
     }))
   }, [])
 
+  // the width from the field config, as Payload's own fields apply it (`mergeFieldStyles`, not
+  // exported); without it the select shrinks to its text in the row
+  const style: React.CSSProperties & { '--field-width'?: string } = field.admin?.width
+    ? { '--field-width': String(field.admin.width) }
+    : { flex: '1 1 auto' }
+
   return (
     <SelectInput
       path={fieldPath}
@@ -34,6 +40,7 @@ export const TimezoneSelect: React.FC<TextFieldClientProps> = ({ field, path }) 
       label={field.label}
       description={field.admin?.description}
       isClearable={false}
+      style={style}
       options={options}
       value={value ?? 'UTC'}
       showError={showError}

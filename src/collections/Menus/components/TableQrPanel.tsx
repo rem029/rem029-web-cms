@@ -30,7 +30,8 @@ export const tableQrSrc = (
  * QR codes of a menu's tables, on its Ordering tab (rem0018 phase 1 step 1b), under the tables
  * list (the join: "Add new" there creates a table already on this menu):
  * - "Add existing tables": a multi-select of the tenant's other tables + Add (re-checked on the
- *   server as the user), then the list reloads
+ *   server as the user), then the list reloads; Payload's join list above only loads once, so a
+ *   note offers a page reload to show them there too
  * - one row per table: label, QR preview (svg), Download PNG, Download SVG; an inactive table
  *   says "Not taking orders"
  * - "Print all" opens `/next/menu-qr/sheet?menu=<id>` in a new tab
@@ -45,6 +46,7 @@ export const TableQrPanel: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<number[]>([])
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
+  const [added, setAdded] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
 
   const reload = () => setReloadKey((prev) => prev + 1)
@@ -73,6 +75,7 @@ export const TableQrPanel: React.FC = () => {
     if (!id || selectedIds.length === 0) return
     setAdding(true)
     setAddError(null)
+    setAdded(false)
 
     const result = await callAction(() =>
       addTablesToMenuAction({ menuId: Number(id), tableIds: selectedIds }),
@@ -81,6 +84,7 @@ export const TableQrPanel: React.FC = () => {
 
     if (result.ok) {
       setSelectedIds([])
+      setAdded(true)
       reload()
     } else {
       setAddError(result.error)
@@ -145,6 +149,21 @@ export const TableQrPanel: React.FC = () => {
                   {addError}
                 </p>
               )}
+            </div>
+          )}
+
+          {added && (
+            <div className="menu-table-qr__added" role="status">
+              <p className="field-description">
+                Added. Reload the page to see them in the Tables list above.
+              </p>
+              <button
+                type="button"
+                className="btn btn--size-small btn--style-secondary"
+                onClick={() => window.location.reload()}
+              >
+                Reload
+              </button>
             </div>
           )}
 

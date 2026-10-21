@@ -86,6 +86,7 @@ export const Tables: CollectionConfig = {
       defaultValue: true,
       admin: {
         position: 'sidebar',
+        components: { Cell: '@/common/components/YesNoCell#YesNoCell' },
         description: 'Untick to stop orders from this table without deleting it.',
       },
     },

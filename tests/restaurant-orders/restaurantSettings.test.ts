@@ -111,6 +111,34 @@ describe('restaurant settings', () => {
     expect(text).toContain('Monday')
   })
 
+  it('shows the repeated day on its own row', async () => {
+    // arrange: —
+    // act: update with openingHours [mon, tue, mon]
+    const call = payload.update({
+      collection: 'settings',
+      id: settingsId,
+      data: {
+        restaurant: {
+          openingHours: [
+            { weekday: 'mon', opens: '08:00', closes: '22:00' },
+            { weekday: 'tue', opens: '08:00', closes: '22:00' },
+            { weekday: 'mon', opens: '09:00', closes: '23:00' },
+          ],
+        },
+      },
+      user: tenantAdmin,
+      overrideAccess: false,
+      context,
+    })
+
+    // assert: the error is on the third row's Day (the admin shows it there), not the list
+    await expect(call).rejects.toMatchObject({
+      data: {
+        errors: [{ path: 'restaurant.openingHours.2.weekday' }],
+      },
+    })
+  })
+
   it('lets a tenant admin set opening hours', async () => {
     // arrange: the tenant admin of test-a
     // act: update test-a Settings with openingHours [mon 08:00–22:00, fri closed]

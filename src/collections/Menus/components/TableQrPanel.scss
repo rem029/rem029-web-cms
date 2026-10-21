@@ -93,7 +93,8 @@
     }
   }
 
-  &__error {
+  &__error,
+  &__added {
     display: flex;
     align-items: center;
     gap: calc(var(--base) / 2);

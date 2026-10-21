@@ -156,8 +156,14 @@ export const MenuItems: CollectionConfig = {
           name: 'options',
           type: 'array',
           label: 'Choices',
+          labels: { singular: 'Choice', plural: 'Choices' },
           required: true,
           minRows: 1,
+          admin: {
+            components: {
+              RowLabel: '@/collections/MenuItems/components/ChoiceRowLabel#ChoiceRowLabel',
+            },
+          },
           fields: [
             {
               type: 'row',
@@ -195,7 +201,7 @@ export const MenuItems: CollectionConfig = {
       label: 'In stock',
       defaultValue: true,
       admin: {
-        components: { Cell: '@/collections/MenuItems/components/YesNoCell#YesNoCell' },
+        components: { Cell: '@/common/components/YesNoCell#YesNoCell' },
         position: 'sidebar',
         description: 'Out of stock items stay on the menu, marked as unavailable.',
       },
@@ -206,7 +212,7 @@ export const MenuItems: CollectionConfig = {
       label: 'Show on menus',
       defaultValue: true,
       admin: {
-        components: { Cell: '@/collections/MenuItems/components/YesNoCell#YesNoCell' },
+        components: { Cell: '@/common/components/YesNoCell#YesNoCell' },
         position: 'sidebar',
         description: 'Untick to hide this item from every menu without deleting it.',
       },
