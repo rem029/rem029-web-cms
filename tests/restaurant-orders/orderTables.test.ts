@@ -1,4 +1,4 @@
-// The table of a QR code (rem0018 phase 1 step 1b, resolveOrderTable in
+// The table of a QR code (rem0018 phase 1 steps 1b and 1c, resolveOrderTable in
 // src/common/utils/orderTables.ts): only an active table of the host's tenant that lists the menu.
 import type { Payload } from 'payload'
 import { beforeAll, describe, expect, it } from 'vitest'
@@ -42,7 +42,7 @@ describe('resolveOrderTable', () => {
       data: {
         label,
         tenant: tenantA.id,
-        menus: [menu.id],
+        menu: menu.id,
         isActive: true,
       },
       locale: 'en',
@@ -64,8 +64,8 @@ describe('resolveOrderTable', () => {
     })
   })
 
-  it('rejects a table not linked to the menu', async () => {
-    // arrange: a test-a table listing another menu
+  it('rejects a table of another menu', async () => {
+    // arrange: a test-a table of another menu
     const otherMenu = await payload.create({
       collection: 'menus',
       data: {
@@ -91,7 +91,7 @@ describe('resolveOrderTable', () => {
       data: {
         label: uniqueName('Table'),
         tenant: tenantA.id,
-        menus: [otherMenu.id],
+        menu: otherMenu.id,
         isActive: true,
       },
       locale: 'en',
@@ -126,7 +126,7 @@ describe('resolveOrderTable', () => {
       data: {
         label: uniqueName('Table Inactive'),
         tenant: tenantA.id,
-        menus: [menu.id],
+        menu: menu.id,
         isActive: false,
       },
       locale: 'en',
@@ -171,7 +171,7 @@ describe('resolveOrderTable', () => {
       data: {
         label: uniqueName('Table B'),
         tenant: tenantB.id,
-        menus: [menuB.id],
+        menu: menuB.id,
         isActive: true,
       },
       locale: 'en',

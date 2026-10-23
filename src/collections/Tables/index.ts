@@ -3,15 +3,17 @@ import type { CollectionConfig } from 'payload'
 import { sameTenantFilter } from '@/common/fields/menuFields'
 import { revalidateMenus, revalidateMenusDelete } from '@/common/hooks/revalidateMenus'
 import { validateSameTenant } from '@/common/hooks/validateSameTenant'
-import { validateTenantSlugUniqueness } from '@/common/hooks/validateTenantSlugUniqueness'
 import { accessCheckResolver, hiddenResolver } from '@/common/utils/access'
 import { slugField } from '@/fields/slug'
 
+import { setTableTenantFromMenu } from './hooks/setTableTenantFromMenu'
+import { validateTableSlugUniqueness } from './hooks/validateTableSlugUniqueness'
+
 /**
- * Tables (rem0018): the tenant's tables guests order from. A table picks the menus it serves (as
- * sdq, where a venue's tables serve its events); the menu's Ordering tab lists them (join) and
- * prints their QR codes. Guests reach a table only through the menu's server actions, so there
- * is no public read.
+ * Tables (rem0018): the tables guests order from. Each table belongs to one menu (a menu is a
+ * restaurant or an event, so "Table 1" of one restaurant is not "Table 1" of another: step 1c);
+ * the menu's Ordering tab lists them (join) and prints their QR codes. Guests reach a table only
+ * through the menu's server actions, so there is no public read.
  */
 export const Tables: CollectionConfig = {
   slug: 'tables',
@@ -25,16 +27,17 @@ export const Tables: CollectionConfig = {
   admin: {
     group: 'Orders',
     useAsTitle: 'label',
-    defaultColumns: ['label', 'menus', 'seats', 'isActive'],
+    defaultColumns: ['label', 'menu', 'seats', 'isActive'],
     listSearchableFields: ['label', 'slug'],
     hidden: hiddenResolver('tables'),
   },
   defaultSort: 'sortOrder',
-  indexes: [{ fields: ['tenant', 'slug'], unique: true }],
+  indexes: [{ fields: ['menu', 'slug'], unique: true }],
   hooks: {
     beforeValidate: [
-      validateTenantSlugUniqueness('tables', 'table'),
-      validateSameTenant([{ path: 'menus', collection: 'menus', label: 'menu' }]),
+      setTableTenantFromMenu,
+      validateTableSlugUniqueness,
+      validateSameTenant([{ path: 'menu', collection: 'menus', label: 'menu' }]),
     ],
     // the guest menu's table picker lists them: same tag as the rest of the menu
     afterChange: [revalidateMenus],
@@ -51,13 +54,13 @@ export const Tables: CollectionConfig = {
       admin: { description: 'What guests and staff call it, e.g. Table 5 or Terrace 2.' },
     },
     {
-      name: 'menus',
+      name: 'menu',
       type: 'relationship',
       relationTo: 'menus',
-      hasMany: true,
-      label: 'Menus',
+      required: true,
+      label: 'Menu',
       filterOptions: sameTenantFilter,
-      admin: { description: 'Guests at this table can order from these menus.' },
+      admin: { description: 'The restaurant or event this table belongs to.' },
     },
     {
       type: 'row',

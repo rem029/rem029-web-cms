@@ -772,7 +772,7 @@ export interface Menu {
     flow?: ('waiter_kitchen_cashier' | 'waiter_kitchen' | 'kitchen_only') | null;
     showPrices?: boolean | null;
     /**
-     * The tables guests order from. Add a new one, or pick existing ones below.
+     * The tables guests order from. Each table belongs to this menu only.
      */
     tables?: {
       docs?: (number | Table)[];
@@ -918,9 +918,9 @@ export interface Table {
    */
   label: string;
   /**
-   * Guests at this table can order from these menus.
+   * The restaurant or event this table belongs to.
    */
-  menus?: (number | Menu)[] | null;
+  menu: number | Menu;
   /**
    * For staff only.
    */
@@ -3639,7 +3639,7 @@ export interface MenusSelect<T extends boolean = true> {
 export interface TablesSelect<T extends boolean = true> {
   tenant?: T;
   label?: T;
-  menus?: T;
+  menu?: T;
   seats?: T;
   sortOrder?: T;
   slug?: T;

@@ -22,6 +22,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TABLE "tables" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"tenant_id" integer,
+  	"menu_id" integer NOT NULL,
   	"seats" numeric,
   	"sort_order" numeric DEFAULT 0,
   	"slug" varchar,
@@ -40,14 +41,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"_parent_id" integer NOT NULL
   );
   
-  CREATE TABLE "tables_rels" (
-  	"id" serial PRIMARY KEY NOT NULL,
-  	"order" integer,
-  	"parent_id" integer NOT NULL,
-  	"path" varchar NOT NULL,
-  	"menus_id" integer
-  );
-  
   ALTER TABLE "settings" ADD COLUMN "restaurant_logo_id" integer;
   ALTER TABLE "settings" ADD COLUMN "restaurant_timezone" varchar DEFAULT 'UTC';
   ALTER TABLE "settings" ADD COLUMN "restaurant_day_starts_at" "enum_settings_restaurant_day_starts_at" DEFAULT '00:00';
@@ -64,25 +57,21 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "payload_locked_documents_rels" ADD COLUMN "tables_id" integer;
   ALTER TABLE "settings_restaurant_opening_hours" ADD CONSTRAINT "settings_restaurant_opening_hours_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."settings"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "tables" ADD CONSTRAINT "tables_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "tables" ADD CONSTRAINT "tables_menu_id_menus_id_fk" FOREIGN KEY ("menu_id") REFERENCES "public"."menus"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "tables" ADD CONSTRAINT "tables_created_by_id_users_id_fk" FOREIGN KEY ("created_by_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "tables" ADD CONSTRAINT "tables_updated_by_id_users_id_fk" FOREIGN KEY ("updated_by_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "tables_locales" ADD CONSTRAINT "tables_locales_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."tables"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "tables_rels" ADD CONSTRAINT "tables_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."tables"("id") ON DELETE cascade ON UPDATE no action;
-  ALTER TABLE "tables_rels" ADD CONSTRAINT "tables_rels_menus_fk" FOREIGN KEY ("menus_id") REFERENCES "public"."menus"("id") ON DELETE cascade ON UPDATE no action;
   CREATE INDEX "settings_restaurant_opening_hours_order_idx" ON "settings_restaurant_opening_hours" USING btree ("_order");
   CREATE INDEX "settings_restaurant_opening_hours_parent_id_idx" ON "settings_restaurant_opening_hours" USING btree ("_parent_id");
   CREATE INDEX "tables_tenant_idx" ON "tables" USING btree ("tenant_id");
+  CREATE INDEX "tables_menu_idx" ON "tables" USING btree ("menu_id");
   CREATE INDEX "tables_slug_idx" ON "tables" USING btree ("slug");
   CREATE INDEX "tables_created_by_idx" ON "tables" USING btree ("created_by_id");
   CREATE INDEX "tables_updated_by_idx" ON "tables" USING btree ("updated_by_id");
   CREATE INDEX "tables_updated_at_idx" ON "tables" USING btree ("updated_at");
   CREATE INDEX "tables_created_at_idx" ON "tables" USING btree ("created_at");
-  CREATE UNIQUE INDEX "tenant_slug_7_idx" ON "tables" USING btree ("tenant_id","slug");
+  CREATE UNIQUE INDEX "menu_slug_idx" ON "tables" USING btree ("menu_id","slug");
   CREATE UNIQUE INDEX "tables_locales_locale_parent_id_unique" ON "tables_locales" USING btree ("_locale","_parent_id");
-  CREATE INDEX "tables_rels_order_idx" ON "tables_rels" USING btree ("order");
-  CREATE INDEX "tables_rels_parent_idx" ON "tables_rels" USING btree ("parent_id");
-  CREATE INDEX "tables_rels_path_idx" ON "tables_rels" USING btree ("path");
-  CREATE INDEX "tables_rels_menus_id_idx" ON "tables_rels" USING btree ("menus_id");
   ALTER TABLE "settings" ADD CONSTRAINT "settings_restaurant_logo_id_media_id_fk" FOREIGN KEY ("restaurant_logo_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_tables_fk" FOREIGN KEY ("tables_id") REFERENCES "public"."tables"("id") ON DELETE cascade ON UPDATE no action;
   CREATE INDEX "settings_restaurant_restaurant_logo_idx" ON "settings" USING btree ("restaurant_logo_id");
@@ -94,14 +83,12 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
    ALTER TABLE "settings_restaurant_opening_hours" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "tables" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "tables_locales" DISABLE ROW LEVEL SECURITY;
-  ALTER TABLE "tables_rels" DISABLE ROW LEVEL SECURITY;
   -- drop the foreign key first: DROP TABLE … CASCADE below already removes it, and the
   -- DROP CONSTRAINT Payload generates after it then fails (known generator bug, see CLAUDE.md)
   ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_tables_fk";
   DROP TABLE "settings_restaurant_opening_hours" CASCADE;
   DROP TABLE "tables" CASCADE;
   DROP TABLE "tables_locales" CASCADE;
-  DROP TABLE "tables_rels" CASCADE;
   ALTER TABLE "settings" DROP CONSTRAINT "settings_restaurant_logo_id_media_id_fk";
   -- profile rows for tables would fail the cast back to the enum without its value: remove them
   DELETE FROM "users_access_access" WHERE "slug" = 'tables';

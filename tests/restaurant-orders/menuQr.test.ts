@@ -55,7 +55,7 @@ describe('menu QR codes', () => {
       data: {
         label: uniqueName('Table'),
         tenant: tenantA.id,
-        menus: [menu.id],
+        menu: menu.id,
       },
       locale: 'en',
       context,
@@ -97,7 +97,7 @@ describe('menu QR codes', () => {
       data: {
         label: uniqueName('Table'),
         tenant: tenantA.id,
-        menus: [menu.id],
+        menu: menu.id,
       },
       locale: 'en',
       context,
@@ -136,11 +136,21 @@ describe('menu QR codes', () => {
   })
 
   it('refuses a table outside the menu', async () => {
-    // arrange: a test-a table not on the menu
+    // arrange: a test-a menu and a table of another test-a menu
     const menu = await payload.create({
       collection: 'menus',
       data: {
         title: uniqueName('Menu'),
+        tenant: tenantA.id,
+        _status: 'published',
+      },
+      draft: false,
+      context,
+    })
+    const otherMenu = await payload.create({
+      collection: 'menus',
+      data: {
+        title: uniqueName('Other Menu'),
         tenant: tenantA.id,
         _status: 'published',
       },
@@ -152,6 +162,7 @@ describe('menu QR codes', () => {
       data: {
         label: uniqueName('Table'),
         tenant: tenantA.id,
+        menu: otherMenu.id,
       },
       locale: 'en',
       context,
@@ -189,7 +200,7 @@ describe('menu QR codes', () => {
       data: {
         label: uniqueName('Table B'),
         tenant: tenantB.id,
-        menus: [menuB.id],
+        menu: menuB.id,
       },
       locale: 'en',
       overrideAccess: true,
@@ -229,7 +240,7 @@ describe('menu QR codes', () => {
       data: {
         label: label1,
         tenant: tenantA.id,
-        menus: [menu.id],
+        menu: menu.id,
       },
       locale: 'en',
       context,
@@ -239,7 +250,7 @@ describe('menu QR codes', () => {
       data: {
         label: label2,
         tenant: tenantA.id,
-        menus: [menu.id],
+        menu: menu.id,
       },
       locale: 'en',
       context,
@@ -273,7 +284,7 @@ describe('menu QR codes', () => {
       data: {
         label: '<b>Patio</b>',
         tenant: tenantA.id,
-        menus: [menu.id],
+        menu: menu.id,
       },
       locale: 'en',
       context,

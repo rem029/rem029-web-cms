@@ -9,7 +9,7 @@ export type OrderTable = {
 
 /**
  * The table of a QR code (`?table=<slug>`) for a menu (rem0018): only an active table of that
- * tenant that lists that menu, else `null` (the guest then picks a table). Guests aren't users,
+ * tenant on that menu, else `null` (the guest then picks a table). Guests aren't users,
  * so it reads with `overrideAccess` and filters by the host's tenant itself; the caller resolved
  * the tenant from the host and the menu in that tenant.
  */
@@ -27,7 +27,7 @@ export const resolveOrderTable = async (
       and: [
         { tenant: { equals: args.tenantId } },
         { slug: { equals: args.tableSlug } },
-        { menus: { equals: args.menuId } },
+        { menu: { equals: args.menuId } },
         { isActive: { equals: true } },
       ],
     },

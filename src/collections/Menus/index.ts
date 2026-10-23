@@ -21,6 +21,7 @@ import {
 import { previewURL } from '@/common/utils/preview'
 import { slugField } from '@/fields/slug'
 
+import { deleteMenuTables } from './hooks/deleteMenuTables'
 import { orderingTab } from './fields/ordering'
 import { pageFields } from './fields/pageFields'
 import { revalidateMenus, revalidateMenusDelete } from '@/common/hooks/revalidateMenus'
@@ -69,6 +70,8 @@ export const Menus: CollectionConfig<'menus'> = {
       validateSameTenant(SAME_TENANT),
     ],
     afterChange: [syncHiddenToDoc, revalidateMenus],
+    // a table belongs to one menu (rem0018 step 1c)
+    beforeDelete: [deleteMenuTables],
     afterDelete: [revalidateMenusDelete],
   },
   versions: {

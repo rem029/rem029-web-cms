@@ -1,5 +1,5 @@
 {
-  "id": "22de233b-8f28-4113-ad14-d179a653d687",
+  "id": "6034889e-0bdd-4407-86ea-e335e8e3e357",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -20301,6 +20301,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "menu_id": {
+          "name": "menu_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "seats": {
           "name": "seats",
           "type": "numeric",
@@ -20367,6 +20373,21 @@
           "columns": [
             {
               "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "tables_menu_idx": {
+          "name": "tables_menu_idx",
+          "columns": [
+            {
+              "expression": "menu_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -20452,11 +20473,11 @@
           "method": "btree",
           "with": {}
         },
-        "tenant_slug_7_idx": {
-          "name": "tenant_slug_7_idx",
+        "menu_slug_idx": {
+          "name": "menu_slug_idx",
           "columns": [
             {
-              "expression": "tenant_id",
+              "expression": "menu_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -20481,6 +20502,19 @@
           "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "tables_menu_id_menus_id_fk": {
+          "name": "tables_menu_id_menus_id_fk",
+          "tableFrom": "tables",
+          "tableTo": "menus",
+          "columnsFrom": [
+            "menu_id"
           ],
           "columnsTo": [
             "id"
@@ -20581,137 +20615,6 @@
           "tableTo": "tables",
           "columnsFrom": [
             "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.tables_rels": {
-      "name": "tables_rels",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "order": {
-          "name": "order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "parent_id": {
-          "name": "parent_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "path": {
-          "name": "path",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "menus_id": {
-          "name": "menus_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "tables_rels_order_idx": {
-          "name": "tables_rels_order_idx",
-          "columns": [
-            {
-              "expression": "order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "tables_rels_parent_idx": {
-          "name": "tables_rels_parent_idx",
-          "columns": [
-            {
-              "expression": "parent_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "tables_rels_path_idx": {
-          "name": "tables_rels_path_idx",
-          "columns": [
-            {
-              "expression": "path",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "tables_rels_menus_id_idx": {
-          "name": "tables_rels_menus_id_idx",
-          "columns": [
-            {
-              "expression": "menus_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "tables_rels_parent_fk": {
-          "name": "tables_rels_parent_fk",
-          "tableFrom": "tables_rels",
-          "tableTo": "tables",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "tables_rels_menus_fk": {
-          "name": "tables_rels_menus_fk",
-          "tableFrom": "tables_rels",
-          "tableTo": "menus",
-          "columnsFrom": [
-            "menus_id"
           ],
           "columnsTo": [
             "id"

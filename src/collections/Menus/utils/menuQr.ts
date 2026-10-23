@@ -105,13 +105,7 @@ export const buildMenuQr = async (
     return { ok: false, status: 404, error: "This table can't be found." }
   }
 
-  const tableTenantId = extractTenantId(table.tenant)
-  const menuTenantId = tenant.id
-  const tableMenuIds = (table.menus ?? [])
-    .map(extractTenantId)
-    .filter((id): id is number => id !== null)
-
-  if (tableTenantId !== menuTenantId || !tableMenuIds.includes(args.menuId)) {
+  if (extractTenantId(table.tenant) !== tenant.id || extractTenantId(table.menu) !== args.menuId) {
     payload.logger.warn(
       { menuId: args.menuId, tableId: args.tableId, userId },
       'menu qr: table not on menu',
@@ -161,7 +155,7 @@ export const buildMenuQrSheet = async (
       where: {
         and: [
           { tenant: { equals: tenant.id } },
-          { menus: { equals: args.menuId } },
+          { menu: { equals: args.menuId } },
           { isActive: { equals: true } },
         ],
       },

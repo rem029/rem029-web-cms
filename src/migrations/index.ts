@@ -1,41 +1,41 @@
-import * as migration_20250508_082212_initial_commit from './20250508_082212_initial_commit';
-import * as migration_20250508_082216_add_admin_role from './20250508_082216_add_admin_role';
-import * as migration_20250510_172522_removed_hero from './20250510_172522_removed_hero';
-import * as migration_20250510_201923_added_new_hero_and_carousel_blocks from './20250510_201923_added_new_hero_and_carousel_blocks';
-import * as migration_20250511_101426_update_default_themes__update_link_variant from './20250511_101426_update_default_themes__update_link_variant';
-import * as migration_20250511_141238_update_fields_with_icons_and_some_fixes from './20250511_141238_update_fields_with_icons_and_some_fixes';
-import * as migration_20250512_123010_add_site_name_on_settings from './20250512_123010_add_site_name_on_settings';
-import * as migration_20250513_085451_added_more_support_on_locales from './20250513_085451_added_more_support_on_locales';
-import * as migration_20250513_101646_add_element_ID_on_cards_button from './20250513_101646_add_element_ID_on_cards_button';
-import * as migration_20250513_230042_add_category_for_pages from './20250513_230042_add_category_for_pages';
-import * as migration_20250514_072424_add_locales_for_link_labels from './20250514_072424_add_locales_for_link_labels';
-import * as migration_20250514_082219_checkbox_for_locale_switchers from './20250514_082219_checkbox_for_locale_switchers';
-import * as migration_20250514_212002_add_analytics from './20250514_212002_add_analytics';
-import * as migration_20250602_110944_grouped_links_added from './20250602_110944_grouped_links_added';
-import * as migration_20251210_163848_payload_upgrade_to_3_44 from './20251210_163848_payload_upgrade_to_3_44';
-import * as migration_20260509_182521_user_roles_update_add_super_user from './20260509_182521_user_roles_update_add_super_user';
-import * as migration_20260509_191323_set_users_as_super_user from './20260509_191323_set_users_as_super_user';
-import * as migration_20261002_072703_multi_tenancy_tenants from './20261002_072703_multi_tenancy_tenants';
-import * as migration_20261002_185443_globals_to_tenant_docs from './20261002_185443_globals_to_tenant_docs';
-import * as migration_20261002_225304_users_access from './20261002_225304_users_access';
-import * as migration_20261002_234322_roles_to_users_access from './20261002_234322_roles_to_users_access';
-import * as migration_20261003_004242_users_is_disabled from './20261003_004242_users_is_disabled';
-import * as migration_20261003_013511_users_tenant_access from './20261003_013511_users_tenant_access';
-import * as migration_20261003_102355_tenant_admins from './20261003_102355_tenant_admins';
-import * as migration_20261003_122558_hidden_documents from './20261003_122558_hidden_documents';
-import * as migration_20261003_160746_access_templates from './20261003_160746_access_templates';
-import * as migration_20261010_121953_created_updated_by from './20261010_121953_created_updated_by';
-import * as migration_20261010_170458_audit_logs from './20261010_170458_audit_logs';
-import * as migration_20261010_201646_audit_logs_retention from './20261010_201646_audit_logs_retention';
-import * as migration_20261015_193545_audit_logs_login_failed from './20261015_193545_audit_logs_login_failed';
-import * as migration_20261017_170736_field_showcase from './20261017_170736_field_showcase';
-import * as migration_20261017_222951_field_showcase_sidebar from './20261017_222951_field_showcase_sidebar';
-import * as migration_20261017_225947_showcase_global from './20261017_225947_showcase_global';
-import * as migration_20261018_215217_restaurant_menu from './20261018_215217_restaurant_menu';
-import * as migration_20261019_115508_menu_links from './20261019_115508_menu_links';
-import * as migration_20261019_123104_menu_custom_css from './20261019_123104_menu_custom_css';
-import * as migration_20261020_141219_menu_choice_prices from './20261020_141219_menu_choice_prices';
-import * as migration_20261020_163119_restaurant_tables_settings from './20261020_163119_restaurant_tables_settings';
+import * as migration_20250508_082212_initial_commit from './20250508_082212_initial_commit'
+import * as migration_20250508_082216_add_admin_role from './20250508_082216_add_admin_role'
+import * as migration_20250510_172522_removed_hero from './20250510_172522_removed_hero'
+import * as migration_20250510_201923_added_new_hero_and_carousel_blocks from './20250510_201923_added_new_hero_and_carousel_blocks'
+import * as migration_20250511_101426_update_default_themes__update_link_variant from './20250511_101426_update_default_themes__update_link_variant'
+import * as migration_20250511_141238_update_fields_with_icons_and_some_fixes from './20250511_141238_update_fields_with_icons_and_some_fixes'
+import * as migration_20250512_123010_add_site_name_on_settings from './20250512_123010_add_site_name_on_settings'
+import * as migration_20250513_085451_added_more_support_on_locales from './20250513_085451_added_more_support_on_locales'
+import * as migration_20250513_101646_add_element_ID_on_cards_button from './20250513_101646_add_element_ID_on_cards_button'
+import * as migration_20250513_230042_add_category_for_pages from './20250513_230042_add_category_for_pages'
+import * as migration_20250514_072424_add_locales_for_link_labels from './20250514_072424_add_locales_for_link_labels'
+import * as migration_20250514_082219_checkbox_for_locale_switchers from './20250514_082219_checkbox_for_locale_switchers'
+import * as migration_20250514_212002_add_analytics from './20250514_212002_add_analytics'
+import * as migration_20250602_110944_grouped_links_added from './20250602_110944_grouped_links_added'
+import * as migration_20251210_163848_payload_upgrade_to_3_44 from './20251210_163848_payload_upgrade_to_3_44'
+import * as migration_20260509_182521_user_roles_update_add_super_user from './20260509_182521_user_roles_update_add_super_user'
+import * as migration_20260509_191323_set_users_as_super_user from './20260509_191323_set_users_as_super_user'
+import * as migration_20261002_072703_multi_tenancy_tenants from './20261002_072703_multi_tenancy_tenants'
+import * as migration_20261002_185443_globals_to_tenant_docs from './20261002_185443_globals_to_tenant_docs'
+import * as migration_20261002_225304_users_access from './20261002_225304_users_access'
+import * as migration_20261002_234322_roles_to_users_access from './20261002_234322_roles_to_users_access'
+import * as migration_20261003_004242_users_is_disabled from './20261003_004242_users_is_disabled'
+import * as migration_20261003_013511_users_tenant_access from './20261003_013511_users_tenant_access'
+import * as migration_20261003_102355_tenant_admins from './20261003_102355_tenant_admins'
+import * as migration_20261003_122558_hidden_documents from './20261003_122558_hidden_documents'
+import * as migration_20261003_160746_access_templates from './20261003_160746_access_templates'
+import * as migration_20261010_121953_created_updated_by from './20261010_121953_created_updated_by'
+import * as migration_20261010_170458_audit_logs from './20261010_170458_audit_logs'
+import * as migration_20261010_201646_audit_logs_retention from './20261010_201646_audit_logs_retention'
+import * as migration_20261015_193545_audit_logs_login_failed from './20261015_193545_audit_logs_login_failed'
+import * as migration_20261017_170736_field_showcase from './20261017_170736_field_showcase'
+import * as migration_20261017_222951_field_showcase_sidebar from './20261017_222951_field_showcase_sidebar'
+import * as migration_20261017_225947_showcase_global from './20261017_225947_showcase_global'
+import * as migration_20261018_215217_restaurant_menu from './20261018_215217_restaurant_menu'
+import * as migration_20261019_115508_menu_links from './20261019_115508_menu_links'
+import * as migration_20261019_123104_menu_custom_css from './20261019_123104_menu_custom_css'
+import * as migration_20261020_141219_menu_choice_prices from './20261020_141219_menu_choice_prices'
+import * as migration_20261023_175449_restaurant_tables_settings from './20261023_175449_restaurant_tables_settings'
 
 export const migrations = [
   {
@@ -224,8 +224,8 @@ export const migrations = [
     name: '20261020_141219_menu_choice_prices',
   },
   {
-    up: migration_20261020_163119_restaurant_tables_settings.up,
-    down: migration_20261020_163119_restaurant_tables_settings.down,
-    name: '20261020_163119_restaurant_tables_settings'
+    up: migration_20261023_175449_restaurant_tables_settings.up,
+    down: migration_20261023_175449_restaurant_tables_settings.down,
+    name: '20261023_175449_restaurant_tables_settings',
   },
-];
+]

@@ -51,20 +51,19 @@ export const orderingTab: Tab = {
       defaultValue: true,
       admin: { condition: whenOrdering },
     },
-    // the menu's tables: a table picks its menus (`tables.menus`); "Add new" here creates one
-    // already linked to this menu
+    // the menu's tables (`tables.menu`); "Add new" here creates one already on this menu
     {
       name: 'tables',
       type: 'join',
       collection: 'tables',
-      on: 'menus',
+      on: 'menu',
       label: 'Tables',
       defaultSort: 'sortOrder',
       defaultLimit: 50,
       admin: {
         condition: whenOrdering,
         defaultColumns: ['label', 'seats', 'isActive'],
-        description: 'The tables guests order from. Add a new one, or pick existing ones below.',
+        description: 'The tables guests order from. Each table belongs to this menu only.',
       },
     },
     {
