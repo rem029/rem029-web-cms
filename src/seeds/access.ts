@@ -18,7 +18,12 @@ import type { Payload } from 'payload'
 
 import { getAccessSlugs } from '@/collections/UsersAccess/utils/accessSlugs'
 import { DEFAULT_ACCESS_SLUG } from '@/collections/UsersAccess/utils/defaultProfile'
-import { PAGES_EDITOR_TEMPLATE } from '@/collections/UsersAccess/utils/templates'
+import {
+  CASHIER_TEMPLATE,
+  KITCHEN_TEMPLATE,
+  PAGES_EDITOR_TEMPLATE,
+  WAITER_TEMPLATE,
+} from '@/collections/UsersAccess/utils/templates'
 import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
 import type { Tenant, UsersAccess } from '@/payload-types'
 
@@ -303,6 +308,38 @@ const TENANT_USERS: TenantSeedUser[] = [
     name: 'Owner of tenant3 (inactive business)',
     email: 'admin3@example.test',
     memberships: [{ tenantSlug: 'tenant3', isTenantAdmin: true }],
+  },
+  // restaurant staff (rem0018 step 2), on the platform templates; `restaurant.ts` lists them on
+  // the ordering menus. step 2 adds, for tenant1 and tenant2 (n = 1, 2):
+  {
+    name: 'tenant1 waiter',
+    email: 'waiter1@example.test',
+    memberships: [{ tenantSlug: 'tenant1', templateSlug: WAITER_TEMPLATE }],
+  },
+  {
+    name: 'tenant1 kitchen',
+    email: 'kitchen1@example.test',
+    memberships: [{ tenantSlug: 'tenant1', templateSlug: KITCHEN_TEMPLATE }],
+  },
+  {
+    name: 'tenant1 cashier',
+    email: 'cashier-staff1@example.test',
+    memberships: [{ tenantSlug: 'tenant1', templateSlug: CASHIER_TEMPLATE }],
+  },
+  {
+    name: 'tenant2 waiter',
+    email: 'waiter2@example.test',
+    memberships: [{ tenantSlug: 'tenant2', templateSlug: WAITER_TEMPLATE }],
+  },
+  {
+    name: 'tenant2 kitchen',
+    email: 'kitchen2@example.test',
+    memberships: [{ tenantSlug: 'tenant2', templateSlug: KITCHEN_TEMPLATE }],
+  },
+  {
+    name: 'tenant2 cashier',
+    email: 'cashier-staff2@example.test',
+    memberships: [{ tenantSlug: 'tenant2', templateSlug: CASHIER_TEMPLATE }],
   },
 ]
 

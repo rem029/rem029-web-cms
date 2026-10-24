@@ -26,11 +26,15 @@ import {
   tenantScopedCollections,
 } from '@/common/utils/tenantCollections'
 import { getSelectedTenant } from '@/common/utils/getSelectedTenant'
+import { type FeatureSlug, isFeatureSlug } from '@/common/utils/featureSlugs'
 
 export type AccessOperation = 'read' | 'create' | 'update' | 'delete' | 'admin' | 'access'
 
-/** A profile row is for a collection or a global (globals since rem0005 phase 3 step 3). */
-export type AccessSlug = CollectionSlug | GlobalSlug
+/**
+ * A profile row is for a collection, a global (since rem0005 phase 3 step 3) or a feature (the
+ * staff boards, rem0018 phase 1 step 2, `FEATURE_SLUGS`).
+ */
+export type AccessSlug = CollectionSlug | GlobalSlug | FeatureSlug
 
 export function isDisabledUser(
   user: User | ClientUser | Partial<User> | null | undefined,
@@ -188,6 +192,10 @@ export const tenantAdminAllows = (slug: AccessSlug, op: AccessOperation): boolea
     return op === 'admin'
   }
 
+  if (isFeatureSlug(slug)) {
+    return op === 'read'
+  }
+
   return false
 }
 
@@ -199,6 +207,7 @@ export const tenantAdminShows = (slug: AccessSlug): boolean => {
   if (tenantScopedCollections.some((s) => s === slug)) return true
   if (tenantGlobalCollections.some((s) => s === slug)) return true
   if (slug === 'tenants' || slug === 'users' || slug === 'users-access') return true
+  if (isFeatureSlug(slug)) return true
   return false
 }
 

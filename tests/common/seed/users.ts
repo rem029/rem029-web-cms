@@ -1,7 +1,12 @@
 /** One user per role (`TEST_USERS`); each logs in with their email as the password. */
 import type { Payload } from 'payload'
 
-import { PAGES_EDITOR_TEMPLATE } from '@/collections/UsersAccess/utils/templates'
+import {
+  CASHIER_TEMPLATE,
+  KITCHEN_TEMPLATE,
+  PAGES_EDITOR_TEMPLATE,
+  WAITER_TEMPLATE,
+} from '@/collections/UsersAccess/utils/templates'
 import { DEFAULT_TENANT_SLUG } from '@/common/utils/defaultTenant'
 
 import { TEST_USERS, type ProfileIds, type TenantIds } from './fixtures'
@@ -90,6 +95,9 @@ export const seedTestUsers = async (
   profiles: ProfileIds,
 ): Promise<void> => {
   const pagesEditor = await findTemplateId(payload, PAGES_EDITOR_TEMPLATE)
+  const waiterTemplate = await findTemplateId(payload, WAITER_TEMPLATE)
+  const kitchenTemplate = await findTemplateId(payload, KITCHEN_TEMPLATE)
+  const cashierTemplate = await findTemplateId(payload, CASHIER_TEMPLATE)
   const users: SeedUserSpec[] = [
     {
       email: TEST_USERS.superUser,
@@ -212,6 +220,34 @@ export const seedTestUsers = async (
       super_user: false,
       is_disabled: false,
       tenants: [{ tenant: tenants.a, isTenantAdmin: true, access: profiles.logReader.a }],
+    },
+    {
+      email: TEST_USERS.waiter,
+      name: 'Waiter A',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.a, access: waiterTemplate }],
+    },
+    {
+      email: TEST_USERS.kitchen,
+      name: 'Kitchen A',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.a, access: kitchenTemplate }],
+    },
+    {
+      email: TEST_USERS.cashier,
+      name: 'Cashier A',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.a, access: cashierTemplate }],
+    },
+    {
+      email: TEST_USERS.otherWaiter,
+      name: 'Waiter B',
+      super_user: false,
+      is_disabled: false,
+      tenants: [{ tenant: tenants.b, access: waiterTemplate }],
     },
   ]
 

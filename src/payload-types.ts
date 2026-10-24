@@ -397,7 +397,10 @@ export interface UsersAccess {
           | 'forms'
           | 'form-submissions'
           | 'search'
-          | 'field-showcase-global';
+          | 'field-showcase-global'
+          | 'order-waiter'
+          | 'order-kitchen'
+          | 'order-cashier';
         hidden?: boolean | null;
         read?: boolean | null;
         create?: boolean | null;
@@ -771,6 +774,10 @@ export interface Menu {
      */
     flow?: ('waiter_kitchen_cashier' | 'waiter_kitchen' | 'kitchen_only') | null;
     showPrices?: boolean | null;
+    /**
+     * Staff who work this menu's orders. Changes apply when the menu is published.
+     */
+    staff?: (number | User)[] | null;
     /**
      * The tables guests order from. Each table belongs to this menu only.
      */
@@ -3613,6 +3620,7 @@ export interface MenusSelect<T extends boolean = true> {
         enabled?: T;
         flow?: T;
         showPrices?: T;
+        staff?: T;
         tables?: T;
       };
   meta?:

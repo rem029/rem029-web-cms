@@ -1,4 +1,5 @@
 import type { ArrayField, Config, Plugin, SelectField } from 'payload'
+import { FEATURE_SLUGS } from '@/common/utils/featureSlugs'
 import { getAccessSlugs } from './accessSlugs'
 
 /**
@@ -43,10 +44,13 @@ export const withAccessSlugOptions: Plugin = (config: Config): Config => {
   }
 
   const validSlugs = getAccessSlugs(collections, globals)
-  slugField.options = validSlugs.map((slug) => ({
-    label: slug,
-    value: slug,
-  }))
+  slugField.options = validSlugs.map((slug) => {
+    const feature = FEATURE_SLUGS.find((f) => f.value === slug)
+    return {
+      label: feature ? feature.label : slug,
+      value: slug,
+    }
+  })
 
   return config
 }

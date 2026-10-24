@@ -54,6 +54,16 @@ export const TEST_USERS = {
   logReader: 'log-reader-b@example.test',
   // tenant admin of test-a with the log reader profile (tenant admins read logs only through it)
   logReaderAdmin: 'log-admin-a@example.test',
+  // restaurant staff (rem0018 step 2) on the platform templates; listed on no menu (tests make
+  // their own menus with a staff list)
+  // the `waiter` template in test-a
+  waiter: 'waiter-a@example.test',
+  // the `kitchen` template in test-a
+  kitchen: 'kitchen-a@example.test',
+  // the `cashier` template in test-a
+  cashier: 'cashier-a@example.test',
+  // the `waiter` template in test-b only
+  otherWaiter: 'waiter-b@example.test',
 } as const
 
 /** Ids of what one seed creates, by fixture key, for the seeds that run after it. */

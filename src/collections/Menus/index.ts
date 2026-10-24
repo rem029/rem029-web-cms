@@ -22,6 +22,7 @@ import { previewURL } from '@/common/utils/preview'
 import { slugField } from '@/fields/slug'
 
 import { deleteMenuTables } from './hooks/deleteMenuTables'
+import { validateMenuStaff } from './hooks/validateMenuStaff'
 import { orderingTab } from './fields/ordering'
 import { pageFields } from './fields/pageFields'
 import { revalidateMenus, revalidateMenusDelete } from '@/common/hooks/revalidateMenus'
@@ -68,6 +69,8 @@ export const Menus: CollectionConfig<'menus'> = {
     beforeValidate: [
       validateTenantSlugUniqueness('menus', 'menu'),
       validateSameTenant(SAME_TENANT),
+      // staff of this business only, also on drafts (rem0018 step 2)
+      validateMenuStaff,
     ],
     afterChange: [syncHiddenToDoc, revalidateMenus],
     // a table belongs to one menu (rem0018 step 1c)

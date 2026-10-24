@@ -43,6 +43,7 @@ const seedMenuTables = async (
   payload: Payload,
   tenantId: number,
   spec: MenuTablesSpec,
+  tenantSlug: string,
 ): Promise<number> => {
   const { docs: menus } = await payload.find({
     collection: 'menus',
@@ -96,11 +97,37 @@ const seedMenuTables = async (
     })
   }
 
+  const staffIds: number[] = []
+  const n = tenantSlug.replace(/\D/g, '')
+  const staffEmails = [
+    `waiter${n}@example.test`,
+    `kitchen${n}@example.test`,
+    `cashier-staff${n}@example.test`,
+  ]
+  for (const email of staffEmails) {
+    const { docs: users } = await payload.find({
+      collection: 'users',
+      where: { email: { equals: email } },
+      depth: 0,
+      limit: 1,
+    })
+    if (users[0]) {
+      staffIds.push(users[0].id)
+    } else {
+      payload.logger.warn({ email, tenantSlug }, 'restaurant seed: staff user not found')
+    }
+  }
+
   await payload.update({
     collection: 'menus',
     id: menu.id,
     data: {
-      ordering: { enabled: true, flow: 'waiter_kitchen_cashier', showPrices: true },
+      ordering: {
+        enabled: true,
+        flow: 'waiter_kitchen_cashier',
+        showPrices: true,
+        staff: staffIds,
+      },
       _status: 'published',
     },
     draft: false,
@@ -125,7 +152,7 @@ export const seedRestaurant = async (payload: Payload): Promise<void> => {
 
     let tableCount = 0
     for (const spec of MENU_TABLES) {
-      tableCount += await seedMenuTables(payload, tenant.id, spec)
+      tableCount += await seedMenuTables(payload, tenant.id, spec, tenantSlug)
     }
 
     const { docs: settings } = await payload.find({
