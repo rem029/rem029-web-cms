@@ -148,6 +148,9 @@ export default buildConfig({
   email: nodemailerAdapter({
     defaultFromAddress: process.env.DEFAULT_FROM_ADDRESS || '',
     defaultFromName: process.env.DEFAULT_FROM_NAME || '',
+    // tests never wait on a mail server: the verify runs on every Payload boot, and an
+    // unreachable host held each test file for nodemailer's 2-minute timeout
+    skipVerify: process.env.NODE_ENV === 'test',
 
     transportOptions: {
       host: process.env.MAIL_SMTP_HOST,
