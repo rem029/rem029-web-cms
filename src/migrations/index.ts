@@ -38,6 +38,8 @@ import * as migration_20261020_141219_menu_choice_prices from './20261020_141219
 import * as migration_20261023_175449_restaurant_tables_settings from './20261023_175449_restaurant_tables_settings';
 import * as migration_20261024_021936_staff_board_slugs from './20261024_021936_staff_board_slugs';
 import * as migration_20261024_022008_staff_templates from './20261024_022008_staff_templates';
+import * as migration_20261024_181105_orders from './20261024_181105_orders';
+import * as migration_20261024_181200_orders_on_staff_templates from './20261024_181200_orders_on_staff_templates';
 
 export const migrations = [
   {
@@ -238,6 +240,16 @@ export const migrations = [
   {
     up: migration_20261024_022008_staff_templates.up,
     down: migration_20261024_022008_staff_templates.down,
-    name: '20261024_022008_staff_templates'
+    name: '20261024_022008_staff_templates',
+  },
+  {
+    up: migration_20261024_181105_orders.up,
+    down: migration_20261024_181105_orders.down,
+    name: '20261024_181105_orders',
+  },
+  {
+    up: migration_20261024_181200_orders_on_staff_templates.up,
+    down: migration_20261024_181200_orders_on_staff_templates.down,
+    name: '20261024_181200_orders_on_staff_templates',
   },
 ];

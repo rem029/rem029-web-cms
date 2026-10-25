@@ -27,6 +27,7 @@ export const createdUpdatedByCollections: CollectionSlug[] = [
   'menus',
   // rem0018: restaurant orders
   'tables',
+  'orders',
   'field-showcase',
 ]
 
@@ -38,4 +39,6 @@ export const withoutCreatedUpdatedBy: CollectionSlug[] = [
   'search',
   // written by the audit hooks, never edited
   'audit-logs',
+  // rem0018: the order number counter, written only by the order hook
+  'order-counters',
 ]

@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { hiddenResolver, isSuperUserField, showToSuperUsers } from '@/common/utils/access'
 import { defaultAccessRows } from './hooks/defaultAccessRows'
-import { businessLabel } from './hooks/businessLabel'
+import { businessLabel } from '@/common/hooks/businessLabel'
 import { enforceProfileTenant } from './hooks/enforceProfileTenant'
 import { guardTemplateTenant } from './hooks/guardTemplateTenant'
 import { createProfile, deleteProfile, readProfiles, updateProfile } from './utils/access'

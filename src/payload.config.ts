@@ -26,6 +26,8 @@ import { MenuCategories } from './collections/MenuCategories'
 import { MenuItems } from './collections/MenuItems'
 import { Menus } from './collections/Menus'
 import { Tables } from './collections/Tables'
+import { Orders } from './collections/Orders'
+import { OrderCounters } from './collections/OrderCounters'
 import { MenuTags } from './collections/MenuTags'
 
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './utilities/constant'
@@ -137,6 +139,8 @@ export default buildConfig({
     MenuItems,
     Menus,
     Tables,
+    Orders,
+    OrderCounters,
     AuditLogs,
     FieldShowcase,
   ],

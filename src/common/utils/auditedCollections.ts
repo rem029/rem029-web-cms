@@ -28,6 +28,7 @@ export const auditedCollections: CollectionSlug[] = [
   'menus',
   // restaurant orders (rem0018)
   'tables',
+  'orders',
 ]
 
 // deliberately not audited
@@ -41,4 +42,6 @@ export const notAudited: CollectionSlug[] = [
   'search',
   // dev sample data for checking the admin theme (rem0005); nothing on the site reads it
   'field-showcase',
+  // internal order number counter (rem0018): every order's number is logged on the order itself
+  'order-counters',
 ]

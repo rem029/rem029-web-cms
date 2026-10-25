@@ -7,6 +7,7 @@
  *   the other menus stay browse-only
  * - Settings → Restaurant: name, timezone Asia/Qatar, the day starting at 04:00, opening hours
  *   (Sat–Thu 07:00–01:00, Friday 13:00–01:00), legal name and tax number
+ * - three sample orders on the Corniche branch (Sample guest 1–3, pending; step 3a)
  *
  * Runs after `menu` (needs the menus). Idempotent: tables upserted by menu + slug, the menus and
  * Settings updated in place. Dev only (`src/seeds/index.ts` refuses production).
@@ -14,6 +15,7 @@
 import type { Payload } from 'payload'
 
 import type { Setting } from '@/payload-types'
+import { extractTenantId } from '@/common/utils/tenantCollections'
 
 const context = { disableRevalidate: true }
 
@@ -136,6 +138,115 @@ const seedMenuTables = async (
   return spec.count
 }
 
+const SAMPLE_GUESTS = ['Sample guest 1', 'Sample guest 2', 'Sample guest 3']
+
+/**
+ * A few pending orders on the Corniche branch (rem0018 step 3a; 3b moves them through every status),
+ * so the orders list and later the boards have something to show. Idempotent: one order per
+ * sample guest name on that menu, created only when missing. Placed through the real hooks
+ * (numbers, snapshots), as a guest would.
+ */
+const seedSampleOrders = async (payload: Payload, tenantId: number): Promise<number> => {
+  const { docs: menus } = await payload.find({
+    collection: 'menus',
+    where: {
+      and: [{ tenant: { equals: tenantId } }, { slug: { equals: 'corniche-branch' } }],
+    },
+    draft: false,
+    depth: 0,
+    limit: 1,
+  })
+  const menu = menus[0]
+  if (!menu) {
+    payload.logger.warn({ msg: 'restaurant seed: corniche-branch menu not found', tenantId })
+    return 0
+  }
+
+  const itemIds: number[] = []
+  if (Array.isArray(menu.items)) {
+    for (const item of menu.items) {
+      const id = extractTenantId(item)
+      if (id !== null) {
+        itemIds.push(id)
+      }
+    }
+  }
+
+  const items = itemIds.slice(0, 3)
+  if (items.length < 3) {
+    payload.logger.warn({
+      msg: 'restaurant seed: corniche-branch menu items missing',
+      tenantId,
+      menuId: menu.id,
+    })
+    return 0
+  }
+
+  const tableSlugs = ['table-1', 'table-2', 'table-3']
+  const { docs: tables } = await payload.find({
+    collection: 'tables',
+    where: {
+      and: [{ menu: { equals: menu.id } }, { slug: { in: tableSlugs } }],
+    },
+    depth: 0,
+    pagination: false,
+  })
+
+  const tableMap = new Map<string, number>()
+  for (const table of tables) {
+    if (typeof table.slug === 'string') {
+      tableMap.set(table.slug, table.id)
+    }
+  }
+
+  let createdCount = 0
+  for (let i = 0; i < SAMPLE_GUESTS.length; i++) {
+    const guestName = SAMPLE_GUESTS[i]
+    if (!guestName) continue
+
+    const { docs: existing } = await payload.find({
+      collection: 'orders',
+      where: {
+        and: [{ menu: { equals: menu.id } }, { guestName: { equals: guestName } }],
+      },
+      depth: 0,
+      limit: 1,
+    })
+
+    if (existing.length > 0) {
+      continue
+    }
+
+    const tableId = tableMap.get(`table-${i + 1}`)
+    const itemId = items[i]
+    if (itemId === undefined) continue
+
+    await payload.create({
+      collection: 'orders',
+      data: {
+        tenant: tenantId,
+        menu: menu.id,
+        ...(tableId !== undefined ? { table: tableId } : {}),
+        guestName,
+        source: 'guest',
+        type: 'dine_in',
+        status: 'pending',
+        paymentStatus: 'unpaid',
+        items: [
+          {
+            item: itemId,
+            quantity: i + 1,
+          },
+        ],
+      },
+      context,
+    })
+    createdCount++
+  }
+
+  return createdCount
+}
+
 export const seedRestaurant = async (payload: Payload): Promise<void> => {
   for (const tenantSlug of BUSINESS_SLUGS) {
     const { docs: tenants } = await payload.find({
@@ -193,8 +304,11 @@ export const seedRestaurant = async (payload: Payload): Promise<void> => {
       })
     }
 
+    // after Settings: the order numbers use its timezone and day start
+    const orderCount = await seedSampleOrders(payload, tenant.id)
+
     payload.logger.info(
-      { tenantId: tenant.id, tables: tableCount },
+      { tenantId: tenant.id, tables: tableCount, orders: orderCount },
       'restaurant seed: done for tenant',
     )
   }

@@ -143,6 +143,8 @@ export interface Config {
     'menu-items': MenuItem;
     menus: Menu;
     tables: Table;
+    orders: Order;
+    'order-counters': OrderCounter;
     'audit-logs': AuditLog;
     'field-showcase': FieldShowcase;
     redirects: Redirect;
@@ -181,6 +183,8 @@ export interface Config {
     'menu-items': MenuItemsSelect<false> | MenuItemsSelect<true>;
     menus: MenusSelect<false> | MenusSelect<true>;
     tables: TablesSelect<false> | TablesSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
+    'order-counters': OrderCountersSelect<false> | OrderCountersSelect<true>;
     'audit-logs': AuditLogsSelect<false> | AuditLogsSelect<true>;
     'field-showcase': FieldShowcaseSelect<false> | FieldShowcaseSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -391,6 +395,7 @@ export interface UsersAccess {
           | 'menu-items'
           | 'menus'
           | 'tables'
+          | 'orders'
           | 'audit-logs'
           | 'field-showcase'
           | 'redirects'
@@ -2048,6 +2053,68 @@ export interface Setting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  /**
+   * Restarts every business day.
+   */
+  orderNumber?: number | null;
+  orderDate?: string | null;
+  status: 'pending' | 'confirmed' | 'preparing' | 'prepared' | 'served' | 'completed' | 'cancelled';
+  menu: number | Menu;
+  table?: (number | null) | Table;
+  source: 'guest' | 'pos';
+  type: 'dine_in' | 'takeaway';
+  guestName?: string | null;
+  notes?: string | null;
+  items: {
+    item: number | MenuItem;
+    quantity: number;
+    unitPrice?: number | null;
+    lineTotal?: number | null;
+    title?: string | null;
+    selectedOptions?:
+      | {
+          option: string;
+          group?: string | null;
+          label?: string | null;
+          price?: number | null;
+          id?: string | null;
+        }[]
+      | null;
+    id?: string | null;
+  }[];
+  subtotal?: number | null;
+  total?: number | null;
+  amountPaid?: number | null;
+  balance?: number | null;
+  business?: string | null;
+  paymentStatus: 'unpaid' | 'partially_paid' | 'paid' | 'waived';
+  currency?: string | null;
+  flow?: ('waiter_kitchen_cashier' | 'waiter_kitchen' | 'kitchen_only') | null;
+  showPrices?: boolean | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "order-counters".
+ */
+export interface OrderCounter {
+  id: number;
+  tenant: number;
+  date: string;
+  last: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "audit-logs".
  */
 export interface AuditLog {
@@ -2509,6 +2576,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tables';
         value: number | Table;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'order-counters';
+        value: number | OrderCounter;
       } | null)
     | ({
         relationTo: 'audit-logs';
@@ -3655,6 +3730,65 @@ export interface TablesSelect<T extends boolean = true> {
   isActive?: T;
   createdBy?: T;
   updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  tenant?: T;
+  orderNumber?: T;
+  orderDate?: T;
+  status?: T;
+  menu?: T;
+  table?: T;
+  source?: T;
+  type?: T;
+  guestName?: T;
+  notes?: T;
+  items?:
+    | T
+    | {
+        item?: T;
+        quantity?: T;
+        unitPrice?: T;
+        lineTotal?: T;
+        title?: T;
+        selectedOptions?:
+          | T
+          | {
+              option?: T;
+              group?: T;
+              label?: T;
+              price?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  subtotal?: T;
+  total?: T;
+  amountPaid?: T;
+  balance?: T;
+  business?: T;
+  paymentStatus?: T;
+  currency?: T;
+  flow?: T;
+  showPrices?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "order-counters_select".
+ */
+export interface OrderCountersSelect<T extends boolean = true> {
+  tenant?: T;
+  date?: T;
+  last?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -16,6 +16,7 @@ export const tenantScopedCollections: CollectionSlug[] = [
   'menu-items',
   'menus',
   'tables',
+  'orders',
   'field-showcase',
 ]
 
