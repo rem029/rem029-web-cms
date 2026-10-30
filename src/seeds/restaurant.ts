@@ -7,14 +7,16 @@
  *   the other menus stay browse-only
  * - Settings → Restaurant: name, timezone Asia/Qatar, the day starting at 04:00, opening hours
  *   (Sat–Thu 07:00–01:00, Friday 13:00–01:00), legal name and tax number
- * - three sample orders on the Corniche branch (Sample guest 1–3, pending; step 3a)
+ * - sample orders on the Corniche branch in every status (Sample guest 1–7; step 3b)
  *
  * Runs after `menu` (needs the menus). Idempotent: tables upserted by menu + slug, the menus and
  * Settings updated in place. Dev only (`src/seeds/index.ts` refuses production).
  */
 import type { Payload } from 'payload'
 
-import type { Setting } from '@/payload-types'
+import type { OrderStatus } from '@/collections/Orders/utils/statuses'
+import { NEXT_STATUS } from '@/collections/Orders/utils/transitions'
+import type { Order, Setting, User } from '@/payload-types'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 
 const context = { disableRevalidate: true }
@@ -138,13 +140,69 @@ const seedMenuTables = async (
   return spec.count
 }
 
-const SAMPLE_GUESTS = ['Sample guest 1', 'Sample guest 2', 'Sample guest 3']
+// one order per status on tables 1–7 (step 3b); guests 1–3 were pending in 3a and move on
+const SAMPLE_ORDERS: { guestName: string; status: OrderStatus; cancelReason?: string }[] = [
+  { guestName: 'Sample guest 1', status: 'pending' },
+  { guestName: 'Sample guest 2', status: 'confirmed' },
+  { guestName: 'Sample guest 3', status: 'preparing' },
+  { guestName: 'Sample guest 4', status: 'prepared' },
+  { guestName: 'Sample guest 5', status: 'served' },
+  { guestName: 'Sample guest 6', status: 'completed' },
+  { guestName: 'Sample guest 7', status: 'cancelled', cancelReason: 'Guest left' },
+]
 
 /**
- * A few pending orders on the Corniche branch (rem0018 step 3a; 3b moves them through every status),
- * so the orders list and later the boards have something to show. Idempotent: one order per
- * sample guest name on that menu, created only when missing. Placed through the real hooks
- * (numbers, snapshots), as a guest would.
+ * Moves a sample order forward one status at a time to `target`, as `user` (a super user: every
+ * move is theirs), through the real hooks (guard, stamps, events). Cancelled: one move with the
+ * reason. Already at or past the target: nothing.
+ */
+const walkToStatus = async (
+  payload: Payload,
+  order: Order,
+  target: OrderStatus,
+  user: User,
+  cancelReason?: string,
+): Promise<void> => {
+  if (order.status === target || order.status === 'completed' || order.status === 'cancelled') {
+    return
+  }
+  if (target === 'cancelled') {
+    await payload.update({
+      collection: 'orders',
+      id: order.id,
+      data: {
+        status: 'cancelled',
+        ...(cancelReason ? { cancelReason } : {}),
+      },
+      user,
+      overrideAccess: false,
+    })
+    return
+  }
+
+  let currentStatus: OrderStatus = order.status
+  while (currentStatus !== target) {
+    const next: OrderStatus | null = NEXT_STATUS[currentStatus]
+    if (!next) {
+      break
+    }
+    const updated: Order = await payload.update({
+      collection: 'orders',
+      id: order.id,
+      data: { status: next },
+      user,
+      overrideAccess: false,
+    })
+    currentStatus = updated.status
+  }
+}
+
+/**
+ * Sample orders on the Corniche branch, one in each status (rem0018 steps 3a and 3b), so the
+ * orders list and later the boards have something to show. Idempotent: one order per sample
+ * guest name on that menu; a missing one is placed through the real hooks (numbers, snapshots)
+ * as a guest would, then walked to its status as the seeded super user (`walkToStatus`); an
+ * existing one behind its status is walked on (3a's pending orders), else left alone.
  */
 const seedSampleOrders = async (payload: Payload, tenantId: number): Promise<number> => {
   const { docs: menus } = await payload.find({
@@ -182,7 +240,26 @@ const seedSampleOrders = async (payload: Payload, tenantId: number): Promise<num
     return 0
   }
 
-  const tableSlugs = ['table-1', 'table-2', 'table-3']
+  const { docs: superUsers } = await payload.find({
+    collection: 'users',
+    where: { super_user: { equals: true } },
+    depth: 0,
+    limit: 1,
+  })
+  const superUser = superUsers[0]
+  if (!superUser) {
+    payload.logger.warn({ msg: 'restaurant seed: super user not found' })
+  }
+
+  const tableSlugs = [
+    'table-1',
+    'table-2',
+    'table-3',
+    'table-4',
+    'table-5',
+    'table-6',
+    'table-7',
+  ]
   const { docs: tables } = await payload.find({
     collection: 'tables',
     where: {
@@ -200,9 +277,10 @@ const seedSampleOrders = async (payload: Payload, tenantId: number): Promise<num
   }
 
   let createdCount = 0
-  for (let i = 0; i < SAMPLE_GUESTS.length; i++) {
-    const guestName = SAMPLE_GUESTS[i]
-    if (!guestName) continue
+  for (let i = 0; i < SAMPLE_ORDERS.length; i++) {
+    const sample = SAMPLE_ORDERS[i]
+    if (!sample) continue
+    const { guestName, status, cancelReason } = sample
 
     const { docs: existing } = await payload.find({
       collection: 'orders',
@@ -213,15 +291,18 @@ const seedSampleOrders = async (payload: Payload, tenantId: number): Promise<num
       limit: 1,
     })
 
-    if (existing.length > 0) {
+    if (existing[0]) {
+      if (superUser) {
+        await walkToStatus(payload, existing[0], status, superUser, cancelReason)
+      }
       continue
     }
 
     const tableId = tableMap.get(`table-${i + 1}`)
-    const itemId = items[i]
+    const itemId = items[i % items.length]
     if (itemId === undefined) continue
 
-    await payload.create({
+    const created = await payload.create({
       collection: 'orders',
       data: {
         tenant: tenantId,
@@ -235,12 +316,17 @@ const seedSampleOrders = async (payload: Payload, tenantId: number): Promise<num
         items: [
           {
             item: itemId,
-            quantity: i + 1,
+            quantity: (i % 3) + 1,
           },
         ],
       },
       context,
     })
+
+    if (superUser) {
+      await walkToStatus(payload, created, status, superUser, cancelReason)
+    }
+
     createdCount++
   }
 

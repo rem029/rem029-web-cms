@@ -2064,6 +2064,10 @@ export interface Order {
   orderNumber?: number | null;
   orderDate?: string | null;
   status: 'pending' | 'confirmed' | 'preparing' | 'prepared' | 'served' | 'completed' | 'cancelled';
+  /**
+   * Why the order was cancelled, e.g. "Guest left" or "Out of stock".
+   */
+  cancelReason?: string | null;
   menu: number | Menu;
   table?: (number | null) | Table;
   source: 'guest' | 'pos';
@@ -2096,6 +2100,12 @@ export interface Order {
   currency?: string | null;
   flow?: ('waiter_kitchen_cashier' | 'waiter_kitchen' | 'kitchen_only') | null;
   showPrices?: boolean | null;
+  confirmedAt?: string | null;
+  preparingAt?: string | null;
+  preparedAt?: string | null;
+  servedAt?: string | null;
+  completedAt?: string | null;
+  cancelledAt?: string | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -3742,6 +3752,7 @@ export interface OrdersSelect<T extends boolean = true> {
   orderNumber?: T;
   orderDate?: T;
   status?: T;
+  cancelReason?: T;
   menu?: T;
   table?: T;
   source?: T;
@@ -3776,6 +3787,12 @@ export interface OrdersSelect<T extends boolean = true> {
   currency?: T;
   flow?: T;
   showPrices?: T;
+  confirmedAt?: T;
+  preparingAt?: T;
+  preparedAt?: T;
+  servedAt?: T;
+  completedAt?: T;
+  cancelledAt?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;

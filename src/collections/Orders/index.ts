@@ -8,7 +8,11 @@ import { accessCheckResolver, hiddenResolver, isActiveSuperUser } from '@/common
 import { extractTenantId } from '@/common/utils/tenantCollections'
 
 import { assignOrderNumber } from './hooks/assignOrderNumber'
+import { autoComplete } from './hooks/autoComplete'
+import { broadcast } from './hooks/broadcast'
 import { snapshotItems } from './hooks/snapshotItems'
+import { statusTimestamps } from './hooks/statusTimestamps'
+import { transitionGuard } from './hooks/transitionGuard'
 import { ordersAccess } from './utils/access'
 import { ORDER_SOURCES, ORDER_STATUSES, ORDER_TYPES, PAYMENT_STATUSES } from './utils/statuses'
 
@@ -26,7 +30,8 @@ const money = {
  * menu. Prices, titles and the menu's flow are snapshotted when the order is placed, so later
  * catalog or menu changes never change it; amounts are minor units (`src/common/utils/money.ts`).
  * No public access: guests go through server actions. Staff read and update the orders of the
- * menus that list them (`ordersAccess`). Status moves, their timestamps and live updates: 3b.
+ * menus that list them (`ordersAccess`). Status moves and who may make them: `utils/transitions.ts`
+ * (`transitionGuard`); every save is published to open screens after it commits (`broadcast`).
  */
 export const Orders: CollectionConfig = {
   slug: 'orders',
@@ -53,8 +58,11 @@ export const Orders: CollectionConfig = {
         { path: 'table', collection: 'tables', label: 'table' },
       ]),
     ],
-    // snapshot first: the number is taken last, so a refused order never uses one
-    beforeChange: [snapshotItems, assignOrderNumber],
+    // the guard first and the number last, so a refused order never uses one; autoComplete
+    // before the stamps, so a served-and-completed order gets both times
+    beforeChange: [transitionGuard, snapshotItems, autoComplete, statusTimestamps, assignOrderNumber],
+    // published after commit only (`afterCommit`): a save that rolls back sends nothing
+    afterChange: [broadcast],
   },
   fields: [
     {
@@ -84,6 +92,17 @@ export const Orders: CollectionConfig = {
           admin: { width: '33%' },
         },
       ],
+    },
+    {
+      // asked for when staff cancel (transitionGuard); guests cancel without one
+      name: 'cancelReason',
+      type: 'text',
+      label: 'Cancel reason',
+      maxLength: 200,
+      admin: {
+        condition: (data) => data?.status === 'cancelled',
+        description: 'Why the order was cancelled, e.g. "Guest left" or "Out of stock".',
+      },
     },
     {
       type: 'row',
@@ -247,6 +266,20 @@ export const Orders: CollectionConfig = {
       type: 'checkbox',
       label: 'Prices shown to the guest',
       admin: { ...computed, position: 'sidebar' },
+    },
+    // when the order reached each status (statusTimestamps), for the boards' timers and the report
+    {
+      type: 'collapsible',
+      label: 'Status times',
+      admin: { position: 'sidebar', initCollapsed: true },
+      fields: [
+        { name: 'confirmedAt', type: 'date', label: 'Confirmed', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
+        { name: 'preparingAt', type: 'date', label: 'Preparing', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
+        { name: 'preparedAt', type: 'date', label: 'Prepared', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
+        { name: 'servedAt', type: 'date', label: 'Served', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
+        { name: 'completedAt', type: 'date', label: 'Completed', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
+        { name: 'cancelledAt', type: 'date', label: 'Cancelled', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
+      ],
     },
   ],
 }
