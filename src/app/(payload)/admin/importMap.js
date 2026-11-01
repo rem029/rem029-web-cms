@@ -38,6 +38,7 @@ import { TableQrPanel as TableQrPanel_485125a8420880c99ec5f9c172a9499b } from '@
 import { MoneyCell as MoneyCell_54a8acb2632f3c21498e1eeeacd37312 } from '@/collections/Orders/components/MoneyCell'
 import { MoneyField as MoneyField_0a1e81ba236491810119a65b775fe770 } from '@/collections/Orders/components/MoneyField'
 import { MoneyInput as MoneyInput_2bd625b3b87bcb68f8381e8c420d8e58 } from '@/collections/Payments/components/MoneyInput'
+import { RefundDueCell as RefundDueCell_5e46699d9b09740ea018e08fd87f8b5a } from '@/collections/Payments/components/RefundDueCell'
 import { ShowcaseBanner as ShowcaseBanner_ff3381454f74bb637fe497e0c393f186 } from '@/common/components/ShowcaseBanner/ShowcaseBanner'
 import { UploadFeatureClient as UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlockquoteFeatureClient as BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
@@ -104,6 +105,7 @@ export const importMap = {
   "@/collections/Orders/components/MoneyCell#MoneyCell": MoneyCell_54a8acb2632f3c21498e1eeeacd37312,
   "@/collections/Orders/components/MoneyField#MoneyField": MoneyField_0a1e81ba236491810119a65b775fe770,
   "@/collections/Payments/components/MoneyInput#MoneyInput": MoneyInput_2bd625b3b87bcb68f8381e8c420d8e58,
+  "@/collections/Payments/components/RefundDueCell#RefundDueCell": RefundDueCell_5e46699d9b09740ea018e08fd87f8b5a,
   "@/common/components/ShowcaseBanner/ShowcaseBanner#ShowcaseBanner": ShowcaseBanner_ff3381454f74bb637fe497e0c393f186,
   "@payloadcms/richtext-lexical/client#UploadFeatureClient": UploadFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlockquoteFeatureClient": BlockquoteFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,

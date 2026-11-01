@@ -8,6 +8,7 @@ import { hiddenBannerField, hiddenFields } from '@/common/fields/hiddenFields'
 import { validateTenantDocUniqueness } from '@/common/hooks/validateTenantDocUniqueness'
 import type { CollectionConfig } from 'payload'
 import { currencyField } from './fields/currency'
+import { onlinePaymentsField } from './fields/onlinePayments'
 import { restaurantTab } from './fields/restaurant'
 import { validateHomepageTenant } from './hooks/validateHomepageTenant'
 
@@ -165,6 +166,8 @@ export const Settings: CollectionConfig = {
           ],
         },
         restaurantTab,
+        // rem0018 phase 2 step 2: unnamed, so the field stays `onlinePayments.provider`
+        { label: 'Payments', fields: [onlinePaymentsField] },
       ],
     },
     ...hiddenFields({

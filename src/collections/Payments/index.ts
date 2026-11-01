@@ -22,7 +22,7 @@ export const PAYMENT_STATES = [
   { label: 'Voided', value: 'voided' },
 ] as const
 
-/** The provider of cash and card payments the cashier records (step 2 adds online providers). */
+/** The provider of cash and card payments the cashier records (online: `PROVIDERS` in payments/registry.ts). */
 export const MANUAL_PROVIDER = 'manual'
 
 // set by the hooks: editors see them, nobody types them
@@ -63,7 +63,15 @@ export const Payments: CollectionConfig = {
   },
   admin: {
     group: 'Orders',
-    defaultColumns: ['orderNumber', 'method', 'amount', 'status', 'takenBy', 'createdAt'],
+    defaultColumns: [
+      'orderNumber',
+      'method',
+      'amount',
+      'status',
+      'refundDue',
+      'takenBy',
+      'createdAt',
+    ],
     hidden: hiddenResolver('payments'),
   },
   defaultSort: '-createdAt',
@@ -180,6 +188,23 @@ export const Payments: CollectionConfig = {
       admin: {
         condition: (data) => data?.status === 'voided',
         description: 'Why the payment was voided, e.g. "Wrong amount".',
+      },
+    },
+    {
+      // rem0018 phase 2 step 2: an online success the order didn't need (a second checkout, the
+      // wrong amount, an order already paid or closed): the money moved, so it is recorded and the
+      // cashier refunds it by hand, then voids it with the reason
+      name: 'refundDue',
+      type: 'checkbox',
+      label: 'Refund due',
+      defaultValue: false,
+      access: serverOnly,
+      admin: {
+        ...computed,
+        components: { Cell: '@/collections/Payments/components/RefundDueCell#RefundDueCell' },
+        condition: (data) => Boolean(data?.refundDue),
+        description:
+          'The guest paid online twice or the wrong amount: refund them, then void this payment.',
       },
     },
     // the order's, copied when the payment is recorded: the money display, list column and access

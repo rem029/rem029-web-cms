@@ -17,6 +17,13 @@ import type { Order, Payment } from '@/payload-types'
  *    the status back: a completed order with a voided payment stays completed and unpaid
  *    (adversarial review 9). The order's own `broadcast` tells open screens (after commit).
  * 4. log `info` with tenant id, order id, payment id, paymentStatus
+ *
+ * step 2 (online):
+ * - "paid" is a payment that **becomes** succeeded, new or not (an online payment goes pending →
+ *   succeeded through the webhook) and isn't `refundDue` (a duplicate or a wrong amount, set by
+ *   `applyWebhook`: the order stays as it is)
+ * - a void makes the order unpaid only when no other succeeded payment is left on it (voiding the
+ *   refunded duplicate keeps the order paid)
  */
 export const syncOrderPayment: CollectionAfterChangeHook<Payment> = async ({
   doc,
@@ -32,10 +39,10 @@ export const syncOrderPayment: CollectionAfterChangeHook<Payment> = async ({
     return doc
   }
 
-  // 2. `paymentStatus`: a new succeeded payment → paid; voided → unpaid (waived orders are never
-  //    touched: closed without payment)
+  // 2. `paymentStatus`: a payment that becomes succeeded without refundDue → paid; voided → unpaid
+  //    (waived orders are never touched: closed without payment)
   let targetPaymentStatus: 'paid' | 'unpaid' | null = null
-  if (isNew && doc.status === 'succeeded') {
+  if (doc.status === 'succeeded' && previousDoc?.status !== 'succeeded' && !doc.refundDue) {
     targetPaymentStatus = 'paid'
   } else if (doc.status === 'voided' && previousDoc?.status !== 'voided') {
     targetPaymentStatus = 'unpaid'
@@ -62,9 +69,33 @@ export const syncOrderPayment: CollectionAfterChangeHook<Payment> = async ({
     return doc
   }
 
+  // don't touch an order already paid when marking paid
+  if (targetPaymentStatus === 'paid' && order.paymentStatus === 'paid') {
+    return doc
+  }
+
   // waived orders are never touched: closed without payment
   if (targetPaymentStatus === 'unpaid' && order.paymentStatus === 'waived') {
     return doc
+  }
+
+  // on a void, count the order's other succeeded payments and skip when > 0
+  if (targetPaymentStatus === 'unpaid') {
+    const { totalDocs } = await req.payload.count({
+      collection: 'payments',
+      where: {
+        and: [
+          { order: { equals: orderId } },
+          { status: { equals: 'succeeded' } },
+          { id: { not_equals: doc.id } },
+        ],
+      },
+      overrideAccess: true,
+      req,
+    })
+    if (totalDocs > 0) {
+      return doc
+    }
   }
 
   // 3. update the order (overrideAccess, req, `context: { orderMove: 'payment' }`); when it is

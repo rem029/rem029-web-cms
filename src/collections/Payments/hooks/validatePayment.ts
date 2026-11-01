@@ -7,6 +7,7 @@ import {
 } from 'payload'
 
 import { isActiveSuperUser, tenantAdminTenantIds } from '@/common/utils/access'
+import { getProvider } from '@/common/utils/payments/registry'
 import { staffRolesFor } from '@/common/utils/staffRoles'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 import type { Payment } from '@/payload-types'
@@ -70,6 +71,13 @@ const lockOrder = async (req: PayloadRequest, orderId: number): Promise<void> =>
  *    code
  * 8. a succeeded payment only becomes `voided`, with a reason; its method, received, reference
  *    and order never change (remarks may)
+ *
+ * online (step 2), server code only (no user):
+ * - create: `provider` must be a registered online provider (`getProvider`), status `pending`
+ *   whatever was sent; the order rules (3) and the amount (4) as above
+ * - update: a pending, cancelled or failed online payment may become `succeeded` (a late success
+ *   is still money moved, adversarial review 6); pending may become `failed` or `cancelled`;
+ *   `providerRef` is set once (null → value), never changed
  */
 export const validatePayment: CollectionBeforeValidateHook<Payment> = async ({
   data,
@@ -86,6 +94,67 @@ export const validatePayment: CollectionBeforeValidateHook<Payment> = async ({
       paymentId: originalDoc?.id,
     }
     const before = originalDoc?.status
+
+    // online updates from server code (step 2)
+    if (!req.user && originalDoc?.method === 'online') {
+      if (
+        data.providerRef !== undefined &&
+        originalDoc.providerRef !== null &&
+        originalDoc.providerRef !== undefined &&
+        data.providerRef !== originalDoc.providerRef
+      ) {
+        refuse(req, ctx, 'providerRef', "The provider reference can't change.")
+      }
+
+      if (data.status !== undefined && data.status !== before) {
+        const allowed =
+          (before === 'pending' &&
+            (data.status === 'succeeded' ||
+              data.status === 'failed' ||
+              data.status === 'cancelled')) ||
+          (before === 'cancelled' && data.status === 'succeeded') ||
+          (before === 'failed' && data.status === 'succeeded')
+
+        if (!allowed) {
+          refuse(req, ctx, 'status', 'This payment is closed.')
+        }
+      }
+
+      // a success the order doesn't need is still recorded, for a refund by hand: decided under
+      // the order lock, so two webhooks at once can't both pay the order
+      if (data.status === 'succeeded' && before !== 'succeeded' && ctx.orderId) {
+        await lockOrder(req, ctx.orderId)
+        const order = await req.payload.findByID({
+          collection: 'orders',
+          id: ctx.orderId,
+          overrideAccess: true,
+          req,
+          depth: 0,
+          disableErrors: true,
+        })
+        const { totalDocs: otherPaid } = await req.payload.count({
+          collection: 'payments',
+          where: {
+            and: [
+              { order: { equals: ctx.orderId } },
+              { status: { equals: 'succeeded' } },
+              { id: { not_equals: originalDoc.id } },
+            ],
+          },
+          overrideAccess: true,
+          req,
+        })
+        const unneeded =
+          otherPaid > 0 || order?.paymentStatus === 'waived' || order?.status === 'cancelled'
+        data.refundDue = Boolean(data.refundDue) || unneeded
+        if (data.refundDue) {
+          req.payload.logger.warn({ msg: 'payment: online success needs a refund', ...ctx })
+        }
+      }
+
+      req.payload.logger.debug({ msg: 'payment: online update checked', ...ctx })
+      return data
+    }
 
     // 7. closed payments are final; pending (online) ones belong to the provider
     if (before === 'voided' || before === 'failed' || before === 'cancelled') {
@@ -172,6 +241,13 @@ export const validatePayment: CollectionBeforeValidateHook<Payment> = async ({
   const amount = order.total ?? 0
   data.amount = amount
   if (data.method !== 'online' && !isActiveSuperUser(req.user)) data.status = 'succeeded'
+  if (!req.user && data.method === 'online') {
+    const provider = getProvider(data.provider)
+    if (!provider) {
+      refuse(req, ctx, 'provider', 'Unknown payment provider.')
+    }
+    data.status = 'pending'
+  }
 
   // 5. method rules
   if (data.method === 'card') {

@@ -2044,6 +2044,12 @@ export interface Setting {
     legalName?: string | null;
     taxNumber?: string | null;
   };
+  onlinePayments?: {
+    /**
+     * Connect a payment provider to let guests pay from their phone.
+     */
+    provider?: ('none' | 'test') | null;
+  };
   /**
    * Hides it from other members in the admin only. The public site always uses it.
    */
@@ -2147,6 +2153,10 @@ export interface Payment {
    * Why the payment was voided, e.g. "Wrong amount".
    */
   voidReason?: string | null;
+  /**
+   * The guest paid online twice or the wrong amount: refund them, then void this payment.
+   */
+  refundDue?: boolean | null;
   orderNumber?: number | null;
   menu?: (number | null) | Menu;
   currency?: string | null;
@@ -3621,6 +3631,11 @@ export interface SettingsSelect<T extends boolean = true> {
         legalName?: T;
         taxNumber?: T;
       };
+  onlinePayments?:
+    | T
+    | {
+        provider?: T;
+      };
   isHidden?: T;
   visibleTo?: T;
   createdBy?: T;
@@ -3876,6 +3891,7 @@ export interface PaymentsSelect<T extends boolean = true> {
   reference?: T;
   remarks?: T;
   voidReason?: T;
+  refundDue?: T;
   orderNumber?: T;
   menu?: T;
   currency?: T;

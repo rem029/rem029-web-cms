@@ -18,6 +18,7 @@
 import type { Payload } from 'payload'
 
 import { closeOrder } from '@/collections/Orders/utils/closeOrder'
+import { getProvider } from '@/common/utils/payments/registry'
 import type { OrderStatus } from '@/collections/Orders/utils/statuses'
 import { NEXT_STATUS } from '@/collections/Orders/utils/transitions'
 import { DEFAULT_CURRENCY } from '@/collections/Settings/fields/currency'
@@ -460,6 +461,8 @@ export const seedRestaurant = async (payload: Payload): Promise<void> => {
             legalName: 'Corniche Kitchen LLC',
             taxNumber: 'QA-123456',
           },
+          // guests can pay online in dev when the test provider is on (PAYMENTS_TEST_PROVIDER=true)
+          onlinePayments: { provider: getProvider('test') ? 'test' : 'none' },
         },
         locale: 'en',
         context,
