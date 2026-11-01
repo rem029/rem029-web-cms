@@ -52,6 +52,8 @@ export type MoveActor =
   | { kind: 'guest' }
   // manager = tenant admin of the order's business, or a super user: every move
   | { kind: 'staff'; roles: StaffRole[]; isManager: boolean }
+  // server code moving an order on its own (phase 2: a payment that pays a served order)
+  | { kind: 'system' }
 
 export type MoveCheck = {
   from: OrderStatus
@@ -61,12 +63,14 @@ export type MoveCheck = {
   cancelReason?: string | null
   // the order's business day is today's (moving a completed order back is same-day only)
   sameBusinessDay: boolean
+  // the order is paid or waived (phase 2): under the cashier flow, served → completed needs it
+  paid: boolean
 }
 
 /** Why a move is refused: 400 for a move that doesn't exist, 403 for the wrong person. */
 export type MoveRefusal = {
   status: 400 | 403
-  path: 'status' | 'cancelReason'
+  path: 'status' | 'cancelReason' | 'closeReason' | 'closeNote'
   message: string
 }
 
@@ -117,6 +121,18 @@ export const previousStatus = (flow: OrderFlow, from: OrderStatus): OrderStatus 
  */
 export const checkMove = (check: MoveCheck): MoveRefusal | null => {
   const { from, to, flow, actor, cancelReason, sameBusinessDay } = check
+
+  // 0. server code (a payment) only completes a paid served order; any other system move is a bug
+  if (actor.kind === 'system') {
+    if (from === 'served' && to === 'completed' && check.paid) {
+      return null
+    }
+    return {
+      status: 400,
+      path: 'status',
+      message: `An order can't go from ${statusLabel(from)} to ${statusLabel(to)}.`,
+    }
+  }
 
   // 1. to === 'cancelled':
   if (to === 'cancelled') {
@@ -182,6 +198,16 @@ export const checkMove = (check: MoveCheck): MoveRefusal | null => {
 
   // 3. to === NEXT_STATUS[from] (forward):
   if (to === NEXT_STATUS[from]) {
+    // the cashier flow completes only paid orders (managers too: they close unpaid ones with
+    // closeOrder)
+    if (from === 'served' && flow === 'waiter_kitchen_cashier' && !check.paid) {
+      return {
+        status: 400,
+        path: 'status',
+        message: 'Take the payment first, or close the order without payment.',
+      }
+    }
+
     // served → completed in flows without a cashier: autoComplete's move, 400 (never asked)
     if (from === 'served' && flow !== 'waiter_kitchen_cashier') {
       return {
@@ -236,4 +262,89 @@ export const checkMove = (check: MoveCheck): MoveRefusal | null => {
     path: 'status',
     message: `An order can't go from ${statusLabel(from)} to ${statusLabel(to)}. Move it one step at a time.`,
   }
+}
+
+/** Why a guest left without paying (phase 2 step 1): `closeOrder`'s `unpaid` outcome. */
+export type CloseReason = 'walked_out' | 'complimentary' | 'staff_meal' | 'other'
+
+export type CloseCheck = {
+  from: OrderStatus
+  actor: MoveActor
+  outcome: 'paid' | 'unpaid'
+  // the order is paid (its payment went through)
+  paid: boolean
+  reason?: CloseReason | null
+  note?: string | null
+}
+
+/**
+ * Whether `actor` may close an order (phase 2 step 1, plan "close order"); `null` = allowed.
+ * Pure, as `checkMove`: the cashier board (phase 4) shows Close order only when it passes.
+ * 1. from completed / cancelled → 400 on status "This order is already closed."
+ * 2. not staff, or staff without the cashier role and not a manager → 403
+ *    "Only a cashier or a manager can close an order."
+ * 3. outcome paid and not `paid` → 400 on status "This order isn't paid yet. Take the payment,
+ *    or close it without payment."
+ * 4. outcome unpaid on a paid order → 400 on status "This order is paid. Close it as paid.": a
+ *    payment that went through stays on its order (user 2026-11-01)
+ * 5. outcome unpaid: no reason → 400 on closeReason "Pick why the order is closed without
+ *    payment."; reason other and no note (trimmed) → 400 on closeNote "Add a note for Other."
+ */
+export const checkClose = (check: CloseCheck): MoveRefusal | null => {
+  const { from, actor, outcome, paid, reason, note } = check
+
+  // 1. from completed / cancelled → 400 on status "This order is already closed."
+  if (from === 'completed' || from === 'cancelled') {
+    return {
+      status: 400,
+      path: 'status',
+      message: 'This order is already closed.',
+    }
+  }
+
+  // 2. not staff, or staff without the cashier role and not a manager → 403
+  //    "Only a cashier or a manager can close an order."
+  if (actor.kind !== 'staff' || (!actor.isManager && !actor.roles.includes('cashier'))) {
+    return {
+      status: 403,
+      path: 'status',
+      message: 'Only a cashier or a manager can close an order.',
+    }
+  }
+
+  // 3. outcome paid and not `paid` → 400 on status "This order isn't paid yet. Take the payment,
+  //    or close it without payment."
+  if (outcome === 'paid' && !paid) {
+    return {
+      status: 400,
+      path: 'status',
+      message: "This order isn't paid yet. Take the payment, or close it without payment.",
+    }
+  }
+
+  // 4. a paid order keeps its payment: never waived
+  if (outcome === 'unpaid' && paid) {
+    return { status: 400, path: 'status', message: 'This order is paid. Close it as paid.' }
+  }
+
+  // 5. outcome unpaid: no reason → 400 on closeReason "Pick why the order is closed without
+  //    payment."; reason other and no note (trimmed) → 400 on closeNote "Add a note for Other."
+  if (outcome === 'unpaid') {
+    if (!reason) {
+      return {
+        status: 400,
+        path: 'closeReason',
+        message: 'Pick why the order is closed without payment.',
+      }
+    }
+    if (reason === 'other' && (!note || !note.trim())) {
+      return {
+        status: 400,
+        path: 'closeNote',
+        message: 'Add a note for Other.',
+      }
+    }
+  }
+
+  return null
 }

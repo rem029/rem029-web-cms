@@ -27,6 +27,7 @@ import { MenuItems } from './collections/MenuItems'
 import { Menus } from './collections/Menus'
 import { Tables } from './collections/Tables'
 import { Orders } from './collections/Orders'
+import { Payments } from './collections/Payments'
 import { OrderCounters } from './collections/OrderCounters'
 import { MenuTags } from './collections/MenuTags'
 
@@ -141,6 +142,7 @@ export default buildConfig({
     Tables,
     Orders,
     OrderCounters,
+    Payments,
     AuditLogs,
     FieldShowcase,
   ],

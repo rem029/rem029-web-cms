@@ -480,12 +480,10 @@ describe('orders', () => {
       ],
     })
 
-    // assert: subtotal and total 3750 + 3000 = 6750, balance 6750, amountPaid 0, paymentStatus
-    //         unpaid, currency USD, flow and showPrices from the menu
+    // assert: subtotal and total 3750 + 3000 = 6750, paymentStatus unpaid, currency USD,
+    //         flow and showPrices from the menu
     expect(order.subtotal).toBe(6750)
     expect(order.total).toBe(6750)
-    expect(order.balance).toBe(6750)
-    expect(order.amountPaid).toBe(0)
     expect(order.paymentStatus).toBe('unpaid')
     expect(order.currency).toBe('USD')
     expect(order.flow).toBe(menu.ordering?.flow)

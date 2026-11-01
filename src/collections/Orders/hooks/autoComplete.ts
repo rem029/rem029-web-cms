@@ -7,6 +7,9 @@ import type { Order } from '@/payload-types'
  * sdq's auto-complete): `waiter_kitchen` and `kitchen_only`. Only on a forward move into
  * `served` (from `prepared`), so moving a completed order back to `prepared` sticks
  * (adversarial review 5). Runs after `transitionGuard`, before `statusTimestamps`.
+ * phase 2 step 1 (open question 1): also under `waiter_kitchen_cashier` when the order is
+ * already paid (`paymentStatus` paid or waived): nothing is left for the cashier, so served
+ * completes at once.
  */
 export const autoComplete: CollectionBeforeChangeHook<Order> = ({
   data,
@@ -15,7 +18,10 @@ export const autoComplete: CollectionBeforeChangeHook<Order> = ({
 }) => {
   const servedNow =
     operation === 'update' && originalDoc?.status === 'prepared' && data.status === 'served'
-  if (servedNow && originalDoc?.flow !== 'waiter_kitchen_cashier') {
+  // the incoming value first: a void sets unpaid on a paid order
+  const paymentStatus = data.paymentStatus ?? originalDoc?.paymentStatus
+  const isPaid = paymentStatus === 'paid' || paymentStatus === 'waived'
+  if (servedNow && (originalDoc?.flow !== 'waiter_kitchen_cashier' || isPaid)) {
     data.status = 'completed'
   }
   return data

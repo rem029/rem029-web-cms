@@ -9,7 +9,7 @@ import { DEFAULT_CURRENCY } from '@/collections/Settings/fields/currency'
 import { formatMinor } from '@/common/utils/money'
 
 /**
- * A read-only order amount (prices, line totals, totals, paid, balance) in the order's currency:
+ * A read-only order amount (prices, line totals, totals, payments) in the order's currency:
  * stored in minor units (150), shown as money ("$1.50"). Every one of these fields is computed
  * on the server, so the field never edits.
  */

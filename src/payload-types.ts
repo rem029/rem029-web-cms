@@ -145,6 +145,7 @@ export interface Config {
     tables: Table;
     orders: Order;
     'order-counters': OrderCounter;
+    payments: Payment;
     'audit-logs': AuditLog;
     'field-showcase': FieldShowcase;
     redirects: Redirect;
@@ -159,6 +160,9 @@ export interface Config {
   collectionsJoins: {
     menus: {
       'ordering.tables': 'tables';
+    };
+    orders: {
+      payments: 'payments';
     };
     'field-showcase': {
       children: 'field-showcase';
@@ -185,6 +189,7 @@ export interface Config {
     tables: TablesSelect<false> | TablesSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     'order-counters': OrderCountersSelect<false> | OrderCountersSelect<true>;
+    payments: PaymentsSelect<false> | PaymentsSelect<true>;
     'audit-logs': AuditLogsSelect<false> | AuditLogsSelect<true>;
     'field-showcase': FieldShowcaseSelect<false> | FieldShowcaseSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -396,6 +401,7 @@ export interface UsersAccess {
           | 'menus'
           | 'tables'
           | 'orders'
+          | 'payments'
           | 'audit-logs'
           | 'field-showcase'
           | 'redirects'
@@ -2093,10 +2099,15 @@ export interface Order {
   }[];
   subtotal?: number | null;
   total?: number | null;
-  amountPaid?: number | null;
-  balance?: number | null;
   business?: string | null;
-  paymentStatus: 'unpaid' | 'partially_paid' | 'paid' | 'waived';
+  paymentStatus: 'unpaid' | 'paid' | 'waived';
+  closeReason?: ('walked_out' | 'complimentary' | 'staff_meal' | 'other') | null;
+  closeNote?: string | null;
+  payments?: {
+    docs?: (number | Payment)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   currency?: string | null;
   flow?: ('waiter_kitchen_cashier' | 'waiter_kitchen' | 'kitchen_only') | null;
   showPrices?: boolean | null;
@@ -2106,6 +2117,42 @@ export interface Order {
   servedAt?: string | null;
   completedAt?: string | null;
   cancelledAt?: string | null;
+  createdBy?: (number | null) | User;
+  updatedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments".
+ */
+export interface Payment {
+  id: number;
+  tenant?: (number | null) | Tenant;
+  order: number | Order;
+  method: 'cash' | 'card' | 'online';
+  amount?: number | null;
+  status?: ('pending' | 'succeeded' | 'failed' | 'cancelled' | 'voided') | null;
+  /**
+   * What the guest handed over. Leave empty when it was the exact amount.
+   */
+  received?: number | null;
+  change?: number | null;
+  /**
+   * The receipt number printed by the card machine.
+   */
+  reference?: string | null;
+  remarks?: string | null;
+  /**
+   * Why the payment was voided, e.g. "Wrong amount".
+   */
+  voidReason?: string | null;
+  orderNumber?: number | null;
+  menu?: (number | null) | Menu;
+  currency?: string | null;
+  takenBy?: (number | null) | User;
+  provider?: string | null;
+  providerRef?: string | null;
   createdBy?: (number | null) | User;
   updatedBy?: (number | null) | User;
   updatedAt: string;
@@ -2594,6 +2641,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'order-counters';
         value: number | OrderCounter;
+      } | null)
+    | ({
+        relationTo: 'payments';
+        value: number | Payment;
       } | null)
     | ({
         relationTo: 'audit-logs';
@@ -3780,10 +3831,11 @@ export interface OrdersSelect<T extends boolean = true> {
       };
   subtotal?: T;
   total?: T;
-  amountPaid?: T;
-  balance?: T;
   business?: T;
   paymentStatus?: T;
+  closeReason?: T;
+  closeNote?: T;
+  payments?: T;
   currency?: T;
   flow?: T;
   showPrices?: T;
@@ -3806,6 +3858,32 @@ export interface OrderCountersSelect<T extends boolean = true> {
   tenant?: T;
   date?: T;
   last?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments_select".
+ */
+export interface PaymentsSelect<T extends boolean = true> {
+  tenant?: T;
+  order?: T;
+  method?: T;
+  amount?: T;
+  status?: T;
+  received?: T;
+  change?: T;
+  reference?: T;
+  remarks?: T;
+  voidReason?: T;
+  orderNumber?: T;
+  menu?: T;
+  currency?: T;
+  takenBy?: T;
+  provider?: T;
+  providerRef?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }

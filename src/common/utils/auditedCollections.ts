@@ -29,6 +29,7 @@ export const auditedCollections: CollectionSlug[] = [
   // restaurant orders (rem0018)
   'tables',
   'orders',
+  'payments',
 ]
 
 // deliberately not audited

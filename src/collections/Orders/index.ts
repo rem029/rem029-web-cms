@@ -5,6 +5,7 @@ import { sameTenantFilter } from '@/common/fields/menuFields'
 import { validateSameTenant } from '@/common/hooks/validateSameTenant'
 import { businessLabel } from '@/common/hooks/businessLabel'
 import { accessCheckResolver, hiddenResolver, isActiveSuperUser } from '@/common/utils/access'
+import { menuStaffAccess } from '@/common/utils/menuStaffAccess'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 
 import { assignOrderNumber } from './hooks/assignOrderNumber'
@@ -13,11 +14,19 @@ import { broadcast } from './hooks/broadcast'
 import { snapshotItems } from './hooks/snapshotItems'
 import { statusTimestamps } from './hooks/statusTimestamps'
 import { transitionGuard } from './hooks/transitionGuard'
-import { ordersAccess } from './utils/access'
-import { ORDER_SOURCES, ORDER_STATUSES, ORDER_TYPES, PAYMENT_STATUSES } from './utils/statuses'
+import {
+  CLOSE_REASONS,
+  ORDER_SOURCES,
+  ORDER_STATUSES,
+  ORDER_TYPES,
+  PAYMENT_STATUSES,
+} from './utils/statuses'
 
 // computed by the hooks: editors see them, nobody types them
 const computed = { readOnly: true } as const
+
+// set by the hooks and server code (phase 2 step 1): staff with orders update can't write them
+const serverOnly = { create: () => false, update: () => false }
 
 // amounts are minor units (1800); these show them as money in the order's currency ("$18.00")
 const money = {
@@ -30,17 +39,19 @@ const money = {
  * menu. Prices, titles and the menu's flow are snapshotted when the order is placed, so later
  * catalog or menu changes never change it; amounts are minor units (`src/common/utils/money.ts`).
  * No public access: guests go through server actions. Staff read and update the orders of the
- * menus that list them (`ordersAccess`). Status moves and who may make them: `utils/transitions.ts`
- * (`transitionGuard`); every save is published to open screens after it commits (`broadcast`).
+ * menus that list them (`menuStaffAccess`). Status moves and who may make them:
+ * `utils/transitions.ts` (`transitionGuard`); every save is published to open screens after it
+ * commits (`broadcast`). Paid once by one payment (`Payments`), or closed unpaid:
+ * `utils/closeOrder.ts`.
  */
 export const Orders: CollectionConfig = {
   slug: 'orders',
   labels: { singular: 'Order', plural: 'Orders' },
   access: {
-    read: ordersAccess('read'),
+    read: menuStaffAccess('orders', 'read'),
     // guests and the POS create through server code (overrideAccess); in the admin, the profile
     create: accessCheckResolver('orders', 'create'),
-    update: ordersAccess('update'),
+    update: menuStaffAccess('orders', 'update'),
     delete: accessCheckResolver('orders', 'delete'),
   },
   admin: {
@@ -214,16 +225,8 @@ export const Orders: CollectionConfig = {
     {
       type: 'row',
       fields: [
-        { name: 'subtotal', type: 'number', label: 'Subtotal', admin: { ...computed, width: '25%', components: money } },
-        { name: 'total', type: 'number', label: 'Total', admin: { ...computed, width: '25%', components: money } },
-        {
-          name: 'amountPaid',
-          type: 'number',
-          label: 'Paid',
-          defaultValue: 0,
-          admin: { ...computed, width: '25%', components: money },
-        },
-        { name: 'balance', type: 'number', label: 'Balance', admin: { ...computed, width: '25%', components: money } },
+        { name: 'subtotal', type: 'number', label: 'Subtotal', access: serverOnly, admin: { ...computed, width: '50%', components: money } },
+        { name: 'total', type: 'number', label: 'Total', access: serverOnly, admin: { ...computed, width: '50%', components: money } },
       ],
     },
     {
@@ -249,8 +252,39 @@ export const Orders: CollectionConfig = {
       defaultValue: 'unpaid',
       required: true,
       index: true,
-      // recomputed from payments in phase 2
+      // paid by the order's payment (syncOrderPayment), or waived by closeOrder
+      access: serverOnly,
       admin: { ...computed, position: 'sidebar' },
+    },
+    {
+      name: 'closeReason',
+      type: 'select',
+      label: 'Closed without payment',
+      options: [...CLOSE_REASONS],
+      access: serverOnly,
+      admin: { ...computed, position: 'sidebar', condition: (data) => Boolean(data?.closeReason) },
+    },
+    {
+      name: 'closeNote',
+      type: 'text',
+      label: 'Close note',
+      maxLength: 200,
+      access: serverOnly,
+      admin: { ...computed, position: 'sidebar', condition: (data) => Boolean(data?.closeNote) },
+    },
+    {
+      // the order's payment, and voided ones before it; "Add new" opens a payment for this order
+      name: 'payments',
+      type: 'join',
+      label: 'Payments',
+      collection: 'payments',
+      on: 'order',
+      defaultSort: '-createdAt',
+      // payments are recorded from the Payments list (the order's picker), never from here
+      admin: {
+        allowCreate: false,
+        defaultColumns: ['method', 'amount', 'status', 'takenBy', 'createdAt'],
+      },
     },
     { name: 'currency', type: 'text', label: 'Currency', admin: { ...computed, position: 'sidebar' } },
     // the menu's Ordering settings when the order was placed (plan: "snapshotted on each order")

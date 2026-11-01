@@ -28,6 +28,7 @@ export const createdUpdatedByCollections: CollectionSlug[] = [
   // rem0018: restaurant orders
   'tables',
   'orders',
+  'payments',
   'field-showcase',
 ]
 

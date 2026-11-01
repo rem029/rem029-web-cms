@@ -17,7 +17,6 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number]['value']
 
 export const PAYMENT_STATUSES = [
   { label: 'Unpaid', value: 'unpaid' },
-  { label: 'Partially paid', value: 'partially_paid' },
   { label: 'Paid', value: 'paid' },
   { label: 'Waived', value: 'waived' },
 ] as const
@@ -30,4 +29,12 @@ export const ORDER_SOURCES = [
 export const ORDER_TYPES = [
   { label: 'Dine in', value: 'dine_in' },
   { label: 'Takeaway', value: 'takeaway' },
+] as const
+
+// why an order was closed without payment (phase 2 step 1, `closeOrder`), shown in the report
+export const CLOSE_REASONS = [
+  { label: 'Walked out', value: 'walked_out' },
+  { label: 'Complimentary', value: 'complimentary' },
+  { label: 'Staff meal', value: 'staff_meal' },
+  { label: 'Other', value: 'other' },
 ] as const

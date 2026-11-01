@@ -4,17 +4,19 @@ import { allowedTenantIds, isActiveSuperUser, isDisabledUser } from '@/common/ut
 import { staffMenuIds } from '@/common/utils/staffRoles'
 
 /**
- * Orders read / update (rem0018 phase 1 step 3a, from step 2's plan): both must allow.
- * - the profile: `orders` <op> in the order's business (`accessCheckResolver('orders', op)`,
+ * Read / update of orders and payments (rem0018 phase 1 step 3a; payments since phase 2 step 1,
+ * moved here from `Orders/utils/access.ts`): both must allow.
+ * - the profile: `<slug>` <op> in the doc's business (`accessCheckResolver(slug, op)`,
  *   which also gives tenant admins and super users their grants)
- * - the menu: the order's menu lists the user as staff (`staffMenuIds`, published menus only);
- *   tenant admins of that business and super users: every menu (`null`)
+ * - the menu: the doc's `menu` (an order's own, a payment's copy of its order's) lists the user
+ *   as staff (`staffMenuIds`, published menus only); tenant admins of that business and super
+ *   users: every menu (`null`)
  * Returns a `where` per allowed business: `{ tenant: { equals: t } }` when staffMenuIds is null,
  * else `{ and: [{ tenant: { equals: t } }, { menu: { in: ids } }] }`, joined with `or`; no
  * business left → false.
  */
-export const ordersAccess =
-  (op: 'read' | 'update'): Access =>
+export const menuStaffAccess =
+  (slug: 'orders' | 'payments', op: 'read' | 'update'): Access =>
   async ({ req }) => {
     const { user } = req
     if (!user || isDisabledUser(user)) {
@@ -24,9 +26,9 @@ export const ordersAccess =
       return true
     }
 
-    const tenantIds = allowedTenantIds(req, 'orders', op)
+    const tenantIds = allowedTenantIds(req, slug, op)
     if (tenantIds.length === 0) {
-      req.payload.logger.debug({ msg: 'access: denied', slug: 'orders', op, userId: user.id })
+      req.payload.logger.debug({ msg: 'access: denied', slug, op, userId: user.id })
       return false
     }
 
@@ -44,7 +46,7 @@ export const ordersAccess =
 
     if (clauses.length === 0) {
       req.payload.logger.debug({
-        msg: 'orders: no menus of user',
+        msg: `${slug}: no menus of user`,
         userId: user.id,
         op,
       })

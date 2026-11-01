@@ -8,14 +8,20 @@
  * - Settings → Restaurant: name, timezone Asia/Qatar, the day starting at 04:00, opening hours
  *   (Sat–Thu 07:00–01:00, Friday 13:00–01:00), legal name and tax number
  * - sample orders on the Corniche branch in every status (Sample guest 1–7; step 3b)
+ * - payments (phase 2 step 1): guest 6 completed by a cash payment with change (walked to
+ *   served, then paid: the payment completes it), guest 8 prepared and paid by card, guest 9
+ *   closed without payment (walked out)
  *
  * Runs after `menu` (needs the menus). Idempotent: tables upserted by menu + slug, the menus and
  * Settings updated in place. Dev only (`src/seeds/index.ts` refuses production).
  */
 import type { Payload } from 'payload'
 
+import { closeOrder } from '@/collections/Orders/utils/closeOrder'
 import type { OrderStatus } from '@/collections/Orders/utils/statuses'
 import { NEXT_STATUS } from '@/collections/Orders/utils/transitions'
+import { DEFAULT_CURRENCY } from '@/collections/Settings/fields/currency'
+import { toMinor } from '@/common/utils/money'
 import type { Order, Setting, User } from '@/payload-types'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 
@@ -147,8 +153,12 @@ const SAMPLE_ORDERS: { guestName: string; status: OrderStatus; cancelReason?: st
   { guestName: 'Sample guest 3', status: 'preparing' },
   { guestName: 'Sample guest 4', status: 'prepared' },
   { guestName: 'Sample guest 5', status: 'served' },
-  { guestName: 'Sample guest 6', status: 'completed' },
+  { guestName: 'Sample guest 6', status: 'served' },
   { guestName: 'Sample guest 7', status: 'cancelled', cancelReason: 'Guest left' },
+  { guestName: 'Sample guest 8', status: 'prepared' },
+  { guestName: 'Sample guest 9', status: 'confirmed' },
+  // phase 2 step 1: guest 6 above walks to served, seedSamplePayments pays and completes it;
+  // guests 8 (prepared) and 9 (confirmed) get a card payment and a walked-out close
 ]
 
 /**
@@ -251,15 +261,7 @@ const seedSampleOrders = async (payload: Payload, tenantId: number): Promise<num
     payload.logger.warn({ msg: 'restaurant seed: super user not found' })
   }
 
-  const tableSlugs = [
-    'table-1',
-    'table-2',
-    'table-3',
-    'table-4',
-    'table-5',
-    'table-6',
-    'table-7',
-  ]
+  const tableSlugs = ['table-1', 'table-2', 'table-3', 'table-4', 'table-5', 'table-6', 'table-7']
   const { docs: tables } = await payload.find({
     collection: 'tables',
     where: {
@@ -333,6 +335,92 @@ const seedSampleOrders = async (payload: Payload, tenantId: number): Promise<num
   return createdCount
 }
 
+/**
+ * Sample payments on the Corniche branch (rem0018 phase 2 step 1), as the super user through
+ * the real hooks (the cashier checks pass for a manager). Idempotent: an order that is already
+ * paid or closed is left alone.
+ * 1. guest 6 (served): cash, received rounded up to the next 10 → change; the payment completes
+ *    the order
+ * 2. guest 8 (prepared): card, receipt "SEED-0008", remarks "Visa"
+ * 3. guest 9 (confirmed): `closeOrder` unpaid, reason walked_out
+ * Returns how many payments it recorded.
+ */
+const seedSamplePayments = async (payload: Payload, tenantId: number): Promise<number> => {
+  const { docs: superUsers } = await payload.find({
+    collection: 'users',
+    where: { super_user: { equals: true } },
+    depth: 0,
+    limit: 1,
+  })
+  const superUser = superUsers[0]
+  if (!superUser) {
+    payload.logger.warn({ msg: 'restaurant seed: super user not found, no payments', tenantId })
+    return 0
+  }
+
+  // the sample order still open (no payment, not closed), else null
+  const openSample = async (guestName: string): Promise<Order | null> => {
+    const { docs } = await payload.find({
+      collection: 'orders',
+      where: { and: [{ tenant: { equals: tenantId } }, { guestName: { equals: guestName } }] },
+      depth: 0,
+      limit: 1,
+    })
+    const order = docs[0]
+    if (!order) payload.logger.warn({ msg: 'restaurant seed: sample order missing', guestName })
+    const open = order && order.paymentStatus === 'unpaid' && order.status !== 'completed'
+    return open ? order : null
+  }
+
+  let createdCount = 0
+
+  // 1. guest 6: cash with change, completes it
+  const order6 = await openSample('Sample guest 6')
+  if (order6) {
+    const tens = toMinor(10, order6.currency ?? DEFAULT_CURRENCY)
+    const received = (Math.floor((order6.total ?? 0) / tens) + 1) * tens
+    await payload.create({
+      collection: 'payments',
+      data: { order: order6.id, method: 'cash', status: 'succeeded', received },
+      user: superUser,
+      overrideAccess: true,
+      context,
+    })
+    createdCount++
+  }
+
+  // 2. guest 8: card
+  const order8 = await openSample('Sample guest 8')
+  if (order8) {
+    await payload.create({
+      collection: 'payments',
+      data: {
+        order: order8.id,
+        method: 'card',
+        status: 'succeeded',
+        reference: 'SEED-0008',
+        remarks: 'Visa',
+      },
+      user: superUser,
+      overrideAccess: true,
+      context,
+    })
+    createdCount++
+  }
+
+  // 3. guest 9: closed without payment
+  const order9 = await openSample('Sample guest 9')
+  if (order9) {
+    await closeOrder(payload, superUser, {
+      orderId: order9.id,
+      outcome: 'unpaid',
+      reason: 'walked_out',
+    })
+  }
+
+  return createdCount
+}
+
 export const seedRestaurant = async (payload: Payload): Promise<void> => {
   for (const tenantSlug of BUSINESS_SLUGS) {
     const { docs: tenants } = await payload.find({
@@ -392,9 +480,11 @@ export const seedRestaurant = async (payload: Payload): Promise<void> => {
 
     // after Settings: the order numbers use its timezone and day start
     const orderCount = await seedSampleOrders(payload, tenant.id)
+    // after the orders: they need served orders to pay
+    const paymentCount = await seedSamplePayments(payload, tenant.id)
 
     payload.logger.info(
-      { tenantId: tenant.id, tables: tableCount, orders: orderCount },
+      { tenantId: tenant.id, tables: tableCount, orders: orderCount, payments: paymentCount },
       'restaurant seed: done for tenant',
     )
   }

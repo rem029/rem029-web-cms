@@ -66,7 +66,15 @@ const newOrderTenantId = async (
   return menu ? extractTenantId(menu.tenant) : null
 }
 
+// set by trusted server code on its own order update (phase 2 step 1): `payment` = syncOrderPayment
+// completing a paid served order, `close` = closeOrder (already checked with `checkClose`). Never
+// from a client: REST and GraphQL can't set `context`.
+export const ORDER_MOVE_CONTEXT = 'orderMove'
+export type OrderMove = 'payment' | 'close'
+
 const actorFor = (req: PayloadRequest, tenantId: number | null): MoveActor => {
+  // a payment completing a paid served order (syncOrderPayment)
+  if (req.context?.[ORDER_MOVE_CONTEXT] === 'payment') return { kind: 'system' }
   // every account is a `users` doc; a Local API call may pass one without `collection` set
   const user = req.user ?? null
   if (!user) return { kind: 'guest' }
@@ -134,11 +142,18 @@ export const transitionGuard: CollectionBeforeChangeHook<Order> = async ({
   // no move: other edits are access's business
   if (!originalDoc || !from || !to || to === from) return data
 
+  // closeOrder already checked the move with checkClose
+  if (req.context?.[ORDER_MOVE_CONTEXT] === 'close') return data
+
   const tenantId = extractTenantId(originalDoc.tenant)
   // moving a completed order back is same-day only; the settings are read only then
   const rules = from === 'completed' && tenantId !== null ? await restaurantRules(req, tenantId) : null
   const sameBusinessDay =
     !rules || originalDoc.orderDate === businessDate(new Date(), rules.timezone, rules.dayStartsAt)
+
+  // paid or waived after this save (a payment sync sets the status and the payment at once)
+  const paymentStatus = data.paymentStatus ?? originalDoc.paymentStatus
+  const paid = paymentStatus === 'paid' || paymentStatus === 'waived'
 
   const refusal = checkMove({
     from,
@@ -147,6 +162,7 @@ export const transitionGuard: CollectionBeforeChangeHook<Order> = async ({
     actor: actorFor(req, tenantId),
     cancelReason: data.cancelReason !== undefined ? data.cancelReason : originalDoc.cancelReason,
     sameBusinessDay,
+    paid,
   })
 
   const log = { orderId: originalDoc.id, tenantId, userId: req.user?.id, from, to }

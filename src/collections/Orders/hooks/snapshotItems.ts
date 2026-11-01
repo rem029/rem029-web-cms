@@ -224,8 +224,6 @@ export const snapshotItems: CollectionBeforeChangeHook<Order> = async ({
     items: snapshottedLines,
     subtotal: total,
     total,
-    amountPaid: 0,
-    balance: total,
     paymentStatus: 'unpaid',
     currency,
     flow: menu.ordering?.flow ?? null,

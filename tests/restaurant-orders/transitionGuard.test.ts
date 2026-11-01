@@ -18,7 +18,9 @@ import { loadUser, type SessionUser } from '../common/users'
 // - test-a: one published menu per flow (waiter_kitchen_cashier, waiter_kitchen, kitchen_only),
 //   ordering on, one item, staff [waiter, kitchen, cashier]
 // - a helper `orderAt(flow, status)`: creates a guest order on that flow's menu, then walks it
-//   forward to `status` as the super user (a cancelled one with a reason)
+//   forward to `status` as the super user (a cancelled one with a reason); phase 2 step 1:
+//   `orderAt(flow, status, { paid })` first records a card payment for the total as the super
+//   user when `paid` (the cases' `paid`)
 // - a helper `moveAs(who, order, to, cancelReason?)`: who = waiter | kitchen | cashier |
 //   tenantAdmin | otherWaiter (overrideAccess: false, user) | guest (overrideAccess: true, no user)
 
@@ -42,6 +44,8 @@ type MoveCase = {
   to: Status
   who: Who
   reason?: string
+  // phase 2 step 1: the order is paid in full (a card payment by the super user) before the move
+  paid?: boolean
   outcome: Outcome
 }
 
@@ -50,7 +54,8 @@ const context = { disableRevalidate: true }
 const CASES: MoveCase[] = [
   { name: 'waiter confirms', flow: 'waiter_kitchen_cashier', from: 'pending', to: 'confirmed', who: 'waiter', outcome: 'moves' },
   { name: 'kitchen prepares', flow: 'waiter_kitchen_cashier', from: 'confirmed', to: 'preparing', who: 'kitchen', outcome: 'moves' },
-  { name: 'cashier completes', flow: 'waiter_kitchen_cashier', from: 'served', to: 'completed', who: 'cashier', outcome: 'moves' },
+  { name: 'cashier cannot complete an unpaid order', flow: 'waiter_kitchen_cashier', from: 'served', to: 'completed', who: 'cashier', outcome: 400 },
+  { name: 'tenant admin cannot complete an unpaid order', flow: 'waiter_kitchen_cashier', from: 'served', to: 'completed', who: 'tenantAdmin', outcome: 400 },
   { name: 'waiter cannot prepare', flow: 'waiter_kitchen_cashier', from: 'confirmed', to: 'preparing', who: 'waiter', outcome: 403 },
   { name: 'kitchen only lets the kitchen confirm', flow: 'kitchen_only', from: 'pending', to: 'confirmed', who: 'kitchen', outcome: 'moves' },
   { name: 'kitchen only shuts the waiter out', flow: 'kitchen_only', from: 'pending', to: 'confirmed', who: 'waiter', outcome: 403 },
@@ -82,7 +87,11 @@ describe('transitionGuard', () => {
   let itemA: MenuItem
   let menus: Record<Flow, Menu>
 
-  const orderAt = async (flow: Flow, status: Status): Promise<Order> => {
+  const orderAt = async (
+    flow: Flow,
+    status: Status,
+    options?: { paid?: boolean },
+  ): Promise<Order> => {
     const menu = menus[flow]
     let current = await payload.create({
       collection: 'orders',
@@ -99,12 +108,8 @@ describe('transitionGuard', () => {
       overrideAccess: true,
     })
 
-    if (status === 'pending') {
-      return current
-    }
-
     if (status === 'cancelled') {
-      return payload.update({
+      current = await payload.update({
         collection: 'orders',
         id: current.id,
         data: {
@@ -114,17 +119,32 @@ describe('transitionGuard', () => {
         user: superUser,
         overrideAccess: false,
       })
+    } else if (status !== 'pending') {
+      const steps: Status[] = ['confirmed', 'preparing', 'prepared', 'served', 'completed']
+      for (const next of steps) {
+        if (current.status === status) {
+          break
+        }
+        current = await payload.update({
+          collection: 'orders',
+          id: current.id,
+          data: { status: next },
+          user: superUser,
+          overrideAccess: false,
+        })
+      }
     }
 
-    const steps: Status[] = ['confirmed', 'preparing', 'prepared', 'served', 'completed']
-    for (const next of steps) {
-      if (current.status === status) {
-        break
-      }
-      current = await payload.update({
-        collection: 'orders',
-        id: current.id,
-        data: { status: next },
+    if (options?.paid) {
+      await payload.create({
+        collection: 'payments',
+        data: {
+          order: current.id,
+          tenant: tenantA.id,
+          method: 'card',
+          status: 'succeeded',
+          reference: uniqueName('R'),
+        },
         user: superUser,
         overrideAccess: false,
       })
@@ -261,9 +281,9 @@ describe('transitionGuard', () => {
   // one table, two loops (no `if` in a test): the allowed moves, then the refusals
   it.each(CASES.filter((c) => c.outcome === 'moves'))(
     '$name',
-    async ({ flow, from, to, who, reason }) => {
+    async ({ flow, from, to, who, reason, paid }) => {
       // arrange: order = orderAt(flow, from)
-      const order = await orderAt(flow, from)
+      const order = await orderAt(flow, from, { paid })
 
       // act: moveAs(who, order, to, reason)
       const saved = await moveAs(who, order, to, reason)
@@ -275,9 +295,9 @@ describe('transitionGuard', () => {
 
   it.each(CASES.filter((c) => c.outcome !== 'moves'))(
     '$name',
-    async ({ flow, from, to, who, reason, outcome }) => {
+    async ({ flow, from, to, who, reason, outcome, paid }) => {
       // arrange: order = orderAt(flow, from)
-      const order = await orderAt(flow, from)
+      const order = await orderAt(flow, from, { paid })
 
       // act: moveAs(who, order, to, reason)
       const call = moveAs(who, order, to, reason)
@@ -332,6 +352,20 @@ describe('transitionGuard', () => {
   it('auto-completes served orders without a cashier step', async () => {
     // arrange: orderAt('waiter_kitchen', 'prepared')
     const order = await orderAt('waiter_kitchen', 'prepared')
+
+    // act: moveAs('waiter', order, 'served')
+    const saved = await moveAs('waiter', order, 'served')
+
+    // assert: status 'completed', servedAt and completedAt both set
+    expect(saved.status).toBe('completed')
+    expect(saved.servedAt).toBeTruthy()
+    expect(saved.completedAt).toBeTruthy()
+  })
+
+  it('auto-completes a paid order when served', async () => {
+    // phase 2 step 1, open question 1
+    // arrange: orderAt('waiter_kitchen_cashier', 'prepared', { paid: true })
+    const order = await orderAt('waiter_kitchen_cashier', 'prepared', { paid: true })
 
     // act: moveAs('waiter', order, 'served')
     const saved = await moveAs('waiter', order, 'served')
