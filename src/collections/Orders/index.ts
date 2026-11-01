@@ -286,6 +286,31 @@ export const Orders: CollectionConfig = {
         defaultColumns: ['method', 'amount', 'status', 'takenBy', 'createdAt'],
       },
     },
+    // the guest's requests (phase 3 step 1, `requestAssistance`): the waiter and cashier boards
+    // show them and clear them (phase 4)
+    {
+      name: 'assistanceRequestedAt',
+      type: 'date',
+      label: 'Staff called',
+      access: serverOnly,
+      admin: { ...computed, position: 'sidebar', date: { pickerAppearance: 'dayAndTime' } },
+    },
+    {
+      name: 'billRequestedAt',
+      type: 'date',
+      label: 'Bill asked for',
+      access: serverOnly,
+      admin: { ...computed, position: 'sidebar', date: { pickerAppearance: 'dayAndTime' } },
+    },
+    {
+      // sha256 of the guest's token (phase 3 step 1, `findGuestOrder`): the guest's browser keeps
+      // the token, nobody reads the hash through the api, and `redact` drops `*token*` keys from
+      // audit logs
+      name: 'guestTokenHash',
+      type: 'text',
+      access: { read: () => false, create: () => false, update: () => false },
+      admin: { hidden: true },
+    },
     { name: 'currency', type: 'text', label: 'Currency', admin: { ...computed, position: 'sidebar' } },
     // the menu's Ordering settings when the order was placed (plan: "snapshotted on each order")
     {

@@ -44,6 +44,7 @@ import * as migration_20261025_193955_order_status_times from './20261025_193955
 import * as migration_20261031_222051_payments from './20261031_222051_payments';
 import * as migration_20261031_222151_payments_on_cashier_template from './20261031_222151_payments_on_cashier_template';
 import * as migration_20261101_182729_online_payments from './20261101_182729_online_payments';
+import * as migration_20261101_204134_guest_ordering from './20261101_204134_guest_ordering';
 
 export const migrations = [
   {
@@ -274,6 +275,11 @@ export const migrations = [
   {
     up: migration_20261101_182729_online_payments.up,
     down: migration_20261101_182729_online_payments.down,
-    name: '20261101_182729_online_payments'
+    name: '20261101_182729_online_payments',
+  },
+  {
+    up: migration_20261101_204134_guest_ordering.up,
+    down: migration_20261101_204134_guest_ordering.down,
+    name: '20261101_204134_guest_ordering'
   },
 ];

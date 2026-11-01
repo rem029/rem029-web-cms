@@ -2114,6 +2114,9 @@ export interface Order {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  assistanceRequestedAt?: string | null;
+  billRequestedAt?: string | null;
+  guestTokenHash?: string | null;
   currency?: string | null;
   flow?: ('waiter_kitchen_cashier' | 'waiter_kitchen' | 'kitchen_only') | null;
   showPrices?: boolean | null;
@@ -3851,6 +3854,9 @@ export interface OrdersSelect<T extends boolean = true> {
   closeReason?: T;
   closeNote?: T;
   payments?: T;
+  assistanceRequestedAt?: T;
+  billRequestedAt?: T;
+  guestTokenHash?: T;
   currency?: T;
   flow?: T;
   showPrices?: T;
