@@ -12,6 +12,8 @@ export type MenuItemCardProps = {
   currency: string
   locale: TypedLocale
   onOpen: (item: GuestMenuItem) => void
+  /** off on an ordering menu that hides prices (rem0018 phase 3 step 2a): no price on the card */
+  showPrices?: boolean
 }
 
 /**
@@ -21,7 +23,13 @@ export type MenuItemCardProps = {
  * is greyed (fading the whole card took the price below AA contrast). The price is `<bdi dir="ltr">`, so Arabic
  * reads "9.00 US$" instead of the bidi-scrambled "$US 9.00".
  */
-export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, currency, locale, onOpen }) => {
+export const MenuItemCard: React.FC<MenuItemCardProps> = ({
+  item,
+  currency,
+  locale,
+  onOpen,
+  showPrices,
+}) => {
   const t = menuStrings(locale)
   return (
     <button
@@ -42,9 +50,11 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, currency, loca
           </span>
         )}
         <span className="mt-auto flex flex-wrap items-center gap-2 pt-1">
-          <bdi dir="ltr" className="menu-item-price font-medium">
-            {formatPrice(item.price, currency, locale)}
-          </bdi>
+          {showPrices !== false && (
+            <bdi dir="ltr" className="menu-item-price font-medium">
+              {formatPrice(item.price, currency, locale)}
+            </bdi>
+          )}
           {!item.inStock && (
             <span className="menu-item-badge w-auto rounded bg-menu-border px-2 py-0.5 text-xs font-medium">
               {t.outOfStock}

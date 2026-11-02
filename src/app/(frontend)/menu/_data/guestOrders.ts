@@ -11,6 +11,7 @@ import { startOnlinePayment } from '@/common/utils/payments/startOnlinePayment'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 import type { Menu } from '@/payload-types'
 
+import { MAX_LINES, MAX_QUANTITY } from './orderLimits'
 import { allowHit } from './rateLimit'
 
 /**
@@ -74,9 +75,6 @@ export const PLACE_ORDER_LIMIT = 5
 export const PLACE_ORDER_WINDOW_MS = 10 * 60 * 1000
 /** One Call staff (and one Ask for the bill) per order in this time. */
 export const ASSISTANCE_INTERVAL_MS = 60 * 1000
-/** Lines per order and quantity per line the guest may send. */
-export const MAX_LINES = 50
-export const MAX_QUANTITY = 99
 
 const orderingMenu = async (
   payload: Payload,

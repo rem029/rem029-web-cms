@@ -8,7 +8,7 @@ import { getFrontendTenantId } from '@/common/utils/frontendTenant'
 import { getTenantDoc } from '@/common/utils/getTenantDoc'
 import { isPreviewing } from '@/common/utils/isPreviewing'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
-import type { Menu as MenuDoc } from '@/payload-types'
+import type { Menu as MenuDoc, Setting } from '@/payload-types'
 import { generateMeta } from '@/utilities/generateMeta'
 
 import { Menu } from '../_components/Menu'
@@ -22,6 +22,8 @@ import { menuCustomCss } from '../_data/menuCustomCss'
 import { menuColorVars } from '../_data/menuColors'
 import { getMenuPage } from '../_data/menuData'
 import { parseMenuUrl } from '../_data/menuUrl'
+import { openStatus, type MenuOrdering } from '../_data/ordering'
+import { resolveTable } from '../_data/guestOrders'
 
 type Args = {
   params: Promise<{ slug: string }>
@@ -62,6 +64,44 @@ const carouselImages = (menu: MenuDoc): CarouselImage[] =>
     return [{ url, srcSet: srcSet || undefined, alt: media.alt ?? '' }]
   })
 
+// what the menu needs to take orders (rem0018 phase 3 step 2a), or null on a browse-only menu and
+// in live preview (an editor must not place real orders). `?table=` is checked on the server: a
+// table that isn't on this menu opens the picker with a notice.
+const menuOrdering = async (args: {
+  tenantId: number
+  slug: string
+  locale: TypedLocale
+  tableSlug: string | null
+  enabled: boolean
+  showPrices: boolean
+  restaurant: Setting['restaurant'] | undefined
+}): Promise<MenuOrdering | null> => {
+  if (!args.enabled) return null
+
+  const payload = await getPayload({ config: configPromise })
+  const resolved = args.tableSlug
+    ? await resolveTable(
+        payload,
+        { tenantId: args.tenantId, ip: null, locale: args.locale },
+        { menuSlug: args.slug, tableSlug: args.tableSlug },
+      )
+    : null
+
+  return {
+    tenantId: args.tenantId,
+    menuSlug: args.slug,
+    showPrices: args.showPrices,
+    table: resolved?.ok ? resolved.table : null,
+    tableRefused: resolved !== null && !resolved.ok,
+    ordersOnlyWhenOpen: args.restaurant?.ordersOnlyWhenOpen === true,
+    open: openStatus(
+      args.restaurant?.openingHours ?? [],
+      args.restaurant?.timezone || 'UTC',
+      new Date(),
+    ),
+  }
+}
+
 /**
  * A menu's guest page, `/menu/<slug>` on its tenant's host (rem0017 phase 3). Rendered per
  * request (no generateStaticParams: the tenant comes from the host). Unknown host, unknown slug,
@@ -82,6 +122,17 @@ export default async function MenuPage({ params, searchParams }: Args) {
   const settings = await getTenantDoc('settings', tenantId, { depth: 1, locale })
   const css = menuCustomCss(menu.customCss)
 
+  const search = toSearchParams(await searchParams)
+  const ordering = await menuOrdering({
+    tenantId,
+    slug,
+    locale,
+    tableSlug: search.get('table'),
+    enabled: menu.ordering?.enabled === true && !(await isPreviewing()),
+    showPrices: menu.ordering?.showPrices !== false,
+    restaurant: settings?.restaurant,
+  })
+
   return (
     <div
       style={menuColorVars(menu.colors)}
@@ -95,6 +146,7 @@ export default async function MenuPage({ params, searchParams }: Args) {
         homeHref="/menu"
         showLanguageSwitch={menu.header?.showLanguageSwitch !== false}
         locale={locale}
+        openStatus={ordering?.open}
       />
       <main className="flex-1">
         <MenuCarousel images={carouselImages(menu)} />
@@ -110,7 +162,8 @@ export default async function MenuPage({ params, searchParams }: Args) {
             currency={currency}
             locale={locale}
             filters={menu.filters}
-            initial={parseMenuUrl(toSearchParams(await searchParams))}
+            initial={parseMenuUrl(search)}
+            ordering={ordering}
           />
         </div>
       </main>

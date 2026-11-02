@@ -169,13 +169,14 @@ describe('menu data', () => {
       const page = await findMenuPage(payload, tenantA.id, menu.slug ?? '', published)
       const sections = buildMenuSections(page?.items ?? [], [])
 
-      // assert: the guest item's options are { label, price: 1.5 } and { label, price: null }
+      // assert: the guest item's options are { id, label, price: 1.5 } and { id, label, price: null }
+      //   (the id: rem0018 phase 3, what the cart sends)
       const guestItem = sections
         .flatMap((section) => section.items)
         .find((entry) => entry.id === item.id)
       expect(guestItem?.modifierGroups[0]?.options).toEqual([
-        { label: 'Large', price: 1.5 },
-        { label: 'Small', price: null },
+        { id: expect.any(String), label: 'Large', price: 1.5 },
+        { id: expect.any(String), label: 'Small', price: null },
       ])
     })
   })

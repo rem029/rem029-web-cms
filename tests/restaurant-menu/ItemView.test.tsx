@@ -35,8 +35,8 @@ describe('ItemView', () => {
           inputType: 'radio',
           required: true,
           options: [
-            { label: 'Small', price: null },
-            { label: 'Large', price: null },
+            { id: 'small', label: 'Small', price: null },
+            { id: 'large', label: 'Large', price: null },
           ],
         },
       ],
@@ -63,8 +63,8 @@ describe('ItemView', () => {
           inputType: 'radio',
           required: true,
           options: [
-            { label: 'Small', price: null },
-            { label: 'Large', price: 2 },
+            { id: 'small', label: 'Small', price: null },
+            { id: 'large', label: 'Large', price: 2 },
           ],
         },
       ],
@@ -86,7 +86,7 @@ describe('ItemView', () => {
           name: 'Size',
           inputType: 'radio',
           required: true,
-          options: [{ label: 'Small', price: null }],
+          options: [{ id: 'small', label: 'Small', price: null }],
         },
       ],
     })

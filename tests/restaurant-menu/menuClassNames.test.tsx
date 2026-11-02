@@ -18,6 +18,9 @@ import { MenuItemCard } from '@/app/(frontend)/menu/_components/MenuItemCard'
 import { MenuIntro } from '@/app/(frontend)/menu/_components/MenuIntro'
 import { ScrollToTop } from '@/app/(frontend)/menu/_components/ScrollToTop'
 import { SearchOverlay } from '@/app/(frontend)/menu/_components/SearchOverlay'
+import { CartBar } from '@/app/(frontend)/menu/_components/ordering/CartBar'
+import { TableChip } from '@/app/(frontend)/menu/_components/ordering/TableChip'
+import { CartStoreProvider, cartStorageKey } from '@/app/(frontend)/menu/_store/cart'
 import { MenuStoreProvider } from '@/app/(frontend)/menu/_store/store'
 import type { Media, Setting } from '@/payload-types'
 
@@ -52,8 +55,17 @@ const scrollIntoView = vi.fn()
 
 describe('menu class names', () => {
   beforeEach(() => {
+    localStorage.clear()
     Element.prototype.scrollIntoView = scrollIntoView
     window.history.replaceState(null, '', '/menu/dinner')
+    if (typeof HTMLDialogElement !== 'undefined') {
+      HTMLDialogElement.prototype.showModal ??= function () {
+        this.setAttribute('open', '')
+      }
+      HTMLDialogElement.prototype.close ??= function () {
+        this.removeAttribute('open')
+      }
+    }
   })
 
   afterEach(() => {
@@ -198,8 +210,8 @@ describe('menu class names', () => {
                   inputType: 'radio',
                   required: true,
                   options: [
-                    { label: 'Small', price: null },
-                    { label: 'Large', price: 2 },
+                    { id: 'small', label: 'Small', price: null },
+                    { id: 'large', label: 'Large', price: 2 },
                   ],
                 },
               ],
@@ -262,6 +274,100 @@ describe('menu class names', () => {
             <ScrollToTop locale="en" />
           </>,
         ),
+    ],
+    [
+      'open status',
+      'MenuHeader with openStatus closed',
+      'menu-open-status, is-closed',
+      () =>
+        render(
+          <MenuHeader
+            title="Dinner"
+            logo={logo}
+            homeHref="/menu"
+            showLanguageSwitch
+            locale="en"
+            openStatus={{ open: false, next: { weekday: 'mon', opens: '08:00' } }}
+          />,
+        ),
+    ],
+    [
+      'table chip',
+      'TableChip with a table',
+      'menu-table-chip',
+      () =>
+        render(
+          <TableChip table={{ id: 1, slug: 't5', label: '5' }} locale="en" onChange={vi.fn()} />,
+        ),
+    ],
+    [
+      'item view ordering',
+      'ItemView with ordering, an item with a required group',
+      'menu-item-view-choice, menu-item-view-breakdown, menu-qty, menu-qty-btn, menu-qty-value, menu-add-to-cart',
+      () =>
+        render(
+          <ItemView
+            item={guestItem({
+              title: 'Latte',
+              modifierGroups: [
+                {
+                  name: 'Size',
+                  inputType: 'radio',
+                  required: true,
+                  options: [
+                    { id: 'small', label: 'Small', price: null },
+                    { id: 'large', label: 'Large', price: 2 },
+                  ],
+                },
+              ],
+            })}
+            currency="QAR"
+            locale="en"
+            onClose={vi.fn()}
+            ordering={{ showPrices: true, onAdd: vi.fn() }}
+          />,
+        ),
+    ],
+    [
+      'cart',
+      'CartBar with one line, the sheet opened',
+      'menu-cart-bar, menu-cart, menu-cart-line, menu-cart-total, menu-place-order',
+      () => {
+        localStorage.setItem(
+          cartStorageKey(1, 'corniche'),
+          JSON.stringify({
+            state: {
+              lines: [{ itemId: 1, optionIds: [], quantity: 1, key: '1:' }],
+              guestName: '',
+              notes: '',
+              tableSlug: 't5',
+            },
+            version: 0,
+          }),
+        )
+        const view = render(
+          <CartStoreProvider tenantId={1} menuSlug="corniche">
+            <CartBar
+              items={[guestItem({ id: 1, title: 'Item 1' })]}
+              currency="QAR"
+              locale="en"
+              ordering={{
+                tenantId: 1,
+                menuSlug: 'corniche',
+                showPrices: true,
+                table: { id: 1, slug: 't5', label: '5' },
+                tableRefused: false,
+                ordersOnlyWhenOpen: false,
+                open: { open: true, next: null },
+              }}
+              onPickTable={vi.fn()}
+              onPlaced={vi.fn()}
+            />
+          </CartStoreProvider>,
+        )
+        fireEvent.click(screen.getByRole('button'))
+        return view
+      },
     ],
   ])('gives the %s its class names', (_part, _render, classes, renderFn) => {
     // arrange: the component as described, with the guest fixtures (./guestItems)
