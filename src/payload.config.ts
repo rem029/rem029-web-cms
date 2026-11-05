@@ -66,12 +66,20 @@ export default buildConfig({
     },
     components: {
       actions: ['@/common/components/ThemeToggle/ThemeToggle#ThemeToggle'],
+      afterNavLinks: ['@/common/components/OrderBoardNavLinks#OrderBoardNavLinks'],
       beforeLogin: ['@/common/components/LoginIntro/LoginIntro#LoginIntro'],
       header: ['@/common/components/InactiveTenantNotice#InactiveTenantNotice'],
       providers: ['@/common/components/AdminTheme/AdminTheme#AdminTheme'],
       graphics: {
         Icon: '@/common/components/AdminBranding/Icon#Icon',
         Logo: '@/common/components/AdminBranding/Logo#Logo',
+      },
+      // rem0018 phase 4: the staff boards, /admin/orders/waiter|kitchen|cashier
+      views: {
+        orderBoard: {
+          Component: '@/collections/Orders/views/OrderBoardView#OrderBoardView',
+          path: '/orders/:role',
+        },
       },
     },
     importMap: {

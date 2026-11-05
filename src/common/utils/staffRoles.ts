@@ -1,4 +1,4 @@
-import type { ClientUser, PayloadRequest } from 'payload'
+import { createLocalReq, type ClientUser, type Payload, type PayloadRequest } from 'payload'
 
 import {
   getTenantRows,
@@ -120,4 +120,14 @@ export const staffMenuIds = async (
   })
 
   return ids
+}
+
+/**
+ * A Local API req signed in as `user`, for `staffMenuIds` outside a request (the board actions and
+ * the staff stream, rem0018 phase 4). `createLocalReq` wants an auth user: the collection set, no
+ * `sessions` (the generated type allows null there, Payload's doesn't).
+ */
+export const staffReqFor = async (payload: Payload, user: User): Promise<PayloadRequest> => {
+  const { sessions: _sessions, ...authUser } = user
+  return createLocalReq({ user: { ...authUser, collection: 'users' } }, payload)
 }
