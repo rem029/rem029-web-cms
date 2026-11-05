@@ -4,6 +4,11 @@ import { Search, SlidersHorizontal } from 'lucide-react'
 import type { TypedLocale } from 'payload'
 import React, { useCallback, useMemo, useState } from 'react'
 
+import { useAlertSound, type AlertSound } from '@/common/components/AlertSounds/useAlertSound'
+import {
+  useBrowserNotifications,
+  type BrowserNotifications,
+} from '@/common/components/AlertSounds/useBrowserNotifications'
 import type { OrderTable } from '@/common/utils/orderTables'
 import type { Menu as MenuDoc } from '@/payload-types'
 import { cn } from '@/utilities/ui'
@@ -15,6 +20,7 @@ import { useActiveSection } from '../_hooks/useActiveSection'
 import { useMenuUrl } from '../_hooks/useMenuUrl'
 import { menuStrings } from '../_i18n'
 import { CartStoreProvider, useCartStore } from '../_store/cart'
+import { MyOrdersProvider, useMyOrders } from '../_store/myOrders'
 import { MenuStoreProvider, useMenuStore, type MenuState } from '../_store/store'
 import { CategoryNav, sectionId } from './CategoryNav'
 import { touchTarget } from './chip'
@@ -25,6 +31,7 @@ import { MenuItemCard } from './MenuItemCard'
 import { CartBar, type PlacedOrder } from './ordering/CartBar'
 import { TableChip } from './ordering/TableChip'
 import { TablePicker } from './ordering/TablePicker'
+import { YourOrders } from './ordering/YourOrders'
 import { ScrollToTop } from './ScrollToTop'
 import { SearchOverlay } from './SearchOverlay'
 
@@ -56,10 +63,12 @@ export const Menu: React.FC<MenuProps> = ({ initial, ordering, ...props }) => (
         menuSlug={ordering.menuSlug}
         available={cartItems(props.sections)}
       >
-        <MenuBody {...props} ordering={ordering} />
+        <MyOrdersProvider tenantId={ordering.tenantId}>
+          <OrderingMenuBody {...props} ordering={ordering} />
+        </MyOrdersProvider>
       </CartStoreProvider>
     ) : (
-      <MenuBody {...props} ordering={null} />
+      <MenuBody {...props} ordering={null} guest={null} />
     )}
   </MenuStoreProvider>
 )
@@ -95,21 +104,60 @@ const CartTable: React.FC<{ table: OrderTable | null }> = ({ table }) => {
   return null
 }
 
+const noop = () => {}
+
 const barButtonClass = cn(
   touchTarget,
   '[@media(pointer:coarse)]:min-w-11 justify-center',
   'flex shrink-0 items-center gap-1.5 rounded-full border border-menu-border px-3 py-1.5 text-sm font-medium text-menu-text hover:bg-menu-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-menu-primary aria-expanded:border-menu-primary',
 )
 
+// what an ordering menu adds for the guest's placed orders (rem0018 phase 3 step 2b)
+type GuestOrdering = {
+  sound: AlertSound
+  notifications: BrowserNotifications
+  openOrderId: number | null
+  setOpenOrderId: (orderId: number | null) => void
+  onPlaced: (order: PlacedOrder) => void
+}
+
+type BodyProps = Omit<MenuProps, 'initial' | 'ordering'>
+
+// one alert sound and notifier for every tracked order; a placed order is saved on this device
+// and its tracker opens. Back from Pay now (`returnedOrderId`), the tracker opens only when this
+// device saved that order (YourOrders has no chip for another one).
+const OrderingMenuBody: React.FC<BodyProps & { ordering: MenuOrdering }> = (props) => {
+  const { menuSlug, returnedOrderId } = props.ordering
+  const sound = useAlertSound('guest')
+  const notifications = useBrowserNotifications(sound)
+  const addOrder = useMyOrders((state) => state.add)
+  const [openOrderId, setOpenOrderId] = useState<number | null>(returnedOrderId)
+  const onPlaced = useCallback(
+    (placed: PlacedOrder) => {
+      addOrder({
+        orderId: placed.orderId,
+        orderNumber: placed.orderNumber,
+        menuSlug,
+        token: placed.guestToken,
+        placedAt: new Date().toISOString(),
+      })
+      setOpenOrderId(placed.orderId)
+    },
+    [addOrder, menuSlug],
+  )
+  return (
+    <MenuBody {...props} guest={{ sound, notifications, openOrderId, setOpenOrderId, onPlaced }} />
+  )
+}
+
 // inside the provider, so it can use the store
 const MenuBody: React.FC<
-  Omit<MenuProps, 'initial' | 'ordering'> & { ordering: MenuOrdering | null }
-> = ({ menuId, sections, currency, locale, filters, ordering }) => {
+  BodyProps & { ordering: MenuOrdering | null; guest: GuestOrdering | null }
+> = ({ menuId, sections, currency, locale, filters, ordering, guest }) => {
   const t = menuStrings(locale)
-  // ordering (rem0018 phase 3 step 2a): the table on screen, the picker, the last placed order
+  // ordering (rem0018 phase 3 step 2a): the table on screen and the picker
   const [table, setTable] = useState<OrderTable | null>(ordering?.table ?? null)
   const [pickerOpen, setPickerOpen] = useState(ordering?.tableRefused === true)
-  const [placed, setPlaced] = useState<PlacedOrder | null>(null)
   const closePicker = useCallback(() => setPickerOpen(false), [])
   const showPrices = ordering?.showPrices !== false
   const allergens = useMenuStore((state) => state.allergens)
@@ -183,6 +231,17 @@ const MenuBody: React.FC<
         )}
       </div>
 
+      {ordering && guest && (
+        <YourOrders
+          locale={locale}
+          onlinePayment={ordering.onlinePayment}
+          openOrderId={guest.openOrderId}
+          onOpen={guest.setOpenOrderId}
+          sound={guest.sound}
+          notifications={guest.notifications}
+        />
+      )}
+
       {shown.length === 0 && <p className="py-10 text-center text-menu-muted">{t.noResults}</p>}
       {shown.map((section) => {
         const id = sectionId(section)
@@ -247,21 +306,13 @@ const MenuBody: React.FC<
               onClose={closePicker}
             />
           )}
-          {placed && (
-            <p
-              role="status"
-              className="menu-order-placed fixed inset-x-4 bottom-4 z-30 mx-auto max-w-lg rounded border border-menu-border bg-menu-card p-4 text-center font-medium shadow-lg"
-            >
-              {t.orderPlaced.replace('{number}', String(placed.orderNumber))}
-            </p>
-          )}
           <CartBar
             items={sections.flatMap((section) => section.items)}
             currency={currency}
             locale={locale}
             ordering={ordering}
             onPickTable={() => setPickerOpen(true)}
-            onPlaced={setPlaced}
+            onPlaced={guest?.onPlaced ?? noop}
           />
         </>
       )}

@@ -9,12 +9,11 @@ import { formatMinor, toMinor } from '@/common/utils/money'
 import { cn } from '@/utilities/ui'
 
 import { placeOrderAction } from '../../_actions/orders'
-import type { GuestError } from '../../_data/guestOrders'
 import type { GuestMenuItem } from '../../_data/menuData'
 import { MAX_QUANTITY } from '../../_data/orderLimits'
 import type { MenuOrdering } from '../../_data/ordering'
 import { useModalDialog } from '../../_hooks/useModalDialog'
-import { menuStrings, type MenuStrings } from '../../_i18n'
+import { guestErrorText, menuStrings, type MenuStrings } from '../../_i18n'
 import { useCartStore, type CartLine } from '../../_store/cart'
 import { touchTarget } from '../chip'
 import { QuantityControl } from './QuantityControl'
@@ -50,18 +49,6 @@ const priceLine = (line: CartLine, item: GuestMenuItem, currency: string): Price
     quantity: line.quantity,
   })
   return { line, title: item.title, breakdown }
-}
-
-// what a refused order says to the guest
-const errorText = (error: GuestError, t: MenuStrings): string => {
-  if (error === 'menuNotFound') return t.menuNotFound
-  if (error === 'orderingOff') return t.orderingOff
-  if (error === 'tableNotOnMenu') return t.tableNotOnMenu
-  if (error === 'itemUnavailable') return t.itemUnavailable
-  if (error === 'invalidOrder') return t.invalidOrder
-  if (error === 'tooManyOrders') return t.tooManyOrders
-  if (error === 'closed') return t.ordersWhenOpen
-  return t.failed
 }
 
 // "Closed, opens Monday at 08:00", or "Closed" when no day opens
@@ -165,7 +152,7 @@ const CartSheet: React.FC<
         locale,
       })
       if (!result.ok) {
-        setError(errorText(result.error, t))
+        setError(guestErrorText(result.error, t))
         return
       }
       clear()

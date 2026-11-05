@@ -68,6 +68,8 @@ const baseOrdering: MenuOrdering = {
   tableRefused: false,
   ordersOnlyWhenOpen: false,
   open: { open: true, next: null },
+  onlinePayment: false,
+  returnedOrderId: null,
 }
 
 const money = (minor: number) => formatMinor(minor, 'QAR', 'en').replace(/\s+/g, ' ')

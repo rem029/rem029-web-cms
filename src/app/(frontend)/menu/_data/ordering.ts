@@ -28,6 +28,10 @@ export type MenuOrdering = {
   /** "Take orders only while open" (Settings → Restaurant) */
   ordersOnlyWhenOpen: boolean
   open: OpenStatus
+  /** the business has a working online provider (`onlineProviderFor`): the tracker offers Pay now */
+  onlinePayment: boolean
+  /** `?order=` (back from an online payment, `payOnline`'s return url): open its tracker when it is in "Your orders" */
+  returnedOrderId: number | null
 }
 
 /**

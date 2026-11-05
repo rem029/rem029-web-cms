@@ -19,9 +19,15 @@ import { MenuIntro } from '@/app/(frontend)/menu/_components/MenuIntro'
 import { ScrollToTop } from '@/app/(frontend)/menu/_components/ScrollToTop'
 import { SearchOverlay } from '@/app/(frontend)/menu/_components/SearchOverlay'
 import { CartBar } from '@/app/(frontend)/menu/_components/ordering/CartBar'
+import { OrderTracker } from '@/app/(frontend)/menu/_components/ordering/OrderTracker'
 import { TableChip } from '@/app/(frontend)/menu/_components/ordering/TableChip'
+import { YourOrders } from '@/app/(frontend)/menu/_components/ordering/YourOrders'
 import { CartStoreProvider, cartStorageKey } from '@/app/(frontend)/menu/_store/cart'
 import { MenuStoreProvider } from '@/app/(frontend)/menu/_store/store'
+import { MyOrdersProvider, myOrdersStorageKey } from '@/app/(frontend)/menu/_store/myOrders'
+import type { AlertSound } from '@/common/components/AlertSounds/useAlertSound'
+import type { BrowserNotifications } from '@/common/components/AlertSounds/useBrowserNotifications'
+import type { GuestOrder } from '@/common/utils/guestOrder'
 import type { Media, Setting } from '@/payload-types'
 
 import { guestItem, section } from './guestItems'
@@ -32,6 +38,75 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/app/(frontend)/menu/_actions', () => ({ searchMenuItemsAction: vi.fn() }))
+vi.mock('@/app/(frontend)/menu/_actions/orders', () => ({
+  getOrderStatusAction: vi.fn(async () => ({ ok: false, status: 500, error: 'failed' })),
+  cancelOrderAction: vi.fn(),
+  requestAssistanceAction: vi.fn(),
+  payOnlineAction: vi.fn(),
+}))
+
+// the guest's tracking (rem0018 phase 3 step 2b): sound and notifications as plain objects, no stream
+class SilentEventSource {
+  addEventListener() {}
+  removeEventListener() {}
+  close() {}
+}
+const sound: AlertSound = {
+  ready: false,
+  enable: vi.fn(async () => {}),
+  enabled: true,
+  setEnabled: vi.fn(),
+  level: 'normal',
+  setLevel: vi.fn(),
+  tone: 'chime',
+  setTone: vi.fn(),
+  vibrate: true,
+  setVibrate: vi.fn(),
+  loop: false,
+  setLoop: vi.fn(),
+  ringing: false,
+  setRinging: vi.fn(),
+  chimeWhenVisible: false,
+  setChimeWhenVisible: vi.fn(),
+  play: vi.fn(),
+}
+const notifications: BrowserNotifications = {
+  permission: 'default',
+  requestPermission: vi.fn(async () => {}),
+  notify: vi.fn(),
+}
+const guestOrder = (overrides: Partial<GuestOrder>): GuestOrder => ({
+  id: 7,
+  orderNumber: 12,
+  status: 'pending',
+  paymentStatus: 'unpaid',
+  table: '5',
+  guestName: null,
+  notes: null,
+  lines: [{ title: 'Karak', quantity: 1, unitPrice: 500, lineTotal: 500, options: [] }],
+  total: 500,
+  currency: 'QAR',
+  showPrices: true,
+  createdAt: '2026-11-04T10:00:00.000Z',
+  assistanceRequestedAt: null,
+  billRequestedAt: null,
+  receipt: null,
+  ...overrides,
+})
+const trackerOf = (order: GuestOrder) =>
+  render(
+    <OrderTracker
+      order={order}
+      token="t"
+      live
+      locale="en"
+      onlinePayment
+      sound={sound}
+      notifications={notifications}
+      onUpdate={vi.fn()}
+      onClose={vi.fn()}
+    />,
+  )
 
 const logo: Media = {
   id: 1,
@@ -71,6 +146,8 @@ describe('menu class names', () => {
   afterEach(() => {
     cleanup()
     scrollIntoView.mockClear()
+    vi.unstubAllGlobals()
+    localStorage.clear()
   })
 
   // one row per part: [part, how it is rendered, the class names it must have]
@@ -359,6 +436,8 @@ describe('menu class names', () => {
                 tableRefused: false,
                 ordersOnlyWhenOpen: false,
                 open: { open: true, next: null },
+                onlinePayment: false,
+                returnedOrderId: null,
               }}
               onPickTable={vi.fn()}
               onPlaced={vi.fn()}
@@ -368,6 +447,62 @@ describe('menu class names', () => {
         fireEvent.click(screen.getByRole('button'))
         return view
       },
+    ],
+    [
+      'your orders',
+      'YourOrders with one saved order',
+      'menu-your-orders, menu-your-order',
+      () => {
+        vi.stubGlobal('EventSource', SilentEventSource)
+        localStorage.setItem(
+          myOrdersStorageKey(1),
+          JSON.stringify({
+            state: {
+              orders: [
+                {
+                  orderId: 7,
+                  orderNumber: 12,
+                  menuSlug: 'corniche',
+                  token: 't',
+                  placedAt: new Date().toISOString(),
+                  finishedAt: null,
+                },
+              ],
+            },
+            version: 0,
+          }),
+        )
+        return render(
+          <MyOrdersProvider tenantId={1}>
+            <YourOrders
+              locale="en"
+              onlinePayment={false}
+              openOrderId={null}
+              onOpen={vi.fn()}
+              sound={sound}
+              notifications={notifications}
+            />
+          </MyOrdersProvider>,
+        )
+      },
+    ],
+    [
+      'tracker',
+      'OrderTracker, pending, unpaid, online payment on',
+      'menu-tracker, menu-tracker-step, menu-tracker-live, menu-call-staff, menu-ask-bill, menu-cancel-order, menu-pay-options, menu-pay-now, menu-notify-prompt',
+      () => trackerOf(guestOrder({})),
+    ],
+    [
+      'receipt',
+      'OrderTracker, paid',
+      'menu-receipt',
+      () =>
+        trackerOf(
+          guestOrder({
+            paymentStatus: 'paid',
+            receipt: { method: 'cash', amount: 500, paidAt: '2026-11-04T10:10:00.000Z' },
+          }),
+        ),
     ],
   ])('gives the %s its class names', (_part, _render, classes, renderFn) => {
     // arrange: the component as described, with the guest fixtures (./guestItems)

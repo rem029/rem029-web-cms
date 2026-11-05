@@ -6,6 +6,7 @@ import React, { cache } from 'react'
 
 import { getFrontendTenantId } from '@/common/utils/frontendTenant'
 import { getTenantDoc } from '@/common/utils/getTenantDoc'
+import { onlineProviderFor } from '@/common/utils/payments/registry'
 import { isPreviewing } from '@/common/utils/isPreviewing'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import type { Menu as MenuDoc, Setting } from '@/payload-types'
@@ -67,6 +68,11 @@ const carouselImages = (menu: MenuDoc): CarouselImage[] =>
 // what the menu needs to take orders (rem0018 phase 3 step 2a), or null on a browse-only menu and
 // in live preview (an editor must not place real orders). `?table=` is checked on the server: a
 // table that isn't on this menu opens the picker with a notice.
+const positiveId = (value: string | null): number | null => {
+  const id = Number(value)
+  return value && Number.isInteger(id) && id > 0 ? id : null
+}
+
 const menuOrdering = async (args: {
   tenantId: number
   slug: string
@@ -74,7 +80,8 @@ const menuOrdering = async (args: {
   tableSlug: string | null
   enabled: boolean
   showPrices: boolean
-  restaurant: Setting['restaurant'] | undefined
+  settings: Setting | null
+  orderParam: string | null
 }): Promise<MenuOrdering | null> => {
   if (!args.enabled) return null
 
@@ -93,12 +100,16 @@ const menuOrdering = async (args: {
     showPrices: args.showPrices,
     table: resolved?.ok ? resolved.table : null,
     tableRefused: resolved !== null && !resolved.ok,
-    ordersOnlyWhenOpen: args.restaurant?.ordersOnlyWhenOpen === true,
+    ordersOnlyWhenOpen: args.settings?.restaurant?.ordersOnlyWhenOpen === true,
     open: openStatus(
-      args.restaurant?.openingHours ?? [],
-      args.restaurant?.timezone || 'UTC',
+      args.settings?.restaurant?.openingHours ?? [],
+      args.settings?.restaurant?.timezone || 'UTC',
       new Date(),
     ),
+    // warns on a provider that is picked but unavailable or unconfigured
+    onlinePayment: onlineProviderFor(payload, args.settings) !== null,
+    // back from Pay now (`?order=<id>`): the tracker opens if this device saved that order
+    returnedOrderId: positiveId(args.orderParam),
   }
 }
 
@@ -130,7 +141,8 @@ export default async function MenuPage({ params, searchParams }: Args) {
     tableSlug: search.get('table'),
     enabled: menu.ordering?.enabled === true && !(await isPreviewing()),
     showPrices: menu.ordering?.showPrices !== false,
-    restaurant: settings?.restaurant,
+    settings,
+    orderParam: search.get('order'),
   })
 
   return (

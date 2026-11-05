@@ -9,7 +9,9 @@ import {
   type ReactNode,
 } from 'react'
 import { createStore, useStore, type Mutate, type StoreApi } from 'zustand'
-import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
+
+import { safeStorage } from '@/common/utils/safeStorage'
 
 import type { CartLine as PlacedLine } from '../_data/guestOrders'
 import { MAX_QUANTITY } from '../_data/orderLimits'
@@ -57,46 +59,8 @@ export type CartStoreApi = Mutate<StoreApi<CartStore>, [['zustand/persist', Cart
 export const cartStorageKey = (tenantId: number, menuSlug: string): string =>
   `orders-cart:${tenantId}:${menuSlug}`
 
-let storageWarned = false
-const warnStorageOnce = (err: unknown) => {
-  if (!storageWarned) {
-    storageWarned = true
-    console.warn('cart storage unavailable', err)
-  }
-}
-
-const safeStorage: StateStorage = {
-  getItem: (name: string): string | null => {
-    try {
-      if (typeof window === 'undefined') return null
-      return window.localStorage.getItem(name)
-    } catch (err) {
-      warnStorageOnce(err)
-      return null
-    }
-  },
-  setItem: (name: string, value: string): void => {
-    try {
-      if (typeof window === 'undefined') return
-      window.localStorage.setItem(name, value)
-    } catch (err) {
-      warnStorageOnce(err)
-    }
-  },
-  removeItem: (name: string): void => {
-    try {
-      if (typeof window === 'undefined') return
-      window.localStorage.removeItem(name)
-    } catch (err) {
-      warnStorageOnce(err)
-    }
-  },
-}
-
 /**
- * A cart store persisted under `cartStorageKey`. `createJSONStorage` over a localStorage
- * wrapper whose getItem / setItem / removeItem catch and `console.warn` once (no logger in the
- * browser; plan: "a warn in the console at most").
+ * A cart store persisted under `cartStorageKey` (`createJSONStorage` over `safeStorage`).
  */
 export const createCartStore = (tenantId: number, menuSlug: string): CartStoreApi =>
   createStore<CartStore, [['zustand/persist', CartState]]>(
