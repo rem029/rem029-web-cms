@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
-import { DEFAULT_ORDER_FLOW } from '@/collections/Menus/fields/ordering'
+import { DEFAULT_ORDER_FLOW } from '@/collections/Menus/fields/orderFlows'
 import { ORDER_MOVE_CONTEXT } from '@/collections/Orders/hooks/transitionGuard'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 import type { Order, Payment } from '@/payload-types'

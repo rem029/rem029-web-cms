@@ -1,4 +1,4 @@
-import type { OrderFlow } from '@/collections/Menus/fields/ordering'
+import type { OrderFlow } from '@/collections/Menus/fields/orderFlows'
 import type { StaffRole } from '@/common/utils/staffRoles'
 import type { Order } from '@/payload-types'
 

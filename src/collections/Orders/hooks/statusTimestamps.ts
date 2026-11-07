@@ -4,7 +4,6 @@ import type { Order } from '@/payload-types'
 
 import { FORWARD_STATUSES, STATUS_TIMESTAMP_FIELDS } from '../utils/transitions'
 
-
 /**
  * Stamps when an order reached each status (rem0018 phase 1 step 3b): `confirmedAt` …
  * `cancelledAt` (`STATUS_TIMESTAMP_FIELDS`), for the boards' timers and the report. Server time

@@ -1,6 +1,7 @@
 import { APIError, NotFound, ValidationError, type Payload, type Where } from 'payload'
 
-import { DEFAULT_ORDER_FLOW, type OrderFlow } from '@/collections/Menus/fields/ordering'
+import { DEFAULT_ORDER_FLOW, type OrderFlow } from '@/collections/Menus/fields/orderFlows'
+import { isActiveSuperUser, tenantAdminTenantIds } from '@/common/utils/access'
 import { businessDate } from '@/common/utils/restaurantHours'
 import { staffMenuIds, staffReqFor, staffRolesFor, type StaffRole } from '@/common/utils/staffRoles'
 import { extractTenantId } from '@/common/utils/tenantCollections'
@@ -26,6 +27,10 @@ export type BoardMenu = {
 
 export type BoardContext = {
   tenantId: number
+  // the board's user: the browser storage keys (step 2a)
+  userId: number
+  // tenant admin of this tenant or super user: every move, cancel after preparing (step 2a)
+  isManager: boolean
   // the user's roles in that tenant (`staffRolesFor`); empty → the board refuses
   roles: StaffRole[]
   menus: BoardMenu[]
@@ -190,6 +195,8 @@ export const getBoardContext = async (
 
   return {
     tenantId,
+    userId: user.id,
+    isManager: isActiveSuperUser(user) || tenantAdminTenantIds(user).includes(tenantId),
     roles,
     menus,
     today,

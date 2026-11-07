@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { ORDER_FLOWS } from '@/collections/Menus/fields/ordering'
+import { ORDER_FLOWS } from '@/collections/Menus/fields/orderFlows'
 import { sameTenantFilter } from '@/common/fields/menuFields'
 import { validateSameTenant } from '@/common/hooks/validateSameTenant'
 import { businessLabel } from '@/common/hooks/businessLabel'
@@ -58,7 +58,15 @@ export const Orders: CollectionConfig = {
     group: 'Orders',
     useAsTitle: 'orderNumber',
     // `business` shows to super users only (its read access): the only ones who see several
-    defaultColumns: ['orderNumber', 'business', 'table', 'status', 'paymentStatus', 'total', 'createdAt'],
+    defaultColumns: [
+      'orderNumber',
+      'business',
+      'table',
+      'status',
+      'paymentStatus',
+      'total',
+      'createdAt',
+    ],
     hidden: hiddenResolver('orders'),
   },
   defaultSort: '-createdAt',
@@ -71,7 +79,13 @@ export const Orders: CollectionConfig = {
     ],
     // the guard first and the number last, so a refused order never uses one; autoComplete
     // before the stamps, so a served-and-completed order gets both times
-    beforeChange: [transitionGuard, snapshotItems, autoComplete, statusTimestamps, assignOrderNumber],
+    beforeChange: [
+      transitionGuard,
+      snapshotItems,
+      autoComplete,
+      statusTimestamps,
+      assignOrderNumber,
+    ],
     // published after commit only (`afterCommit`): a save that rolls back sends nothing
     afterChange: [broadcast],
   },
@@ -196,8 +210,18 @@ export const Orders: CollectionConfig = {
               max: 99,
               admin: { width: '20%' },
             },
-            { name: 'unitPrice', type: 'number', label: 'Price', admin: { ...computed, width: '15%', components: money } },
-            { name: 'lineTotal', type: 'number', label: 'Line', admin: { ...computed, width: '15%', components: money } },
+            {
+              name: 'unitPrice',
+              type: 'number',
+              label: 'Price',
+              admin: { ...computed, width: '15%', components: money },
+            },
+            {
+              name: 'lineTotal',
+              type: 'number',
+              label: 'Line',
+              admin: { ...computed, width: '15%', components: money },
+            },
           ],
         },
         // the item's title when ordered, in the order's locale
@@ -212,10 +236,31 @@ export const Orders: CollectionConfig = {
               type: 'row',
               fields: [
                 // the choice row id on the item (`modifierGroups[].options[].id`): the input
-                { name: 'option', type: 'text', required: true, label: 'Choice id', admin: { width: '25%' } },
-                { name: 'group', type: 'text', label: 'Group', admin: { ...computed, width: '25%' } },
-                { name: 'label', type: 'text', label: 'Choice', admin: { ...computed, width: '30%' } },
-                { name: 'price', type: 'number', label: 'Extra', admin: { ...computed, width: '20%', components: money } },
+                {
+                  name: 'option',
+                  type: 'text',
+                  required: true,
+                  label: 'Choice id',
+                  admin: { width: '25%' },
+                },
+                {
+                  name: 'group',
+                  type: 'text',
+                  label: 'Group',
+                  admin: { ...computed, width: '25%' },
+                },
+                {
+                  name: 'label',
+                  type: 'text',
+                  label: 'Choice',
+                  admin: { ...computed, width: '30%' },
+                },
+                {
+                  name: 'price',
+                  type: 'number',
+                  label: 'Extra',
+                  admin: { ...computed, width: '20%', components: money },
+                },
               ],
             },
           ],
@@ -225,8 +270,20 @@ export const Orders: CollectionConfig = {
     {
       type: 'row',
       fields: [
-        { name: 'subtotal', type: 'number', label: 'Subtotal', access: serverOnly, admin: { ...computed, width: '50%', components: money } },
-        { name: 'total', type: 'number', label: 'Total', access: serverOnly, admin: { ...computed, width: '50%', components: money } },
+        {
+          name: 'subtotal',
+          type: 'number',
+          label: 'Subtotal',
+          access: serverOnly,
+          admin: { ...computed, width: '50%', components: money },
+        },
+        {
+          name: 'total',
+          type: 'number',
+          label: 'Total',
+          access: serverOnly,
+          admin: { ...computed, width: '50%', components: money },
+        },
       ],
     },
     {
@@ -311,7 +368,12 @@ export const Orders: CollectionConfig = {
       access: { read: () => false, create: () => false, update: () => false },
       admin: { hidden: true },
     },
-    { name: 'currency', type: 'text', label: 'Currency', admin: { ...computed, position: 'sidebar' } },
+    {
+      name: 'currency',
+      type: 'text',
+      label: 'Currency',
+      admin: { ...computed, position: 'sidebar' },
+    },
     // the menu's Ordering settings when the order was placed (plan: "snapshotted on each order")
     {
       name: 'flow',
@@ -332,12 +394,42 @@ export const Orders: CollectionConfig = {
       label: 'Status times',
       admin: { position: 'sidebar', initCollapsed: true },
       fields: [
-        { name: 'confirmedAt', type: 'date', label: 'Confirmed', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
-        { name: 'preparingAt', type: 'date', label: 'Preparing', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
-        { name: 'preparedAt', type: 'date', label: 'Prepared', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
-        { name: 'servedAt', type: 'date', label: 'Served', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
-        { name: 'completedAt', type: 'date', label: 'Completed', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
-        { name: 'cancelledAt', type: 'date', label: 'Cancelled', admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } } },
+        {
+          name: 'confirmedAt',
+          type: 'date',
+          label: 'Confirmed',
+          admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } },
+        },
+        {
+          name: 'preparingAt',
+          type: 'date',
+          label: 'Preparing',
+          admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } },
+        },
+        {
+          name: 'preparedAt',
+          type: 'date',
+          label: 'Prepared',
+          admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } },
+        },
+        {
+          name: 'servedAt',
+          type: 'date',
+          label: 'Served',
+          admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } },
+        },
+        {
+          name: 'completedAt',
+          type: 'date',
+          label: 'Completed',
+          admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } },
+        },
+        {
+          name: 'cancelledAt',
+          type: 'date',
+          label: 'Cancelled',
+          admin: { ...computed, date: { pickerAppearance: 'dayAndTime' } },
+        },
       ],
     },
   ],

@@ -3,19 +3,7 @@ import type { Condition, FilterOptions, FilterOptionsProps, Tab } from 'payload'
 import { getSelectedTenant } from '@/common/utils/getSelectedTenant'
 import { extractTenantId } from '@/common/utils/tenantCollections'
 
-/**
- * Who handles a menu's orders (rem0018, sdq's "order handling"). Snapshotted on each order, so
- * changing it never breaks orders already open.
- */
-export const ORDER_FLOWS = [
-  { label: 'Waiter, kitchen and cashier', value: 'waiter_kitchen_cashier' },
-  { label: 'Waiter and kitchen', value: 'waiter_kitchen' },
-  { label: 'Kitchen only', value: 'kitchen_only' },
-] as const
-
-export type OrderFlow = (typeof ORDER_FLOWS)[number]['value']
-
-export const DEFAULT_ORDER_FLOW: OrderFlow = 'waiter_kitchen_cashier'
+import { DEFAULT_ORDER_FLOW, ORDER_FLOWS } from './orderFlows'
 
 const whenOrdering: Condition = (_, siblingData) => siblingData?.enabled === true
 

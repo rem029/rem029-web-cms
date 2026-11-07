@@ -77,7 +77,8 @@ export const snapshotItems: CollectionBeforeChangeHook<Order> = async ({
   }
 
   const tenantId = extractTenantId(data.tenant) ?? extractTenantId(menu.tenant)
-  const currency = tenantId !== null ? await tenantCurrency(req.payload, tenantId) : DEFAULT_CURRENCY
+  const currency =
+    tenantId !== null ? await tenantCurrency(req.payload, tenantId) : DEFAULT_CURRENCY
 
   const rawLines = Array.isArray(data.items) ? data.items : []
   const requestedItemIds: number[] = []

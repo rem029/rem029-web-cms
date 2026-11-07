@@ -1,0 +1,371 @@
+// The staff boards (rem0018 phase 4 step 2a; checked against Payload 3.44): /admin/orders/<role>.
+// Role tokens only (`--admin-*`, _tokens.scss), no literal colours or fonts; 2px borders, hard
+// offset shadows on cards, motion transform-only (`--admin-duration`), big targets for tablets.
+
+.order-board {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+
+  button {
+    min-height: 44px;
+  }
+}
+
+.order-board__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--admin-surface);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-m);
+  box-shadow: var(--admin-shadow-xs);
+}
+
+.order-board__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.order-board__menu-filter {
+  select {
+    min-height: 44px;
+    padding: 0 1rem;
+    font-family: var(--admin-font-body);
+    font-size: 1rem;
+    color: var(--admin-text);
+    background: var(--admin-surface);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    box-shadow: var(--admin-shadow-xs);
+  }
+}
+
+.order-board__stream-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--admin-font-mono);
+  font-size: 0.875rem;
+  color: var(--admin-muted);
+}
+
+.order-board__history-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--admin-raised);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+}
+
+.order-board__history-date {
+  font-family: var(--admin-font-mono);
+  font-weight: bold;
+}
+
+.order-board__pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.order-board__alert {
+  padding: 1rem;
+  color: var(--admin-danger-text);
+  background: var(--admin-danger);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+  box-shadow: var(--admin-shadow-xs);
+}
+
+.order-board__notice {
+  padding: 1rem;
+  color: var(--admin-warning-text);
+  background: var(--admin-warning);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+}
+
+.order-board__empty {
+  // spans the whole grid row, not one card's column
+  grid-column: 1 / -1;
+  padding: 3rem 1rem;
+  text-align: center;
+  font-size: 1.125rem;
+  color: var(--admin-muted);
+  background: var(--admin-surface);
+  border: var(--admin-border-width) dashed var(--admin-border);
+  border-radius: var(--admin-radius-m);
+}
+
+.order-board__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1.5rem;
+  // cards in a row share their height, the buttons sit at the bottom (`margin-top: auto`)
+  align-items: stretch;
+}
+
+.order-board__card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--admin-surface);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-m);
+  box-shadow: var(--admin-shadow-s);
+  transition: transform var(--admin-duration) var(--admin-ease);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+
+  &--request {
+    border-color: var(--admin-warning-text);
+    background: var(--admin-raised);
+    box-shadow: var(--admin-shadow-m);
+  }
+}
+
+.order-board__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: var(--admin-border-width) solid var(--admin-border);
+}
+
+.order-board__card-primary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.order-board__card-number {
+  margin: 0;
+  font-family: var(--admin-font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.order-board__card-table {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.order-board__card-guest {
+  font-size: 0.875rem;
+  color: var(--admin-muted);
+}
+
+.order-board__card-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.order-board__card-status {
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--admin-ink);
+  background: var(--admin-primary);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+}
+
+.order-board__card-time {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: var(--admin-muted);
+}
+
+.order-board__card-requests {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.order-board__badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+
+  &--request {
+    background: var(--admin-warning);
+    color: var(--admin-ink);
+  }
+}
+
+.order-board__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+.order-board__line {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.order-board__line-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.order-board__addons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding-left: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--admin-muted);
+}
+
+.order-board__addon {
+  display: flex;
+  justify-content: space-between;
+}
+
+.order-board__total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: var(--admin-border-width) solid var(--admin-border);
+  font-weight: 700;
+}
+
+.order-board__notes {
+  margin: 0;
+  padding: 0.5rem;
+  font-size: 0.8125rem;
+  font-style: italic;
+  background: var(--admin-raised);
+  border-radius: var(--admin-radius-s);
+}
+
+.order-board__card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+.order-board__payments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.order-board__payment-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--admin-surface);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-s);
+}
+
+.order-board__undo-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--admin-surface);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-m);
+  box-shadow: var(--admin-shadow-m);
+}
+
+.order-board__dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--admin-bg);
+  opacity: 0.95;
+}
+
+.order-board__dialog {
+  width: 90%;
+  max-width: 32rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--admin-surface);
+  border: var(--admin-border-width) solid var(--admin-border);
+  border-radius: var(--admin-radius-m);
+  box-shadow: var(--admin-shadow-l);
+
+  h2 {
+    margin: 0;
+    font-family: var(--admin-font-display);
+    font-size: 1.25rem;
+  }
+}
+
+.order-board__dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-board__dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    font-family: var(--admin-font-body);
+    font-size: 0.9375rem;
+    background: var(--admin-surface);
+    border: var(--admin-border-width) solid var(--admin-border);
+    border-radius: var(--admin-radius-s);
+    box-shadow: var(--admin-shadow-xs);
+  }
+}
+
+.order-board__dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}

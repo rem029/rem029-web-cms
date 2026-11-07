@@ -5,6 +5,7 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
 
 import { BOARD_LABELS } from '@/common/components/OrderBoard/labels'
+import { OrderBoard } from '@/common/components/OrderBoard'
 import { getSelectedTenant } from '@/common/utils/getSelectedTenant'
 import { staffRolesFor, type StaffRole } from '@/common/utils/staffRoles'
 
@@ -63,7 +64,7 @@ export const OrderBoardView: React.FC<AdminViewServerProps> = (props) => {
       <div className="admin-notice">You don&apos;t work on the {role} board of this business.</div>
     )
   } else {
-    body = <p>The board comes in the next step.</p>
+    body = <OrderBoard role={role} tenantId={tenantId} />
   }
 
   return (

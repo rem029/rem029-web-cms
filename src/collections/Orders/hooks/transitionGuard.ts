@@ -5,7 +5,7 @@ import {
   type PayloadRequest,
 } from 'payload'
 
-import { DEFAULT_ORDER_FLOW } from '@/collections/Menus/fields/ordering'
+import { DEFAULT_ORDER_FLOW } from '@/collections/Menus/fields/orderFlows'
 import { isActiveSuperUser, tenantAdminTenantIds } from '@/common/utils/access'
 import {
   businessDate,
@@ -147,7 +147,8 @@ export const transitionGuard: CollectionBeforeChangeHook<Order> = async ({
 
   const tenantId = extractTenantId(originalDoc.tenant)
   // moving a completed order back is same-day only; the settings are read only then
-  const rules = from === 'completed' && tenantId !== null ? await restaurantRules(req, tenantId) : null
+  const rules =
+    from === 'completed' && tenantId !== null ? await restaurantRules(req, tenantId) : null
   const sameBusinessDay =
     !rules || originalDoc.orderDate === businessDate(new Date(), rules.timezone, rules.dayStartsAt)
 
