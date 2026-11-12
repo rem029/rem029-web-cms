@@ -12,7 +12,7 @@ import { extractTenantId } from '@/common/utils/tenantCollections'
 
 /**
  * Links to the staff boards in the admin nav (rem0018 phase 4 step 1, `admin.components.
- * afterNavLinks`): one per role the user holds in the selected tenant, "Waiter board",
+ * beforeNavLinks` under the business selector, added by `src/plugins/orderBoardNavLinks.ts`): one per role the user holds in the selected tenant, "Waiter board",
  * "Kitchen board", "Cashier board" → `/admin/orders/<role>`. None → renders nothing.
  * Client side because the tenant selector changes without a reload:
  * 1. `useTenantSelection().selectedTenantID` (as `InactiveTenantNotice`); none → null

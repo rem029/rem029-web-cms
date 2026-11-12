@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@payloadcms/ui'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { BoardContext } from '@/collections/Orders/utils/board'
 import { ORDER_STATUSES } from '@/collections/Orders/utils/statuses'
@@ -16,12 +16,15 @@ import {
   type BoardResult,
 } from './actions'
 import { ConfirmDialog } from './ConfirmDialog'
+import { NotificationSettings } from './NotificationSettings'
 import type { OrderButton } from './orderButtons'
 import { OrderCard } from './OrderCard'
+import { RingAlertBanner } from './RingAlertBanner'
 import { UndoToast } from './UndoToast'
+import { useBoardAlerts } from './useBoardAlerts'
 import { useBoardOrders } from './useBoardOrders'
 import { useBoardSettings, type BoardTab } from './useBoardSettings'
-import { useOrderStream } from './useOrderStream'
+import { useOrderStream, type OrderStreamEvent } from './useOrderStream'
 
 const TAB_OPTIONS: { id: BoardTab; label: string; roles: StaffRole[] }[] = [
   { id: 'active', label: 'Active', roles: ['waiter', 'kitchen', 'cashier'] },
@@ -82,9 +85,20 @@ const OrderBoardLoaded: React.FC<{ context: BoardContext; role: StaffRole }> = (
     replaceOrder,
   } = useBoardOrders({ context, role, tab, menuId })
 
+  const alerts = useBoardAlerts({ context, role })
+  const { onEvent: onAlertEvent } = alerts
+
+  const handleStreamEvent = useCallback(
+    (event: OrderStreamEvent) => {
+      applyEvent(event)
+      onAlertEvent(event)
+    },
+    [applyEvent, onAlertEvent],
+  )
+
   const { live, reconnect } = useOrderStream({
     tenantId: context.tenantId,
-    onEvent: applyEvent,
+    onEvent: handleStreamEvent,
     onOpen: refetch,
   })
 
@@ -176,6 +190,7 @@ const OrderBoardLoaded: React.FC<{ context: BoardContext; role: StaffRole }> = (
 
   return (
     <div className="order-board">
+      <RingAlertBanner alerts={alerts} />
       <div className="order-board__toolbar">
         <div className="order-board__tabs" role="group" aria-label="Lists">
           {allowedTabs.map((t) => (
@@ -183,6 +198,7 @@ const OrderBoardLoaded: React.FC<{ context: BoardContext; role: StaffRole }> = (
               key={t.id}
               buttonStyle={tab === t.id ? 'primary' : 'secondary'}
               size="medium"
+              margin={false}
               aria-pressed={tab === t.id}
               onClick={() => setTab(t.id)}
             >
@@ -191,30 +207,34 @@ const OrderBoardLoaded: React.FC<{ context: BoardContext; role: StaffRole }> = (
           ))}
         </div>
 
-        {context.menus.length > 1 && (
-          <div className="order-board__menu-filter">
-            <select
-              aria-label="Menu"
-              value={menuId ?? ''}
-              onChange={(e) => setMenuId(e.target.value ? Number(e.target.value) : null)}
-            >
-              <option value="">All menus</option>
-              {context.menus.map((m) => (
-                <option key={m.id} value={String(m.id)}>
-                  {m.title}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <div className="order-board__stream-indicator">
-          <span className="order-board__stream-status">{live ? 'Live' : 'Disconnected'}</span>
-          {!live && (
-            <Button buttonStyle="secondary" size="small" onClick={reconnect}>
-              Force reconnect
-            </Button>
+        <div className="order-board__toolbar-end">
+          {context.menus.length > 1 && (
+            <div className="order-board__menu-filter">
+              <select
+                aria-label="Menu"
+                value={menuId ?? ''}
+                onChange={(e) => setMenuId(e.target.value ? Number(e.target.value) : null)}
+              >
+                <option value="">All menus</option>
+                {context.menus.map((m) => (
+                  <option key={m.id} value={String(m.id)}>
+                    {m.title}
+                  </option>
+                ))}
+              </select>
+            </div>
           )}
+
+          <NotificationSettings alerts={alerts} />
+
+          <div className="order-board__stream-indicator">
+            <span className="order-board__stream-status">{live ? 'Live' : 'Disconnected'}</span>
+            {!live && (
+              <Button buttonStyle="secondary" size="small" margin={false} onClick={reconnect}>
+                Force reconnect
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -342,6 +362,10 @@ const OrderBoardLoaded: React.FC<{ context: BoardContext; role: StaffRole }> = (
  *    cancel → `ConfirmDialog` → `moveOrderAction({ status: 'cancelled', cancelReason })`;
  *    clearStaff / clearBill → `clearAssistanceAction`; pay / close → step 2b dialogs. A refusal
  *    shows its message above the grid (`role="alert"`) and refetches.
+ * 6. alerts (`useBoardAlerts({ context, role })`): the stream's `onEvent` feeds both `applyEvent`
+ *    and `alerts.onEvent`; `<RingAlertBanner alerts={alerts} />` above the toolbar,
+ *    `<NotificationSettings alerts={alerts} />` in the toolbar next to "Live"; the menu filter,
+ *    Alerts and Live sit together on the right (`order-board__toolbar-end`)
  * English only (admin rule); class names `order-board`, `order-board__toolbar`, `__grid`.
  */
 export const OrderBoard: React.FC<{ role: StaffRole; tenantId: number }> = ({ role, tenantId }) => {

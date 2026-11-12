@@ -41,6 +41,27 @@ const upsertOrder = (list: Order[], order: Order, belongs: boolean): Order[] => 
   return belongs ? [...without, order].sort(sortByCreatedAt) : without
 }
 
+/**
+ * The fetched list with the stream's frames that arrived while it loaded (a frame for an order
+ * placed or moved after the server read the list would otherwise be overwritten by the older
+ * list, e.g. right after a reconnect). A frame wins unless the list has a newer version.
+ */
+const withLateEvents = (
+  list: Order[],
+  events: Map<number, Order>,
+  belongs: (order: Order) => boolean,
+): Order[] => {
+  let next = list
+  for (const order of events.values()) {
+    const listed = next.find((o) => o.id === order.id)
+    if (listed && new Date(listed.updatedAt).getTime() > new Date(order.updatedAt).getTime()) {
+      continue
+    }
+    next = upsertOrder(next, order, belongs(order))
+  }
+  return next
+}
+
 const sortByCreatedAt = (a: Order, b: Order): number =>
   new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
 
@@ -108,6 +129,9 @@ export const useBoardOrders = (args: {
   const setPage = useCallback((page: number) => setPageState({ key: pageKey, page }), [pageKey])
 
   const reqIdRef = useRef(0)
+  // frames since the last list arrived (latest per order), replayed over the next one; not cleared
+  // when a fetch starts, so a frame between "refetch" and the fetch itself isn't lost
+  const lateEventsRef = useRef(new Map<number, Order>())
   const [fetchTrigger, setFetchTrigger] = useState(0)
   const refetch = useCallback(() => {
     setFetchTrigger((c) => c + 1)
@@ -144,7 +168,13 @@ export const useBoardOrders = (args: {
           })
           if (reqId !== reqIdRef.current) return
           if (res.ok) {
-            setOrders(res.data.orders)
+            const late = lateEventsRef.current
+            lateEventsRef.current = new Map()
+            setOrders(
+              tab === 'active'
+                ? withLateEvents(res.data.orders, late, (o) => belongsToTab(role, o, menuId))
+                : res.data.orders,
+            )
             setPayments([])
             setTotalPages(res.data.totalPages)
             setLoading(false)
@@ -172,6 +202,7 @@ export const useBoardOrders = (args: {
         return
       }
       const belongs = belongsToTab(role, event.order, menuId)
+      lateEventsRef.current.set(event.order.id, event.order)
       setOrders((prev) => upsertOrder(prev, event.order, belongs))
     },
     [tab, role, menuId, refetch],

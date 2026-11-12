@@ -16,6 +16,8 @@ if (!existsSync('.env.test')) {
   )
 }
 loadEnv()
+// one clock zone everywhere (CI runners are UTC): time labels in tests read the same locally
+process.env.TZ = 'UTC'
 
 const dirname = fileURLToPath(new URL('.', import.meta.url))
 

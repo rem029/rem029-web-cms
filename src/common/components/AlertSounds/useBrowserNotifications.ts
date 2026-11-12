@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import type { ToneId } from './tones'
 import type { AlertSound } from './useAlertSound'
 
 export type NotifyPermission = NotificationPermission | 'unsupported'
@@ -9,6 +10,8 @@ export type NotifyPermission = NotificationPermission | 'unsupported'
 export type NotifyOptions = NotificationOptions & {
   /** also play the tone (default true) */
   sound?: boolean
+  /** the tone to play (default: the sound's `tone`) */
+  tone?: ToneId
   /** alert even while the tab is visible (default: only `sound.chimeWhenVisible`) */
   whenVisible?: boolean
 }
@@ -95,7 +98,7 @@ export const useBrowserNotifications = (sound: AlertSound): BrowserNotifications
     }
 
     if (options?.sound !== false) {
-      soundRef.current.play()
+      soundRef.current.play(options?.tone)
     }
 
     if (
@@ -105,7 +108,13 @@ export const useBrowserNotifications = (sound: AlertSound): BrowserNotifications
       'Notification' in window
     ) {
       try {
-        new Notification(title, options)
+        const {
+          tone: _tone,
+          sound: _sound,
+          whenVisible: _whenVisible,
+          ...notificationOptions
+        } = options ?? {}
+        new Notification(title, notificationOptions)
       } catch (err) {
         console.warn('Failed to construct Notification', err)
       }

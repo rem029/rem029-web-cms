@@ -15,7 +15,7 @@ import {
 
 const isBoolean = (value: unknown): value is boolean => typeof value === 'boolean'
 
-const isToneId = (value: unknown): value is ToneId =>
+export const isToneId = (value: unknown): value is ToneId =>
   typeof value === 'string' && TONE_IDS.some((id) => id === value)
 
 const isSoundLevel = (value: unknown): value is SoundLevel =>
@@ -89,7 +89,10 @@ export type AlertSound = {
   loop: boolean
   setLoop: (value: boolean) => void
   ringing: boolean
-  setRinging: (value: boolean) => void
+  /**
+   * What the loop plays (default: `tone`), so a board rings a guest request with its request tone.
+   */
+  setRinging: (value: boolean, tone?: ToneId) => void
   /** also alert while the tab is visible (staff opt-in; default: only a hidden tab beeps) */
   chimeWhenVisible: boolean
   setChimeWhenVisible: (value: boolean) => void
@@ -106,21 +109,25 @@ export const COALESCE_MS = 250
  * split): scope `guest` on the menu, `<userId>:<tenantId>:<board>` on the staff boards
  * (phase 4). Client only, no `payload` import.
  */
-export const useAlertSound = (scope: string): AlertSound => {
+export const useAlertSound = (
+  scope: string,
+  defaults?: { loop?: boolean; chimeWhenVisible?: boolean },
+): AlertSound => {
   const [enabled, setEnabled] = useStoredSetting(scope, 'sound', true, isBoolean)
   const [level, setLevel] = useStoredSetting(scope, 'level', DEFAULT_LEVEL, isSoundLevel)
   const [tone, setTone] = useStoredSetting(scope, 'tone', DEFAULT_TONE, isToneId)
   const [vibrate, setVibrate] = useStoredSetting(scope, 'vibrate', true, isBoolean)
-  const [loop, setLoop] = useStoredSetting(scope, 'loop', false, isBoolean)
+  const [loop, setLoop] = useStoredSetting(scope, 'loop', defaults?.loop ?? false, isBoolean)
   const [chimeWhenVisible, setChimeWhenVisible] = useStoredSetting(
     scope,
     'chimeVisible',
-    false,
+    defaults?.chimeWhenVisible ?? false,
     isBoolean,
   )
 
   const [ready, setReady] = useState(false)
-  const [ringing, setRinging] = useState(false)
+  const [ringing, setRingingState] = useState(false)
+  const ringToneRef = useRef<ToneId | null>(null)
 
   const audioContextRef = useRef<AudioContext | null>(null)
   const lastToneAtRef = useRef(0)
@@ -195,11 +202,21 @@ export const useAlertSound = (scope: string): AlertSound => {
     }
   }, [])
 
+  const setRinging = useCallback((value: boolean, toneToRing?: ToneId) => {
+    if (value) {
+      ringToneRef.current = toneToRing ?? null
+      setRingingState(true)
+    } else {
+      ringToneRef.current = null
+      setRingingState(false)
+    }
+  }, [])
+
   useEffect(() => {
     if (!ringing || !loop) return
-    play()
+    play(ringToneRef.current ?? undefined)
     const id = window.setInterval(() => {
-      play()
+      play(ringToneRef.current ?? undefined)
     }, LOOP_INTERVAL_MS)
     return () => {
       window.clearInterval(id)

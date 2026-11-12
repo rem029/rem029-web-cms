@@ -7,6 +7,7 @@ import { formBuilder } from '@/plugins/formBuilder'
 import { gatePluginCollections } from '@/plugins/gatePluginCollections'
 import { multiTenant } from '@/plugins/multiTenant'
 import { nestedDocs } from '@/plugins/nestedDocs'
+import { addOrderBoardNavLinks } from '@/plugins/orderBoardNavLinks'
 import { redirects } from '@/plugins/redirects'
 import { search } from '@/plugins/search'
 import { seo } from '@/plugins/seo'
@@ -24,6 +25,7 @@ export const plugins: Plugin[] = [
   formBuilder,
   search,
   multiTenant,
+  addOrderBoardNavLinks,
   addTenantMembershipCheck,
   addCreatedUpdatedBy,
   addSidebarToggle,

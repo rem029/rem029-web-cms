@@ -15,7 +15,13 @@ const STRINGS = {
     level: 'Volume',
     preview: 'Play {tone}',
     vibrate: 'Vibrate',
-    tones: { classic: 'Classic', chime: 'Chime', ring: 'Ring', bell: 'Bell', handbell: 'Hand bell' },
+    tones: {
+      classic: 'Classic',
+      chime: 'Chime',
+      ring: 'Ring',
+      bell: 'Bell',
+      handbell: 'Hand bell',
+    },
     levels: { low: 'Low', normal: 'Normal', high: 'High' },
   },
   ar: {
@@ -25,7 +31,13 @@ const STRINGS = {
     level: 'مستوى الصوت',
     preview: 'تشغيل {tone}',
     vibrate: 'الاهتزاز',
-    tones: { classic: 'كلاسيكي', chime: 'رنين', ring: 'جرس هاتف', bell: 'جرس', handbell: 'جرس يدوي' },
+    tones: {
+      classic: 'كلاسيكي',
+      chime: 'رنين',
+      ring: 'جرس هاتف',
+      bell: 'جرس',
+      handbell: 'جرس يدوي',
+    },
     levels: { low: 'منخفض', normal: 'عادي', high: 'مرتفع' },
   },
 } satisfies Record<
@@ -41,6 +53,10 @@ const STRINGS = {
     levels: Record<SoundLevel, string>
   }
 >
+
+/** A tone's name as the panel shows it (one source for every list of tones). */
+export const toneLabel = (id: ToneId, locale: AlertSoundLocale = 'en'): string =>
+  STRINGS[locale].tones[id]
 
 export type AlertSoundSettingsProps = {
   sound: AlertSound

@@ -119,6 +119,46 @@ describe('orderEvents', () => {
     })
   })
 
+  it("sends the table's label with the order", async () => {
+    // arrange: a table "Terrace 4" on the menu; an order at that table
+    const table = await payload.create({
+      collection: 'tables',
+      data: { tenant: tenantA.id, menu: menu.id, label: 'Terrace 4', slug: uniqueName('t4') },
+      overrideAccess: true,
+      context,
+    })
+    const order = await payload.create({
+      collection: 'orders',
+      data: {
+        tenant: tenantA.id,
+        menu: menu.id,
+        table: table.id,
+        status: 'pending',
+        source: 'guest',
+        type: 'dine_in',
+        paymentStatus: 'unpaid',
+        items: [{ item: item.id, quantity: 1 }],
+      },
+      overrideAccess: true,
+    })
+    events.length = 0
+
+    // act: move it as the super user with depth 0 (the saved doc holds the table's id only, as a
+    //      REST save from another device can)
+    await payload.update({
+      collection: 'orders',
+      id: order.id,
+      data: { status: 'confirmed' },
+      depth: 0,
+      user: superUser,
+      overrideAccess: false,
+    })
+
+    // assert: the event's order carries the table with its label, not just its id
+    const event = events.find((e) => e.order.id === order.id)
+    expect(event?.order.table).toMatchObject({ id: table.id, label: 'Terrace 4' })
+  })
+
   it('publishes only after the save commits', async () => {
     // arrange: a subscribed listener; payload.db.beginTransaction() and a req with that
     //          transactionID (createLocalReq)

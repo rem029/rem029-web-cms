@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { BoardContext } from '@/collections/Orders/utils/board'
+import { playTone } from '@/common/components/AlertSounds/tones'
 import { OrderBoard } from '@/common/components/OrderBoard'
 import {
   clearAssistanceAction,
@@ -12,6 +13,8 @@ import {
   moveOrderAction,
 } from '@/common/components/OrderBoard/actions'
 import type { Order } from '@/payload-types'
+
+import { FakeAudioContext } from '../common/audio'
 
 // rem0018 phase 4 step 2a: a staff board. Renders <OrderBoard role tenantId /> from
 // src/common/components/OrderBoard; the actions module is mocked
@@ -170,6 +173,9 @@ describe('OrderBoard', () => {
   beforeEach(() => {
     FakeEventSource.instances = []
     vi.stubGlobal('EventSource', FakeEventSource)
+    FakeAudioContext.instances = []
+    FakeAudioContext.createdOscillators = []
+    vi.stubGlobal('AudioContext', FakeAudioContext)
     localStorage.clear()
     vi.clearAllMocks()
     vi.mocked(getBoardContextAction).mockResolvedValue({
@@ -187,6 +193,7 @@ describe('OrderBoard', () => {
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     cleanup()
     localStorage.clear()
     vi.unstubAllGlobals()
@@ -545,5 +552,371 @@ describe('OrderBoard', () => {
     await waitFor(() => {
       expect(listBoardOrdersAction).toHaveBeenCalledTimes(2)
     })
+  })
+
+  // step 2b: card details (raised at the 2a review, okayed by the user 2026-11-07)
+
+  it('shows the base price and each add-on', async () => {
+    // arrange: role waiter; listBoardOrdersAction answers makeOrder('pending') (Burger, unitPrice
+    // 5000, Cheese +500, quantity 2, lineTotal 11000)
+    const order = makeOrder('pending', {
+      items: [
+        {
+          id: 'line-1',
+          item: 10,
+          title: 'Burger',
+          quantity: 2,
+          unitPrice: 5000,
+          lineTotal: 11000,
+          selectedOptions: [
+            {
+              id: 'opt-1',
+              option: 'cheese',
+              group: 'Add-ons',
+              label: 'Cheese',
+              price: 500,
+            },
+          ],
+        },
+      ],
+      total: 11000,
+    })
+    vi.mocked(listBoardOrdersAction).mockResolvedValue({
+      ok: true,
+      data: { orders: [order], page: 1, totalPages: 1 },
+    })
+
+    // act: render, wait for the card
+    render(<OrderBoard role="waiter" tenantId={1} />)
+    await screen.findByText(/Order 23/)
+
+    // assert: the line reads "2 × Burger" with QAR 110.00; under it "Base" QAR 50.00 and
+    // "Cheese" + QAR 5.00 (never the base minus the add-ons)
+    expect(screen.getByText('2 × Burger')).toBeTruthy()
+    expect(screen.getAllByText('QAR 110.00').length).toBeGreaterThan(0)
+    expect(screen.getByText('Base')).toBeTruthy()
+    expect(screen.getByText('QAR 50.00')).toBeTruthy()
+    expect(screen.getByText('Cheese')).toBeTruthy()
+    expect(screen.getByText('+ QAR 5.00')).toBeTruthy()
+    expect(screen.queryByText('QAR 45.00')).toBeNull()
+  })
+
+  it('shows the date for an order from an earlier day', async () => {
+    // arrange: fake timers at 2026-11-05T12:00Z; one order createdAt 2026-11-03T18:46:00Z, one
+    // createdAt 2026-11-05T11:48:00Z
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    vi.setSystemTime(new Date('2026-11-05T12:00:00.000Z'))
+
+    const order1 = makeOrder('pending', {
+      id: 1,
+      orderNumber: 1,
+      createdAt: '2026-11-03T18:46:00.000Z',
+    })
+    const order2 = makeOrder('pending', {
+      id: 2,
+      orderNumber: 2,
+      createdAt: '2026-11-05T11:48:00.000Z',
+    })
+    vi.mocked(listBoardOrdersAction).mockResolvedValue({
+      ok: true,
+      data: { orders: [order1, order2], page: 1, totalPages: 1 },
+    })
+
+    // act: render
+    render(<OrderBoard role="waiter" tenantId={1} />)
+    await screen.findByText(/Order 1/)
+    await screen.findByText(/Order 2/)
+
+    // assert: the first card shows "Nov 3, 18:46" (en, 24 h; TZ is UTC in the test run) and the
+    // second "12 min ago"
+    expect(screen.getByText('Nov 3, 18:46')).toBeTruthy()
+    expect(screen.getByText('12 min ago')).toBeTruthy()
+  })
+
+  it('says which list is empty', async () => {
+    // arrange: role cashier; listBoardOrdersAction answers no orders
+    vi.mocked(listBoardOrdersAction).mockResolvedValue({
+      ok: true,
+      data: { orders: [], page: 1, totalPages: 1 },
+    })
+
+    // act: render, then click History, then Unpaid
+    render(<OrderBoard role="cashier" tenantId={1} />)
+
+    // assert: "No orders waiting" on Active, "No orders on this day" on History, "No unpaid
+    // orders" on Unpaid
+    expect(await screen.findByText('No orders waiting')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'History' }))
+    expect(await screen.findByText('No orders on this day')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Unpaid' }))
+    expect(await screen.findByText('No unpaid orders')).toBeTruthy()
+  })
+
+  it('counts up the time since the request', async () => {
+    // arrange: fake timers at 2026-11-05T12:00Z; an order with assistanceRequestedAt =
+    // 2026-11-05T12:00:00Z
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    vi.setSystemTime(new Date('2026-11-05T12:00:00.000Z'))
+
+    const order = makeOrder('pending', {
+      assistanceRequestedAt: '2026-11-05T12:00:00.000Z',
+    })
+    vi.mocked(listBoardOrdersAction).mockResolvedValue({
+      ok: true,
+      data: { orders: [order], page: 1, totalPages: 1 },
+    })
+
+    // act: render ("Staff called · just now"), advance the clock 5 minutes
+    render(<OrderBoard role="waiter" tenantId={1} />)
+    const badge = await screen.findByRole('status')
+    expect(badge.textContent).toContain('Staff called · just now')
+    // let React run the badge's effects (its clock starts there) before moving the clock
+    await act(async () => {})
+
+    await act(async () => {
+      vi.advanceTimersByTime(5 * 60 * 1000)
+    })
+
+    // assert: the badge reads "Staff called · 5 min ago" without a new render from the test
+    expect(badge.textContent).toContain('Staff called · 5 min ago')
+  })
+
+  it('keeps an order that arrives while the list loads', async () => {
+    // arrange: role waiter; render; the stream opens, and its refetch answers only once the test
+    // says so (a list the server read before the new order)
+    render(<OrderBoard role="waiter" tenantId={1} />)
+    await screen.findByText('No orders waiting')
+    let answer: (value: Awaited<ReturnType<typeof listBoardOrdersAction>>) => void = () => {}
+    vi.mocked(listBoardOrdersAction).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          answer = resolve
+        }),
+    )
+    FakeEventSource.instances[0]?.onopen?.(new Event('open'))
+    await waitFor(() => {
+      expect(listBoardOrdersAction).toHaveBeenCalledTimes(2)
+    })
+
+    // act: a 'created' frame for order 31, then the refetch answers an empty list
+    FakeEventSource.instances[0]?.emit('order', {
+      type: 'created',
+      order: makeOrder('pending', { id: 31, orderNumber: 31 }),
+    })
+    await act(async () => {
+      answer({ ok: true, data: { orders: [], page: 1, totalPages: 1 } })
+    })
+
+    // assert: order 31 is still on the board
+    expect(screen.getByText('Order 31')).toBeTruthy()
+  })
+
+  // step 2b: alerts. AudioContext = FakeAudioContext (tests/common/audio.ts, reset in beforeEach);
+  // the board's sound scope is '7:1:<role>' (user 7, tenant 1), settings in localStorage under
+  // 'orders-notify:7:1:<role>:<name>'
+
+  it('asks to turn on sound before ringing', async () => {
+    // arrange: role waiter, nothing in localStorage
+    // act: render
+    render(<OrderBoard role="waiter" tenantId={1} />)
+
+    // assert: "Turn on sound" is shown; after clicking it, it's gone and an AudioContext exists
+    const turnOnBtn = await screen.findByRole('button', { name: 'Turn on sound' })
+    expect(turnOnBtn).toBeTruthy()
+    fireEvent.click(turnOnBtn)
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Turn on sound' })).toBeNull()
+      expect(FakeAudioContext.instances.length).toBeGreaterThan(0)
+    })
+  })
+
+  it('rings until the new order is handled', async () => {
+    // arrange: fake timers; role waiter; render and click "Turn on sound"; the stream opens
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const now = '2026-11-05T12:00:00.000Z'
+    vi.setSystemTime(new Date(now))
+
+    render(<OrderBoard role="waiter" tenantId={1} />)
+    const turnOnBtn = await screen.findByRole('button', { name: 'Turn on sound' })
+    fireEvent.click(turnOnBtn)
+
+    await waitFor(() => {
+      expect(FakeEventSource.instances.length).toBeGreaterThan(0)
+    })
+    FakeEventSource.instances[0]?.onopen?.(new Event('open'))
+
+    // act: emit { type: 'created', order: makeOrder('pending', { id: 5, orderNumber: 5,
+    // createdAt: now }) }
+    const order5 = makeOrder('pending', {
+      id: 5,
+      orderNumber: 5,
+      createdAt: now,
+    })
+    FakeEventSource.instances[0]?.emit('order', { type: 'created', order: order5 })
+
+    // assert: the banner (role alert) reads "New order 5", oscillators were created; after 3.5 s
+    // more oscillators; then emit the same order 'updated' as confirmed (confirmedAt now): the
+    // banner is gone and 3.5 s later no new oscillators
+    const banner = await screen.findByRole('alert')
+    expect(banner.textContent).toContain('New order 5')
+    expect(FakeAudioContext.createdOscillators.length).toBeGreaterThan(0)
+    const countAfterFirst = FakeAudioContext.createdOscillators.length
+
+    await act(async () => {
+      vi.advanceTimersByTime(3500)
+    })
+    expect(FakeAudioContext.createdOscillators.length).toBeGreaterThan(countAfterFirst)
+
+    FakeEventSource.instances[0]?.emit('order', {
+      type: 'updated',
+      order: { ...order5, status: 'confirmed', confirmedAt: now },
+    })
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).toBeNull()
+    })
+    // let React run the effect that stops the ring before counting
+    await act(async () => {})
+    const countAfterHandled = FakeAudioContext.createdOscillators.length
+
+    await act(async () => {
+      vi.advanceTimersByTime(3500)
+    })
+    expect(FakeAudioContext.createdOscillators.length).toBe(countAfterHandled)
+  })
+
+  it('stays quiet about orders from before the board opened', async () => {
+    // arrange: role waiter; render and turn on sound; the stream opens
+    render(<OrderBoard role="waiter" tenantId={1} />)
+    const turnOnBtn = await screen.findByRole('button', { name: 'Turn on sound' })
+    fireEvent.click(turnOnBtn)
+
+    await waitFor(() => {
+      expect(FakeEventSource.instances.length).toBeGreaterThan(0)
+    })
+    FakeEventSource.instances[0]?.onopen?.(new Event('open'))
+
+    // act: emit 'updated' for a pending order created an hour before the board opened (its
+    // guest name changed)
+    const oldOrder = makeOrder('pending', {
+      id: 8,
+      orderNumber: 8,
+      createdAt: new Date(Date.now() - 3600_000).toISOString(),
+      guestName: 'Changed Name',
+    })
+    FakeEventSource.instances[0]?.emit('order', { type: 'updated', order: oldOrder })
+    // let the frame's state updates render before asserting nothing appeared
+    await act(async () => {})
+    await screen.findByText('Changed Name')
+
+    // assert: no banner, no oscillators
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(FakeAudioContext.createdOscillators).toHaveLength(0)
+  })
+
+  it('uses the request tone for bill requests', async () => {
+    // arrange: role cashier; localStorage 'orders-notify:7:1:cashier:tone' = "chime" and
+    // ':requestTone' = "bell"; render, turn on sound; reference: the frequencies 'bell' plays
+    // (playTone on a separate FakeAudioContext, then reset the recorded oscillators)
+    localStorage.setItem('orders-notify:7:1:cashier:tone', JSON.stringify('chime'))
+    localStorage.setItem('orders-notify:7:1:cashier:requestTone', JSON.stringify('bell'))
+
+    // The fake implements only what tones use
+    const refCtx = new FakeAudioContext() as unknown as AudioContext
+    playTone(refCtx, 'bell', 'normal')
+    const refFrequencies = FakeAudioContext.createdOscillators.flatMap((osc) =>
+      osc.frequency.setValueAtTime.mock.calls.map((call) => call[0]),
+    )
+    FakeAudioContext.createdOscillators = []
+
+    render(<OrderBoard role="cashier" tenantId={1} />)
+    const turnOnBtn = await screen.findByRole('button', { name: 'Turn on sound' })
+    fireEvent.click(turnOnBtn)
+
+    await waitFor(() => {
+      expect(FakeEventSource.instances.length).toBeGreaterThan(0)
+    })
+    FakeEventSource.instances[0]?.onopen?.(new Event('open'))
+
+    // act: emit 'updated' for a served order with billRequestedAt = now
+    const now = new Date().toISOString()
+    const servedOrder = makeOrder('served', {
+      id: 12,
+      orderNumber: 12,
+      table: 4,
+      billRequestedAt: now,
+    })
+    FakeEventSource.instances[0]?.emit('order', { type: 'updated', order: servedOrder })
+
+    // assert: the banner reads "Table … asks for the bill"; the played frequencies are bell's,
+    // not chime's
+    const banner = await screen.findByRole('alert')
+    expect(banner.textContent).toContain('Table 4 asks for the bill')
+    const playedFrequencies = FakeAudioContext.createdOscillators.flatMap((osc) =>
+      osc.frequency.setValueAtTime.mock.calls.map((call) => call[0]),
+    )
+    expect(playedFrequencies).toEqual(refFrequencies)
+  })
+
+  it('stops ringing when told to', async () => {
+    // arrange: fake timers; role waiter; turn on sound; emit a new pending order (rings)
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const now = '2026-11-05T12:00:00.000Z'
+    vi.setSystemTime(new Date(now))
+
+    render(<OrderBoard role="waiter" tenantId={1} />)
+    const turnOnBtn = await screen.findByRole('button', { name: 'Turn on sound' })
+    fireEvent.click(turnOnBtn)
+
+    await waitFor(() => {
+      expect(FakeEventSource.instances.length).toBeGreaterThan(0)
+    })
+    FakeEventSource.instances[0]?.onopen?.(new Event('open'))
+
+    FakeEventSource.instances[0]?.emit('order', {
+      type: 'created',
+      order: makeOrder('pending', { id: 9, orderNumber: 9, createdAt: now }),
+    })
+    await screen.findByRole('alert')
+    expect(FakeAudioContext.createdOscillators.length).toBeGreaterThan(0)
+
+    // act: click "Stop ringing", reset the recorded oscillators, advance 3.5 s
+    const stopBtn = screen.getByRole('button', { name: 'Stop ringing' })
+    fireEvent.click(stopBtn)
+    FakeAudioContext.createdOscillators = []
+
+    await act(async () => {
+      vi.advanceTimersByTime(3500)
+    })
+
+    // assert: the banner is gone and no oscillators were created
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(FakeAudioContext.createdOscillators).toHaveLength(0)
+  })
+
+  it('keeps alert settings per board', async () => {
+    // arrange: role kitchen; render, open "Alerts", untick "Ring until handled"
+    const { unmount } = render(<OrderBoard role="kitchen" tenantId={1} />)
+    const alertsBtn = await screen.findByRole('button', { name: 'Alerts' })
+    fireEvent.click(alertsBtn)
+
+    const ringCheckbox = await screen.findByRole('checkbox', { name: 'Ring until handled' })
+    fireEvent.click(ringCheckbox)
+
+    // act: unmount, render the waiter board (same user and tenant)
+    unmount()
+    cleanup()
+
+    render(<OrderBoard role="waiter" tenantId={1} />)
+    const waiterAlertsBtn = await screen.findByRole('button', { name: 'Alerts' })
+    fireEvent.click(waiterAlertsBtn)
+
+    // assert: localStorage 'orders-notify:7:1:kitchen:loop' is false; the waiter board's
+    // "Ring until handled" is still ticked
+    expect(localStorage.getItem('orders-notify:7:1:kitchen:loop')).toBe('false')
+    const waiterRingCheckbox = await screen.findByRole('checkbox', { name: 'Ring until handled' })
+    expect(waiterRingCheckbox).toHaveProperty('checked', true)
   })
 })

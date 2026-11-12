@@ -66,7 +66,6 @@ export default buildConfig({
     },
     components: {
       actions: ['@/common/components/ThemeToggle/ThemeToggle#ThemeToggle'],
-      afterNavLinks: ['@/common/components/OrderBoardNavLinks#OrderBoardNavLinks'],
       beforeLogin: ['@/common/components/LoginIntro/LoginIntro#LoginIntro'],
       header: ['@/common/components/InactiveTenantNotice#InactiveTenantNotice'],
       providers: ['@/common/components/AdminTheme/AdminTheme#AdminTheme'],
