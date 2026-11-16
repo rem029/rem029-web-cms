@@ -66,7 +66,7 @@ const sortByCreatedAt = (a: Order, b: Order): number =>
   new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
 
 /**
- * Mirrors `listBoardOrders` active `where` in `src/collections/Orders/utils/board.ts` (lines 244-268).
+ * Mirrors `listBoardOrders` active `where` in `src/collections/Orders/utils/board.ts`.
  */
 export const belongsToTab = (role: StaffRole, order: Order, menuId: number | null): boolean => {
   if (menuId !== null) {
@@ -93,8 +93,9 @@ export const belongsToTab = (role: StaffRole, order: Order, menuId: number | nul
     order.paymentStatus === 'unpaid' &&
     (order.flow ?? DEFAULT_ORDER_FLOW) === 'waiter_kitchen_cashier'
   const isBillRequested = OPEN_STATUSES.includes(order.status) && Boolean(order.billRequestedAt)
+  const isPaidOpen = OPEN_STATUSES.includes(order.status) && order.paymentStatus === 'paid'
 
-  return isServedUnpaid || isBillRequested
+  return isServedUnpaid || isBillRequested || isPaidOpen
 }
 
 /**

@@ -42,7 +42,7 @@ export type BoardContext = {
  * The lists a board shows:
  * - `active`: open orders the role acts on (waiter: pending → served; kitchen: confirmed →
  *   prepared; cashier: "Waiting for payment" = served under the cashier flow, plus any open order
- *   with a bill request)
+ *   with a bill request or already paid, to close)
  * - `history`: completed and cancelled orders of one business day (`date`, default today)
  * - `unpaid` (cashier): open or completed orders whose `paymentStatus` is `unpaid`
  * - `earlier` (cashier): open orders from before today's business day
@@ -262,6 +262,10 @@ export const listBoardOrders = async (
           },
           {
             and: [{ status: { in: OPEN_STATUSES } }, { billRequestedAt: { exists: true } }],
+          },
+          // paid before it was served: the cashier closes it once the guest is done
+          {
+            and: [{ status: { in: OPEN_STATUSES } }, { paymentStatus: { equals: 'paid' } }],
           },
         ],
       }

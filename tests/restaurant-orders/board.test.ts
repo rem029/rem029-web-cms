@@ -463,6 +463,24 @@ describe('board', () => {
       expect(ids).not.toContain(paidOrder.id)
     })
 
+    it('lists paid open orders for the cashier', async () => {
+      // arrange: orderAt('confirmed') paid before it is served (recordPayment)
+      // act: listBoardOrders(cashier, { list: 'active' })
+      // assert: contains the paid confirmed order
+      const paidEarly = await orderAt('confirmed')
+      await recordPayment(payload, cashier, {
+        orderId: paidEarly.id,
+        method: 'cash',
+        received: 1000,
+      })
+      const result = await listBoardOrders(payload, cashier, {
+        tenantId: tenantA.id,
+        role: 'cashier',
+        list: 'active',
+      })
+      expect(result.orders.map((o) => o.id)).toContain(paidEarly.id)
+    })
+
     it('lists open orders from earlier days', async () => {
       // arrange: orderAt('confirmed'), its orderDate set to yesterday's business day
       //          (overrideAccess update); orderAt('confirmed') of today

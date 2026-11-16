@@ -268,6 +268,32 @@ describe('OrderBoard', () => {
     })
   })
 
+  it('keeps a paid open order on the cashier board', async () => {
+    // arrange: role cashier, a `served` unpaid order on the board
+    const order = makeOrder('served')
+    vi.mocked(listBoardOrdersAction).mockResolvedValue({
+      ok: true,
+      data: { orders: [order], page: 1, totalPages: 1 },
+    })
+    render(<OrderBoard role="cashier" tenantId={1} />)
+    expect(await screen.findByText(/Order 23/)).toBeTruthy()
+    await waitFor(() => {
+      expect(FakeEventSource.instances.length).toBeGreaterThan(0)
+    })
+    const source = FakeEventSource.instances[0]
+    if (!source) throw new Error('Expected EventSource instance')
+
+    // act: the stream says it moved back to `confirmed` and is paid
+    source.emit('order', {
+      type: 'updated',
+      order: { ...order, status: 'confirmed', paymentStatus: 'paid' },
+    })
+
+    // assert: the card stays, now with the Payment button
+    expect(await screen.findByRole('button', { name: 'Payment' })).toBeTruthy()
+    expect(screen.getByText(/Order 23/)).toBeTruthy()
+  })
+
   it('undoes the last move', async () => {
     // arrange: role kitchen, a `confirmed` order; moveOrderAction answers it `preparing`, then
     //          `confirmed`
