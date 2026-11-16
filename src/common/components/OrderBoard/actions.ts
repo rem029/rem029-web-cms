@@ -7,6 +7,7 @@ import { APIError, getPayload, NotFound, ValidationError, type Payload } from 'p
 import {
   clearAssistance,
   getBoardContext,
+  getOrderPayment,
   listBoardOrders,
   listRefundDue,
   moveOrder,
@@ -102,6 +103,12 @@ export const recordPaymentAction = async (
   input: RecordPaymentInput,
 ): Promise<BoardResult<Payment>> =>
   withStaff('recordPayment', (payload, user) => recordPayment(payload, user, input))
+
+/** The order's succeeded payment (or null), for the Payment dialog's read-only view. */
+export const getOrderPaymentAction = async (
+  orderId: number,
+): Promise<BoardResult<Payment | null>> =>
+  withStaff('getOrderPayment', (payload, user) => getOrderPayment(payload, user, orderId))
 
 export const voidPaymentAction = async (input: VoidPaymentInput): Promise<BoardResult<Payment>> =>
   withStaff('voidPayment', (payload, user) => voidPayment(payload, user, input))

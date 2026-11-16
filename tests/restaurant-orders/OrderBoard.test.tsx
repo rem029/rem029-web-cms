@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -8,9 +8,12 @@ import { playTone } from '@/common/components/AlertSounds/tones'
 import { OrderBoard } from '@/common/components/OrderBoard'
 import {
   clearAssistanceAction,
+  closeOrderAction,
   getBoardContextAction,
+  getOrderPaymentAction,
   listBoardOrdersAction,
   moveOrderAction,
+  recordPaymentAction,
 } from '@/common/components/OrderBoard/actions'
 import type { Order } from '@/payload-types'
 
@@ -29,6 +32,7 @@ import { FakeAudioContext } from '../common/audio'
 vi.mock('@/common/components/OrderBoard/actions', () => ({
   getBoardRolesAction: vi.fn(),
   getBoardContextAction: vi.fn(),
+  getOrderPaymentAction: vi.fn(),
   listBoardOrdersAction: vi.fn(),
   listRefundDueAction: vi.fn(),
   moveOrderAction: vi.fn(),
@@ -918,5 +922,142 @@ describe('OrderBoard', () => {
     expect(localStorage.getItem('orders-notify:7:1:kitchen:loop')).toBe('false')
     const waiterRingCheckbox = await screen.findByRole('checkbox', { name: 'Ring until handled' })
     expect(waiterRingCheckbox).toHaveProperty('checked', true)
+  })
+
+  it('takes a payment from the cashier board', async () => {
+    // arrange: cashier board, one served unpaid order on Active; recordPaymentAction resolves ok
+    // act: click "Take payment", type 50 in Received, click "Take payment" in the dialog
+    // assert: recordPaymentAction called with { orderId, method: 'cash', received: 5000 }; the
+    //         dialog closes and "Payment taken · Order <n>" shows
+    const order = makeOrder('served', {
+      id: 42,
+      orderNumber: 42,
+      paymentStatus: 'unpaid',
+      total: 4300,
+    })
+    vi.mocked(listBoardOrdersAction).mockResolvedValue({
+      ok: true,
+      data: { orders: [order], page: 1, totalPages: 1 },
+    })
+    vi.mocked(recordPaymentAction).mockResolvedValue({
+      ok: true,
+      data: {
+        id: 101,
+        order: order.id,
+        method: 'cash',
+        status: 'succeeded',
+        amount: 4300,
+        received: 5000,
+        change: 700,
+        createdAt: '2026-11-05T12:00:00.000Z',
+        updatedAt: '2026-11-05T12:00:00.000Z',
+      },
+    })
+
+    render(<OrderBoard role="cashier" tenantId={1} />)
+    const cardPayBtn = await screen.findByRole('button', { name: 'Take payment' })
+    fireEvent.click(cardPayBtn)
+
+    const dialog = screen.getByRole('dialog')
+    fireEvent.change(within(dialog).getByLabelText('Received'), { target: { value: '50' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Take payment' }))
+
+    await waitFor(() => {
+      expect(recordPaymentAction).toHaveBeenCalledWith({
+        orderId: order.id,
+        method: 'cash',
+        received: 5000,
+      })
+    })
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(await screen.findByText(`Payment taken · Order ${order.orderNumber}`)).toBeTruthy()
+  })
+
+  it('shows the payment of a paid order', async () => {
+    // arrange: cashier board, a paid open order with a bill request on Active;
+    //          getOrderPaymentAction resolves a cash payment
+    // act: click "Payment"
+    // assert: getOrderPaymentAction called with the order id; the dialog shows the payment
+    //         read-only (method Cash) with "Void payment"
+    const order = makeOrder('served', {
+      id: 43,
+      orderNumber: 43,
+      paymentStatus: 'paid',
+      billRequestedAt: '2026-11-05T12:00:00.000Z',
+    })
+    vi.mocked(listBoardOrdersAction).mockResolvedValue({
+      ok: true,
+      data: { orders: [order], page: 1, totalPages: 1 },
+    })
+    vi.mocked(getOrderPaymentAction).mockResolvedValue({
+      ok: true,
+      data: {
+        id: 102,
+        order: order.id,
+        method: 'cash',
+        status: 'succeeded',
+        amount: 4300,
+        received: 5000,
+        change: 700,
+        remarks: 'Tip kept',
+        createdAt: '2026-11-05T12:00:00.000Z',
+        updatedAt: '2026-11-05T12:00:00.000Z',
+      },
+    })
+
+    render(<OrderBoard role="cashier" tenantId={1} />)
+    const paymentBtn = await screen.findByRole('button', { name: 'Payment' })
+    fireEvent.click(paymentBtn)
+
+    await waitFor(() => {
+      expect(getOrderPaymentAction).toHaveBeenCalledWith(order.id)
+    })
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText(/Cash/i)).toBeTruthy()
+    expect(within(dialog).getByRole('button', { name: 'Void payment' })).toBeTruthy()
+  })
+
+  it('closes an order without payment', async () => {
+    // arrange: cashier board, one served unpaid order; closeOrderAction resolves the completed
+    //          order
+    // act: click "Close order", pick "Complimentary", click "Close order" in the dialog
+    // assert: closeOrderAction called with { orderId, outcome: 'unpaid', reason: 'complimentary' };
+    //         the order leaves the Active list
+    const order = makeOrder('served', {
+      id: 44,
+      orderNumber: 44,
+      paymentStatus: 'unpaid',
+    })
+    vi.mocked(listBoardOrdersAction).mockResolvedValue({
+      ok: true,
+      data: { orders: [order], page: 1, totalPages: 1 },
+    })
+    vi.mocked(closeOrderAction).mockResolvedValue({
+      ok: true,
+      data: {
+        ...order,
+        status: 'completed',
+        closeReason: 'complimentary',
+      },
+    })
+
+    render(<OrderBoard role="cashier" tenantId={1} />)
+    const cardCloseBtn = await screen.findByRole('button', { name: 'Close order' })
+    fireEvent.click(cardCloseBtn)
+
+    const dialog = screen.getByRole('dialog')
+    fireEvent.click(within(dialog).getByRole('radio', { name: 'Complimentary' }))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close order' }))
+
+    await waitFor(() => {
+      expect(closeOrderAction).toHaveBeenCalledWith({
+        orderId: order.id,
+        outcome: 'unpaid',
+        reason: 'complimentary',
+      })
+    })
+    await waitFor(() => {
+      expect(screen.queryByText(new RegExp(`Order ${order.orderNumber}`))).toBeNull()
+    })
   })
 })

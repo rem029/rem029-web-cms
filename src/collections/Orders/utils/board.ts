@@ -557,6 +557,56 @@ export const voidPayment = async (
 }
 
 /**
+ * The order's taken payment, for the cashier board's "Payment" button (rem0018 phase 4 step 2c):
+ * read-only details and Void. A stream frame doesn't carry the payment, so the board asks here.
+ * 1. `payload.findByID` the order as the user (`overrideAccess: false`, depth 0): not found / no
+ *    access → NotFound (the menu's staff list applies, as `recordPayment`)
+ * 2. `payload.find` payments as the user: `order` equals the id, `status` succeeded, newest first,
+ *    `limit: 1`, depth 0 (one succeeded payment per order, phase 2; a voided one is history)
+ * 3. return it, or `null` when there is none; `debug` log with order id, user id, found or not
+ */
+export const getOrderPayment = async (
+  payload: Payload,
+  user: User,
+  orderId: number,
+): Promise<Payment | null> => {
+  const order = await payload.findByID({
+    collection: 'orders',
+    id: orderId,
+    overrideAccess: false,
+    user,
+    depth: 0,
+  })
+
+  if (!order) {
+    throw new NotFound()
+  }
+
+  const { docs } = await payload.find({
+    collection: 'payments',
+    where: {
+      and: [{ order: { equals: orderId } }, { status: { equals: 'succeeded' } }],
+    },
+    sort: '-createdAt',
+    limit: 1,
+    depth: 0,
+    overrideAccess: false,
+    user,
+  })
+
+  const payment = docs[0] ?? null
+
+  payload.logger.debug({
+    msg: 'board: get order payment',
+    orderId,
+    userId: user.id,
+    found: payment !== null,
+  })
+
+  return payment
+}
+
+/**
  * Staff handled a guest's Call staff / Ask for the bill. The stamps are `serverOnly`, so:
  * 1. `payload.findByID` the order as the user (not found / no access → NotFound), as `closeOrder`
  * 2. the user needs a staff role in the order's tenant (403 otherwise; user 2026-11-05: the

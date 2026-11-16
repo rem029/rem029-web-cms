@@ -24,8 +24,9 @@ export type OrderButton =
   | { kind: 'back'; to: OrderStatus; label: string }
   // always behind ConfirmDialog
   | { kind: 'cancel'; label: string }
-  // cashier only (step 2b dialogs)
+  // cashier only (step 2c dialogs): take payment, see the taken one, close the order
   | { kind: 'pay'; label: string }
+  | { kind: 'payment'; label: string }
   | { kind: 'close'; label: string }
   // a guest request is waiting (AssistanceBadge's "Done")
   | { kind: 'clearStaff'; label: string }
@@ -47,10 +48,11 @@ export type OrderButtonsArgs = {
  * 3. back: `to = previousStatus(flow, status)`; shown when `checkMove` allows it ("Move back")
  * 4. cancel: shown when `checkMove({ to: 'cancelled', cancelReason: 'x' })` allows it (so after
  *    preparing only the kitchen board and managers)
- * 5. cashier board: `pay` when open or completed and `paymentStatus` unpaid; `close` when open
+ * 5. cashier board: `pay` when open or completed and `paymentStatus` unpaid; `payment`
+ *    ("Payment") when `paymentStatus` paid (not waived: nothing was taken); `close` when open
  *    (not completed / cancelled)
  * 6. `clearStaff` / `clearBill` when `assistanceRequestedAt` / `billRequestedAt` is set
- * Order: forward, pay, close, clearStaff, clearBill, back, cancel (the main action first).
+ * Order: forward, pay, payment, close, clearStaff, clearBill, back, cancel (the main action first).
  */
 export const orderButtons = (args: OrderButtonsArgs): OrderButton[] => {
   const { order, role, context } = args
@@ -84,6 +86,11 @@ export const orderButtons = (args: OrderButtonsArgs): OrderButton[] => {
   // 2. pay (cashier only)
   if (role === 'cashier' && order.status !== 'cancelled' && order.paymentStatus === 'unpaid') {
     buttons.push({ kind: 'pay', label: 'Take payment' })
+  }
+
+  // 2b. payment (cashier only)
+  if (role === 'cashier' && order.paymentStatus === 'paid') {
+    buttons.push({ kind: 'payment', label: 'Payment' })
   }
 
   // 3. close (cashier only)

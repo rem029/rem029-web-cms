@@ -21,7 +21,7 @@ export type TableChipProps = {
  */
 export const TableChip: React.FC<TableChipProps> = ({ table, locale, onChange }) => {
   const t = menuStrings(locale)
-  const text = table ? `${t.table} ${table.label} · ${t.change}` : t.pickTable
+  const text = table ? `${table.label} · ${t.change}` : t.pickTable
 
   return (
     <button

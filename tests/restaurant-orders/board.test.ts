@@ -12,6 +12,7 @@ import {
   moveOrder,
   recordPayment,
   voidPayment,
+  getOrderPayment,
 } from '@/collections/Orders/utils/board'
 import type { Menu, MenuItem, Order, Tenant } from '@/payload-types'
 
@@ -375,6 +376,52 @@ describe('board', () => {
         overrideAccess: true,
       })
       expect(reloaded.paymentStatus).toBe('unpaid')
+    })
+  })
+
+  describe('getOrderPayment', () => {
+    it("returns the order's payment", async () => {
+      // arrange: orderAt('served'), recordPayment(cashier, cash, received 2000)
+      // act: getOrderPayment(cashier, orderId)
+      // assert: the same payment id, status 'succeeded', received 2000
+      const order = await orderAt('served')
+      const payment = await recordPayment(payload, cashier, {
+        orderId: order.id,
+        method: 'cash',
+        received: 2000,
+      })
+      const result = await getOrderPayment(payload, cashier, order.id)
+      expect(result?.id).toBe(payment.id)
+      expect(result?.status).toBe('succeeded')
+      expect(result?.received).toBe(2000)
+    })
+
+    it('returns nothing once the payment is voided', async () => {
+      // arrange: orderAt('served'), recordPayment(cashier, card 'R-2'), voidPayment(cashier)
+      // act: getOrderPayment(cashier, orderId)
+      // assert: null
+      const order = await orderAt('served')
+      const payment = await recordPayment(payload, cashier, {
+        orderId: order.id,
+        method: 'card',
+        reference: 'R-2',
+      })
+      await voidPayment(payload, cashier, {
+        paymentId: payment.id,
+        reason: 'Wrong card',
+      })
+      const result = await getOrderPayment(payload, cashier, order.id)
+      expect(result).toBeNull()
+    })
+
+    it('refuses an order of another tenant', async () => {
+      // arrange: an order in test-b (served)
+      // act: getOrderPayment(cashier, <test-b order id>)
+      // assert: rejects with status 404
+      const orderB = await orderAt('served', menuB, tenantB, itemB)
+      await expect(getOrderPayment(payload, cashier, orderB.id)).rejects.toMatchObject({
+        status: 404,
+      })
     })
   })
 

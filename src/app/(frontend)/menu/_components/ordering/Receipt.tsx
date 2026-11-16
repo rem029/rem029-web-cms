@@ -116,11 +116,7 @@ export const Receipt: React.FC<ReceiptProps> = ({ order, locale }) => {
             {t.orderNumber.replace('{number}', String(order.orderNumber))}
           </p>
         )}
-        {order.table && (
-          <p className="text-sm text-menu-muted">
-            {t.table} {order.table}
-          </p>
-        )}
+        {order.table && <p className="text-sm text-menu-muted">{order.table}</p>}
         <p className="text-sm text-menu-muted">
           <time dateTime={receipt.paidAt}>{paidTime}</time>
         </p>

@@ -14,20 +14,22 @@ describe('TableChip', () => {
   })
 
   it('shows the table from the qr code', () => {
-    // arrange: table { id 1, slug 't5', label '5' }, locale en
-    const table: OrderTable = { id: 1, slug: 't5', label: '5' }
+    // arrange: table { id 1, slug 't5', label 'Table 5' } (the label is what the business wrote,
+    //          localized), locale en
+    const table: OrderTable = { id: 1, slug: 't5', label: 'Table 5' }
     const onChange = vi.fn()
 
     // act: render
     const { rerender } = render(<TableChip locale="en" onChange={onChange} table={table} />)
 
-    // assert: the button reads "Table 5 · Change"; with locale ar it reads "طاولة 5 · تغيير"
+    // assert: the button reads the label alone, "Table 5 · Change" (not "Table Table 5"); with
+    //         locale ar "Table 5 · تغيير" (the ar label comes from the server, localized)
     const en = menuStrings('en')
-    expect(screen.getByRole('button').textContent).toBe(`${en.table} ${table.label} · ${en.change}`)
+    expect(screen.getByRole('button').textContent).toBe(`Table 5 · ${en.change}`)
 
     rerender(<TableChip locale="ar" onChange={onChange} table={table} />)
     const ar = menuStrings('ar')
-    expect(screen.getByRole('button').textContent).toBe(`${ar.table} ${table.label} · ${ar.change}`)
+    expect(screen.getByRole('button').textContent).toBe(`Table 5 · ${ar.change}`)
   })
 
   it('opens the picker on change', () => {

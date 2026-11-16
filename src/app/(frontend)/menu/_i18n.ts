@@ -34,7 +34,6 @@ const EN = {
   filters: 'Filters',
   withAllergens: 'Show items with',
   // ordering (rem0018 phase 3 step 2a); `{…}` are filled in by the component
-  table: 'Table',
   change: 'Change',
   pickTable: 'Pick your table',
   tableNotOnMenu: "This table isn't on this menu, pick yours.",
@@ -149,7 +148,6 @@ const STRINGS: Record<TypedLocale, MenuStrings> = {
     categories: 'الأقسام',
     filters: 'التصفية',
     withAllergens: 'عرض الأطباق التي تحتوي على',
-    table: 'طاولة',
     change: 'تغيير',
     pickTable: 'اختر طاولتك',
     tableNotOnMenu: 'هذه الطاولة ليست في هذه القائمة، اختر طاولتك.',

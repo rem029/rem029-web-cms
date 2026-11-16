@@ -7,18 +7,24 @@ import type { BoardContext } from '@/collections/Orders/utils/board'
 import { ORDER_STATUSES } from '@/collections/Orders/utils/statuses'
 import { formatMinor } from '@/common/utils/money'
 import type { StaffRole } from '@/common/utils/staffRoles'
-import type { Order } from '@/payload-types'
+import type { Order, Payment } from '@/payload-types'
 
 import {
   clearAssistanceAction,
+  closeOrderAction,
   getBoardContextAction,
+  getOrderPaymentAction,
   moveOrderAction,
+  recordPaymentAction,
+  voidPaymentAction,
   type BoardResult,
 } from './actions'
+import { CloseOrderDialog, type CloseEntry } from './CloseOrderDialog'
 import { ConfirmDialog } from './ConfirmDialog'
 import { NotificationSettings } from './NotificationSettings'
 import type { OrderButton } from './orderButtons'
 import { OrderCard } from './OrderCard'
+import { PaymentDialog, type PaymentEntry } from './PaymentDialog'
 import { RingAlertBanner } from './RingAlertBanner'
 import { UndoToast } from './UndoToast'
 import { useBoardAlerts } from './useBoardAlerts'
@@ -104,6 +110,8 @@ const OrderBoardLoaded: React.FC<{ context: BoardContext; role: StaffRole }> = (
 
   const [busy, setBusy] = useState(false)
   const [cancellingOrder, setCancellingOrder] = useState<Order | null>(null)
+  const [paying, setPaying] = useState<{ order: Order; payment: Payment | null } | null>(null)
+  const [closingOrder, setClosingOrder] = useState<Order | null>(null)
   const [alertMessage, setAlertMessage] = useState<string | null>(null)
   const [noticeMessage, setNoticeMessage] = useState<string | null>(null)
   const [toast, setToast] = useState<{
@@ -148,9 +156,35 @@ const OrderBoardLoaded: React.FC<{ context: BoardContext; role: StaffRole }> = (
       setCancellingOrder(order)
       return
     }
-    if (button.kind === 'pay' || button.kind === 'close') {
-      // step 2b: the payment and close order dialogs
-      setNoticeMessage('Take payment comes in the next step.')
+    if (button.kind === 'pay') {
+      setPaying({ order, payment: null })
+      return
+    }
+    if (button.kind === 'payment') {
+      setBusy(true)
+      try {
+        const res = await getOrderPaymentAction(order.id)
+        if (res.ok) {
+          if (res.data) {
+            setPaying({ order, payment: res.data })
+          } else {
+            setAlertMessage('No payment found for this order.')
+            refetch()
+          }
+        } else {
+          setAlertMessage(res.message)
+          refetch()
+        }
+      } catch (err) {
+        console.warn('board: getOrderPayment failed', err)
+        setAlertMessage('Something went wrong. Try again.')
+      } finally {
+        setBusy(false)
+      }
+      return
+    }
+    if (button.kind === 'close') {
+      setClosingOrder(order)
       return
     }
     if (button.kind === 'clearStaff' || button.kind === 'clearBill') {
@@ -170,6 +204,61 @@ const OrderBoardLoaded: React.FC<{ context: BoardContext; role: StaffRole }> = (
         revertStatus: order.status,
       })
     }
+  }
+
+  /**
+   * Take or void a payment from the dialog (both answer a Payment, not an Order): the dialog
+   * closes, then a notice or the refusal; the list refetches either way (the order also arrives
+   * by the stream).
+   */
+  const runPaymentAction = async (
+    name: string,
+    call: () => Promise<BoardResult<Payment>>,
+    notice: string,
+  ) => {
+    setBusy(true)
+    try {
+      const res = await call()
+      if (res.ok) {
+        setNoticeMessage(notice)
+      } else {
+        setAlertMessage(res.message)
+      }
+    } catch (err) {
+      console.warn(`board: ${name} failed`, err)
+      setAlertMessage('Something went wrong. Try again.')
+    } finally {
+      setPaying(null)
+      setBusy(false)
+      refetch()
+    }
+  }
+
+  const handlePaymentSubmit = async (entry: PaymentEntry) => {
+    if (!paying) return
+    const { order } = paying
+    await runPaymentAction(
+      'record payment',
+      () => recordPaymentAction({ orderId: order.id, ...entry }),
+      `Payment taken · Order ${order.orderNumber ?? order.id}`,
+    )
+  }
+
+  const handlePaymentVoid = async (reason: string) => {
+    if (!paying?.payment) return
+    const { order, payment } = paying
+    await runPaymentAction(
+      'void payment',
+      () => voidPaymentAction({ paymentId: payment.id, reason }),
+      `Payment voided · Order ${order.orderNumber ?? order.id}`,
+    )
+  }
+
+  const handleCloseConfirm = async (entry: CloseEntry) => {
+    if (!closingOrder) return
+    const orderId = closingOrder.id
+    setClosingOrder(null)
+    await runAction('close', () => closeOrderAction({ orderId, ...entry }))
   }
 
   const handleUndo = async () => {
@@ -343,6 +432,26 @@ const OrderBoardLoaded: React.FC<{ context: BoardContext; role: StaffRole }> = (
           onClose={() => setCancellingOrder(null)}
         />
       )}
+
+      {paying && (
+        <PaymentDialog
+          order={paying.order}
+          payment={paying.payment}
+          busy={busy}
+          onSubmit={handlePaymentSubmit}
+          onVoid={handlePaymentVoid}
+          onClose={() => setPaying(null)}
+        />
+      )}
+
+      {closingOrder && (
+        <CloseOrderDialog
+          order={closingOrder}
+          busy={busy}
+          onConfirm={handleCloseConfirm}
+          onClose={() => setClosingOrder(null)}
+        />
+      )}
     </div>
   )
 }
@@ -360,7 +469,8 @@ const OrderBoardLoaded: React.FC<{ context: BoardContext; role: StaffRole }> = (
  * 5. a button: forward / back → `moveOrderAction`; on success `replaceOrder` and an
  *    `UndoToast` whose Undo moves it back to where it was (`moveOrderAction` with the old status);
  *    cancel → `ConfirmDialog` → `moveOrderAction({ status: 'cancelled', cancelReason })`;
- *    clearStaff / clearBill → `clearAssistanceAction`; pay / close → step 2b dialogs. A refusal
+ *    clearStaff / clearBill → `clearAssistanceAction`; pay / payment → `PaymentDialog`, close →
+ *    `CloseOrderDialog` (step 2c). A refusal
  *    shows its message above the grid (`role="alert"`) and refetches.
  * 6. alerts (`useBoardAlerts({ context, role })`): the stream's `onEvent` feeds both `applyEvent`
  *    and `alerts.onEvent`; `<RingAlertBanner alerts={alerts} />` above the toolbar,

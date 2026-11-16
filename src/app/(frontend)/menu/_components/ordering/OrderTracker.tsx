@@ -160,11 +160,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = (props) => {
 
         {(order.table || order.guestName || order.notes) && (
           <div className="text-sm">
-            {order.table && (
-              <p>
-                {t.table} {order.table}
-              </p>
-            )}
+            {order.table && <p>{order.table}</p>}
             {order.guestName && <p>{order.guestName}</p>}
             {order.notes && <p className="text-menu-muted">{order.notes}</p>}
           </div>
